@@ -1,7 +1,15 @@
 # Сборка всех бинарников
+.PHONY: all
+all: build
+
+# Сборка всех бинарников
 .PHONY: build
-build: prepare-bin
-# 	go build -o bin/t01_goroutine_clocks.exe ./t01_goroutine_clocks
+build: dependencies prepare-bin
+	go build -o bin/gogue.exe ./app/main.go
+
+.PHONY: dependencies
+dependencies:
+	go mod tidy
 
 TEST_FLAGS=-v
 
@@ -38,6 +46,6 @@ clean:
 	go clean -testcache
 
 # Сборка и запуск отдельного приложения
-# .PHONY: run-t01
-# run-t01:
-# 	go run ./t01_goroutine_clocks/main.go 10 1000
+.PHONY: run
+run:
+	go run ./app/main.go
