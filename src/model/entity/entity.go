@@ -132,20 +132,16 @@ type LevelEntity struct {
 }
 
 type RoomEntity struct {
-	Geometry    ObjectEntity
-	Consumables ConsumablesEntity
-	Enemies     []EnemyEntity
+	Geometry ObjectEntity
+	Foods    []FoodEntity
+	Elixirs  []ElixirEntity
+	Scrolls  []ScrollEntity
+	Weapons  []WeaponEntity
+	Enemies  []EnemyEntity
 }
 
 type PassageEntity struct {
 	Geometries []ObjectEntity
-}
-
-type ConsumablesEntity struct {
-	Foods   []FoodEntity
-	Elixirs []ElixirEntity
-	Scrolls []ScrollEntity
-	Weapons []WeaponEntity
 }
 
 type FoodEntity struct {
