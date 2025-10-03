@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	HEIGHT = 10
-	WIDTH  = 30
+	MENU_HEIGHT = 10
+	MENU_WIDTH  = 30
 )
 
 func main() {
@@ -28,9 +28,9 @@ func main() {
 	stdscr.Keypad(true)
 
 	my, mx := stdscr.MaxYX()
-	y, x := 2, (mx/2)-(WIDTH/2)
+	y, x := 2, (mx/2)-(MENU_WIDTH/2)
 
-	win, _ := gc.NewWindow(HEIGHT, WIDTH, y, x)
+	win, _ := gc.NewWindow(MENU_HEIGHT, MENU_WIDTH, y, x)
 	win.Keypad(true)
 
 	stdscr.Print("Use arrow keys to go up and down, Press enter to select")
