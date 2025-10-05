@@ -1,6 +1,6 @@
 * text=auto
 
-!misc/
+!misc/*
 
 # Packaging
 *.zip filter=lfs diff=lfs merge=lfs -text
