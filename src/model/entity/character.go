@@ -12,7 +12,7 @@ type CharacterLike interface {
 	TakeDamage(damage float64)
 	Heal(amount uint)
 	Attack() uint
-	CheckEvasion(agility uint) bool
+	CheckEvasion() bool
 }
 
 type Character struct {
@@ -62,6 +62,10 @@ func (c *Character) CheckEvasion() bool {
 
 	const scale = 20.0
 	chance := 1.0 - 1.0/(1.0+float64(c.Agility)/scale)
+
+	// @todo (Copilot):
+	// Using the global rand.Float64() makes the function non-deterministic and difficult to test.
+	// Consider accepting a *rand.Rand parameter or using a seeded random generator for better testability.
 	roll := rand.Float64() // Случайное дробное число - [0,1)
 	return roll < chance
 }
