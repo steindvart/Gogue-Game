@@ -1,8 +1,8 @@
 package entity
 
 type Scroll struct {
-	Geometry           Object
-	AffectedAttributes Attributes[uint]
+	Shape              Box
+	AffectedAttributes Attributes
 	Increment          uint
 	Name               string
 }

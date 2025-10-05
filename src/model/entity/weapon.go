@@ -1,7 +1,7 @@
 package entity
 
 type Weapon struct {
-	Geometry     Object
+	Shape        Box
 	StrengthBuff uint
 	Name         string
 }

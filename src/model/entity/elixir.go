@@ -5,9 +5,9 @@ import (
 )
 
 type Elixir struct {
-	Geometry           Object
+	Shape              Box
 	EffectDuration     time.Duration
-	AffectedAttributes Attributes[uint]
+	AffectedAttributes Attributes
 	Increment          uint
 	Name               string
 }

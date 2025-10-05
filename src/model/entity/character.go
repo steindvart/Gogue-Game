@@ -1,11 +1,11 @@
 package entity
 
-type Attributes[T any] struct {
-	MaxHealth, Agility, Strength T
+type Attributes struct {
+	MaxHealth, Agility, Strength uint
 }
 
 type Character struct {
-	Geometry Object
+	Shape    Box
 	Health   float64
 	Strength uint
 	Agility  uint

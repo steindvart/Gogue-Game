@@ -1,7 +1,7 @@
 package entity
 
 type Food struct {
-	Geometry           Object
+	Shape              Box
 	HealthRegeneration uint
 	Name               string
 }

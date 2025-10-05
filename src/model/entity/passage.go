@@ -1,5 +1,5 @@
 package entity
 
 type Passage struct {
-	Geometries []Object
+	Shapes []Box
 }
