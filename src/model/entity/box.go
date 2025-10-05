@@ -9,6 +9,6 @@ type Size2D[T any] struct {
 }
 
 type Box struct {
-	Coordinate Point2D[int]
-	Measure    Size2D[uint]
+	Point Point2D[int]
+	Size  Size2D[uint]
 }
