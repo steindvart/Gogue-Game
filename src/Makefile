@@ -47,5 +47,5 @@ clean:
 
 # Сборка и запуск отдельного приложения
 .PHONY: run
-run:
+run: dependencies
 	go run ./cmd/gogue-cli/main.go
