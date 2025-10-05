@@ -5,7 +5,7 @@ all: build
 # Сборка всех бинарников
 .PHONY: build
 build: dependencies prepare-bin
-	go build -o bin/gogue.exe ./app/main.go
+	go build -o bin/gogue-cli.exe ./cmd/gogue-cli/main.go
 
 .PHONY: dependencies
 dependencies:
@@ -47,5 +47,5 @@ clean:
 
 # Сборка и запуск отдельного приложения
 .PHONY: run
-run:
-	go run ./app/main.go
+run: dependencies
+	go run ./cmd/gogue-cli/main.go
