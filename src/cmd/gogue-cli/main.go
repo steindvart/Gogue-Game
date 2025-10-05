@@ -23,15 +23,30 @@ func main() {
 
 	gc.Raw(true)
 	gc.Echo(false)
-	gc.Cursor(0)
-	stdscr.Clear()
-	stdscr.Keypad(true)
+
+	err = gc.Cursor(0)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = stdscr.Clear()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = stdscr.Keypad(true)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	my, mx := stdscr.MaxYX()
 	y, x := 2, (mx/2)-(MENU_WIDTH/2)
 
 	win, _ := gc.NewWindow(MENU_HEIGHT, MENU_WIDTH, y, x)
-	win.Keypad(true)
+	err = win.Keypad(true)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	stdscr.Print("Use arrow keys to go up and down, Press enter to select")
 	stdscr.Refresh()
@@ -59,12 +74,20 @@ func main() {
 			stdscr.MovePrintf(my-2, 0, "Choice #%d: %s selected",
 				active,
 				menu[active])
-			stdscr.ClearToEOL()
+
+			err = stdscr.ClearToEOL()
+			if err != nil {
+				log.Fatal(err)
+			}
 			stdscr.Refresh()
 		default:
 			stdscr.MovePrintf(my-2, 0, "Character pressed = %3d/%c",
 				ch, ch)
-			stdscr.ClearToEOL()
+
+			err = stdscr.ClearToEOL()
+			if err != nil {
+				log.Fatal(err)
+			}
 			stdscr.Refresh()
 		}
 
@@ -74,12 +97,23 @@ func main() {
 
 func printmenu(w *gc.Window, menu []string, active int) {
 	y, x := 2, 2
-	w.Box(0, 0)
+	err := w.Box(0, 0)
+	if err != nil {
+		log.Fatal(err)
+	}
 	for i, s := range menu {
 		if i == active {
-			w.AttrOn(gc.A_REVERSE)
+			err := w.AttrOn(gc.A_REVERSE)
+			if err != nil {
+				log.Fatal(err)
+			}
+
 			w.MovePrint(y+i, x, s)
-			w.AttrOff(gc.A_REVERSE)
+
+			err = w.AttrOff(gc.A_REVERSE)
+			if err != nil {
+				log.Fatal(err)
+			}
 		} else {
 			w.MovePrint(y+i, x, s)
 		}
