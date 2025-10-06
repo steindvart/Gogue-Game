@@ -116,7 +116,7 @@ func TestCharacter_Heal(t *testing.T) {
 		name      string
 		health    float64
 		maxHealth float64
-		heal      uint
+		heal      float64
 		want      float64
 	}{
 		{

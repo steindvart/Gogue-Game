@@ -10,7 +10,7 @@ type CharacterLike interface {
 	IsAlive() bool
 	Move(delta Point2D[int])
 	TakeDamage(damage float64)
-	Heal(amount uint)
+	Heal(amount float64)
 	Attack() uint
 	CheckEvasion() bool
 }
@@ -39,8 +39,8 @@ func (c *Character) TakeDamage(damage float64) {
 	}
 }
 
-func (c *Character) Heal(amount uint) {
-	c.Health += float64(amount)
+func (c *Character) Heal(amount float64) {
+	c.Health += amount
 	if c.Health > c.MaxHealth {
 		c.Health = c.MaxHealth
 	}

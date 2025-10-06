@@ -18,7 +18,7 @@ func (p *Player) TakeDamage(damage float64) {
 	p.Character.TakeDamage(damage)
 }
 
-func (p *Player) Heal(amount uint) {
+func (p *Player) Heal(amount float64) {
 	p.Character.Heal(amount)
 }
 
