@@ -1,4 +1,4 @@
-package presentation
+package cli
 
 import (
 	"testing"

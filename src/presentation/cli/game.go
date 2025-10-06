@@ -1,4 +1,4 @@
-package presentation
+package cli
 
 type GameStateSignal int
 
