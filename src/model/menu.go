@@ -2,13 +2,13 @@ package model
 
 type Signal int
 
-type option struct {
+type MenuOption struct {
 	Label  string
 	Signal Signal
 }
 
 type Menu struct {
-	Options []option
+	Options []MenuOption
 	Active  int
 }
 
@@ -26,9 +26,9 @@ func (m *Menu) Previous() {
 	m.Active = (m.Active - 1 + len(m.Options)) % len(m.Options)
 }
 
-func (m *Menu) Select() Signal {
+func (m *Menu) Select() MenuOption {
 	if len(m.Options) == 0 {
-		return -1
+		return MenuOption{Label: "", Signal: -1}
 	}
-	return m.Options[m.Active].Signal
+	return m.Options[m.Active]
 }

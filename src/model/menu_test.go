@@ -7,19 +7,19 @@ import (
 func TestMenu_Next(t *testing.T) {
 	tests := []struct {
 		name    string
-		options []option
+		options []MenuOption
 		active  int
 		want    int
 	}{
 		{
 			name:    "next increments",
-			options: []option{{"A", 1}, {"B", 2}, {"C", 3}},
+			options: []MenuOption{{"A", 1}, {"B", 2}, {"C", 3}},
 			active:  0,
 			want:    1,
 		},
 		{
 			name:    "next wraps",
-			options: []option{{"A", 1}, {"B", 2}},
+			options: []MenuOption{{"A", 1}, {"B", 2}},
 			active:  1,
 			want:    0,
 		},
@@ -44,19 +44,19 @@ func TestMenu_Next(t *testing.T) {
 func TestMenu_Previous(t *testing.T) {
 	tests := []struct {
 		name    string
-		options []option
+		options []MenuOption
 		active  int
 		want    int
 	}{
 		{
 			name:    "previous decrements",
-			options: []option{{"A", 1}, {"B", 2}, {"C", 3}},
+			options: []MenuOption{{"A", 1}, {"B", 2}, {"C", 3}},
 			active:  2,
 			want:    1,
 		},
 		{
 			name:    "previous wraps",
-			options: []option{{"A", 1}, {"B", 2}},
+			options: []MenuOption{{"A", 1}, {"B", 2}},
 			active:  0,
 			want:    1,
 		},
@@ -81,27 +81,27 @@ func TestMenu_Previous(t *testing.T) {
 func TestMenu_Select(t *testing.T) {
 	tests := []struct {
 		name    string
-		options []option
+		options []MenuOption
 		active  int
-		want    Signal
+		want    MenuOption
 	}{
 		{
 			name:    "select valid",
-			options: []option{{"A", 42}, {"B", 99}},
+			options: []MenuOption{{"A", 42}, {"B", 99}},
 			active:  1,
-			want:    99,
+			want:    MenuOption{"B", 99},
 		},
 		{
 			name:    "select in empty menu",
 			options: nil,
 			active:  0,
-			want:    -1,
+			want:    MenuOption{Label: "", Signal: -1},
 		},
 		{
 			name:    "select with one option",
-			options: []option{{"A", 7}},
+			options: []MenuOption{{"A", 7}},
 			active:  0,
-			want:    7,
+			want:    MenuOption{"A", 7},
 		},
 	}
 	for _, tt := range tests {
@@ -116,25 +116,25 @@ func TestMenu_Select(t *testing.T) {
 }
 
 func TestMenu_NextPreviousSelect(t *testing.T) {
-	m := &Menu{Options: []option{{"A", 42}, {"B", 99}}, Active: 0}
+	m := &Menu{Options: []MenuOption{{"A", 42}, {"B", 99}}, Active: 0}
 
 	m.Next()
 	got := m.Select()
-	want := m.Options[1].Signal
+	want := m.Options[1]
 	if got != want {
 		t.Errorf("Select() = %v, want %v", got, want)
 	}
 
 	m.Previous()
 	got = m.Select()
-	want = m.Options[0].Signal
+	want = m.Options[0]
 	if got != want {
 		t.Errorf("Select() = %v, want %v", got, want)
 	}
 
 	m.Previous()
 	got = m.Select()
-	want = m.Options[1].Signal
+	want = m.Options[1]
 	if got != want {
 		t.Errorf("Select() = %v, want %v", got, want)
 	}
