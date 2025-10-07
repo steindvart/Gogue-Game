@@ -175,7 +175,7 @@ func TestGhostConstructor(t *testing.T) {
 		wantHostilityRadius uint
 		wantIsChasing       bool
 		wantDiretion        uint
-		wantIsVisible  bool
+		wantIsVisible       bool
 	}{
 		{
 			name:                "ghost constructor",
@@ -189,7 +189,7 @@ func TestGhostConstructor(t *testing.T) {
 			wantHostilityRadius: 2,
 			wantIsChasing:       false,
 			wantDiretion:        8,
-			wantIsVisible:  true,
+			wantIsVisible:       true,
 		},
 	}
 
@@ -217,7 +217,7 @@ func TestGhostConstructor(t *testing.T) {
 				t.Errorf("NewGhost(): Health got %v, want %v", z.Enemy.Character.Health, tt.wantHealth)
 			}
 
-			if z.Enemy.Character.MaxHealth != tt.wantMaxHealth  {
+			if z.Enemy.Character.MaxHealth != tt.wantMaxHealth {
 				t.Errorf("NewGhost(): MaxHealth got %v, want %v", z.Enemy.Character.MaxHealth, tt.wantMaxHealth)
 			}
 
@@ -257,7 +257,7 @@ func TestOgreConstructor(t *testing.T) {
 		wantHostilityRadius uint
 		wantIsChasing       bool
 		wantDiretion        uint
-		wantIsResting  bool
+		wantIsResting       bool
 	}{
 		{
 			name:                "ogre constructor",
@@ -271,7 +271,7 @@ func TestOgreConstructor(t *testing.T) {
 			wantHostilityRadius: 4,
 			wantIsChasing:       false,
 			wantDiretion:        8,
-			wantIsResting:  false,
+			wantIsResting:       false,
 		},
 	}
 
@@ -299,7 +299,7 @@ func TestOgreConstructor(t *testing.T) {
 				t.Errorf("NewOgre(): Health got %v, want %v", z.Enemy.Character.Health, tt.wantHealth)
 			}
 
-			if z.Enemy.Character.MaxHealth != tt.wantMaxHealth  {
+			if z.Enemy.Character.MaxHealth != tt.wantMaxHealth {
 				t.Errorf("NewOgre(): MaxHealth got %v, want %v", z.Enemy.Character.MaxHealth, tt.wantMaxHealth)
 			}
 
@@ -379,7 +379,7 @@ func TestSnakeMageConstructor(t *testing.T) {
 				t.Errorf("NewSnakeMage(): Health got %v, want %v", z.Enemy.Character.Health, tt.wantHealth)
 			}
 
-			if z.Enemy.Character.MaxHealth != tt.wantMaxHealth  {
+			if z.Enemy.Character.MaxHealth != tt.wantMaxHealth {
 				t.Errorf("NewSnakeMage(): MaxHealth got %v, want %v", z.Enemy.Character.MaxHealth, tt.wantMaxHealth)
 			}
 
