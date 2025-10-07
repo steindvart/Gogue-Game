@@ -13,7 +13,7 @@ func (p *Point2D[T]) Move(delta Point2D[T]) {
 	p.Y += delta.Y
 }
 
-type Size2D[T any] struct {
+type Size2D[T Number] struct {
 	Height, Width T
 }
 
