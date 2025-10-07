@@ -30,6 +30,7 @@ type Room struct {
 	Scrolls []Scroll
 	Weapons []Weapon
 	Enemies []Enemy
+	Portal  Portal
 }
 
 func NewRoom(roomType RoomType, x, y int, mapHeight, mapWidth int, rand *rand.Rand) (*Room, error) {
@@ -51,6 +52,7 @@ func NewRoom(roomType RoomType, x, y int, mapHeight, mapWidth int, rand *rand.Ra
 		Scrolls: []Scroll{},
 		Weapons: []Weapon{},
 		Enemies: []Enemy{},
+		Portal:  Portal{},
 	}, nil
 }
 
