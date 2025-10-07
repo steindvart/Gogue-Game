@@ -1,80 +1,43 @@
 package entity
 
 import (
+	"reflect"
 	"testing"
 )
 
-func TestZombieConstructor(t *testing.T) {
+func TestNewZombie(t *testing.T) {
 	tests := []struct {
-		name                string
-		box                 Box
-		wantBox             Box
-		wantAgility         uint
-		wantStrength        uint
-		wantHealth          float64
-		wantMaxHealth       float64
-		wantType            uint
-		wantHostilityRadius uint
-		wantIsChasing       bool
-		wantDiretion        uint
+		name string
+		box  Box
+		want *Zombie
 	}{
 		{
-			name:                "zombie constructor",
-			box:                 Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 2}},
-			wantBox:             Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 2}},
-			wantAgility:         25,
-			wantStrength:        50,
-			wantHealth:          75.0,
-			wantMaxHealth:       0.0,
-			wantType:            0,
-			wantHostilityRadius: 4,
-			wantIsChasing:       false,
-			wantDiretion:        8,
+			name: "zombie constructor",
+			box:  Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 2}},
+			want: &Zombie{
+				Enemy: Enemy{
+					Character: Character{
+						Shape:    Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 2}},
+						Agility:  uint(AttributeRateLow),
+						Strength: uint(AttributeRateAverage),
+						Health:   float64(AttributeRateHigh),
+						// @todo - поправить когда будет корректное прокидывание макс здоровья
+						// MaxHealth: float64(AttributeRateHigh),
+					},
+					Type:            EnemyTypeZombie,
+					HostilityRadius: 4,
+					IsChasing:       false,
+					Direction:       DirectionStop,
+				},
+			},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			z := NewZombie(tt.box)
-
-			if z == nil {
-				t.Fatalf("NewZombie(): want valid pointer, got %v", z)
-			}
-
-			if z.Enemy.Character.Shape != tt.wantBox {
-				t.Errorf("NewZombie(): Shape got %v, want %v", z.Enemy.Character.Shape, tt.wantBox)
-			}
-
-			if z.Enemy.Character.Agility != tt.wantAgility {
-				t.Errorf("NewZombie(): Agility got %v, want %v", z.Enemy.Character.Agility, tt.wantAgility)
-			}
-
-			if z.Enemy.Character.Strength != tt.wantStrength {
-				t.Errorf("NewZombie(): Strength got %v, want %v", z.Enemy.Character.Strength, tt.wantStrength)
-			}
-
-			if z.Enemy.Character.Health != tt.wantHealth {
-				t.Errorf("NewZombie(): Health got %v, want %v", z.Enemy.Character.Health, tt.wantHealth)
-			}
-
-			if z.Enemy.Character.MaxHealth != tt.wantMaxHealth {
-				t.Errorf("NewZombie(): MaxHealth got %v, want %v", z.Enemy.Character.MaxHealth, tt.wantMaxHealth)
-			}
-
-			if uint(z.Enemy.Type) != tt.wantType {
-				t.Errorf("NewZombie(): Type got %v, want %v", z.Enemy.Type, tt.wantType)
-			}
-
-			if uint(z.Enemy.HostilityRadius) != tt.wantHostilityRadius {
-				t.Errorf("NewZombie(): HostilityRadius got %v, want %v", z.Enemy.HostilityRadius, tt.wantHostilityRadius)
-			}
-
-			if z.Enemy.IsChasing != tt.wantIsChasing {
-				t.Errorf("NewZombie(): IsChasing got %v, want %v", z.Enemy.IsChasing, tt.wantDiretion)
-			}
-
-			if uint(z.Enemy.Direction) != tt.wantDiretion {
-				t.Errorf("NewZombie(): Direction got %v, want %v", z.Enemy.Direction, tt.wantDiretion)
+			got := NewZombie(tt.box)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewZombie() = %#v, want %#v", got, tt.want)
 			}
 		})
 	}
