@@ -32,12 +32,12 @@ type Room struct {
 	Portal  *Portal
 }
 
-func NewRoom(roomType RoomType, minX int, minY int, maxWidth int, maxHeight int, rand *rand.Rand) (*Room, error) {
+func NewRoom(roomType RoomType, minX int, minY int, maxWidth int, maxHeight int) (*Room, error) {
 	if maxWidth < RoomMinHeight || maxHeight < RoomMinHeight {
 		return nil, errors.New("room cannot be built: map is too small to fit a room of minimum required size")
 	}
 
-	width, height, err := calculateRoomSize(maxWidth, maxHeight, rand)
+	width, height, err := calculateRoomSize(maxWidth, maxHeight)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +64,7 @@ func NewRoom(roomType RoomType, minX int, minY int, maxWidth int, maxHeight int,
 	}, nil
 }
 
-func calculateRoomSize(maxWidth int, maxHeight int, rand *rand.Rand) (uint, uint, error) {
+func calculateRoomSize(maxWidth int, maxHeight int) (uint, uint, error) {
 	width := uint(rand.Intn(maxWidth-RoomMinWidth+1) + RoomMinWidth)
 	height := uint(rand.Intn(maxHeight-RoomMinHeight+1) + RoomMinHeight)
 

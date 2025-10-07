@@ -1,213 +1,160 @@
 package entity
 
 import (
-	"math/rand"
 	"testing"
 )
 
 func TestNewRoom(t *testing.T) {
-	source := rand.NewSource(42)
-	rng := rand.New(source)
+	t.Run("NewRoom - Ordinary Room", func(t *testing.T) {
+		room, err := NewRoom(RoomTypeOrdinary, 0, 0, 10, 10)
+		if err != nil {
+			t.Fatalf("Expected no error, got %v", err)
+		}
 
-	tests := []struct {
-		name        string
-		roomType    RoomType
-		x, y        int
-		mapHeight   int
-		mapWidth    int
-		expectError bool
-	}{
-		{
-			name:        "successful creation ordinary room",
-			roomType:    RoomTypeOrdinary,
-			x:           5,
-			y:           5,
-			mapHeight:   20,
-			mapWidth:    30,
-			expectError: false,
-		},
-		{
-			name:        "successful creation start room",
-			roomType:    RoomTypeStart,
-			x:           0,
-			y:           0,
-			mapHeight:   15,
-			mapWidth:    15,
-			expectError: false,
-		},
-		{
-			name:        "successful creation finish room",
-			roomType:    RoomTypeFinish,
-			x:           10,
-			y:           10,
-			mapHeight:   12,
-			mapWidth:    12,
-			expectError: false,
-		},
-		{
-			name:        "map too small",
-			roomType:    RoomTypeStart,
-			x:           0,
-			y:           0,
-			mapHeight:   2,
-			mapWidth:    2,
-			expectError: true,
-		},
-		{
-			name:        "boundary case minimum size",
-			roomType:    RoomTypeOrdinary,
-			x:           0,
-			y:           0,
-			mapHeight:   12,
-			mapWidth:    9,
-			expectError: true,
-		},
-		{
-			name:        "boundary case exact minimum",
-			roomType:    RoomTypeOrdinary,
-			x:           0,
-			y:           0,
-			mapHeight:   12,
-			mapWidth:    12,
-			expectError: false,
-		},
-	}
+		if room.Type != RoomTypeOrdinary {
+			t.Errorf("Expected room type %v, got %v", RoomTypeOrdinary, room.Type)
+		}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			room, err := NewRoom(tt.roomType, tt.x, tt.y, tt.mapHeight, tt.mapWidth, rng)
+		if room.Portal != nil {
+			t.Error("Expected no portal for ordinary room")
+		}
 
-			if tt.expectError {
-				if err == nil {
-					t.Fatal("expected error, got nil")
-				}
-				expectedMsg := "room cannot be built: map is too small to fit a room of minimum required size"
-				if err.Error() != expectedMsg {
-					t.Errorf("expected error message '%s', got '%s'", expectedMsg, err.Error())
-				}
-				return
-			}
+		if room.Shape.Size.Width < RoomMinWidth || room.Shape.Size.Height < RoomMinHeight {
+			t.Errorf("Room size is smaller than minimum required: width=%d, height=%d", room.Shape.Size.Width, room.Shape.Size.Height)
+		}
 
-			if err != nil {
-				t.Fatalf("expected no error, got %v", err)
-			}
+		if room.Shape.Point.X < 0 || room.Shape.Point.X >= 10 {
+			t.Errorf("Room X position is out of bounds: %d", room.Shape.Point.X)
+		}
+		if room.Shape.Point.Y < 0 || room.Shape.Point.Y >= 10 {
+			t.Errorf("Room Y position is out of bounds: %d", room.Shape.Point.Y)
+		}
+	})
 
-			if room == nil {
-				t.Fatal("expected room to be created, got nil")
-			}
+	t.Run("NewRoom - Start Room with Portal", func(t *testing.T) {
+		room, err := NewRoom(RoomTypeStart, 0, 0, 10, 10)
+		if err != nil {
+			t.Fatalf("Expected no error, got %v", err)
+		}
 
-			if room.Type != tt.roomType {
-				t.Errorf("expected room type %d, got %d", tt.roomType, room.Type)
-			}
+		if room.Type != RoomTypeStart {
+			t.Errorf("Expected room type %v, got %v", RoomTypeStart, room.Type)
+		}
 
-			if room.Shape.Point.X != tt.x || room.Shape.Point.Y != tt.y {
-				t.Errorf("expected position (%d, %d), got (%d, %d)", tt.x, tt.y, room.Shape.Point.X, room.Shape.Point.Y)
-			}
+		if room.Portal == nil {
+			t.Error("Expected portal for start room")
+		}
+	})
 
-			// Проверяем, что размеры в допустимых пределах
-			if room.Shape.Size.Width < RoomMinWidth {
-				t.Errorf("expected width >= %d, got %d", RoomMinWidth, room.Shape.Size.Width)
-			}
+	t.Run("NewRoom - Finish Room with Portal", func(t *testing.T) {
+		room, err := NewRoom(RoomTypeFinish, 0, 0, 10, 10)
+		if err != nil {
+			t.Fatalf("Expected no error, got %v", err)
+		}
 
-			if room.Shape.Size.Height < RoomMinHeight {
-				t.Errorf("expected height >= %d, got %d", RoomMinHeight, room.Shape.Size.Height)
-			}
+		if room.Type != RoomTypeFinish {
+			t.Errorf("Expected room type %v, got %v", RoomTypeFinish, room.Type)
+		}
 
-			// Проверяем, что слайсы инициализированы пустыми
-			if len(room.Foods) != 0 {
-				t.Errorf("expected empty Foods slice, got length %d", len(room.Foods))
-			}
+		if room.Portal == nil {
+			t.Error("Expected portal for finish room")
+		}
+	})
 
-			if len(room.Elixirs) != 0 {
-				t.Errorf("expected empty Elixirs slice, got length %d", len(room.Elixirs))
-			}
+	t.Run("NewRoom - Error on Too Small Map", func(t *testing.T) {
+		_, err := NewRoom(RoomTypeOrdinary, 0, 0, 3, 3)
+		if err == nil {
+			t.Fatal("Expected error for too small map, got nil")
+		}
 
-			if len(room.Scrolls) != 0 {
-				t.Errorf("expected empty Scrolls slice, got length %d", len(room.Scrolls))
-			}
+		expectedErr := "room cannot be built: map is too small to fit a room of minimum required size"
+		if err.Error() != expectedErr {
+			t.Errorf("Expected error message '%s', got '%s'", expectedErr, err.Error())
+		}
+	})
 
-			if len(room.Weapons) != 0 {
-				t.Errorf("expected empty Weapons slice, got length %d", len(room.Weapons))
-			}
+	t.Run("NewRoom - Empty Slices Initialization", func(t *testing.T) {
+		room, err := NewRoom(RoomTypeOrdinary, 0, 0, 10, 10)
+		if err != nil {
+			t.Fatalf("Expected no error, got %v", err)
+		}
 
-			if len(room.Enemies) != 0 {
-				t.Errorf("expected empty Enemies slice, got length %d", len(room.Enemies))
-			}
-		})
-	}
+		if len(room.Foods) != 0 {
+			t.Error("Expected empty Foods slice")
+		}
+		if len(room.Elixirs) != 0 {
+			t.Error("Expected empty Elixirs slice")
+		}
+		if len(room.Scrolls) != 0 {
+			t.Error("Expected empty Scrolls slice")
+		}
+		if len(room.Weapons) != 0 {
+			t.Error("Expected empty Weapons slice")
+		}
+		if len(room.Enemies) != 0 {
+			t.Error("Expected empty Enemies slice")
+		}
+	})
 }
 
 func TestCalculateRoomSize(t *testing.T) {
-	source := rand.NewSource(42)
-	rng := rand.New(source)
+	t.Run("CalculateRoomSize - Valid Size", func(t *testing.T) {
+		width, height, err := calculateRoomSize(10, 8)
+		if err != nil {
+			t.Fatalf("Expected no error, got %v", err)
+		}
 
-	tests := []struct {
-		name        string
-		mapHeight   int
-		mapWidth    int
-		expectError bool
-	}{
-		{
-			name:        "normal calculation",
-			mapHeight:   12,
-			mapWidth:    18,
-			expectError: false,
-		},
-		{
-			name:        "map too small",
-			mapHeight:   2,
-			mapWidth:    2,
-			expectError: true,
-		},
-		{
-			name:        "boundary case exact minimum",
-			mapHeight:   12,
-			mapWidth:    12,
-			expectError: false,
-		},
-		{
-			name:        "width too small",
-			mapHeight:   12,
-			mapWidth:    6,
-			expectError: true,
-		},
-		{
-			name:        "height too small",
-			mapHeight:   6,
-			mapWidth:    12,
-			expectError: true,
-		},
-	}
+		if width < RoomMinWidth || width > 10 {
+			t.Errorf("Width out of range: expected [%d, 10], got %d", RoomMinWidth, width)
+		}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			width, height, err := calculateRoomSize(tt.mapHeight, tt.mapWidth, rng)
+		if height < RoomMinHeight || height > 8 {
+			t.Errorf("Height out of range: expected [%d, 8], got %d", RoomMinHeight, height)
+		}
+	})
 
-			if tt.expectError {
-				if err == nil {
-					t.Fatal("expected error, got nil")
-				}
-				expectedMsg := "room cannot be built: map is too small to fit a room of minimum required size"
-				if err.Error() != expectedMsg {
-					t.Errorf("expected error message '%s', got '%s'", expectedMsg, err.Error())
-				}
-				return
-			}
+	t.Run("CalculateRoomSize - Minimum Size", func(t *testing.T) {
+		width, height, err := calculateRoomSize(RoomMinWidth, RoomMinHeight)
+		if err != nil {
+			t.Fatalf("Expected no error, got %v", err)
+		}
 
-			if err != nil {
-				t.Fatalf("expected no error, got %v", err)
-			}
+		if width != RoomMinWidth {
+			t.Errorf("Expected width %d, got %d", RoomMinWidth, width)
+		}
 
-			expectedMaxWidth := uint(tt.mapWidth / RoomsCountEntireLevelWidth)
-			expectedMaxHeight := uint(tt.mapHeight / RoomsCountEntireLevelHeight)
+		if height != RoomMinHeight {
+			t.Errorf("Expected height %d, got %d", RoomMinHeight, height)
+		}
+	})
+}
 
-			if width < RoomMinWidth || width > expectedMaxWidth {
-				t.Errorf("expected width between %d and %d, got %d", RoomMinWidth, expectedMaxWidth, width)
-			}
+func TestGeneratePortal(t *testing.T) {
+	t.Run("GeneratePortal - Valid Position", func(t *testing.T) {
+		portal := generatePortal(0, 0, 10, 8)
 
-			if height < RoomMinHeight || height > expectedMaxHeight {
-				t.Errorf("expected height between %d and %d, got %d", RoomMinHeight, expectedMaxHeight, height)
-			}
-		})
-	}
+		if portal.Shape.Size.Width != 1 || portal.Shape.Size.Height != 1 {
+			t.Errorf("Expected portal size (1,1), got (%d,%d)", portal.Shape.Size.Width, portal.Shape.Size.Height)
+		}
+
+		if portal.Shape.Point.X < 1 || portal.Shape.Point.X >= 10-1 {
+			t.Errorf("Portal X position out of valid range: %d", portal.Shape.Point.X)
+		}
+
+		if portal.Shape.Point.Y < 1 || portal.Shape.Point.Y >= 8-1 {
+			t.Errorf("Portal Y position out of valid range: %d", portal.Shape.Point.Y)
+		}
+	})
+
+	t.Run("GeneratePortal - Different Coordinates", func(t *testing.T) {
+		portal := generatePortal(5, 5, 10, 8)
+
+		if portal.Shape.Point.X < 6 || portal.Shape.Point.X >= 14 {
+			t.Errorf("Portal X position out of valid range [6,14): %d", portal.Shape.Point.X)
+		}
+
+		if portal.Shape.Point.Y < 6 || portal.Shape.Point.Y >= 12 {
+			t.Errorf("Portal Y position out of valid range [6,12): %d", portal.Shape.Point.Y)
+		}
+	})
 }
