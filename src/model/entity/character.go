@@ -28,8 +28,7 @@ func (c *Character) IsAlive() bool {
 }
 
 func (c *Character) Move(delta Point2D[int]) {
-	c.Shape.Point.X += delta.X
-	c.Shape.Point.Y += delta.Y
+	c.Shape.Move(delta)
 }
 
 func (c *Character) TakeDamage(damage float64) {
