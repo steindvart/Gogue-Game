@@ -14,10 +14,9 @@ const (
 )
 
 const (
-	RoomMinHeight               = 4
-	RoomMinWidth                = 4
-	RoomsCountEntireLevelHeight = 3
-	RoomsCountEntireLevelWidth  = 3
+	RoomMinHeight = 4
+	RoomMinWidth  = 4
+	RoomWalls     = 2
 )
 
 type TileType uint
@@ -30,18 +29,27 @@ type Room struct {
 	Scrolls []Scroll
 	Weapons []Weapon
 	Enemies []Enemy
-	Portal  Portal
+	Portal  *Portal
 }
 
-func NewRoom(roomType RoomType, x, y int, mapHeight, mapWidth int, rand *rand.Rand) (*Room, error) {
-	width, height, err := calculateRoomSize(mapHeight, mapWidth, rand)
+func NewRoom(roomType RoomType, minX int, minY int, maxWidth int, maxHeight int, rand *rand.Rand) (*Room, error) {
+	if maxWidth < RoomMinHeight || maxHeight < RoomMinHeight {
+		return nil, errors.New("room cannot be built: map is too small to fit a room of minimum required size")
+	}
+
+	width, height, err := calculateRoomSize(maxWidth, maxHeight, rand)
 	if err != nil {
 		return nil, err
 	}
 
 	shape := Box{
-		Point: Point2D[int]{X: x, Y: y},
+		Point: Point2D[int]{X: minX + rand.Intn(int(width)), Y: minY + rand.Intn(int(height))},
 		Size:  Size2D[uint]{Height: height, Width: width},
+	}
+
+	var portal *Portal = nil
+	if roomType == RoomTypeFinish || roomType == RoomTypeStart {
+		portal = generatePortal(shape.Point.X, shape.Point.Y, int(width), int(height))
 	}
 
 	return &Room{
@@ -52,20 +60,23 @@ func NewRoom(roomType RoomType, x, y int, mapHeight, mapWidth int, rand *rand.Ra
 		Scrolls: []Scroll{},
 		Weapons: []Weapon{},
 		Enemies: []Enemy{},
-		Portal:  Portal{},
+		Portal:  portal,
 	}, nil
 }
 
-func calculateRoomSize(mapHeight, mapWidth int, rand *rand.Rand) (uint, uint, error) {
-	roomMaxHeight := mapHeight / RoomsCountEntireLevelHeight
-	roomMaxWidth := mapWidth / RoomsCountEntireLevelWidth
-
-	if roomMaxWidth < RoomMinWidth || roomMaxHeight < RoomMinHeight {
-		return 0, 0, errors.New("room cannot be built: map is too small to fit a room of minimum required size")
-	}
-
-	width := uint(rand.Intn(roomMaxWidth-RoomMinWidth+1) + RoomMinWidth)
-	height := uint(rand.Intn(roomMaxHeight-RoomMinHeight+1) + RoomMinHeight)
+func calculateRoomSize(maxWidth int, maxHeight int, rand *rand.Rand) (uint, uint, error) {
+	width := uint(rand.Intn(maxWidth-RoomMinWidth+1) + RoomMinWidth)
+	height := uint(rand.Intn(maxHeight-RoomMinHeight+1) + RoomMinHeight)
 
 	return width, height, nil
+}
+
+func generatePortal(x int, y int, width int, height int) *Portal {
+	portal := &Portal{
+		Shape: Box{
+			Point: Point2D[int]{X: x + 1 + rand.Intn(width-RoomWalls), Y: y + 1 + rand.Intn(height-RoomWalls)},
+			Size:  Size2D[uint]{Height: 1, Width: 1},
+		},
+	}
+	return portal
 }
