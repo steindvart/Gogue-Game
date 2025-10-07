@@ -8,27 +8,46 @@ type MenuOption struct {
 }
 
 type Menu struct {
-	Options []MenuOption
-	Active  int
+	options []MenuOption
+	active  int
+}
+
+func NewMenu(options []MenuOption) *Menu {
+	return &Menu{
+		options: options,
+		active:  0,
+	}
 }
 
 func (m *Menu) Next() {
-	if len(m.Options) == 0 {
+	if len(m.options) == 0 {
 		return
 	}
-	m.Active = (m.Active + 1) % len(m.Options)
+	m.active = (m.active + 1) % len(m.options)
 }
 
 func (m *Menu) Previous() {
-	if len(m.Options) == 0 {
+	if len(m.options) == 0 {
 		return
 	}
-	m.Active = (m.Active - 1 + len(m.Options)) % len(m.Options)
+	m.active = (m.active - 1 + len(m.options)) % len(m.options)
 }
 
 func (m *Menu) Select() MenuOption {
-	if len(m.Options) == 0 {
+	if len(m.options) == 0 {
 		return MenuOption{Label: "", Signal: -1}
 	}
-	return m.Options[m.Active]
+	return m.options[m.active]
+}
+
+func (m *Menu) GetActive() int {
+	return m.active
+}
+
+func (m *Menu) GetOptionsLabels() []string {
+	labels := make([]string, len(m.options))
+	for i, opt := range m.options {
+		labels[i] = opt.Label
+	}
+	return labels
 }

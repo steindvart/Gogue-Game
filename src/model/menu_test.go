@@ -32,10 +32,10 @@ func TestMenu_Next(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			m := &Menu{Options: tt.options, Active: tt.active}
+			m := &Menu{options: tt.options, active: tt.active}
 			m.Next()
-			if m.Active != tt.want {
-				t.Errorf("Next() = %d, want %d", m.Active, tt.want)
+			if m.active != tt.want {
+				t.Errorf("Next() = %d, want %d", m.active, tt.want)
 			}
 		})
 	}
@@ -69,10 +69,10 @@ func TestMenu_Previous(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			m := &Menu{Options: tt.options, Active: tt.active}
+			m := &Menu{options: tt.options, active: tt.active}
 			m.Previous()
-			if m.Active != tt.want {
-				t.Errorf("Previous() = %d, want %d", m.Active, tt.want)
+			if m.active != tt.want {
+				t.Errorf("Previous() = %d, want %d", m.active, tt.want)
 			}
 		})
 	}
@@ -106,7 +106,7 @@ func TestMenu_Select(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			m := &Menu{Options: tt.options, Active: tt.active}
+			m := &Menu{options: tt.options, active: tt.active}
 			got := m.Select()
 			if got != tt.want {
 				t.Errorf("Select() = %v, want %v", got, tt.want)
@@ -116,26 +116,97 @@ func TestMenu_Select(t *testing.T) {
 }
 
 func TestMenu_NextPreviousSelect(t *testing.T) {
-	m := &Menu{Options: []MenuOption{{"A", 42}, {"B", 99}}, Active: 0}
+	m := &Menu{options: []MenuOption{{"A", 42}, {"B", 99}}, active: 0}
 
 	m.Next()
 	got := m.Select()
-	want := m.Options[1]
+	want := m.options[1]
 	if got != want {
 		t.Errorf("Select() = %v, want %v", got, want)
 	}
 
 	m.Previous()
 	got = m.Select()
-	want = m.Options[0]
+	want = m.options[0]
 	if got != want {
 		t.Errorf("Select() = %v, want %v", got, want)
 	}
 
 	m.Previous()
 	got = m.Select()
-	want = m.Options[1]
+	want = m.options[1]
 	if got != want {
 		t.Errorf("Select() = %v, want %v", got, want)
+	}
+}
+
+func TestMenu_GetActive(t *testing.T) {
+	tests := []struct {
+		name   string
+		active int
+		want   int
+	}{
+		{
+			name:   "zero active",
+			active: 0,
+			want:   0,
+		},
+		{
+			name:   "positive active",
+			active: 2,
+			want:   2,
+		},
+		{
+			name:   "negative active",
+			active: -1,
+			want:   -1,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := &Menu{active: tt.active}
+			got := m.GetActive()
+			if got != tt.want {
+				t.Errorf("GetActive() = %d, want %d", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMenu_GetOptionsLabels(t *testing.T) {
+	tests := []struct {
+		name    string
+		options []MenuOption
+		want    []string
+	}{
+		{
+			name:    "empty menu",
+			options: nil,
+			want:    []string{},
+		},
+		{
+			name:    "single option",
+			options: []MenuOption{{Label: "Start", Signal: 1}},
+			want:    []string{"Start"},
+		},
+		{
+			name:    "multiple options",
+			options: []MenuOption{{Label: "Start", Signal: 1}, {Label: "Exit", Signal: 2}},
+			want:    []string{"Start", "Exit"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := &Menu{options: tt.options}
+			got := m.GetOptionsLabels()
+			if len(got) != len(tt.want) {
+				t.Errorf("GetOptionsLabels() length = %d, want %d", len(got), len(tt.want))
+			}
+			for i := range got {
+				if got[i] != tt.want[i] {
+					t.Errorf("GetOptionsLabels()[%d] = %q, want %q", i, got[i], tt.want[i])
+				}
+			}
+		})
 	}
 }
