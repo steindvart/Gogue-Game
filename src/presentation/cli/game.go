@@ -1,15 +1,13 @@
 package cli
 
-type GameStateSignal int
-
-const (
-	StopStateSignal GameStateSignal = iota
+import (
+	"gogue/model"
 )
 
 type GameState interface {
 	Input()
 	Render()
-	Update() GameStateSignal
+	Update() model.Signal
 }
 
 type Game struct {
@@ -44,7 +42,7 @@ func (g *Game) Run() {
 		sign := state.Update()
 		state.Render()
 
-		if sign == StopStateSignal {
+		if sign == model.StopSignal {
 			g.PopState()
 		}
 	}

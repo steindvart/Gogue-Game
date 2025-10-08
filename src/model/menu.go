@@ -1,7 +1,5 @@
 package model
 
-type Signal int
-
 type MenuOption struct {
 	Label  string
 	Signal Signal

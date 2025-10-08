@@ -2,6 +2,8 @@ package cli
 
 import (
 	"testing"
+
+	"gogue/model"
 )
 
 type mockState struct {
@@ -12,9 +14,9 @@ type mockState struct {
 
 func (m *mockState) Input() { m.inputCalled = true }
 
-func (m *mockState) Update() GameStateSignal {
+func (m *mockState) Update() model.Signal {
 	m.updateCalled = true
-	return StopStateSignal
+	return model.StopSignal
 }
 
 func (m *mockState) Render() { m.renderCalled = true }
