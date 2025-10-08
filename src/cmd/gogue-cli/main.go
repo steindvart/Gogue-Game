@@ -14,6 +14,7 @@ const (
 )
 
 func main() {
+	// @todo - вынести инициализацию goncurses в отдельную функцию
 	stdscr, err := gc.Init()
 	if err != nil {
 		log.Fatal(err)
