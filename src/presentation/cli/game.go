@@ -39,7 +39,7 @@ func (g *Game) CurrentState() GameState {
 }
 
 func (g *Game) Run() {
-	actions := g.runReadActionsRoutine()
+	actions := g.runInputActionsRoutine()
 
 	for {
 		state := g.CurrentState()
@@ -63,7 +63,7 @@ func (g *Game) Run() {
 	}
 }
 
-func (g *Game) runReadActionsRoutine() <-chan view.ActionType {
+func (g *Game) runInputActionsRoutine() <-chan view.ActionType {
 	actions := make(chan view.ActionType, 1)
 	go func(ch chan<- view.ActionType) {
 		for {
