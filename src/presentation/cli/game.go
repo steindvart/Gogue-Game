@@ -2,17 +2,22 @@ package cli
 
 import (
 	"gogue/model"
+
+	view "gogue/view"
+	viewcli "gogue/view/cli"
+
+	gc "github.com/rthornton128/goncurses"
 )
 
 type GameState interface {
-	Input() model.Signal
+	Input(a view.ActionType) model.Signal
 	Update() model.Signal
 	Render()
 }
 
 type Game struct {
-	States  []GameState
-	Signals chan model.Signal
+	States []GameState
+	Window *gc.Window
 }
 
 func (g *Game) PushState(state GameState) {
@@ -34,13 +39,20 @@ func (g *Game) CurrentState() GameState {
 }
 
 func (g *Game) Run() {
+	actionsCh := make(chan view.ActionType, 1)
+	go func(ch chan<- view.ActionType) {
+		for {
+			ch <- viewcli.HandleInput(g.Window)
+		}
+	}(actionsCh)
+
 	for {
 		state := g.CurrentState()
 		if state == nil {
 			break
 		}
 
-		g.HandleSignal(state.Input())
+		g.HandleSignal(state.Input(<-actionsCh))
 		state = g.CurrentState()
 		if state == nil {
 			break

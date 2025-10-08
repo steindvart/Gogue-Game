@@ -25,9 +25,8 @@ func NewMainMenu(menu *gc.Window) *MainMenu {
 	}
 }
 
-func (m *MainMenu) Input() model.Signal {
-	action := viewcli.HandleInput(m.view.W)
-	switch action {
+func (m *MainMenu) Input(a view.ActionType) model.Signal {
+	switch a {
 	case view.MoveUp:
 		m.model.Previous()
 	case view.MoveDown:

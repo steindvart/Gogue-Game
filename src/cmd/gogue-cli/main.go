@@ -42,8 +42,8 @@ func main() {
 	y, x := 2, (mx/2)-(MENU_WIDTH/2)
 
 	win := stdscr.Sub(MENU_HEIGHT, MENU_WIDTH, y, x)
-	stdscr.Timeout(0)
-	win.Timeout(0)
+	stdscr.Timeout(10)
+	win.Timeout(10)
 
 	err = win.Keypad(true)
 	if err != nil {
@@ -52,6 +52,7 @@ func main() {
 
 	game := &cli.Game{
 		States: []cli.GameState{cli.NewMainMenu(win)},
+		Window: stdscr,
 	}
 
 	game.Run()

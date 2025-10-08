@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"gogue/model"
+	view "gogue/view"
 )
 
 type mockState struct {
@@ -12,14 +13,14 @@ type mockState struct {
 	renderCalled bool
 }
 
-func (m *mockState) Input() model.Signal {
+func (m *mockState) Input(view.ActionType) model.Signal {
 	m.inputCalled = true
 	return model.NoSignal
 }
 
 func (m *mockState) Update() model.Signal {
 	m.updateCalled = true
-	return model.StopSignal
+	return model.NoSignal
 }
 
 func (m *mockState) Render() { m.renderCalled = true }
