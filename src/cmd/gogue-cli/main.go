@@ -51,7 +51,7 @@ func main() {
 	}
 
 	game := &cli.Game{
-		States: []cli.GameState{cli.NewMainMenuState(win)},
+		States: []cli.GameState{cli.NewMainMenu(win)},
 	}
 
 	game.Run()

@@ -13,7 +13,7 @@ type MainMenu struct {
 	view  viewcli.MainMenu
 }
 
-func NewMainMenuState(menu *gc.Window) *MainMenu {
+func NewMainMenu(menu *gc.Window) *MainMenu {
 	return &MainMenu{
 		model: *model.NewMenu([]model.MenuOption{
 			{Label: "New Game", Signal: model.Signal(model.NewGameSignal)},
@@ -25,8 +25,9 @@ func NewMainMenuState(menu *gc.Window) *MainMenu {
 	}
 }
 
-func (m *MainMenu) Input(a view.ActionType) model.Signal {
-	switch a {
+func (m *MainMenu) Input() model.Signal {
+	action := viewcli.HandleInput(m.view.W)
+	switch action {
 	case view.MoveUp:
 		m.model.Previous()
 	case view.MoveDown:
