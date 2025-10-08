@@ -2,7 +2,7 @@ package cli
 
 import (
 	"gogue/model"
-	view "gogue/view"
+	"gogue/view/action"
 	viewcli "gogue/view/cli"
 
 	gc "github.com/rthornton128/goncurses"
@@ -25,13 +25,13 @@ func NewMainMenu(menu *gc.Window) *MainMenu {
 	}
 }
 
-func (m *MainMenu) Input(a view.ActionType) model.Signal {
+func (m *MainMenu) Input(a action.Type) model.Signal {
 	switch a {
-	case view.MoveUp:
+	case action.MoveUp:
 		m.model.Previous()
-	case view.MoveDown:
+	case action.MoveDown:
 		m.model.Next()
-	case view.Select:
+	case action.Select:
 		return m.model.Select().Signal
 	}
 

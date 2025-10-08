@@ -1,43 +1,43 @@
 package cli
 
 import (
-	"gogue/view"
+	"gogue/view/action"
 	"strings"
 
 	gc "github.com/rthornton128/goncurses"
 )
 
-func Action(k gc.Key) view.ActionType {
+func Action(k gc.Key) action.Type {
 	switch k {
 	case gc.KEY_UP:
-		return view.MoveUp
+		return action.MoveUp
 	case gc.KEY_DOWN:
-		return view.MoveDown
+		return action.MoveDown
 	case gc.KEY_LEFT:
-		return view.MoveLeft
+		return action.MoveLeft
 	case gc.KEY_RIGHT:
-		return view.MoveRight
+		return action.MoveRight
 	case gc.KEY_ENTER:
 		fallthrough
 	case gc.KEY_RETURN:
-		return view.Select
+		return action.Select
 	}
 
 	switch strings.ToLower(string(rune(k))) {
 	case "w":
-		return view.MoveUp
+		return action.MoveUp
 	case "s":
-		return view.MoveDown
+		return action.MoveDown
 	case "a":
-		return view.MoveLeft
+		return action.MoveLeft
 	case "d":
-		return view.MoveRight
+		return action.MoveRight
 	case "e":
-		return view.Select
+		return action.Select
 	}
-	return view.NoAction
+	return action.NoAction
 }
 
-func HandleInput(w *gc.Window) view.ActionType {
+func HandleInput(w *gc.Window) action.Type {
 	return Action(gc.Key(w.GetChar()))
 }

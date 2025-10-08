@@ -1,7 +1,7 @@
 package cli
 
 import (
-	"gogue/view"
+	"gogue/view/action"
 	"testing"
 
 	gc "github.com/rthornton128/goncurses"
@@ -11,24 +11,24 @@ func TestAction(t *testing.T) {
 	tests := []struct {
 		name string
 		key  gc.Key
-		want view.ActionType
+		want action.Type
 	}{
-		{"KEY_UP", gc.KEY_UP, view.MoveUp},
-		{"KEY_DOWN", gc.KEY_DOWN, view.MoveDown},
-		{"KEY_LEFT", gc.KEY_LEFT, view.MoveLeft},
-		{"KEY_RIGHT", gc.KEY_RIGHT, view.MoveRight},
-		{"KEY_ENTER", gc.KEY_ENTER, view.Select},
-		{"KEY_RETURN", gc.KEY_RETURN, view.Select},
+		{"KEY_UP", gc.KEY_UP, action.MoveUp},
+		{"KEY_DOWN", gc.KEY_DOWN, action.MoveDown},
+		{"KEY_LEFT", gc.KEY_LEFT, action.MoveLeft},
+		{"KEY_RIGHT", gc.KEY_RIGHT, action.MoveRight},
+		{"KEY_ENTER", gc.KEY_ENTER, action.Select},
+		{"KEY_RETURN", gc.KEY_RETURN, action.Select},
 		// буквы
-		{"w", gc.Key('w'), view.MoveUp},
-		{"W", gc.Key('W'), view.MoveUp},
-		{"s", gc.Key('s'), view.MoveDown},
-		{"a", gc.Key('a'), view.MoveLeft},
-		{"d", gc.Key('d'), view.MoveRight},
-		{"e", gc.Key('e'), view.Select},
+		{"w", gc.Key('w'), action.MoveUp},
+		{"W", gc.Key('W'), action.MoveUp},
+		{"s", gc.Key('s'), action.MoveDown},
+		{"a", gc.Key('a'), action.MoveLeft},
+		{"d", gc.Key('d'), action.MoveRight},
+		{"e", gc.Key('e'), action.Select},
 		// невалидные
-		{"no action", gc.Key('x'), view.NoAction},
-		{"empty", gc.Key(0), view.NoAction},
+		{"no action", gc.Key('x'), action.NoAction},
+		{"empty", gc.Key(0), action.NoAction},
 	}
 
 	for _, tt := range tests {

@@ -3,14 +3,14 @@ package cli
 import (
 	"gogue/model"
 
-	view "gogue/view"
+	"gogue/view/action"
 	viewcli "gogue/view/cli"
 
 	gc "github.com/rthornton128/goncurses"
 )
 
 type GameState interface {
-	Input(a view.ActionType) model.Signal
+	Input(a action.Type) model.Signal
 	Update() model.Signal
 	Render()
 }
@@ -63,9 +63,9 @@ func (g *Game) Run() {
 	}
 }
 
-func (g *Game) runInputActionsRoutine() <-chan view.ActionType {
-	actions := make(chan view.ActionType, 1)
-	go func(ch chan<- view.ActionType) {
+func (g *Game) runInputActionsRoutine() <-chan action.Type {
+	actions := make(chan action.Type, 1)
+	go func(ch chan<- action.Type) {
 		for {
 			ch <- viewcli.HandleInput(g.Window)
 		}
