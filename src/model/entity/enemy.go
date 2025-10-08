@@ -7,7 +7,7 @@ const (
 	EnemyTypeVampire
 	EnemyTypeGhost
 	EnemyTypeOgre
-	EnemyTypeSnake
+	EnemyTypeSnakeMage
 )
 
 type Direction uint
@@ -24,10 +24,138 @@ const (
 	DirectionStop
 )
 
+type AttributeRate uint
+
+const (
+	AttributeRateLow      AttributeRate = 25
+	AttributeRateAverage  AttributeRate = 50
+	AttributeRateHigh     AttributeRate = 75
+	AttributeRateVeryHigh AttributeRate = 100
+)
+
+type HostilityRadius uint
+
+const (
+	HostilityRadiusLow     HostilityRadius = 2
+	HostilityRadiusAverage HostilityRadius = 4
+	HostilityRadiusHigh    HostilityRadius = 6
+)
+
 type Enemy struct {
-	BaseCharacter Character
-	Type          EnemyType
-	Hostility     uint
-	IsChasing     bool
-	Direction     Direction
+	Character       Character
+	Type            EnemyType
+	HostilityRadius HostilityRadius
+	IsChasing       bool
+	Direction       Direction
+}
+
+type Zombie struct {
+	Enemy Enemy
+}
+
+type Vampire struct {
+	Enemy            Enemy
+	AbsoluteEvasions uint
+}
+
+type Ghost struct {
+	Enemy     Enemy
+	IsVisible bool
+}
+
+type Ogre struct {
+	Enemy     Enemy
+	IsResting bool
+}
+
+type SnakeMage struct {
+	Enemy Enemy
+}
+
+func NewZombie(box Box) *Zombie {
+	return &Zombie{
+		Enemy: Enemy{
+			Character: Character{
+				Shape:     box,
+				Agility:   uint(AttributeRateLow),
+				Strength:  uint(AttributeRateAverage),
+				Health:    float64(AttributeRateHigh),
+				MaxHealth: float64(AttributeRateHigh),
+			},
+			Type:            EnemyTypeZombie,
+			HostilityRadius: HostilityRadiusAverage,
+			Direction:       DirectionStop,
+		},
+	}
+}
+
+func NewVampire(box Box) *Vampire {
+	return &Vampire{
+		Enemy: Enemy{
+			Character: Character{
+				Shape:     box,
+				Agility:   uint(AttributeRateHigh),
+				Strength:  uint(AttributeRateAverage),
+				Health:    float64(AttributeRateHigh),
+				MaxHealth: float64(AttributeRateHigh),
+			},
+			Type:            EnemyTypeVampire,
+			HostilityRadius: HostilityRadiusHigh,
+			Direction:       DirectionStop,
+		},
+		AbsoluteEvasions: 0,
+	}
+}
+
+func NewGhost(box Box) *Ghost {
+	return &Ghost{
+		Enemy: Enemy{
+			Character: Character{
+				Shape:     box,
+				Agility:   uint(AttributeRateHigh),
+				Strength:  uint(AttributeRateLow),
+				Health:    float64(AttributeRateLow),
+				MaxHealth: float64(AttributeRateLow),
+			},
+			Type:            EnemyTypeGhost,
+			HostilityRadius: HostilityRadiusLow,
+			Direction:       DirectionStop,
+		},
+		IsVisible: true,
+	}
+}
+
+func NewOgre(box Box) *Ogre {
+	return &Ogre{
+		Enemy: Enemy{
+			Character: Character{
+				Shape:     box,
+				Agility:   uint(AttributeRateLow),
+				Strength:  uint(AttributeRateVeryHigh),
+				Health:    float64(AttributeRateVeryHigh),
+				MaxHealth: float64(AttributeRateVeryHigh),
+			},
+			Type:            EnemyTypeOgre,
+			HostilityRadius: HostilityRadiusAverage,
+			Direction:       DirectionStop,
+		},
+		IsResting: false,
+	}
+}
+
+func NewSnakeMage(box Box) *SnakeMage {
+	return &SnakeMage{
+		Enemy: Enemy{
+			Character: Character{
+				Shape:     box,
+				Agility:   uint(AttributeRateVeryHigh),
+				Strength:  uint(AttributeRateAverage),
+				Health:    float64(AttributeRateHigh),
+				MaxHealth: float64(AttributeRateHigh),
+			},
+			Type:            EnemyTypeSnakeMage,
+			HostilityRadius: HostilityRadiusHigh,
+			Direction:       DirectionStop,
+		},
+	}
 }
