@@ -18,6 +18,7 @@ func TestAction(t *testing.T) {
 		{"KEY_LEFT", gc.KEY_LEFT, view.MoveLeft},
 		{"KEY_RIGHT", gc.KEY_RIGHT, view.MoveRight},
 		{"KEY_ENTER", gc.KEY_ENTER, view.Select},
+		{"KEY_RETURN", gc.KEY_RETURN, view.Select},
 		// буквы
 		{"w", gc.Key('w'), view.MoveUp},
 		{"W", gc.Key('W'), view.MoveUp},
