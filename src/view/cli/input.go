@@ -18,6 +18,7 @@ func Action(k gc.Key) view.ActionType {
 	case gc.KEY_RIGHT:
 		return view.MoveRight
 	case gc.KEY_ENTER:
+	case gc.KEY_RETURN:
 		return view.Select
 	}
 
