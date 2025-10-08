@@ -5,13 +5,14 @@ import (
 )
 
 type GameState interface {
-	Input()
-	Render()
+	Input() model.Signal
 	Update() model.Signal
+	Render()
 }
 
 type Game struct {
-	States []GameState
+	States  []GameState
+	Signals chan model.Signal
 }
 
 func (g *Game) PushState(state GameState) {
@@ -38,12 +39,32 @@ func (g *Game) Run() {
 		if state == nil {
 			break
 		}
-		state.Input()
-		sign := state.Update()
-		state.Render()
 
-		if sign == model.StopSignal {
-			g.PopState()
+		g.HandleSignal(state.Input())
+		state = g.CurrentState()
+		if state == nil {
+			break
 		}
+
+		g.HandleSignal(state.Update())
+		state = g.CurrentState()
+		if state == nil {
+			break
+		}
+
+		state.Render()
+	}
+}
+
+func (g *Game) HandleSignal(s model.Signal) {
+	switch s {
+	case model.StopSignal:
+		g.PopState()
+	case model.NewGameSignal:
+		// @todo push new game state
+	case model.LoadGameSignal:
+		// @todo push load game state
+	case model.ShowScoreboardSignal:
+		// @todo push scoreboard state
 	}
 }

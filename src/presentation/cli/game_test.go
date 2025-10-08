@@ -12,7 +12,10 @@ type mockState struct {
 	renderCalled bool
 }
 
-func (m *mockState) Input() { m.inputCalled = true }
+func (m *mockState) Input() model.Signal {
+	m.inputCalled = true
+	return model.NoSignal
+}
 
 func (m *mockState) Update() model.Signal {
 	m.updateCalled = true
