@@ -35,3 +35,7 @@ func Action(k gc.Key) view.ActionType {
 	}
 	return view.NoAction
 }
+
+func HandleInput(w *gc.Window) view.ActionType {
+	return Action(gc.Key(w.GetChar()))
+}
