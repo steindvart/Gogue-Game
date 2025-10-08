@@ -4,6 +4,7 @@ import (
 	"gogue/model"
 	"gogue/view/action"
 	viewcli "gogue/view/cli"
+	"log"
 
 	gc "github.com/rthornton128/goncurses"
 )
@@ -43,5 +44,8 @@ func (m *MainMenu) Update() model.Signal {
 }
 
 func (m *MainMenu) Render() {
-	m.view.Render(m.model.GetOptionsLabels(), m.model.GetActive())
+	err := m.view.Render(m.model.GetOptionsLabels(), m.model.GetActive())
+	if err != nil {
+		log.Println("Error rendering main menu:", err)
+	}
 }
