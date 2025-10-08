@@ -26,8 +26,6 @@ func NewMainMenuState(menu *gc.Window) *MainMenuState {
 }
 
 func (m *MainMenuState) Input() model.Signal {
-	// m.view.W.Timeout(0)
-
 	action := viewcli.HandleInput(m.view.W)
 	switch action {
 	case view.MoveUp:
