@@ -8,13 +8,13 @@ import (
 	gc "github.com/rthornton128/goncurses"
 )
 
-type MainMenuState struct {
+type MainMenu struct {
 	model model.Menu
 	view  viewcli.MainMenu
 }
 
-func NewMainMenuState(menu *gc.Window) *MainMenuState {
-	return &MainMenuState{
+func NewMainMenuState(menu *gc.Window) *MainMenu {
+	return &MainMenu{
 		model: *model.NewMenu([]model.MenuOption{
 			{Label: "New Game", Signal: model.Signal(model.NewGameSignal)},
 			{Label: "Load Game", Signal: model.Signal(model.LoadGameSignal)},
@@ -25,9 +25,8 @@ func NewMainMenuState(menu *gc.Window) *MainMenuState {
 	}
 }
 
-func (m *MainMenuState) Input() model.Signal {
-	action := viewcli.HandleInput(m.view.W)
-	switch action {
+func (m *MainMenu) Input(a view.ActionType) model.Signal {
+	switch a {
 	case view.MoveUp:
 		m.model.Previous()
 	case view.MoveDown:
@@ -39,14 +38,10 @@ func (m *MainMenuState) Input() model.Signal {
 	return model.NoSignal
 }
 
-func (m *MainMenuState) Update() model.Signal {
-	if gc.Key(m.view.W.GetChar()) == 'q' {
-		return model.StopSignal
-	}
-
+func (m *MainMenu) Update() model.Signal {
 	return model.NoSignal
 }
 
-func (m *MainMenuState) Render() {
+func (m *MainMenu) Render() {
 	m.view.Render(m.model.GetOptionsLabels(), m.model.GetActive())
 }
