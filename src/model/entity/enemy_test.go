@@ -17,15 +17,14 @@ func TestNewZombie(t *testing.T) {
 			want: &Zombie{
 				Enemy: Enemy{
 					Character: Character{
-						Shape:    Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 2}},
-						Agility:  uint(AttributeRateLow),
-						Strength: uint(AttributeRateAverage),
-						Health:   float64(AttributeRateHigh),
-						// @todo - поправить когда будет корректное прокидывание макс здоровья
-						// MaxHealth: float64(AttributeRateHigh),
+						Shape:     Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 2}},
+						Agility:   uint(AttributeRateLow),
+						Strength:  uint(AttributeRateAverage),
+						Health:    float64(AttributeRateHigh),
+						MaxHealth: float64(AttributeRateHigh),
 					},
 					Type:            EnemyTypeZombie,
-					HostilityRadius: 4,
+					HostilityRadius: HostilityRadiusAverage,
 					IsChasing:       false,
 					Direction:       DirectionStop,
 				},
@@ -43,323 +42,152 @@ func TestNewZombie(t *testing.T) {
 	}
 }
 
-func TestVampireConstructor(t *testing.T) {
+func TestNewVampire(t *testing.T) {
 	tests := []struct {
-		name                string
-		box                 Box
-		wantBox             Box
-		wantAgility         uint
-		wantStrength        uint
-		wantHealth          float64
-		wantMaxHealth       float64
-		wantType            uint
-		wantHostilityRadius uint
-		wantIsChasing       bool
-		wantDiretion        uint
-		wantHadFirstDamage  bool
+		name string
+		box  Box
+		want *Vampire
 	}{
 		{
-			name:                "vampire constructor",
-			box:                 Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 2}},
-			wantBox:             Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 2}},
-			wantAgility:         75,
-			wantStrength:        50,
-			wantHealth:          75.0,
-			wantMaxHealth:       0.0,
-			wantType:            1,
-			wantHostilityRadius: 6,
-			wantIsChasing:       false,
-			wantDiretion:        8,
-			wantHadFirstDamage:  false,
+			name: "vampire constructor",
+			box:  Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 2}},
+			want: &Vampire{
+				Enemy: Enemy{
+					Character: Character{
+						Shape:     Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 2}},
+						Agility:   uint(AttributeRateHigh),
+						Strength:  uint(AttributeRateAverage),
+						Health:    float64(AttributeRateHigh),
+						MaxHealth: float64(AttributeRateHigh),
+					},
+					Type:            EnemyTypeVampire,
+					HostilityRadius: HostilityRadiusHigh,
+					IsChasing:       false,
+					Direction:       DirectionStop,
+				},
+				AbsoluteEvasions: 0,
+			},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			z := NewVampire(tt.box)
-
-			if z == nil {
-				t.Fatalf("NewVampire(): want valid pointer, got %v", z)
-			}
-
-			if z.Enemy.Character.Shape != tt.wantBox {
-				t.Errorf("NewVampire(): Shape got %v, want %v", z.Enemy.Character.Shape, tt.wantBox)
-			}
-
-			if z.Enemy.Character.Agility != tt.wantAgility {
-				t.Errorf("NewVampire(): Agility got %v, want %v", z.Enemy.Character.Agility, tt.wantAgility)
-			}
-
-			if z.Enemy.Character.Strength != tt.wantStrength {
-				t.Errorf("NewVampire(): Strength got %v, want %v", z.Enemy.Character.Strength, tt.wantStrength)
-			}
-
-			if z.Enemy.Character.Health != tt.wantHealth {
-				t.Errorf("NewVampire(): Health got %v, want %v", z.Enemy.Character.Health, tt.wantHealth)
-			}
-
-			if z.Enemy.Character.MaxHealth != tt.wantMaxHealth {
-				t.Errorf("NewVampire(): MaxHealth got %v, want %v", z.Enemy.Character.MaxHealth, tt.wantMaxHealth)
-			}
-
-			if uint(z.Enemy.Type) != tt.wantType {
-				t.Errorf("NewVampire(): Type got %v, want %v", z.Enemy.Type, tt.wantType)
-			}
-
-			if uint(z.Enemy.HostilityRadius) != tt.wantHostilityRadius {
-				t.Errorf("NewVampire(): HostilityRadius got %v, want %v", z.Enemy.HostilityRadius, tt.wantHostilityRadius)
-			}
-
-			if z.Enemy.IsChasing != tt.wantIsChasing {
-				t.Errorf("NewVampire(): IsChasing got %v, want %v", z.Enemy.IsChasing, tt.wantDiretion)
-			}
-
-			if uint(z.Enemy.Direction) != tt.wantDiretion {
-				t.Errorf("NewVampire(): Direction got %v, want %v", z.Enemy.Direction, tt.wantDiretion)
-			}
-
-			if z.HadFirstDamage != tt.wantHadFirstDamage {
-				t.Errorf("NewVampire(): HadFirstDamage got %v, want %v", z.HadFirstDamage, tt.wantHadFirstDamage)
+			got := NewVampire(tt.box)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewVampire() = %#v, want %#v", got, tt.want)
 			}
 		})
 	}
 }
 
-func TestGhostConstructor(t *testing.T) {
+func TestNewGhost(t *testing.T) {
 	tests := []struct {
-		name                string
-		box                 Box
-		wantBox             Box
-		wantAgility         uint
-		wantStrength        uint
-		wantHealth          float64
-		wantMaxHealth       float64
-		wantType            uint
-		wantHostilityRadius uint
-		wantIsChasing       bool
-		wantDiretion        uint
-		wantIsVisible       bool
+		name string
+		box  Box
+		want *Ghost
 	}{
 		{
-			name:                "ghost constructor",
-			box:                 Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 2}},
-			wantBox:             Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 2}},
-			wantAgility:         75,
-			wantStrength:        25,
-			wantHealth:          25.0,
-			wantMaxHealth:       0.0,
-			wantType:            2,
-			wantHostilityRadius: 2,
-			wantIsChasing:       false,
-			wantDiretion:        8,
-			wantIsVisible:       true,
+			name: "ghost constructor",
+			box:  Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 2}},
+			want: &Ghost{
+				Enemy: Enemy{
+					Character: Character{
+						Shape:     Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 2}},
+						Agility:   uint(AttributeRateHigh),
+						Strength:  uint(AttributeRateLow),
+						Health:    float64(AttributeRateLow),
+						MaxHealth: float64(AttributeRateLow),
+					},
+					Type:            EnemyTypeGhost,
+					HostilityRadius: HostilityRadiusLow,
+					IsChasing:       false,
+					Direction:       DirectionStop,
+				},
+				IsVisible: true,
+			},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			z := NewGhost(tt.box)
-
-			if z == nil {
-				t.Fatalf("NewGhost(): want valid pointer, got %v", z)
-			}
-
-			if z.Enemy.Character.Shape != tt.wantBox {
-				t.Errorf("NewGhost(): Shape got %v, want %v", z.Enemy.Character.Shape, tt.wantBox)
-			}
-
-			if z.Enemy.Character.Agility != tt.wantAgility {
-				t.Errorf("NewGhost(): Agility got %v, want %v", z.Enemy.Character.Agility, tt.wantAgility)
-			}
-
-			if z.Enemy.Character.Strength != tt.wantStrength {
-				t.Errorf("NewGhost(): Strength got %v, want %v", z.Enemy.Character.Strength, tt.wantStrength)
-			}
-
-			if z.Enemy.Character.Health != tt.wantHealth {
-				t.Errorf("NewGhost(): Health got %v, want %v", z.Enemy.Character.Health, tt.wantHealth)
-			}
-
-			if z.Enemy.Character.MaxHealth != tt.wantMaxHealth {
-				t.Errorf("NewGhost(): MaxHealth got %v, want %v", z.Enemy.Character.MaxHealth, tt.wantMaxHealth)
-			}
-
-			if uint(z.Enemy.Type) != tt.wantType {
-				t.Errorf("NewGhost(): Type got %v, want %v", z.Enemy.Type, tt.wantType)
-			}
-
-			if uint(z.Enemy.HostilityRadius) != tt.wantHostilityRadius {
-				t.Errorf("NewGhost(): HostilityRadius got %v, want %v", z.Enemy.HostilityRadius, tt.wantHostilityRadius)
-			}
-
-			if z.Enemy.IsChasing != tt.wantIsChasing {
-				t.Errorf("NewGhost(): IsChasing got %v, want %v", z.Enemy.IsChasing, tt.wantDiretion)
-			}
-
-			if uint(z.Enemy.Direction) != tt.wantDiretion {
-				t.Errorf("NewGhost(): Direction got %v, want %v", z.Enemy.Direction, tt.wantDiretion)
-			}
-
-			if z.IsVisible != tt.wantIsVisible {
-				t.Errorf("NewGhost(): HadFirstDamage got %v, want %v", z.IsVisible, tt.wantIsVisible)
+			got := NewGhost(tt.box)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewGhost() = %#v, want %#v", got, tt.want)
 			}
 		})
 	}
 }
 
-func TestOgreConstructor(t *testing.T) {
+func TestNewOgre(t *testing.T) {
 	tests := []struct {
-		name                string
-		box                 Box
-		wantBox             Box
-		wantAgility         uint
-		wantStrength        uint
-		wantHealth          float64
-		wantMaxHealth       float64
-		wantType            uint
-		wantHostilityRadius uint
-		wantIsChasing       bool
-		wantDiretion        uint
-		wantIsResting       bool
+		name string
+		box  Box
+		want *Ogre
 	}{
 		{
-			name:                "ogre constructor",
-			box:                 Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 2}},
-			wantBox:             Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 2}},
-			wantAgility:         25,
-			wantStrength:        100,
-			wantHealth:          100.0,
-			wantMaxHealth:       0.0,
-			wantType:            3,
-			wantHostilityRadius: 4,
-			wantIsChasing:       false,
-			wantDiretion:        8,
-			wantIsResting:       false,
+			name: "ogre constructor",
+			box:  Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 2}},
+			want: &Ogre{
+				Enemy: Enemy{
+					Character: Character{
+						Shape:     Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 2}},
+						Agility:   uint(AttributeRateLow),
+						Strength:  uint(AttributeRateVeryHigh),
+						Health:    float64(AttributeRateVeryHigh),
+						MaxHealth: float64(AttributeRateVeryHigh),
+					},
+					Type:            EnemyTypeOgre,
+					HostilityRadius: HostilityRadiusAverage,
+					IsChasing:       false,
+					Direction:       DirectionStop,
+				},
+				IsResting: false,
+			},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			z := NewOgre(tt.box)
-
-			if z == nil {
-				t.Fatalf("NewOgre(): want valid pointer, got %v", z)
-			}
-
-			if z.Enemy.Character.Shape != tt.wantBox {
-				t.Errorf("NewOgre(): Shape got %v, want %v", z.Enemy.Character.Shape, tt.wantBox)
-			}
-
-			if z.Enemy.Character.Agility != tt.wantAgility {
-				t.Errorf("NewOgre(): Agility got %v, want %v", z.Enemy.Character.Agility, tt.wantAgility)
-			}
-
-			if z.Enemy.Character.Strength != tt.wantStrength {
-				t.Errorf("NewOgre(): Strength got %v, want %v", z.Enemy.Character.Strength, tt.wantStrength)
-			}
-
-			if z.Enemy.Character.Health != tt.wantHealth {
-				t.Errorf("NewOgre(): Health got %v, want %v", z.Enemy.Character.Health, tt.wantHealth)
-			}
-
-			if z.Enemy.Character.MaxHealth != tt.wantMaxHealth {
-				t.Errorf("NewOgre(): MaxHealth got %v, want %v", z.Enemy.Character.MaxHealth, tt.wantMaxHealth)
-			}
-
-			if uint(z.Enemy.Type) != tt.wantType {
-				t.Errorf("NewOgre(): Type got %v, want %v", z.Enemy.Type, tt.wantType)
-			}
-
-			if uint(z.Enemy.HostilityRadius) != tt.wantHostilityRadius {
-				t.Errorf("NewOgre(): HostilityRadius got %v, want %v", z.Enemy.HostilityRadius, tt.wantHostilityRadius)
-			}
-
-			if z.Enemy.IsChasing != tt.wantIsChasing {
-				t.Errorf("NewOgre(): IsChasing got %v, want %v", z.Enemy.IsChasing, tt.wantDiretion)
-			}
-
-			if uint(z.Enemy.Direction) != tt.wantDiretion {
-				t.Errorf("NewOgre(): Direction got %v, want %v", z.Enemy.Direction, tt.wantDiretion)
-			}
-
-			if z.IsResting != tt.wantIsResting {
-				t.Errorf("NewOgre(): HadFirstDamage got %v, want %v", z.IsResting, tt.wantIsResting)
+			got := NewOgre(tt.box)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewOgre() = %#v, want %#v", got, tt.want)
 			}
 		})
 	}
 }
 
-func TestSnakeMageConstructor(t *testing.T) {
+func TestNewSnakeMage(t *testing.T) {
 	tests := []struct {
-		name                string
-		box                 Box
-		wantBox             Box
-		wantAgility         uint
-		wantStrength        uint
-		wantHealth          float64
-		wantMaxHealth       float64
-		wantType            uint
-		wantHostilityRadius uint
-		wantIsChasing       bool
-		wantDiretion        uint
+		name string
+		box  Box
+		want *SnakeMage
 	}{
 		{
-			name:                "snake mage constructor",
-			box:                 Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 2}},
-			wantBox:             Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 2}},
-			wantAgility:         100,
-			wantStrength:        50,
-			wantHealth:          75.0,
-			wantMaxHealth:       0.0,
-			wantType:            4,
-			wantHostilityRadius: 6,
-			wantIsChasing:       false,
-			wantDiretion:        8,
+			name: "snake mage constructor",
+			box:  Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 2}},
+			want: &SnakeMage{
+				Enemy: Enemy{
+					Character: Character{
+						Shape:     Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 2}},
+						Agility:   uint(AttributeRateVeryHigh),
+						Strength:  uint(AttributeRateAverage),
+						Health:    float64(AttributeRateHigh),
+						MaxHealth: float64(AttributeRateHigh),
+					},
+					Type:            EnemyTypeSnakeMage,
+					HostilityRadius: HostilityRadiusHigh,
+					IsChasing:       false,
+					Direction:       DirectionStop,
+				},
+			},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			z := NewSnakeMage(tt.box)
-
-			if z == nil {
-				t.Fatalf("NewSnakeMage(): want valid pointer, got %v", z)
-			}
-
-			if z.Enemy.Character.Shape != tt.wantBox {
-				t.Errorf("NewSnakeMage(): Shape got %v, want %v", z.Enemy.Character.Shape, tt.wantBox)
-			}
-
-			if z.Enemy.Character.Agility != tt.wantAgility {
-				t.Errorf("NewSnakeMage(): Agility got %v, want %v", z.Enemy.Character.Agility, tt.wantAgility)
-			}
-
-			if z.Enemy.Character.Strength != tt.wantStrength {
-				t.Errorf("NewSnakeMage(): Strength got %v, want %v", z.Enemy.Character.Strength, tt.wantStrength)
-			}
-
-			if z.Enemy.Character.Health != tt.wantHealth {
-				t.Errorf("NewSnakeMage(): Health got %v, want %v", z.Enemy.Character.Health, tt.wantHealth)
-			}
-
-			if z.Enemy.Character.MaxHealth != tt.wantMaxHealth {
-				t.Errorf("NewSnakeMage(): MaxHealth got %v, want %v", z.Enemy.Character.MaxHealth, tt.wantMaxHealth)
-			}
-
-			if uint(z.Enemy.Type) != tt.wantType {
-				t.Errorf("NewSnakeMage(): Type got %v, want %v", z.Enemy.Type, tt.wantType)
-			}
-
-			if uint(z.Enemy.HostilityRadius) != tt.wantHostilityRadius {
-				t.Errorf("NewSnakeMage(): HostilityRadius got %v, want %v", z.Enemy.HostilityRadius, tt.wantHostilityRadius)
-			}
-
-			if z.Enemy.IsChasing != tt.wantIsChasing {
-				t.Errorf("NewSnakeMage(): IsChasing got %v, want %v", z.Enemy.IsChasing, tt.wantDiretion)
-			}
-
-			if uint(z.Enemy.Direction) != tt.wantDiretion {
-				t.Errorf("NewSnakeMage(): Direction got %v, want %v", z.Enemy.Direction, tt.wantDiretion)
+			got := NewSnakeMage(tt.box)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewSnakeMage() = %#v, want %#v", got, tt.want)
 			}
 		})
 	}
