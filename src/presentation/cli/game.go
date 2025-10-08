@@ -39,12 +39,7 @@ func (g *Game) CurrentState() GameState {
 }
 
 func (g *Game) Run() {
-	actionsCh := make(chan view.ActionType, 1)
-	go func(ch chan<- view.ActionType) {
-		for {
-			ch <- viewcli.HandleInput(g.Window)
-		}
-	}(actionsCh)
+	actions := g.runReadActionsRoutine()
 
 	for {
 		state := g.CurrentState()
@@ -52,13 +47,13 @@ func (g *Game) Run() {
 			break
 		}
 
-		g.HandleSignal(state.Input(<-actionsCh))
+		g.handleSignal(state.Input(<-actions))
 		state = g.CurrentState()
 		if state == nil {
 			break
 		}
 
-		g.HandleSignal(state.Update())
+		g.handleSignal(state.Update())
 		state = g.CurrentState()
 		if state == nil {
 			break
@@ -68,7 +63,18 @@ func (g *Game) Run() {
 	}
 }
 
-func (g *Game) HandleSignal(s model.Signal) {
+func (g *Game) runReadActionsRoutine() <-chan view.ActionType {
+	actions := make(chan view.ActionType, 1)
+	go func(ch chan<- view.ActionType) {
+		for {
+			ch <- viewcli.HandleInput(g.Window)
+		}
+	}(actions)
+
+	return actions
+}
+
+func (g *Game) handleSignal(s model.Signal) {
 	switch s {
 	case model.StopSignal:
 		g.PopState()
