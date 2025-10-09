@@ -31,6 +31,12 @@ func initMainWindowGoncurses() (*gc.Window, error) {
 
 	gc.Raw(true)
 	gc.Echo(false)
+	if gc.HasColors() {
+		err = gc.StartColor()
+		if err != nil {
+			return nil, err
+		}
+	}
 
 	err = gc.Cursor(0)
 	if err != nil {
