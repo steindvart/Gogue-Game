@@ -2,6 +2,7 @@ package cli
 
 import (
 	"gogue/model"
+	"gogue/model/signal"
 	"gogue/view/action"
 	viewcli "gogue/view/cli"
 	"log"
@@ -10,23 +11,29 @@ import (
 )
 
 type MainMenu struct {
-	model model.Menu
-	view  viewcli.MainMenu
+	model *model.Menu
+	view  *viewcli.MainMenu
 }
 
-func NewMainMenu(menu *gc.Window) *MainMenu {
+func NewMainMenu(parent *gc.Window) *MainMenu {
+	menu, err := viewcli.NewMainMenu(parent)
+	if err != nil {
+		log.Println("Error creating main menu view:", err)
+		return nil
+	}
+
 	return &MainMenu{
-		model: *model.NewMenu([]model.MenuOption{
-			{Label: "New Game", Signal: model.Signal(model.NewGameSignal)},
-			{Label: "Load Game", Signal: model.Signal(model.LoadGameSignal)},
-			{Label: "Scoreboard", Signal: model.Signal(model.ShowScoreboardSignal)},
-			{Label: "Exit", Signal: model.Signal(model.StopSignal)},
+		model: model.NewMenu([]model.MenuOption{
+			{Label: "New Game", Signal: signal.NewGame},
+			{Label: "Load Game", Signal: signal.LoadGame},
+			{Label: "Scoreboard", Signal: signal.ShowScoreboard},
+			{Label: "Exit", Signal: signal.Stop},
 		}),
-		view: viewcli.MainMenu{W: menu},
+		view: menu,
 	}
 }
 
-func (m *MainMenu) Input(a action.Type) model.Signal {
+func (m *MainMenu) Input(a action.Type) signal.Type {
 	switch a {
 	case action.MoveUp:
 		m.model.Previous()
@@ -36,11 +43,11 @@ func (m *MainMenu) Input(a action.Type) model.Signal {
 		return m.model.Select().Signal
 	}
 
-	return model.NoSignal
+	return signal.NoSignal
 }
 
-func (m *MainMenu) Update() model.Signal {
-	return model.NoSignal
+func (m *MainMenu) Update() signal.Type {
+	return signal.NoSignal
 }
 
 func (m *MainMenu) Render() {

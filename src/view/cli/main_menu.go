@@ -7,6 +7,11 @@ import (
 	gc "github.com/rthornton128/goncurses"
 )
 
+const (
+	MENU_HEIGHT = 10
+	MENU_WIDTH  = 30
+)
+
 type MainMenu struct {
 	W *gc.Window
 }
@@ -16,6 +21,21 @@ var (
 	errMenuAttrOff = errors.New("cannot set menu attribute off")
 	errMenuBox     = errors.New("cannot draw menu box")
 )
+
+func NewMainMenu(parent *gc.Window) (*MainMenu, error) {
+	_, mx := parent.MaxYX()
+	y, x := 2, (mx/2)-(MENU_WIDTH/2)
+
+	win := parent.Sub(MENU_HEIGHT, MENU_WIDTH, y, x)
+	win.Timeout(0)
+
+	err := win.Keypad(true)
+	if err != nil {
+		return nil, err
+	}
+
+	return &MainMenu{W: win}, nil
+}
 
 func (m *MainMenu) Render(options []string, active int) error {
 	x, y := 2, 2
