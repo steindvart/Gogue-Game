@@ -24,7 +24,8 @@ var (
 
 func NewMainMenu(parent *gc.Window) (*MainMenu, error) {
 	_, mx := parent.MaxYX()
-	y, x := 2, (mx/2)-(MENU_WIDTH/2)
+	y := 2
+	x := (mx / 2) - (MENU_WIDTH / 2)
 
 	win := parent.Sub(MENU_HEIGHT, MENU_WIDTH, y, x)
 	win.Timeout(0)
@@ -38,11 +39,31 @@ func NewMainMenu(parent *gc.Window) (*MainMenu, error) {
 }
 
 func (m *MainMenu) Render(options []string, active int) error {
-	x, y := 2, 2
+	err := m.RenderBox()
+	if err != nil {
+		return err
+	}
+
+	err = m.RenderOptions(options, active)
+	if err != nil {
+		return err
+	}
+
+	m.W.Refresh()
+	return nil
+}
+
+func (m *MainMenu) RenderBox() error {
 	err := m.W.Box(0, 0)
 	if err != nil {
 		return fmt.Errorf("%w: %v", errMenuBox, err)
 	}
+
+	return nil
+}
+
+func (m *MainMenu) RenderOptions(options []string, active int) error {
+	x, y := 2, 2
 
 	for i, s := range options {
 		if i == active {
@@ -62,6 +83,5 @@ func (m *MainMenu) Render(options []string, active int) error {
 		}
 	}
 
-	m.W.Refresh()
 	return nil
 }
