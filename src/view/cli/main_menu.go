@@ -96,7 +96,10 @@ func (m *MainMenu) Render(options []string, active int) error {
 		return err
 	}
 
-	m.RenderDoor()
+	// @todo - пока убрал, т.к. кажется не совсем уместным, ломает минималистичный стиль
+	// Но если нравится - можем оставить. Включите, посмотрите, как с этим будет смотреться.
+	// Также можем раскрасить как-нибудь.
+	// m.RenderDoor()
 
 	m.window.Refresh()
 	return nil
