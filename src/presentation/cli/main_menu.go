@@ -10,19 +10,25 @@ import (
 )
 
 type MainMenu struct {
-	model model.Menu
-	view  viewcli.MainMenu
+	model *model.Menu
+	view  *viewcli.MainMenu
 }
 
-func NewMainMenu(menu *gc.Window) *MainMenu {
+func NewMainMenu(parent *gc.Window) *MainMenu {
+	menu, err := viewcli.NewMainMenu(parent)
+	if err != nil {
+		log.Println("Error creating main menu view:", err)
+		return nil
+	}
+
 	return &MainMenu{
-		model: *model.NewMenu([]model.MenuOption{
+		model: model.NewMenu([]model.MenuOption{
 			{Label: "New Game", Signal: model.Signal(model.NewGameSignal)},
 			{Label: "Load Game", Signal: model.Signal(model.LoadGameSignal)},
 			{Label: "Scoreboard", Signal: model.Signal(model.ShowScoreboardSignal)},
 			{Label: "Exit", Signal: model.Signal(model.StopSignal)},
 		}),
-		view: viewcli.MainMenu{W: menu},
+		view: menu,
 	}
 }
 
