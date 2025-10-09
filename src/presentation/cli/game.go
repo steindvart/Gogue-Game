@@ -1,7 +1,7 @@
 package cli
 
 import (
-	"gogue/model"
+	"gogue/model/signal"
 
 	"gogue/view/action"
 	viewcli "gogue/view/cli"
@@ -10,8 +10,8 @@ import (
 )
 
 type GameState interface {
-	Input(a action.Type) model.Signal
-	Update() model.Signal
+	Input(a action.Type) signal.Type
+	Update() signal.Type
 	Render()
 }
 
@@ -74,15 +74,15 @@ func (g *Game) runInputActionsRoutine() <-chan action.Type {
 	return actions
 }
 
-func (g *Game) handleSignal(s model.Signal) {
+func (g *Game) handleSignal(s signal.Type) {
 	switch s {
-	case model.StopSignal:
+	case signal.Stop:
 		g.PopState()
-	case model.NewGameSignal:
+	case signal.NewGame:
 		// @todo push new game state
-	case model.LoadGameSignal:
+	case signal.LoadGame:
 		// @todo push load game state
-	case model.ShowScoreboardSignal:
+	case signal.ShowScoreboard:
 		// @todo push scoreboard state
 	}
 }

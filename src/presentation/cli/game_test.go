@@ -3,7 +3,7 @@ package cli
 import (
 	"testing"
 
-	"gogue/model"
+	"gogue/model/signal"
 	"gogue/view/action"
 )
 
@@ -13,14 +13,14 @@ type mockState struct {
 	renderCalled bool
 }
 
-func (m *mockState) Input(action.Type) model.Signal {
+func (m *mockState) Input(action.Type) signal.Type {
 	m.inputCalled = true
-	return model.NoSignal
+	return signal.NoSignal
 }
 
-func (m *mockState) Update() model.Signal {
+func (m *mockState) Update() signal.Type {
 	m.updateCalled = true
-	return model.NoSignal
+	return signal.NoSignal
 }
 
 func (m *mockState) Render() { m.renderCalled = true }

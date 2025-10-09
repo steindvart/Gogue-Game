@@ -1,8 +1,12 @@
 package model
 
+import (
+	"gogue/model/signal"
+)
+
 type MenuOption struct {
 	Label  string
-	Signal Signal
+	Signal signal.Type
 }
 
 type Menu struct {
