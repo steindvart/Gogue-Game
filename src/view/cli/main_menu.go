@@ -13,7 +13,7 @@ const (
 )
 
 type MainMenu struct {
-	W *gc.Window
+	window *gc.Window
 }
 
 var (
@@ -35,7 +35,7 @@ func NewMainMenu(parent *gc.Window) (*MainMenu, error) {
 		return nil, err
 	}
 
-	return &MainMenu{W: win}, nil
+	return &MainMenu{window: win}, nil
 }
 
 func (m *MainMenu) Render(options []string, active int) error {
@@ -49,12 +49,12 @@ func (m *MainMenu) Render(options []string, active int) error {
 		return err
 	}
 
-	m.W.Refresh()
+	m.window.Refresh()
 	return nil
 }
 
 func (m *MainMenu) RenderBox() error {
-	err := m.W.Box(0, 0)
+	err := m.window.Box(0, 0)
 	if err != nil {
 		return fmt.Errorf("%w: %v", errMenuBox, err)
 	}
@@ -67,19 +67,19 @@ func (m *MainMenu) RenderOptions(options []string, active int) error {
 
 	for i, s := range options {
 		if i == active {
-			err := m.W.AttrOn(gc.A_REVERSE)
+			err := m.window.AttrOn(gc.A_REVERSE)
 			if err != nil {
 				return fmt.Errorf("%w: %v", errMenuAttrOn, err)
 			}
 
-			m.W.MovePrint(y+i, x, s)
+			m.window.MovePrint(y+i, x, s)
 
-			err = m.W.AttrOff(gc.A_REVERSE)
+			err = m.window.AttrOff(gc.A_REVERSE)
 			if err != nil {
 				return fmt.Errorf("%w: %v", errMenuAttrOff, err)
 			}
 		} else {
-			m.W.MovePrint(y+i, x, s)
+			m.window.MovePrint(y+i, x, s)
 		}
 	}
 
