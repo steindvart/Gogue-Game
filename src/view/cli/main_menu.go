@@ -9,11 +9,10 @@ import (
 )
 
 const (
-	MENU_HEIGHT = 30
+	MENU_HEIGHT = 35
 	MENU_WIDTH  = 70
 )
 
-// ASCII-art title
 var titleArt = []string{
 	"   _____                           _____                      ",
 	"  / ____|                         / ____|                     ",
@@ -23,6 +22,29 @@ var titleArt = []string{
 	"  \\_____|\\___/ \\__, |\\__,_|\\___|  \\_____|\\__,_|_| |_| |_|\\___|",
 	"                __/ |                                         ",
 	"               |___/                                          ",
+}
+
+var doorArt = []string{
+	" _____________________________________________",
+	"|.'',                                     ,''.|",
+	"|.'.'',                                 ,''.'.|",
+	"|.'.'.'',                             ,''.'.'.|",
+	"|.'.'.'.'',                         ,''.'.'.'.|",
+	"|.'.'.'.'.|                         |.'.'.'.'.|",
+	"|.'.'.'.'.|===;                 ;===|.'.'.'.'.|",
+	"|.'.'.'.'.|:::|',             ,'|:::|.'.'.'.'.|",
+	"|.'.'.'.'.|---|'.|, _______ ,|.'|---|.'.'.'.'.|",
+	"|.'.'.'.'.|:::|'.|'|???????|'|.'|:::|.'.'.'.'.|",
+	"|,',',',',|---|',|'|???????|'|,'|---|,',',',',|",
+	"|.'.'.'.'.|:::|'.|'|???????|'|.'|:::|.'.'.'.'.|",
+	"|.'.'.'.'.|---|','   /%%%\\   ','|---|.'.'.'.'.|",
+	"|.'.'.'.'.|===:'    /%%%%%\\    ':===|.'.'.'.'.|",
+	"|.'.'.'.'.|%%%%%%%%%%%%%%%%%%%%%%%%%|.'.'.'.'.|",
+	"|.'.'.'.','       /%%%%%%%%%\\       ','.'.'.'.|",
+	"|.'.'.','        /%%%%%%%%%%%\\        ','.'.'.|",
+	"|.'.','         /%%%%%%%%%%%%%\\         ','.'.|",
+	"|.','          /%%%%%%%%%%%%%%%\\          ','.|",
+	"|;____________/%%%%%%%%%%%%%%%%%\\____________;|",
 }
 
 type MainMenu struct {
@@ -67,11 +89,6 @@ func create256RainbowPairs() []int {
 }
 
 func (m *MainMenu) Render(options []string, active int) error {
-	// err := m.RenderBox()
-	// if err != nil {
-	// 	return err
-	// }
-
 	m.RenderTitle()
 
 	err := m.RenderOptions(options, active)
@@ -79,8 +96,23 @@ func (m *MainMenu) Render(options []string, active int) error {
 		return err
 	}
 
+	m.RenderDoor()
+
 	m.window.Refresh()
 	return nil
+}
+
+func (m *MainMenu) RenderDoor() {
+	maxY, maxX := m.window.MaxYX()
+	artHeight := len(doorArt)
+	artWidth := len(doorArt[0])
+
+	startY := maxY - artHeight - 1 // maxY - рисуем внизу окна
+	startX := (maxX - artWidth) / 2
+
+	for i, line := range doorArt {
+		m.window.MovePrint(startY+i, startX, line)
+	}
 }
 
 func (m *MainMenu) RenderBox() error {
