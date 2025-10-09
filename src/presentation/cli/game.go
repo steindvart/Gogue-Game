@@ -2,12 +2,15 @@ package cli
 
 import (
 	"gogue/model/signal"
+	"time"
 
 	"gogue/view/action"
 	viewcli "gogue/view/cli"
 
 	gc "github.com/rthornton128/goncurses"
 )
+
+const FPS_DEFAULT = 60
 
 type GameState interface {
 	Input(a action.Type) signal.Type
@@ -40,8 +43,12 @@ func (g *Game) CurrentState() GameState {
 
 func (g *Game) Run() {
 	actions := g.runInputActionsRoutine()
+	ticker := time.NewTicker(time.Second / FPS_DEFAULT)
+	defer ticker.Stop()
 
 	for {
+		<-ticker.C // ограничение FPS
+
 		state := g.CurrentState()
 		if state == nil {
 			break
