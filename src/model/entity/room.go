@@ -19,8 +19,8 @@ type Room struct {
 	Portal  *Box
 }
 
-func NewRoom(roomType RoomType, shape Box, portal *Box) Room {
-	return Room{
+func NewRoom(roomType RoomType, shape Box, portal *Box) *Room {
+	return &Room{
 		Shape:   shape,
 		Type:    roomType,
 		Foods:   []Food{},
