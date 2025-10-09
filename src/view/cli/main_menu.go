@@ -51,22 +51,19 @@ func NewMainMenu(parent *gc.Window) (*MainMenu, error) {
 
 	var colors []int
 	if gc.HasColors() {
-		colors = createRainbowPairs()
+		colors = create256RainbowPairs()
 	}
 
 	return &MainMenu{window: win, colors: colors}, nil
 }
 
-func createRainbowPairs() []int {
-	var colors = []int{
-		gc.C_RED, gc.C_YELLOW, gc.C_GREEN, gc.C_CYAN, gc.C_BLUE, gc.C_MAGENTA,
-	}
+func create256RainbowPairs() []int {
+	var rainbow256 = []int{196, 202, 208, 214, 220, 226, 190, 154, 118, 82, 46, 47, 48, 49, 51, 39, 27, 21, 57, 93, 129, 165, 201, 200}
 
-	for i, color := range colors {
+	for i, color := range rainbow256 {
 		gc.InitPair(int16(i+1), int16(color), gc.C_BLACK)
 	}
-
-	return colors
+	return rainbow256
 }
 
 func (m *MainMenu) Render(options []string, active int) error {
@@ -124,7 +121,7 @@ func (m *MainMenu) RenderOptions(options []string, active int) error {
 func (m *MainMenu) RenderTitle() {
 	if gc.HasColors() {
 		// Для плавности: используем текущее время как frame
-		frame := int(time.Now().UnixNano() / 75000000) // ~15 кадров в сек
+		frame := int(time.Now().UnixNano() / 85000000) // ~13 кадров в сек
 		drawGradientTitle(m.window, frame, m.colors)
 	} else {
 		drawRawTitle(m.window)
@@ -139,7 +136,8 @@ func drawGradientTitle(win *gc.Window, frame int, colors []int) {
 
 	for row, line := range titleArt {
 		for col, ch := range line {
-			colorIdx := (col + frame) % len(colors)
+			// Диагональное переливание: сдвиг также по row
+			colorIdx := (col + row + frame) % len(colors)
 			win.AttrOn(gc.ColorPair(int16(colorIdx + 1)))
 			win.MovePrint(startY+row, startX+col, string(ch))
 			win.AttrOff(gc.ColorPair(int16(colorIdx + 1)))
