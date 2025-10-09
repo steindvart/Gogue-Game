@@ -95,9 +95,12 @@ func create256RainbowPairs() ([]int, error) {
 }
 
 func (m *MainMenu) Render(options []string, active int) error {
-	m.RenderTitle()
+	err := m.RenderTitle()
+	if err != nil {
+		return err
+	}
 
-	err := m.RenderOptions(options, active)
+	err = m.RenderOptions(options, active)
 	if err != nil {
 		return err
 	}
