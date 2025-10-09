@@ -1,19 +1,23 @@
 package cli
 
-type GameStateSignal int
+import (
+	"gogue/model"
 
-const (
-	StopStateSignal GameStateSignal = iota
+	"gogue/view/action"
+	viewcli "gogue/view/cli"
+
+	gc "github.com/rthornton128/goncurses"
 )
 
 type GameState interface {
-	Input()
+	Input(a action.Type) model.Signal
+	Update() model.Signal
 	Render()
-	Update() GameStateSignal
 }
 
 type Game struct {
 	States []GameState
+	Window *gc.Window
 }
 
 func (g *Game) PushState(state GameState) {
@@ -35,17 +39,50 @@ func (g *Game) CurrentState() GameState {
 }
 
 func (g *Game) Run() {
+	actions := g.runInputActionsRoutine()
+
 	for {
 		state := g.CurrentState()
 		if state == nil {
 			break
 		}
-		state.Input()
-		sign := state.Update()
-		state.Render()
 
-		if sign == StopStateSignal {
-			g.PopState()
+		g.handleSignal(state.Input(<-actions))
+		state = g.CurrentState()
+		if state == nil {
+			break
 		}
+
+		g.handleSignal(state.Update())
+		state = g.CurrentState()
+		if state == nil {
+			break
+		}
+
+		state.Render()
+	}
+}
+
+func (g *Game) runInputActionsRoutine() <-chan action.Type {
+	actions := make(chan action.Type, 1)
+	go func(ch chan<- action.Type) {
+		for {
+			ch <- viewcli.HandleInput(g.Window)
+		}
+	}(actions)
+
+	return actions
+}
+
+func (g *Game) handleSignal(s model.Signal) {
+	switch s {
+	case model.StopSignal:
+		g.PopState()
+	case model.NewGameSignal:
+		// @todo push new game state
+	case model.LoadGameSignal:
+		// @todo push load game state
+	case model.ShowScoreboardSignal:
+		// @todo push scoreboard state
 	}
 }
