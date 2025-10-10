@@ -54,5 +54,6 @@ func (m *MainMenu) Render() {
 	err := m.view.Render(m.model.GetOptionsLabels(), m.model.GetActive())
 	if err != nil {
 		fmt.Println("Error rendering main menu:", err)
+		panic(err)
 	}
 }
