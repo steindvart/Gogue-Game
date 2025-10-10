@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	"fmt"
 
 	"gogue/presentation/cli"
 
@@ -9,9 +9,17 @@ import (
 )
 
 func main() {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("panic:", r)
+			fmt.Println("probably goncurses error - make sure your terminal supports it and have enough screen size for the game")
+		}
+	}()
+
 	stdscr, err := initMainWindowGoncurses()
 	if err != nil {
-		log.Fatal(err)
+		fmt.Printf("Error: %v", err)
+		return
 	}
 	defer gc.End()
 
