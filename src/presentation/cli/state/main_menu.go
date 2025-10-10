@@ -1,11 +1,11 @@
-package cli
+package state
 
 import (
+	"fmt"
 	"gogue/model"
 	"gogue/model/signal"
 	"gogue/view/action"
 	viewcli "gogue/view/cli"
-	"log"
 
 	gc "github.com/rthornton128/goncurses"
 )
@@ -18,7 +18,7 @@ type MainMenu struct {
 func NewMainMenu(parent *gc.Window) *MainMenu {
 	menu, err := viewcli.NewMainMenu(parent)
 	if err != nil {
-		log.Println("Error creating main menu view:", err)
+		fmt.Println("Error creating main menu view:", err)
 		return nil
 	}
 
@@ -53,6 +53,6 @@ func (m *MainMenu) Update() signal.Type {
 func (m *MainMenu) Render() {
 	err := m.view.Render(m.model.GetOptionsLabels(), m.model.GetActive())
 	if err != nil {
-		log.Println("Error rendering main menu:", err)
+		fmt.Println("Error rendering main menu:", err)
 	}
 }
