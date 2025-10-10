@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"gogue/presentation/cli"
+	"gogue/presentation/cli/state"
 
 	gc "github.com/rthornton128/goncurses"
 )
@@ -29,7 +30,7 @@ func main() {
 	defer gc.End()
 
 	game := &cli.Game{
-		States: []cli.GameState{cli.NewMainMenu(stdscr)},
+		States: []state.State{state.NewMainMenu(stdscr)},
 		Window: stdscr,
 	}
 

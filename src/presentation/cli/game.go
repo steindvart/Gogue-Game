@@ -2,6 +2,7 @@ package cli
 
 import (
 	"gogue/model/signal"
+	"gogue/presentation/cli/state"
 	"time"
 
 	"gogue/view/action"
@@ -12,18 +13,12 @@ import (
 
 const FPS_DEFAULT = 60
 
-type GameState interface {
-	Input(a action.Type) signal.Type
-	Update() signal.Type
-	Render()
-}
-
 type Game struct {
-	States []GameState
+	States []state.State
 	Window *gc.Window
 }
 
-func (g *Game) PushState(state GameState) {
+func (g *Game) PushState(state state.State) {
 	g.States = append(g.States, state)
 }
 
@@ -34,7 +29,7 @@ func (g *Game) PopState() {
 	g.States = g.States[:len(g.States)-1]
 }
 
-func (g *Game) CurrentState() GameState {
+func (g *Game) CurrentState() state.State {
 	if len(g.States) == 0 {
 		return nil
 	}
