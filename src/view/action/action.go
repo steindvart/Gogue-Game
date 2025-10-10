@@ -9,4 +9,5 @@ const (
 	MoveLeft
 	MoveRight
 	Select
+	Exit
 )
