@@ -38,6 +38,8 @@ func NewMainMenu(parent *gc.Window) (*MainMenu, error) {
 }
 
 func (m *MainMenu) Render(options []string, active int) error {
+	m.W.Erase()
+
 	x, y := 2, 2
 	err := m.W.Box(0, 0)
 	if err != nil {
@@ -62,6 +64,6 @@ func (m *MainMenu) Render(options []string, active int) error {
 		}
 	}
 
-	m.W.Refresh()
+	m.W.NoutRefresh()
 	return nil
 }
