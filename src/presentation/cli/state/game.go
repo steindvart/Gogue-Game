@@ -10,13 +10,20 @@ import (
 	gc "github.com/rthornton128/goncurses"
 )
 
+const (
+	FIELD_HEIGHT = 40 // размеры с учётом границ
+	FIELD_WIDTH  = 100
+)
+
 type Game struct {
-	player entity.Player
-	view   *view.Game
+	player      entity.Player
+	fieldWidth  int
+	fieldHeight int
+	view        *view.Game
 }
 
 func NewGame(parent *gc.Window) *Game {
-	viewObj, err := view.NewGame(parent)
+	view, err := view.NewGame(parent, FIELD_WIDTH, FIELD_HEIGHT)
 	if err != nil {
 		fmt.Println("Error creating main menu view:", err)
 		return nil
@@ -38,8 +45,10 @@ func NewGame(parent *gc.Window) *Game {
 	}
 
 	return &Game{
-		player: player,
-		view:   viewObj,
+		player:      player,
+		fieldWidth:  FIELD_WIDTH - 2,  // Исключая границы
+		fieldHeight: FIELD_HEIGHT - 2, // Исключая границы
+		view:        view,
 	}
 }
 
@@ -65,23 +74,26 @@ func (g *Game) Update() signal.Type {
 }
 
 func (g *Game) Render() {
-	field := g.generateField()
-	g.view.Render(field)
+	field := g.makeField()
+
+	err := g.view.Render(field)
+	if err != nil {
+		fmt.Println("Error rendering game state:", err)
+		panic(err)
+	}
 }
 
 // Генерирует двумерное поле, где 0 — пусто, 1 — персонаж
-func (g *Game) generateField() [][]int {
-	// Размер поля (например, 20x20)
-	width, height := 20, 20
-	field := make([][]int, height)
+func (g *Game) makeField() [][]int {
+	field := make([][]int, g.fieldHeight)
 	for y := range field {
-		field[y] = make([]int, width)
+		field[y] = make([]int, g.fieldWidth)
 	}
-	// Координаты персонажа
+
 	px := g.player.Character.Shape.Point.X
 	py := g.player.Character.Shape.Point.Y
-	// Проверка границ
-	if py >= 0 && py < height && px >= 0 && px < width {
+
+	if py >= 0 && py < g.fieldHeight && px >= 0 && px < g.fieldWidth {
 		field[py][px] = 1
 	}
 	return field

@@ -1,51 +1,57 @@
 package cli
 
 import (
+	"errors"
+	"fmt"
+
 	gc "github.com/rthornton128/goncurses"
 )
 
-const (
-	WINDOW_HEIGHT = 20
-	WINDOW_WIDTH  = 50
+type Game struct {
+	window      *gc.Window
+	fieldWidth  int
+	fieldHeight int
+}
+
+var (
+	errBox = errors.New("cannot draw game window box")
 )
 
-type Game struct {
-	W *gc.Window
+func NewGame(parent *gc.Window, fieldWidth, fieldHeight int) (*Game, error) {
+	_, mx := parent.MaxYX()
+
+	y := 20
+	x := (mx / 2) - (fieldWidth / 2)
+
+	win := parent.Sub(fieldHeight, fieldWidth, y, x)
+
+	return &Game{window: win}, nil
 }
 
-// var (
-// 	errMenuAttrOn  = errors.New("cannot set menu attribute on")
-// 	errMenuAttrOff = errors.New("cannot set menu attribute off")
-// 	errMenuBox     = errors.New("cannot draw menu box")
-// )
+func (g *Game) Render(field [][]int) error {
+	g.window.Erase()
 
-func NewGame(parent *gc.Window) (*Game, error) {
-	// y, x := parent.MaxYX()
+	err := g.window.Box(0, 0)
+	if err != nil {
+		return fmt.Errorf("%w: %v", errBox, err)
+	}
 
-	win := parent.Sub(WINDOW_HEIGHT, WINDOW_WIDTH, 0, 0)
-	win.Timeout(0)
+	g.drawField(field)
 
-	// err := win.Keypad(true)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	return &Game{W: win}, nil
+	g.window.NoutRefresh()
+	return nil
 }
 
-func (m *Game) Render(field [][]int) error {
-	m.W.Erase()
+func (g *Game) drawField(field [][]int) {
+	offset := 1 // смещение из-за границ
 
 	for y, row := range field {
 		for x, cell := range row {
 			if cell == 1 {
-				m.W.MovePrint(y, x, "#")
+				g.window.MovePrint(y+offset, x+offset, "@")
 			} else {
-				m.W.MovePrint(y, x, ".")
+				g.window.MovePrint(y+offset, x+offset, " ")
 			}
 		}
 	}
-
-	m.W.NoutRefresh()
-	return nil
 }
