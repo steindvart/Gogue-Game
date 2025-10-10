@@ -8,6 +8,11 @@ import (
 	gc "github.com/rthornton128/goncurses"
 )
 
+const (
+	REQUEIRED_TERMINAL_WIDTH  = 80
+	REQUEIRED_TERMINAL_HEIGHT = 50
+)
+
 func main() {
 	defer func() {
 		if r := recover(); r != nil {
@@ -35,6 +40,13 @@ func initMainWindowGoncurses() (*gc.Window, error) {
 	stdscr, err := gc.Init()
 	if err != nil {
 		return nil, err
+	}
+
+	height, width := stdscr.MaxYX()
+	if height < REQUEIRED_TERMINAL_HEIGHT || width < REQUEIRED_TERMINAL_WIDTH {
+		gc.End()
+		return nil, fmt.Errorf("terminal size is too small: need at least %dx%d, got %dx%d",
+			REQUEIRED_TERMINAL_WIDTH, REQUEIRED_TERMINAL_HEIGHT, width, height)
 	}
 
 	gc.Raw(true)
