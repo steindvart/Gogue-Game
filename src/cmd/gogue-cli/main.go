@@ -23,7 +23,7 @@ func main() {
 
 	stdscr, err := initMainWindowGoncurses()
 	if err != nil {
-		fmt.Printf("Error: %v", err)
+		fmt.Println("Error:", err)
 		return
 	}
 	defer gc.End()
