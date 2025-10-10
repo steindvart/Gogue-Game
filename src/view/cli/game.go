@@ -8,9 +8,7 @@ import (
 )
 
 type Game struct {
-	window      *gc.Window
-	fieldWidth  int
-	fieldHeight int
+	window *gc.Window
 }
 
 var (

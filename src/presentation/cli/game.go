@@ -67,7 +67,11 @@ func (g *Game) Run() {
 		}
 
 		state.Render()
-		gc.Update()
+
+		err := gc.Update()
+		if err != nil {
+			panic(err)
+		}
 	}
 }
 
