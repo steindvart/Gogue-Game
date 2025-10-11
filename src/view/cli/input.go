@@ -21,6 +21,8 @@ func Action(k gc.Key) action.Type {
 		fallthrough
 	case gc.KEY_RETURN:
 		return action.Select
+	case gc.KEY_ESC:
+		return action.Exit
 	}
 
 	switch strings.ToLower(string(rune(k))) {

@@ -64,14 +64,9 @@ func NewMainMenu(parent *gc.Window) (*MainMenu, error) {
 	x := (mx / 2) - (MENU_WIDTH / 2)
 
 	win := parent.Sub(MENU_HEIGHT, MENU_WIDTH, y, x)
-	win.Timeout(0)
-
-	err := win.Keypad(true)
-	if err != nil {
-		return nil, err
-	}
 
 	var colors []int
+	var err error
 	if gc.HasColors() {
 		colors, err = create256RainbowPairs()
 		if err != nil {
@@ -95,6 +90,8 @@ func create256RainbowPairs() ([]int, error) {
 }
 
 func (m *MainMenu) Render(options []string, active int) error {
+	m.window.Erase()
+
 	err := m.RenderTitle()
 	if err != nil {
 		return err
@@ -150,6 +147,7 @@ func (m *MainMenu) RenderOptions(options []string, active int) error {
 		}
 	}
 
+	m.window.NoutRefresh()
 	return nil
 }
 

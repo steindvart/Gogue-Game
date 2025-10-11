@@ -19,6 +19,8 @@ type Game struct {
 }
 
 func (g *Game) PushState(state state.State) {
+	g.Window.Erase()
+	g.Window.Refresh()
 	g.States = append(g.States, state)
 }
 
@@ -26,6 +28,9 @@ func (g *Game) PopState() {
 	if len(g.States) == 0 {
 		return
 	}
+
+	g.Window.Erase()
+	g.Window.Refresh()
 	g.States = g.States[:len(g.States)-1]
 }
 
@@ -62,6 +67,11 @@ func (g *Game) Run() {
 		}
 
 		state.Render()
+
+		err := gc.Update()
+		if err != nil {
+			panic(err)
+		}
 	}
 }
 
@@ -81,7 +91,7 @@ func (g *Game) handleSignal(s signal.Type) {
 	case signal.Stop:
 		g.PopState()
 	case signal.NewGame:
-		// @todo push new game state
+		g.PushState(state.NewGame(g.Window))
 	case signal.LoadGame:
 		// @todo push load game state
 	case signal.ShowScoreboard:
