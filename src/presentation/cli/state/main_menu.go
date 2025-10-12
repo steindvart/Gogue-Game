@@ -1,63 +1,67 @@
 package state
 
 import (
-	"fmt"
 	"gogue/model"
 	"gogue/model/signal"
-	"gogue/view/action"
 	viewcli "gogue/view/cli"
 
-	gc "github.com/rthornton128/goncurses"
+	"github.com/gdamore/tcell/v2"
+	"github.com/rivo/tview"
 )
-
-type MainMenuRenderer interface {
-	Render(options []string, active int) error
-}
 
 type MainMenu struct {
 	model    *model.Menu
-	renderer MainMenuRenderer
+	view     *viewcli.MainMenuTView
+	onSignal func(signal.Type)
 }
 
-func NewMainMenu(parent *gc.Window) *MainMenu {
-	renderer, err := viewcli.NewMainMenu(parent)
-	if err != nil {
-		fmt.Println("Error creating main menu view:", err)
-		return nil
+func NewMainMenu(onSignal func(signal.Type)) *MainMenu {
+	menu := model.NewMenu([]model.MenuOption{
+		{Label: "New Game", Signal: signal.NewGame},
+		{Label: "Load Game", Signal: signal.LoadGame},
+		{Label: "Scoreboard", Signal: signal.ShowScoreboard},
+		{Label: "Exit", Signal: signal.Stop},
+	})
+	view := viewcli.NewMainMenuTView(menu.GetOptionsLabels(), menu.GetActive())
+
+	m := &MainMenu{
+		model:    menu,
+		view:     view,
+		onSignal: onSignal,
 	}
 
-	return &MainMenu{
-		model: model.NewMenu([]model.MenuOption{
-			{Label: "New Game", Signal: signal.NewGame},
-			{Label: "Load Game", Signal: signal.LoadGame},
-			{Label: "Scoreboard", Signal: signal.ShowScoreboard},
-			{Label: "Exit", Signal: signal.Stop},
-		}),
-		renderer: renderer,
-	}
+	view.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		switch event.Key() {
+		case tcell.KeyUp:
+			m.model.Previous()
+			m.view.SetActive(m.model.GetActive())
+			return nil
+		case tcell.KeyDown:
+			m.model.Next()
+			m.view.SetActive(m.model.GetActive())
+			return nil
+		case tcell.KeyEnter:
+			if m.onSignal != nil {
+				m.onSignal(m.model.Select().Signal)
+			}
+			return nil
+		case tcell.KeyEsc:
+			if m.onSignal != nil {
+				m.onSignal(signal.Stop)
+			}
+			return nil
+		}
+		return event
+	})
+
+	return m
 }
 
-func (m *MainMenu) Input(a action.Type) signal.Type {
-	switch a {
-	case action.MoveUp:
-		m.model.Previous()
-	case action.MoveDown:
-		m.model.Next()
-	case action.Select:
-		return m.model.Select().Signal
-	}
-
-	return signal.NoSignal
+// Primitive возвращает tview-примитив для интеграции с приложением
+func (m *MainMenu) Primitive() tview.Primitive {
+	return m.view.Primitive()
 }
 
 func (m *MainMenu) Update() signal.Type {
 	return signal.NoSignal
-}
-
-func (m *MainMenu) Render() {
-	err := m.renderer.Render(m.model.GetOptionsLabels(), m.model.GetActive())
-	if err != nil {
-		fmt.Println("Error rendering main menu:", err)
-		panic(err)
-	}
 }

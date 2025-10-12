@@ -1,16 +1,8 @@
 package cli
 
 import (
-	"errors"
-	"fmt"
-	"time"
-
-	gc "github.com/rthornton128/goncurses"
-)
-
-const (
-	MENU_HEIGHT = 35
-	MENU_WIDTH  = 70
+	"github.com/gdamore/tcell/v2"
+	"github.com/rivo/tview"
 )
 
 var titleArt = []string{
@@ -47,161 +39,66 @@ var hallArt = []string{
 	"|;____________/%%%%%%%%%%%%%%%%%\\____________;|",
 }
 
-type MainMenu struct {
-	window *gc.Window
-	colors []int
+type MainMenuTView struct {
+	flex  *tview.Flex
+	list  *tview.List
+	title *tview.TextView
+	hall  *tview.TextView
 }
 
-var (
-	errMenuAttrOn        = errors.New("cannot set menu attribute on")
-	errMenuAttrOff       = errors.New("cannot set menu attribute off")
-	errMenuInitColorPair = errors.New("cannot init color pair")
-)
-
-func NewMainMenu(parent *gc.Window) (*MainMenu, error) {
-	_, mx := parent.MaxYX()
-	y := 2
-	x := (mx / 2) - (MENU_WIDTH / 2)
-
-	win := parent.Sub(MENU_HEIGHT, MENU_WIDTH, y, x)
-
-	var colors []int
-	var err error
-	if gc.HasColors() {
-		colors, err = create256RainbowPairs()
-		if err != nil {
-			return nil, err
-		}
+func NewMainMenuTView(options []string, active int) *MainMenuTView {
+	title := tview.NewTextView().SetDynamicColors(true)
+	for _, line := range titleArt {
+		title.Write([]byte(line + "\n"))
 	}
+	title.SetTextAlign(tview.AlignCenter)
+	title.SetBorder(false)
 
-	return &MainMenu{window: win, colors: colors}, nil
-}
-
-func create256RainbowPairs() ([]int, error) {
-	var rainbow256 = []int{196, 202, 208, 214, 220, 226, 190, 154, 118, 82, 46, 47, 48, 49, 51, 39, 27, 21, 57, 93, 129, 165, 201, 200}
-
-	for i, color := range rainbow256 {
-		err := gc.InitPair(int16(i+1), int16(color), gc.C_BLACK)
-		if err != nil {
-			return nil, fmt.Errorf("%w: %v", errMenuInitColorPair, err)
-		}
+	hall := tview.NewTextView().SetDynamicColors(true)
+	for _, line := range hallArt {
+		hall.Write([]byte(line + "\n"))
 	}
-	return rainbow256, nil
-}
+	hall.SetTextAlign(tview.AlignCenter)
+	hall.SetBorder(false)
 
-func (m *MainMenu) Render(options []string, active int) error {
-	m.window.Erase()
-
-	err := m.RenderTitle()
-	if err != nil {
-		return err
+	list := tview.NewList()
+	for _, opt := range options {
+		list.AddItem(opt, "", 0, nil)
 	}
+	list.SetCurrentItem(active)
+	list.SetMainTextColor(tcell.ColorWhite)
+	list.SetSelectedTextColor(tcell.ColorBlack)
+	list.SetSelectedBackgroundColor(tcell.ColorYellow)
+	list.SetBorder(false)
 
-	err = m.RenderOptions(options, active)
-	if err != nil {
-		return err
-	}
+	flex := tview.NewFlex().SetDirection(tview.FlexRow).
+		AddItem(title, len(titleArt)+1, 0, false).
+		AddItem(list, 0, 1, true).
+		AddItem(hall, len(hallArt)+1, 0, false)
 
-	// @todo - пока убрал, т.к. кажется не совсем уместным, ломает минималистичный стиль
-	// Но если нравится - можем оставить. Включите, посмотрите, как с этим будет смотреться.
-	// Также можем раскрасить как-нибудь.
-	// m.RenderHall()
-
-	m.window.Refresh()
-	return nil
-}
-
-func (m *MainMenu) RenderHall() {
-	maxY, maxX := m.window.MaxYX()
-	artHeight := len(hallArt)
-	artWidth := len(hallArt[0])
-
-	startY := maxY - artHeight - 1 // maxY - рисуем внизу окна
-	startX := (maxX - artWidth) / 2
-
-	for i, line := range hallArt {
-		m.window.MovePrint(startY+i, startX, line)
+	return &MainMenuTView{
+		flex:  flex,
+		list:  list,
+		title: title,
+		hall:  hall,
 	}
 }
 
-func (m *MainMenu) RenderOptions(options []string, active int) error {
-	_, maxX := m.window.MaxYX()
-	y := 10
-	x := (maxX / 2) - 6
-
-	for i, s := range options {
-		if i == active {
-			err := m.window.AttrOn(gc.A_REVERSE)
-			if err != nil {
-				return fmt.Errorf("%w: %v", errMenuAttrOn, err)
-			}
-
-			m.window.MovePrint(y+i, x, s)
-
-			err = m.window.AttrOff(gc.A_REVERSE)
-			if err != nil {
-				return fmt.Errorf("%w: %v", errMenuAttrOff, err)
-			}
-		} else {
-			m.window.MovePrint(y+i, x, s)
-		}
-	}
-
-	m.window.NoutRefresh()
-	return nil
+func (m *MainMenuTView) Primitive() tview.Primitive {
+	return m.flex
 }
 
-func (m *MainMenu) RenderTitle() error {
-	if gc.HasColors() {
-		// Для плавности: используем текущее время как frame
-		frame := int(time.Now().UnixNano() / 85000000) // ~13 кадров в сек
-		err := drawGradientTitle(m.window, frame, m.colors)
-		if err != nil {
-			return err
-		}
-	} else {
-		drawRawTitle(m.window)
-	}
-
-	return nil
+func (m *MainMenuTView) SetActive(idx int) {
+	m.list.SetCurrentItem(idx)
 }
 
-func drawGradientTitle(win *gc.Window, frame int, colors []int) error {
-	_, maxX := win.MaxYX()
-	titleWidth := len(titleArt[0])
-	startY := 1                       // чуть ниже начала окна
-	startX := (maxX - titleWidth) / 2 // по центру с учётом ширины
-
-	for row, line := range titleArt {
-		for col, ch := range line {
-			// Диагональное переливание: сдвиг также по row
-			colorIdx := (col + row + frame) % len(colors)
-
-			err := win.AttrOn(gc.ColorPair(int16(colorIdx + 1)))
-			if err != nil {
-				return fmt.Errorf("%w: %v", errMenuAttrOn, err)
-			}
-
-			win.MovePrint(startY+row, startX+col, string(ch))
-
-			err = win.AttrOff(gc.ColorPair(int16(colorIdx + 1)))
-			if err != nil {
-				return fmt.Errorf("%w: %v", errMenuAttrOn, err)
-			}
-		}
+func (m *MainMenuTView) SetOptions(options []string) {
+	m.list.Clear()
+	for _, opt := range options {
+		m.list.AddItem(opt, "", 0, nil)
 	}
-
-	return nil
 }
 
-func drawRawTitle(win *gc.Window) {
-	_, maxX := win.MaxYX()
-	titleWidth := len(titleArt[0])
-	startY := 1                       // чуть ниже начала окна
-	startX := (maxX - titleWidth) / 2 // по центру с учётом ширины
-
-	for row, line := range titleArt {
-		win.MovePrint(startY+row, startX, line)
-	}
-
+func (m *MainMenuTView) SetInputCapture(handler func(event *tcell.EventKey) *tcell.EventKey) {
+	m.list.SetInputCapture(handler)
 }
