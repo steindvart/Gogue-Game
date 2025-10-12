@@ -1,6 +1,9 @@
 package cli
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
@@ -44,13 +47,12 @@ type MainMenuTView struct {
 	list  *tview.List
 	title *tview.TextView
 	hall  *tview.TextView
+	frame int // для анимации радуги
 }
 
 func NewMainMenuTView(options []string, active int) *MainMenuTView {
+	// Изначально пусто, будет обновляться через SetRainbowTitleFrame
 	title := tview.NewTextView().SetDynamicColors(true)
-	for _, line := range titleArt {
-		title.Write([]byte(line + "\n"))
-	}
 	title.SetTextAlign(tview.AlignCenter)
 	title.SetBorder(false)
 
@@ -76,12 +78,21 @@ func NewMainMenuTView(options []string, active int) *MainMenuTView {
 		AddItem(list, 0, 1, true).
 		AddItem(hall, len(hallArt)+1, 0, false)
 
-	return &MainMenuTView{
+	m := &MainMenuTView{
 		flex:  flex,
 		list:  list,
 		title: title,
 		hall:  hall,
+		frame: 0,
 	}
+
+	m.SetRainbowTitleFrame(0)
+	return m
+}
+
+func (m *MainMenuTView) SetRainbowTitleFrame(frame int) {
+	m.frame = frame
+	m.title.SetText(DrawRainbowTitle(frame))
 }
 
 func (m *MainMenuTView) Primitive() tview.Primitive {
@@ -101,4 +112,27 @@ func (m *MainMenuTView) SetOptions(options []string) {
 
 func (m *MainMenuTView) SetInputCapture(handler func(event *tcell.EventKey) *tcell.EventKey) {
 	m.list.SetInputCapture(handler)
+}
+
+// DrawRainbowTitle формирует titleArt с анимированной радугой
+func DrawRainbowTitle(frame int) string {
+	var rainbowColors = []tcell.Color{
+		tcell.ColorRed,
+		tcell.ColorOrange,
+		tcell.ColorYellow,
+		tcell.ColorGreen,
+		tcell.ColorBlue,
+		tcell.ColorIndigo,
+		tcell.ColorViolet,
+	}
+
+	var sb strings.Builder
+	for row, line := range titleArt {
+		for col, ch := range line {
+			colorIdx := (col + row + frame) % len(rainbowColors)
+			fmt.Fprintf(&sb, "[#%06x]%c", rainbowColors[colorIdx].Hex(), ch)
+		}
+		sb.WriteByte('\n')
+	}
+	return sb.String()
 }

@@ -57,16 +57,21 @@ func (g *Game) Run() {
 // runUpdateLoop запускает обновление игровых состояний с опросом сигналов от них и с ограничением по FPS
 func (g *Game) runUpdateLoop(fpsLimit int) {
 	ticker := time.NewTicker(time.Second / time.Duration(fpsLimit))
+	var lastTime = time.Now()
 	go func() {
 		defer ticker.Stop()
 		for range ticker.C {
+			now := time.Now()
+			dt := now.Sub(lastTime).Seconds()
+			lastTime = now
+
 			state := g.CurrentState()
 			if state == nil {
 				g.App.Stop()
 				return
 			}
 
-			sig := state.Update()
+			sig := state.Update(dt)
 
 			if sig != signal.NoSignal {
 				g.App.QueueUpdateDraw(func() {
@@ -77,6 +82,9 @@ func (g *Game) runUpdateLoop(fpsLimit int) {
 						g.App.Stop()
 					}
 				})
+			} else {
+				// Для анимации: обновляем UI даже если сигнала нет
+				g.App.QueueUpdateDraw(func() {})
 			}
 		}
 	}()

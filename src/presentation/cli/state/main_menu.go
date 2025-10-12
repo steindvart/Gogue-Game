@@ -10,9 +10,10 @@ import (
 )
 
 type MainMenu struct {
-	model  *model.Menu
-	view   *viewcli.MainMenuTView
-	signal signal.Type
+	model        *model.Menu
+	view         *viewcli.MainMenuTView
+	signal       signal.Type
+	rainbowTimer float64 // для анимации радуги
 }
 
 func NewMainMenu() *MainMenu {
@@ -57,7 +58,12 @@ func (m *MainMenu) Primitive() tview.Primitive {
 	return m.view.Primitive()
 }
 
-func (m *MainMenu) Update() signal.Type {
+func (m *MainMenu) Update(dt float64) signal.Type {
+	// Анимация радуги: увеличиваем frame с учётом времени
+	m.rainbowTimer += dt
+	frame := int(m.rainbowTimer * 10) // скорость анимации
+	m.view.SetRainbowTitleFrame(frame)
+
 	sig := m.signal
 	m.signal = signal.NoSignal // сброс сигнала после чтения
 	return sig
