@@ -3,6 +3,7 @@ package state
 import (
 	"gogue/model"
 	"gogue/model/signal"
+	"gogue/view/action"
 	viewcli "gogue/view/cli"
 
 	"github.com/gdamore/tcell/v2"
@@ -36,26 +37,47 @@ func NewMainMenu() *MainMenu {
 	}
 
 	view.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		switch event.Key() {
-		case tcell.KeyUp:
+		switch EventToAction(event) {
+		case action.MoveUp:
 			m.model.Previous()
 			m.view.SetActive(m.model.GetActive())
 			return nil
-		case tcell.KeyDown:
+		case action.MoveDown:
 			m.model.Next()
 			m.view.SetActive(m.model.GetActive())
 			return nil
-		case tcell.KeyEnter:
+		case action.Select:
 			m.signal = m.model.Select().Signal
 			return nil
-		case tcell.KeyEsc:
+		case action.Exit:
 			m.signal = signal.Stop
 			return nil
+		default:
+			return event
 		}
-		return event
 	})
 
 	return m
+}
+
+func EventToAction(event *tcell.EventKey) action.Type {
+	switch event.Key() {
+	case tcell.KeyUp:
+		return action.MoveUp
+	case tcell.KeyDown:
+		return action.MoveDown
+	case tcell.KeyEnter:
+		return action.Select
+	case tcell.KeyEsc:
+		return action.Exit
+	}
+	switch event.Rune() {
+	case 'w', 'W':
+		return action.MoveUp
+	case 's', 'S':
+		return action.MoveDown
+	}
+	return action.NoAction
 }
 
 func (m *MainMenu) Primitive() tview.Primitive {
