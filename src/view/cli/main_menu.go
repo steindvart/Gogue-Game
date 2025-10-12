@@ -134,8 +134,11 @@ func (m *MainMenu) SetInputCapture(handler func(event *tcell.EventKey) *tcell.Ev
 	m.list.SetInputCapture(handler)
 }
 
+// @todo - вынести работу с цветным текстом в отдельный файл
+
 // hsvToRGB возвращает цвет tcell.Color по HSV (hue [0..360), s,v [0..1])
 func hsvToRGB(h, s, v float64) tcell.Color {
+	// @todo - подумать над именами для "магических чисел"
 	var r, g, b float64
 	i := int(h/60.0) % 6
 	f := h/60.0 - float64(i)
