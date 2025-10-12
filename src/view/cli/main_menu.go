@@ -35,7 +35,7 @@ func NewMainMenu(options []string, active int) *MainMenu {
 	gapBox := tview.NewBox().SetBackgroundColor(tcell.ColorBlack)
 
 	barLength := len(titleArt[0]) + 10
-	runnerBar := NewRunnerBar(barLength)
+	runnerBar := NewRunnerBar(barLength, []string{"🦸", "🦇", "👻", "🧟‍♂️", "🧛", "👹", "🐍"}, 20.0, 1)
 
 	// Центрируем список по горизонтали с помощью Flex
 	listFlex := tview.NewFlex().SetDirection(tview.FlexColumn).

@@ -5,27 +5,29 @@ import (
 )
 
 type RunnerBar struct {
-	view       *tview.TextView
-	length     int
-	heroPos    float64
-	heroSpeed  float64
-	enemyPos   []float64
-	enemyType  []string
-	enemySpeed []float64
+	view    *tview.TextView
+	length  int
+	emojis  []string // список эмодзи (герой + враги)
+	pos     float64  // позиция левого символа
+	speed   float64  // скорость движения (символов в сек)
+	spacing int      // отступ между эмодзи
 }
 
-func NewRunnerBar(length int) *RunnerBar {
+// NewRunnerBar создаёт полоску с произвольным набором эмодзи, скоростью и отступом
+func NewRunnerBar(length int, emojis []string, speed float64, spacing int) *RunnerBar {
 	bar := &RunnerBar{
-		view:       tview.NewTextView().SetDynamicColors(true),
-		length:     length,
-		heroSpeed:  3, // символов в секунду
-		enemyType:  []string{"🦇", "👻", "🧟‍♂️"},
-		enemySpeed: []float64{2, 2, 2},
+		view:    tview.NewTextView().SetDynamicColors(true),
+		length:  length,
+		emojis:  emojis,
+		speed:   speed,
+		spacing: spacing,
 	}
+
 	bar.ResetPositions()
 	bar.view.SetTextAlign(tview.AlignLeft)
 	bar.view.SetBorder(false)
 	bar.Update()
+
 	return bar
 }
 
@@ -34,33 +36,20 @@ func (b *RunnerBar) Update() {
 }
 
 func (b *RunnerBar) UpdatePositions(dt float64) {
-	b.moveHero(dt)
-	b.moveEnemies(dt)
+	b.moveAll(dt)
 	b.Update()
 }
 
-func (b *RunnerBar) moveHero(dt float64) {
-	b.heroPos += b.heroSpeed * dt
-	if int(b.heroPos) >= b.length-2 {
-		b.heroPos = 2
-	}
-}
-
-func (b *RunnerBar) moveEnemies(dt float64) {
-	for i := range b.enemyPos {
-		b.enemyPos[i] -= b.enemySpeed[i] * dt
-		if int(b.enemyPos[i]) < 0 {
-			b.enemyPos[i] = float64(b.length - 4 - i*4)
-		}
+func (b *RunnerBar) moveAll(dt float64) {
+	b.pos += b.speed * dt
+	totalLen := b.totalEmojisLen()
+	if int(b.pos) > b.length {
+		b.pos = -float64(totalLen)
 	}
 }
 
 func (b *RunnerBar) ResetPositions() {
-	b.heroPos = 2
-	b.enemyPos = make([]float64, len(b.enemyType))
-	for i := range b.enemyType {
-		b.enemyPos[i] = float64(b.length - 4 - i*4)
-	}
+	b.pos = 0
 }
 
 func (b *RunnerBar) RenderBar() string {
@@ -69,24 +58,15 @@ func (b *RunnerBar) RenderBar() string {
 		bar[i] = ' '
 	}
 
-	// Враги
-	for i, pos := range b.enemyPos {
-		ipos := int(pos)
-		if ipos >= 0 && ipos < b.length {
-			et := []rune(b.enemyType[i])
-			for j, r := range et {
-				if ipos+j < b.length {
-					bar[ipos+j] = r
-				}
+	start := int(b.pos)
+	for i, emoji := range b.emojis {
+		emojiRunes := []rune(emoji)
+		pos := start + i*(b.spacing+len(emojiRunes))
+		for j, r := range emojiRunes {
+			idx := (pos + j) % b.length
+			if idx >= 0 && idx < b.length {
+				bar[idx] = r
 			}
-		}
-	}
-	// Персонаж
-	hero := []rune("🦸")
-	hpos := int(b.heroPos)
-	for j, r := range hero {
-		if hpos+j < b.length {
-			bar[hpos+j] = r
 		}
 	}
 	return string(bar)
@@ -94,4 +74,16 @@ func (b *RunnerBar) RenderBar() string {
 
 func (b *RunnerBar) Primitive() tview.Primitive {
 	return b.view
+}
+
+// totalEmojisLen возвращает суммарную длину всех эмодзи с учётом отступов
+func (b *RunnerBar) totalEmojisLen() int {
+	total := 0
+	for i, emoji := range b.emojis {
+		total += len([]rune(emoji))
+		if i < len(b.emojis)-1 {
+			total += b.spacing
+		}
+	}
+	return total
 }
