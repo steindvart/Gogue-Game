@@ -31,17 +31,17 @@ func NewMainMenuTView(options []string, active int) *MainMenuTView {
 	title := newTitle()
 	list := newList(options, active)
 
-	// Создаём пустые Box с тёмным фоном для отступов, как у других элементов
-	leftPad := tview.NewBox().SetBackgroundColor(tcell.ColorBlack)
-	rightPad := tview.NewBox().SetBackgroundColor(tcell.ColorBlack)
+	// Создаём пустой Box с тёмным фоном для выравнивания элементов
+	gapBox := tview.NewBox().SetBackgroundColor(tcell.ColorBlack)
 
 	// Центрируем список по горизонтали с помощью Flex
 	hFlex := tview.NewFlex().SetDirection(tview.FlexColumn).
-		AddItem(leftPad, 0, 1, false). // пустое пространство слева
-		AddItem(list, 10, 0, true).    // ширина списка (можно скорректировать)
-		AddItem(rightPad, 0, 1, false) // пустое пространство справа
+		AddItem(gapBox, 0, 1, false). // пустое пространство слева
+		AddItem(list, 10, 0, true).   // ширина списка (можно скорректировать)
+		AddItem(gapBox, 0, 1, false)  // пустое пространство справа
 
 	flex := tview.NewFlex().SetDirection(tview.FlexRow).
+		AddItem(gapBox, 10, 0, false).
 		AddItem(title, len(titleArt)+3, 0, false).
 		AddItem(hFlex, 0, 1, true)
 
@@ -76,6 +76,7 @@ func newList(options []string, active int) *tview.List {
 	list.SetMainTextColor(tcell.ColorWhite)
 	list.SetSelectedTextColor(tcell.ColorBlack)
 	list.SetSelectedBackgroundColor(tcell.ColorWhite)
+	list.ShowSecondaryText(false)
 	list.SetBorder(false)
 
 	return list
