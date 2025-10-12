@@ -40,8 +40,8 @@ func NewMainMenu(options []string, active int) *MainMenu {
 	// Центрируем список по горизонтали с помощью Flex
 	listFlex := tview.NewFlex().SetDirection(tview.FlexColumn).
 		AddItem(gapBox, 0, 1, false).
-		AddItem(gapBox, 5, 1, false).
-		AddItem(list, 10, 0, true).
+		AddItem(gapBox, 6, 1, false).
+		AddItem(list, 14, 0, true).
 		AddItem(gapBox, 0, 1, false)
 
 	// RunnerBar по центру под меню
