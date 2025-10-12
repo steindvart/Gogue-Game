@@ -19,7 +19,7 @@ var titleArt = []string{
 	"               |___/                                          ",
 }
 
-type MainMenuTView struct {
+type MainMenu struct {
 	flex  *tview.Flex
 	list  *tview.List
 	title *tview.TextView
@@ -27,7 +27,7 @@ type MainMenuTView struct {
 	frame int // для анимации радуги
 }
 
-func NewMainMenuTView(options []string, active int) *MainMenuTView {
+func NewMainMenu(options []string, active int) *MainMenu {
 	title := newTitle()
 	list := newList(options, active)
 
@@ -45,7 +45,7 @@ func NewMainMenuTView(options []string, active int) *MainMenuTView {
 		AddItem(title, len(titleArt)+3, 0, false).
 		AddItem(hFlex, 0, 1, true)
 
-	m := &MainMenuTView{
+	m := &MainMenu{
 		flex:  flex,
 		list:  list,
 		title: title,
@@ -82,27 +82,27 @@ func newList(options []string, active int) *tview.List {
 	return list
 }
 
-func (m *MainMenuTView) SetRainbowTitleFrame(frame int) {
+func (m *MainMenu) SetRainbowTitleFrame(frame int) {
 	m.frame = frame
 	m.title.SetText(DrawRainbowTitle(frame))
 }
 
-func (m *MainMenuTView) Primitive() tview.Primitive {
+func (m *MainMenu) Primitive() tview.Primitive {
 	return m.flex
 }
 
-func (m *MainMenuTView) SetActive(idx int) {
+func (m *MainMenu) SetActive(idx int) {
 	m.list.SetCurrentItem(idx)
 }
 
-func (m *MainMenuTView) SetOptions(options []string) {
+func (m *MainMenu) SetOptions(options []string) {
 	m.list.Clear()
 	for _, opt := range options {
 		m.list.AddItem(opt, "", 0, nil)
 	}
 }
 
-func (m *MainMenuTView) SetInputCapture(handler func(event *tcell.EventKey) *tcell.EventKey) {
+func (m *MainMenu) SetInputCapture(handler func(event *tcell.EventKey) *tcell.EventKey) {
 	m.list.SetInputCapture(handler)
 }
 

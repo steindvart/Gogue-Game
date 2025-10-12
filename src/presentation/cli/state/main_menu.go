@@ -16,7 +16,7 @@ const (
 
 type MainMenu struct {
 	model        *model.Menu
-	view         *viewcli.MainMenuTView
+	view         *viewcli.MainMenu
 	signal       signal.Type
 	rainbowTimer float64 // для анимации радуги
 }
@@ -28,7 +28,7 @@ func NewMainMenu() *MainMenu {
 		{Label: "Scoreboard", Signal: signal.ShowScoreboard},
 		{Label: "Exit", Signal: signal.Stop},
 	})
-	view := viewcli.NewMainMenuTView(menu.GetOptionsLabels(), menu.GetActive())
+	view := viewcli.NewMainMenu(menu.GetOptionsLabels(), menu.GetActive())
 
 	m := &MainMenu{
 		model:  menu,
