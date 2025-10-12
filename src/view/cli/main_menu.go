@@ -98,7 +98,7 @@ func newList(options []string, active int) *tview.List {
 	list.SetCurrentItem(active)
 	list.SetMainTextColor(tcell.ColorWhite)
 	list.SetSelectedTextColor(tcell.ColorBlack)
-	list.SetSelectedBackgroundColor(tcell.ColorYellow)
+	list.SetSelectedBackgroundColor(tcell.ColorWhite)
 	list.SetBorder(false)
 
 	return list
