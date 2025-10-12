@@ -7,8 +7,6 @@ import (
 	"github.com/rivo/tview"
 )
 
-const FPS_DEFAULT = 60
-
 type Game struct {
 	States []state.State
 	App    *tview.Application
@@ -34,10 +32,6 @@ func (g *Game) CurrentState() state.State {
 }
 
 func (g *Game) Run() {
-	// actions := g.runInputActionsRoutine()
-	// ticker := time.NewTicker(time.Second / FPS_DEFAULT)
-	// defer ticker.Stop()
-
 	state := g.CurrentState()
 	if state != nil {
 		g.App.SetRoot(g.CurrentState().Primitive(), true)
@@ -48,32 +42,19 @@ func (g *Game) Run() {
 	}
 
 	for {
-		// <-ticker.C // ограничение FPS
-
 		state := g.CurrentState()
 		if state == nil {
 			break
 		}
-
-		// g.handleSignal(state.Input(<-actions))
-		// state = g.CurrentState()
-		// if state == nil {
-		// 	break
-		// }
 
 		g.handleSignal(state.Update())
 		state = g.CurrentState()
 		if state == nil {
 			break
 		}
-
-		// state.Render()
-
-		// err := gc.Update()
-		// if err != nil {
-		// 	panic(err)
-		// }
 	}
+
+	g.App.Stop()
 }
 
 func (g *Game) handleSignal(s signal.Type) {
