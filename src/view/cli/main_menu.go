@@ -34,18 +34,20 @@ func NewMainMenu(options []string, active int) *MainMenu {
 	// Создаём пустой Box с тёмным фоном для выравнивания элементов
 	gapBox := tview.NewBox().SetBackgroundColor(tcell.ColorBlack)
 
-	barLength := len(titleArt[0]) + 10
-	runnerBar := NewRunnerBar(barLength, []string{"🦸", "🦇", "👻", "🧟‍♂️", "🧛", "👹", "🐍"}, 20.0, 1)
+	barLength := len(titleArt[0]) + 35
+	runnerBar := NewRunnerBar(barLength, "🦸   🦇   👻   🧛   👹   🐍   ", 1)
 
 	// Центрируем список по горизонтали с помощью Flex
 	listFlex := tview.NewFlex().SetDirection(tview.FlexColumn).
 		AddItem(gapBox, 0, 1, false).
-		AddItem(list, 20, 0, true).
+		AddItem(gapBox, 5, 1, false).
+		AddItem(list, 10, 0, true).
 		AddItem(gapBox, 0, 1, false)
 
 	// RunnerBar по центру под меню
 	runnerFlex := tview.NewFlex().SetDirection(tview.FlexColumn).
 		AddItem(gapBox, 0, 1, false).
+		AddItem(gapBox, 5, 1, false).
 		AddItem(runnerBar.Primitive(), barLength, 0, false).
 		AddItem(gapBox, 0, 1, false)
 
@@ -53,7 +55,7 @@ func NewMainMenu(options []string, active int) *MainMenu {
 		AddItem(gapBox, 2, 0, false). // верхний отступ
 		AddItem(title, len(titleArt)+2, 0, false).
 		AddItem(listFlex, 5, 1, true).
-		AddItem(gapBox, 1, 0, false). // отступ между меню и полоской
+		AddItem(gapBox, 3, 0, false).
 		AddItem(runnerFlex, 1, 0, false).
 		AddItem(gapBox, 0, 1, false) // всё оставшееся пространство
 

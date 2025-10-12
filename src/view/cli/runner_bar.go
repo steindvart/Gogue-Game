@@ -7,27 +7,23 @@ import (
 type RunnerBar struct {
 	view    *tview.TextView
 	length  int
-	emojis  []string // список эмодзи (герой + враги)
-	pos     float64  // позиция левого символа
-	speed   float64  // скорость движения (символов в сек)
-	spacing int      // отступ между эмодзи
+	content string  // строка, которую нужно прокручивать
+	pos     float64 // позиция первого символа (сдвиг)
+	speed   float64 // скорость движения (символов в сек)
 }
 
-// NewRunnerBar создаёт полоску с произвольным набором эмодзи, скоростью и отступом
-func NewRunnerBar(length int, emojis []string, speed float64, spacing int) *RunnerBar {
+// NewRunnerBar принимает строку (например, эмодзи через пробел), которую будет циклически прокручивать
+func NewRunnerBar(length int, content string, speed float64) *RunnerBar {
 	bar := &RunnerBar{
 		view:    tview.NewTextView().SetDynamicColors(true),
 		length:  length,
-		emojis:  emojis,
+		content: content,
 		speed:   speed,
-		spacing: spacing,
 	}
-
 	bar.ResetPositions()
 	bar.view.SetTextAlign(tview.AlignLeft)
 	bar.view.SetBorder(false)
 	bar.Update()
-
 	return bar
 }
 
@@ -36,16 +32,14 @@ func (b *RunnerBar) Update() {
 }
 
 func (b *RunnerBar) UpdatePositions(dt float64) {
-	b.moveAll(dt)
-	b.Update()
-}
-
-func (b *RunnerBar) moveAll(dt float64) {
 	b.pos += b.speed * dt
-	totalLen := b.totalEmojisLen()
-	if int(b.pos) > b.length {
-		b.pos = -float64(totalLen)
+	contentLen := len([]rune(b.content))
+	if contentLen == 0 {
+		b.pos = 0
+	} else if int(b.pos) >= contentLen {
+		b.pos = 0
 	}
+	b.Update()
 }
 
 func (b *RunnerBar) ResetPositions() {
@@ -57,33 +51,19 @@ func (b *RunnerBar) RenderBar() string {
 	for i := range bar {
 		bar[i] = ' '
 	}
-
-	start := int(b.pos)
-	for i, emoji := range b.emojis {
-		emojiRunes := []rune(emoji)
-		pos := start + i*(b.spacing+len(emojiRunes))
-		for j, r := range emojiRunes {
-			idx := (pos + j) % b.length
-			if idx >= 0 && idx < b.length {
-				bar[idx] = r
-			}
-		}
+	contentRunes := []rune(b.content)
+	contentLen := len(contentRunes)
+	if contentLen == 0 {
+		return string(bar)
+	}
+	start := int(b.pos) % contentLen
+	for i := 0; i < b.length; i++ {
+		idx := (start + i) % contentLen
+		bar[i] = contentRunes[idx]
 	}
 	return string(bar)
 }
 
 func (b *RunnerBar) Primitive() tview.Primitive {
 	return b.view
-}
-
-// totalEmojisLen возвращает суммарную длину всех эмодзи с учётом отступов
-func (b *RunnerBar) totalEmojisLen() int {
-	total := 0
-	for i, emoji := range b.emojis {
-		total += len([]rune(emoji))
-		if i < len(b.emojis)-1 {
-			total += b.spacing
-		}
-	}
-	return total
 }
