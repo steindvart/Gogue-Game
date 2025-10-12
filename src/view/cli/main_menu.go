@@ -19,29 +19,6 @@ var titleArt = []string{
 	"               |___/                                          ",
 }
 
-var hallArt = []string{
-	" _____________________________________________",
-	"|.'',                                     ,''.|",
-	"|.'.'',                                 ,''.'.|",
-	"|.'.'.'',                             ,''.'.'.|",
-	"|.'.'.'.'',                         ,''.'.'.'.|",
-	"|.'.'.'.'.|                         |.'.'.'.'.|",
-	"|.'.'.'.'.|===;                 ;===|.'.'.'.'.|",
-	"|.'.'.'.'.|:::|',             ,'|:::|.'.'.'.'.|",
-	"|.'.'.'.'.|---|'.|, _______ ,|.'|---|.'.'.'.'.|",
-	"|.'.'.'.'.|:::|'.|'|???????|'|.'|:::|.'.'.'.'.|",
-	"|,',',',',|---|',|'|???????|'|,'|---|,',',',',|",
-	"|.'.'.'.'.|:::|'.|'|???????|'|.'|:::|.'.'.'.'.|",
-	"|.'.'.'.'.|---|','   /%%%\\   ','|---|.'.'.'.'.|",
-	"|.'.'.'.'.|===:'    /%%%%%\\    ':===|.'.'.'.'.|",
-	"|.'.'.'.'.|%%%%%%%%%%%%%%%%%%%%%%%%%|.'.'.'.'.|",
-	"|.'.'.'.','       /%%%%%%%%%\\       ','.'.'.'.|",
-	"|.'.'.','        /%%%%%%%%%%%\\        ','.'.'.|",
-	"|.'.','         /%%%%%%%%%%%%%\\         ','.'.|",
-	"|.','          /%%%%%%%%%%%%%%%\\          ','.|",
-	"|;____________/%%%%%%%%%%%%%%%%%\\____________;|",
-}
-
 type MainMenuTView struct {
 	flex  *tview.Flex
 	list  *tview.List
@@ -51,10 +28,57 @@ type MainMenuTView struct {
 }
 
 func NewMainMenuTView(options []string, active int) *MainMenuTView {
+	title := newTitle()
+	list := newList(options, active)
+
+	flex := tview.NewFlex().SetDirection(tview.FlexRow).
+		AddItem(title, len(titleArt)+1, 0, false).
+		AddItem(list, 0, 1, true)
+
+	m := &MainMenuTView{
+		flex:  flex,
+		list:  list,
+		title: title,
+		hall:  nil,
+		frame: 0,
+	}
+
+	m.SetRainbowTitleFrame(0)
+	return m
+}
+
+func newTitle() *tview.TextView {
 	// Изначально пусто, будет обновляться через SetRainbowTitleFrame
 	title := tview.NewTextView().SetDynamicColors(true)
 	title.SetTextAlign(tview.AlignCenter)
 	title.SetBorder(false)
+
+	return title
+}
+
+func newHall() *tview.TextView {
+	var hallArt = []string{
+		" _____________________________________________",
+		"|.'',                                     ,''.|",
+		"|.'.'',                                 ,''.'.|",
+		"|.'.'.'',                             ,''.'.'.|",
+		"|.'.'.'.'',                         ,''.'.'.'.|",
+		"|.'.'.'.'.|                         |.'.'.'.'.|",
+		"|.'.'.'.'.|===;                 ;===|.'.'.'.'.|",
+		"|.'.'.'.'.|:::|',             ,'|:::|.'.'.'.'.|",
+		"|.'.'.'.'.|---|'.|, _______ ,|.'|---|.'.'.'.'.|",
+		"|.'.'.'.'.|:::|'.|'|???????|'|.'|:::|.'.'.'.'.|",
+		"|,',',',',|---|',|'|???????|'|,'|---|,',',',',|",
+		"|.'.'.'.'.|:::|'.|'|???????|'|.'|:::|.'.'.'.'.|",
+		"|.'.'.'.'.|---|','   /%%%\\   ','|---|.'.'.'.'.|",
+		"|.'.'.'.'.|===:'    /%%%%%\\    ':===|.'.'.'.'.|",
+		"|.'.'.'.'.|%%%%%%%%%%%%%%%%%%%%%%%%%|.'.'.'.'.|",
+		"|.'.'.'.','       /%%%%%%%%%\\       ','.'.'.'.|",
+		"|.'.'.','        /%%%%%%%%%%%\\        ','.'.'.|",
+		"|.'.','         /%%%%%%%%%%%%%\\         ','.'.|",
+		"|.','          /%%%%%%%%%%%%%%%\\          ','.|",
+		"|;____________/%%%%%%%%%%%%%%%%%\\____________;|",
+	}
 
 	hall := tview.NewTextView().SetDynamicColors(true)
 	for _, line := range hallArt {
@@ -62,32 +86,22 @@ func NewMainMenuTView(options []string, active int) *MainMenuTView {
 	}
 	hall.SetTextAlign(tview.AlignCenter)
 	hall.SetBorder(false)
+	return hall
+}
 
+func newList(options []string, active int) *tview.List {
 	list := tview.NewList()
 	for _, opt := range options {
 		list.AddItem(opt, "", 0, nil)
 	}
+
 	list.SetCurrentItem(active)
 	list.SetMainTextColor(tcell.ColorWhite)
 	list.SetSelectedTextColor(tcell.ColorBlack)
 	list.SetSelectedBackgroundColor(tcell.ColorYellow)
 	list.SetBorder(false)
 
-	flex := tview.NewFlex().SetDirection(tview.FlexRow).
-		AddItem(title, len(titleArt)+1, 0, false).
-		AddItem(list, 0, 1, true).
-		AddItem(hall, len(hallArt)+1, 0, false)
-
-	m := &MainMenuTView{
-		flex:  flex,
-		list:  list,
-		title: title,
-		hall:  hall,
-		frame: 0,
-	}
-
-	m.SetRainbowTitleFrame(0)
-	return m
+	return list
 }
 
 func (m *MainMenuTView) SetRainbowTitleFrame(frame int) {
