@@ -23,8 +23,7 @@ type MainMenu struct {
 	flex         *tview.Flex
 	list         *tview.List
 	title        *tview.TextView
-	rainbowTimer float64 // для анимации радуги
-	hall         *tview.TextView
+	rainbowTimer float64    // для анимации радуги
 	runnerBar    *RunnerBar // анимированная полоска
 }
 
@@ -35,28 +34,36 @@ func NewMainMenu(options []string, active int) *MainMenu {
 	// Создаём пустой Box с тёмным фоном для выравнивания элементов
 	gapBox := tview.NewBox().SetBackgroundColor(tcell.ColorBlack)
 
-	runnerBar := NewRunnerBar(100)
+	barLength := len(titleArt[0]) + 10
+	runnerBar := NewRunnerBar(barLength)
 
 	// Центрируем список по горизонтали с помощью Flex
-	hFlex := tview.NewFlex().SetDirection(tview.FlexColumn).
+	listFlex := tview.NewFlex().SetDirection(tview.FlexColumn).
 		AddItem(gapBox, 0, 1, false).
-		AddItem(list, 10, 0, true).
+		AddItem(list, 20, 0, true).
 		AddItem(gapBox, 0, 1, false)
 
-	flex := tview.NewFlex().SetDirection(tview.FlexRow).
-		AddItem(gapBox, 10, 0, false).
-		AddItem(title, len(titleArt)+3, 0, false).
-		AddItem(hFlex, 0, 1, true).
-		AddItem(runnerBar.Primitive(), 1, 1, false).
-		AddItem(gapBox, 10, 1, false)
+	// RunnerBar по центру под меню
+	runnerFlex := tview.NewFlex().SetDirection(tview.FlexColumn).
+		AddItem(gapBox, 0, 1, false).
+		AddItem(runnerBar.Primitive(), barLength, 0, false).
+		AddItem(gapBox, 0, 1, false)
+
+	rootFlex := tview.NewFlex().SetDirection(tview.FlexRow).
+		AddItem(gapBox, 2, 0, false). // верхний отступ
+		AddItem(title, len(titleArt)+2, 0, false).
+		AddItem(listFlex, 5, 1, true).
+		AddItem(gapBox, 1, 0, false). // отступ между меню и полоской
+		AddItem(runnerFlex, 1, 0, false).
+		AddItem(gapBox, 0, 1, false) // всё оставшееся пространство
 
 	m := &MainMenu{
-		flex:      flex,
+		flex:      rootFlex,
 		list:      list,
 		title:     title,
-		hall:      nil,
 		runnerBar: runnerBar,
 	}
+
 	m.SetRainbowTitleFrame(0)
 	return m
 }
