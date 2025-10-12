@@ -71,12 +71,14 @@ func EventToAction(event *tcell.EventKey) action.Type {
 	case tcell.KeyEsc:
 		return action.Exit
 	}
+
 	switch event.Rune() {
-	case 'w', 'W':
+	case 'w', 'W', 'ц', 'Ц':
 		return action.MoveUp
-	case 's', 'S':
+	case 's', 'S', 'ы', 'Ы':
 		return action.MoveDown
 	}
+
 	return action.NoAction
 }
 
