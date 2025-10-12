@@ -18,10 +18,10 @@ type MainMenu struct {
 
 func NewMainMenu() *MainMenu {
 	menu := model.NewMenu([]model.MenuOption{
-		{Label: "New Game", Signal: signal.NewGame},
-		{Label: "Load Game", Signal: signal.LoadGame},
+		{Label: " New Game ", Signal: signal.NewGame},
+		{Label: "   Load   ", Signal: signal.LoadGame},
 		{Label: "Scoreboard", Signal: signal.ShowScoreboard},
-		{Label: "Exit", Signal: signal.Stop},
+		{Label: "   Exit   ", Signal: signal.Stop},
 	})
 	view := viewcli.NewMainMenu(menu.GetOptionsLabels(), menu.GetActive())
 
