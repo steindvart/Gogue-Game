@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 
-	"gogue/model/signal"
 	"gogue/presentation/cli"
 	"gogue/presentation/cli/state"
 
@@ -17,26 +16,6 @@ func main() {
 		}
 	}()
 
-	app := tview.NewApplication()
-
-	mainMenu := state.NewMainMenu(func(sig signal.Type) {
-		switch sig {
-		case signal.NewGame:
-			// Перейти в состояние игры
-			// game.PushState(state.NewGame(...))
-		case signal.ShowScoreboard:
-			// Показать таблицу лидеров
-			// game.PushState(state.NewScoreboard(...))
-		case signal.Stop:
-			// Завершить приложение
-			app.Stop()
-		}
-	})
-
-	game := &cli.Game{
-		States: []state.State{mainMenu},
-		App:    app,
-	}
-
+	game := cli.NewGame(tview.NewApplication(), state.NewMainMenu())
 	game.Run()
 }

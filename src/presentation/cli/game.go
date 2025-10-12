@@ -3,13 +3,28 @@ package cli
 import (
 	"gogue/model/signal"
 	"gogue/presentation/cli/state"
+	"time"
 
 	"github.com/rivo/tview"
 )
 
+const DefaultFPSLimit = 60
+
 type Game struct {
-	States []state.State
-	App    *tview.Application
+	States   []state.State
+	App      *tview.Application
+	FPSLimit int
+}
+
+// NewGame создаёт новый игровой цикл с заданным FPS (по умолчанию 60)
+func NewGame(app *tview.Application, initialState state.State) *Game {
+	game := &Game{
+		States:   []state.State{initialState},
+		App:      app,
+		FPSLimit: DefaultFPSLimit,
+	}
+	game.App.SetRoot(game.CurrentState().Primitive(), true)
+	return game
 }
 
 func (g *Game) PushState(state state.State) {
@@ -32,29 +47,39 @@ func (g *Game) CurrentState() state.State {
 }
 
 func (g *Game) Run() {
-	state := g.CurrentState()
-	if state != nil {
-		g.App.SetRoot(g.CurrentState().Primitive(), true)
-	}
+	g.runUpdateLoop(g.FPSLimit)
 
 	if err := g.App.Run(); err != nil {
 		panic(err)
 	}
+}
 
-	for {
-		state := g.CurrentState()
-		if state == nil {
-			break
+// runUpdateLoop запускает обновление игровых состояний с опросом сигналов от них и с ограничением по FPS
+func (g *Game) runUpdateLoop(fpsLimit int) {
+	ticker := time.NewTicker(time.Second / time.Duration(fpsLimit))
+	go func() {
+		defer ticker.Stop()
+		for range ticker.C {
+			state := g.CurrentState()
+			if state == nil {
+				g.App.Stop()
+				return
+			}
+
+			sig := state.Update()
+
+			if sig != signal.NoSignal {
+				g.App.QueueUpdateDraw(func() {
+					g.handleSignal(sig)
+					if s := g.CurrentState(); s != nil {
+						g.App.SetRoot(s.Primitive(), true)
+					} else {
+						g.App.Stop()
+					}
+				})
+			}
 		}
-
-		g.handleSignal(state.Update())
-		state = g.CurrentState()
-		if state == nil {
-			break
-		}
-	}
-
-	g.App.Stop()
+	}()
 }
 
 func (g *Game) handleSignal(s signal.Type) {

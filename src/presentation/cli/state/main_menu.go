@@ -10,12 +10,12 @@ import (
 )
 
 type MainMenu struct {
-	model    *model.Menu
-	view     *viewcli.MainMenuTView
-	onSignal func(signal.Type)
+	model  *model.Menu
+	view   *viewcli.MainMenuTView
+	signal signal.Type
 }
 
-func NewMainMenu(onSignal func(signal.Type)) *MainMenu {
+func NewMainMenu() *MainMenu {
 	menu := model.NewMenu([]model.MenuOption{
 		{Label: "New Game", Signal: signal.NewGame},
 		{Label: "Load Game", Signal: signal.LoadGame},
@@ -25,9 +25,9 @@ func NewMainMenu(onSignal func(signal.Type)) *MainMenu {
 	view := viewcli.NewMainMenuTView(menu.GetOptionsLabels(), menu.GetActive())
 
 	m := &MainMenu{
-		model:    menu,
-		view:     view,
-		onSignal: onSignal,
+		model:  menu,
+		view:   view,
+		signal: signal.NoSignal,
 	}
 
 	view.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
@@ -41,14 +41,10 @@ func NewMainMenu(onSignal func(signal.Type)) *MainMenu {
 			m.view.SetActive(m.model.GetActive())
 			return nil
 		case tcell.KeyEnter:
-			if m.onSignal != nil {
-				m.onSignal(m.model.Select().Signal)
-			}
+			m.signal = m.model.Select().Signal
 			return nil
 		case tcell.KeyEsc:
-			if m.onSignal != nil {
-				m.onSignal(signal.Stop)
-			}
+			m.signal = signal.Stop
 			return nil
 		}
 		return event
@@ -57,11 +53,12 @@ func NewMainMenu(onSignal func(signal.Type)) *MainMenu {
 	return m
 }
 
-// Primitive возвращает tview-примитив для интеграции с приложением
 func (m *MainMenu) Primitive() tview.Primitive {
 	return m.view.Primitive()
 }
 
 func (m *MainMenu) Update() signal.Type {
-	return signal.NoSignal
+	sig := m.signal
+	m.signal = signal.NoSignal // сброс сигнала после чтения
+	return sig
 }
