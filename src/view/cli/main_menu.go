@@ -128,23 +128,45 @@ func (m *MainMenuTView) SetInputCapture(handler func(event *tcell.EventKey) *tce
 	m.list.SetInputCapture(handler)
 }
 
-// DrawRainbowTitle формирует titleArt с анимированной радугой
+// hsvToRGB возвращает цвет tcell.Color по HSV (hue [0..360), s,v [0..1])
+func hsvToRGB(h, s, v float64) tcell.Color {
+	var r, g, b float64
+	i := int(h/60.0) % 6
+	f := h/60.0 - float64(i)
+	p := v * (1 - s)
+	q := v * (1 - f*s)
+	t := v * (1 - (1-f)*s)
+	switch i {
+	case 0:
+		r, g, b = v, t, p
+	case 1:
+		r, g, b = q, v, p
+	case 2:
+		r, g, b = p, v, t
+	case 3:
+		r, g, b = p, q, v
+	case 4:
+		r, g, b = t, p, v
+	case 5:
+		r, g, b = v, p, q
+	}
+	return tcell.NewRGBColor(int32(r*255), int32(g*255), int32(b*255))
+}
+
 func DrawRainbowTitle(frame int) string {
-	var rainbowColors = []tcell.Color{
-		tcell.ColorRed,
-		tcell.ColorOrange,
-		tcell.ColorYellow,
-		tcell.ColorGreen,
-		tcell.ColorBlue,
-		tcell.ColorIndigo,
-		tcell.ColorViolet,
+	const paletteSize = 64 // Чем больше, тем плавнее
+
+	var palette [paletteSize]tcell.Color
+	for i := 0; i < paletteSize; i++ {
+		h := float64(i) * 360.0 / float64(paletteSize)
+		palette[i] = hsvToRGB(h, 1.0, 1.0)
 	}
 
 	var sb strings.Builder
 	for row, line := range titleArt {
 		for col, ch := range line {
-			colorIdx := (col + row + frame) % len(rainbowColors)
-			fmt.Fprintf(&sb, "[#%06x]%c", rainbowColors[colorIdx].Hex(), ch)
+			colorIdx := (col + row + frame) % paletteSize
+			fmt.Fprintf(&sb, "[#%06x]%c", palette[colorIdx].Hex(), ch)
 		}
 		sb.WriteByte('\n')
 	}

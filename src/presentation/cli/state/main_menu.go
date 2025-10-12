@@ -9,6 +9,10 @@ import (
 	"github.com/rivo/tview"
 )
 
+const (
+	animationSpeed = 10 // скорость анимации радуги
+)
+
 type MainMenu struct {
 	model        *model.Menu
 	view         *viewcli.MainMenuTView
@@ -59,12 +63,16 @@ func (m *MainMenu) Primitive() tview.Primitive {
 }
 
 func (m *MainMenu) Update(dt float64) signal.Type {
-	// Анимация радуги: увеличиваем frame с учётом времени
-	m.rainbowTimer += dt
-	frame := int(m.rainbowTimer * 10) // скорость анимации
-	m.view.SetRainbowTitleFrame(frame)
+	m.AnimateTitle(dt)
 
 	sig := m.signal
 	m.signal = signal.NoSignal // сброс сигнала после чтения
 	return sig
+}
+
+// Анимация радуги: увеличиваем frame с учётом времени
+func (m *MainMenu) AnimateTitle(dt float64) {
+	m.rainbowTimer += dt
+	frame := int(m.rainbowTimer * animationSpeed) // скорость анимации
+	m.view.SetRainbowTitleFrame(frame)
 }
