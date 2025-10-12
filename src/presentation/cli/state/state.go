@@ -7,6 +7,6 @@ import (
 )
 
 type State interface {
-	Update() signal.Type
+	Update(dt float64) signal.Type
 	Primitive() tview.Primitive
 }
