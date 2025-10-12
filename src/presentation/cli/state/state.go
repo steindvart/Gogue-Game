@@ -10,7 +10,3 @@ type State interface {
 	Update() signal.Type
 	Render()
 }
-
-type Renderer interface {
-	Render()
-}

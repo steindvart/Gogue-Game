@@ -15,15 +15,19 @@ const (
 	FIELD_WIDTH  = 100
 )
 
+type GameRenderer interface {
+	Render(field [][]int) error
+}
+
 type Game struct {
 	player      entity.Player
 	fieldWidth  int
 	fieldHeight int
-	view        *view.Game
+	renderer    GameRenderer
 }
 
 func NewGame(parent *gc.Window) *Game {
-	view, err := view.NewGame(parent, FIELD_WIDTH, FIELD_HEIGHT)
+	renderer, err := view.NewGame(parent, FIELD_WIDTH, FIELD_HEIGHT)
 	if err != nil {
 		fmt.Println("Error creating main menu view:", err)
 		return nil
@@ -48,7 +52,7 @@ func NewGame(parent *gc.Window) *Game {
 		player:      player,
 		fieldWidth:  FIELD_WIDTH - 2,  // Исключая границы
 		fieldHeight: FIELD_HEIGHT - 2, // Исключая границы
-		view:        view,
+		renderer:    renderer,
 	}
 }
 
@@ -76,7 +80,7 @@ func (g *Game) Update() signal.Type {
 func (g *Game) Render() {
 	field := g.makeField()
 
-	err := g.view.Render(field)
+	err := g.renderer.Render(field)
 	if err != nil {
 		fmt.Println("Error rendering game state:", err)
 		panic(err)

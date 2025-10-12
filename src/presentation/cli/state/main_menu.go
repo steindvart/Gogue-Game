@@ -10,13 +10,17 @@ import (
 	gc "github.com/rthornton128/goncurses"
 )
 
+type MainMenuRenderer interface {
+	Render(options []string, active int) error
+}
+
 type MainMenu struct {
-	model *model.Menu
-	view  *viewcli.MainMenu
+	model    *model.Menu
+	renderer MainMenuRenderer
 }
 
 func NewMainMenu(parent *gc.Window) *MainMenu {
-	menu, err := viewcli.NewMainMenu(parent)
+	renderer, err := viewcli.NewMainMenu(parent)
 	if err != nil {
 		fmt.Println("Error creating main menu view:", err)
 		return nil
@@ -29,7 +33,7 @@ func NewMainMenu(parent *gc.Window) *MainMenu {
 			{Label: "Scoreboard", Signal: signal.ShowScoreboard},
 			{Label: "Exit", Signal: signal.Stop},
 		}),
-		view: menu,
+		renderer: renderer,
 	}
 }
 
@@ -51,7 +55,7 @@ func (m *MainMenu) Update() signal.Type {
 }
 
 func (m *MainMenu) Render() {
-	err := m.view.Render(m.model.GetOptionsLabels(), m.model.GetActive())
+	err := m.renderer.Render(m.model.GetOptionsLabels(), m.model.GetActive())
 	if err != nil {
 		fmt.Println("Error rendering main menu:", err)
 		panic(err)
