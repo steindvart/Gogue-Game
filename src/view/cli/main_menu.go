@@ -20,11 +20,12 @@ var titleArt = []string{
 }
 
 type MainMenu struct {
-	flex  *tview.Flex
-	list  *tview.List
-	title *tview.TextView
-	hall  *tview.TextView
-	frame int // для анимации радуги
+	flex         *tview.Flex
+	list         *tview.List
+	title        *tview.TextView
+	rainbowTimer float64 // для анимации радуги
+	hall         *tview.TextView
+	runnerBar    *RunnerBar // анимированная полоска
 }
 
 func NewMainMenu(options []string, active int) *MainMenu {
@@ -34,25 +35,28 @@ func NewMainMenu(options []string, active int) *MainMenu {
 	// Создаём пустой Box с тёмным фоном для выравнивания элементов
 	gapBox := tview.NewBox().SetBackgroundColor(tcell.ColorBlack)
 
+	runnerBar := NewRunnerBar(100)
+
 	// Центрируем список по горизонтали с помощью Flex
 	hFlex := tview.NewFlex().SetDirection(tview.FlexColumn).
-		AddItem(gapBox, 0, 1, false). // пустое пространство слева
-		AddItem(list, 10, 0, true).   // ширина списка (можно скорректировать)
-		AddItem(gapBox, 0, 1, false)  // пустое пространство справа
+		AddItem(gapBox, 0, 1, false).
+		AddItem(list, 10, 0, true).
+		AddItem(gapBox, 0, 1, false)
 
 	flex := tview.NewFlex().SetDirection(tview.FlexRow).
 		AddItem(gapBox, 10, 0, false).
 		AddItem(title, len(titleArt)+3, 0, false).
-		AddItem(hFlex, 0, 1, true)
+		AddItem(hFlex, 0, 1, true).
+		AddItem(runnerBar.Primitive(), 1, 1, false).
+		AddItem(gapBox, 10, 1, false)
 
 	m := &MainMenu{
-		flex:  flex,
-		list:  list,
-		title: title,
-		hall:  nil,
-		frame: 0,
+		flex:      flex,
+		list:      list,
+		title:     title,
+		hall:      nil,
+		runnerBar: runnerBar,
 	}
-
 	m.SetRainbowTitleFrame(0)
 	return m
 }
@@ -82,8 +86,23 @@ func newList(options []string, active int) *tview.List {
 	return list
 }
 
+func (m *MainMenu) Update(dt float64, animationSpeed float64) {
+	m.AnimateTitle(dt, animationSpeed)
+	m.AnimateRunnerBar(dt)
+}
+
+func (m *MainMenu) AnimateTitle(dt float64, animationSpeed float64) {
+	m.rainbowTimer += dt
+	frame := int(m.rainbowTimer * animationSpeed)
+	m.SetRainbowTitleFrame(frame)
+}
+
+func (m *MainMenu) AnimateRunnerBar(dt float64) {
+	m.runnerBar.UpdatePositions(dt)
+	m.runnerBar.Update()
+}
+
 func (m *MainMenu) SetRainbowTitleFrame(frame int) {
-	m.frame = frame
 	m.title.SetText(DrawRainbowTitle(frame))
 }
 
@@ -132,7 +151,7 @@ func hsvToRGB(h, s, v float64) tcell.Color {
 }
 
 func DrawRainbowTitle(frame int) string {
-	const paletteSize = 64 // Чем больше, тем плавнее
+	const paletteSize = 64 // Чем больше, тем плавнее переход между цветами
 
 	var palette [paletteSize]tcell.Color
 	for i := 0; i < paletteSize; i++ {
