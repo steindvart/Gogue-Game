@@ -18,12 +18,11 @@ func NewRunnerBar(length int) *RunnerBar {
 	bar := &RunnerBar{
 		view:       tview.NewTextView().SetDynamicColors(true),
 		length:     length,
-		heroPos:    2,
 		heroSpeed:  3, // символов в секунду
-		enemyPos:   []float64{float64(length - 4), float64(length - 8), float64(length - 12)},
 		enemyType:  []string{"🦇", "👻", "🧟‍♂️"},
-		enemySpeed: []float64{2, 2, 2}, // скорость врагов (символов в сек)
+		enemySpeed: []float64{2, 2, 2},
 	}
+	bar.ResetPositions()
 	bar.view.SetTextAlign(tview.AlignLeft)
 	bar.view.SetBorder(false)
 	bar.Update()
@@ -31,10 +30,45 @@ func NewRunnerBar(length int) *RunnerBar {
 }
 
 func (b *RunnerBar) Update() {
+	b.view.SetText(b.RenderBar())
+}
+
+func (b *RunnerBar) UpdatePositions(dt float64) {
+	b.moveHero(dt)
+	b.moveEnemies(dt)
+	b.Update()
+}
+
+func (b *RunnerBar) moveHero(dt float64) {
+	b.heroPos += b.heroSpeed * dt
+	if int(b.heroPos) >= b.length-2 {
+		b.heroPos = 2
+	}
+}
+
+func (b *RunnerBar) moveEnemies(dt float64) {
+	for i := range b.enemyPos {
+		b.enemyPos[i] -= b.enemySpeed[i] * dt
+		if int(b.enemyPos[i]) < 0 {
+			b.enemyPos[i] = float64(b.length - 4 - i*4)
+		}
+	}
+}
+
+func (b *RunnerBar) ResetPositions() {
+	b.heroPos = 2
+	b.enemyPos = make([]float64, len(b.enemyType))
+	for i := range b.enemyType {
+		b.enemyPos[i] = float64(b.length - 4 - i*4)
+	}
+}
+
+func (b *RunnerBar) RenderBar() string {
 	bar := make([]rune, b.length)
 	for i := range bar {
 		bar[i] = ' '
 	}
+
 	// Враги
 	for i, pos := range b.enemyPos {
 		ipos := int(pos)
@@ -55,23 +89,7 @@ func (b *RunnerBar) Update() {
 			bar[hpos+j] = r
 		}
 	}
-	b.view.SetText(string(bar))
-}
-
-// UpdatePositions обновляет позиции объектов с учётом dt (секунды)
-func (b *RunnerBar) UpdatePositions(dt float64) {
-	b.heroPos += b.heroSpeed * dt
-	if int(b.heroPos) >= b.length-2 {
-		b.heroPos = 2
-	}
-
-	for i := range b.enemyPos {
-		b.enemyPos[i] -= b.enemySpeed[i] * dt
-		if int(b.enemyPos[i]) < 0 {
-			b.enemyPos[i] = float64(b.length - 4 - i*4)
-		}
-	}
-	b.Update()
+	return string(bar)
 }
 
 func (b *RunnerBar) Primitive() tview.Primitive {
