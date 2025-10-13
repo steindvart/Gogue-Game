@@ -1,42 +1,33 @@
 package state
 
 import (
-	"fmt"
 	"gogue/model/entity"
 	"gogue/model/signal"
 	"gogue/view/action"
-	view "gogue/view/cli"
 
-	gc "github.com/rthornton128/goncurses"
+	"github.com/gdamore/tcell/v2"
+	"github.com/rivo/tview"
 )
 
 const (
-	FIELD_HEIGHT = 40 // размеры с учётом границ
-	FIELD_WIDTH  = 100
+	FieldHeight = 20
+	FieldWidth  = 40
 )
-
-type GameRenderer interface {
-	Render(field [][]int) error
-}
 
 type Game struct {
 	player      entity.Player
 	fieldWidth  int
 	fieldHeight int
-	renderer    GameRenderer
+	view        *tview.Box
+	lastField   [][]int
+	signal      signal.Type
 }
 
-func NewGame(parent *gc.Window) *Game {
-	renderer, err := view.NewGame(parent, FIELD_WIDTH, FIELD_HEIGHT)
-	if err != nil {
-		fmt.Println("Error creating main menu view:", err)
-		return nil
-	}
-
+func NewGame() *Game {
 	player := entity.Player{
 		Character: entity.Character{
 			Shape: entity.Box{
-				Point: entity.Point2D[int]{X: 10, Y: 10},
+				Point: entity.Point2D[int]{X: 5, Y: 5},
 				Size:  entity.Size2D[uint]{Height: 1, Width: 1},
 			},
 			Health:    100,
@@ -48,55 +39,82 @@ func NewGame(parent *gc.Window) *Game {
 		Weapon:   nil,
 	}
 
-	return &Game{
+	box := tview.NewBox().SetBorder(true).SetTitle("Game")
+
+	game := Game{
 		player:      player,
-		fieldWidth:  FIELD_WIDTH - 2,  // Исключая границы
-		fieldHeight: FIELD_HEIGHT - 2, // Исключая границы
-		renderer:    renderer,
+		fieldWidth:  FieldWidth,
+		fieldHeight: FieldHeight,
+		view:        box,
+	}
+
+	game.view.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		switch EventToAction(event) {
+		case action.MoveUp:
+			game.player.Character.Shape.Move(entity.Point2D[int]{X: 0, Y: -1})
+			return nil
+		case action.MoveDown:
+			game.player.Character.Shape.Move(entity.Point2D[int]{X: 0, Y: 1})
+			return nil
+		case action.MoveLeft:
+			game.player.Character.Shape.Move(entity.Point2D[int]{X: -1, Y: 0})
+			return nil
+		case action.MoveRight:
+			game.player.Character.Shape.Move(entity.Point2D[int]{X: 1, Y: 0})
+			return nil
+		case action.Exit:
+			game.signal = signal.Stop
+			return nil
+		default:
+			return event
+		}
+	})
+
+	game.view.SetDrawFunc(func(screen tcell.Screen, x, y, width, height int) (int, int, int, int) {
+		game.view.Draw(screen)
+		game.drawField(screen, x+1, y+1, width-2, height-2)
+		return x, y, width, height
+	})
+
+	return &game
+}
+
+func (g *Game) Update(float64) signal.Type {
+	g.lastField = g.makeField()
+
+	sig := g.signal
+	g.signal = signal.NoSignal // сброс сигнала после чтения
+	return sig
+}
+
+func (g *Game) Primitive() tview.Primitive {
+	return g.view
+}
+
+func (g *Game) drawField(screen tcell.Screen, ox, oy, w, h int) {
+	field := g.lastField
+	if field == nil {
+		field = g.makeField()
+	}
+
+	for y := 0; y < g.fieldHeight && y < h; y++ {
+		for x := 0; x < g.fieldWidth && x < w; x++ {
+			ch := ' '
+			if field[y][x] == 1 {
+				ch = '🦸'
+			}
+			screen.SetContent(ox+x, oy+y, ch, nil, tcell.StyleDefault)
+		}
 	}
 }
 
-func (g *Game) Input(a action.Type) signal.Type {
-	switch a {
-	case action.MoveUp:
-		g.player.Character.Shape.Move(entity.Point2D[int]{X: 0, Y: -1})
-	case action.MoveDown:
-		g.player.Character.Shape.Move(entity.Point2D[int]{X: 0, Y: 1})
-	case action.MoveLeft:
-		g.player.Character.Shape.Move(entity.Point2D[int]{X: -1, Y: 0})
-	case action.MoveRight:
-		g.player.Character.Shape.Move(entity.Point2D[int]{X: 1, Y: 0})
-	case action.Exit:
-		return signal.Stop
-	}
-
-	return signal.NoSignal
-}
-
-func (g *Game) Update() signal.Type {
-	return signal.NoSignal
-}
-
-func (g *Game) Render() {
-	field := g.makeField()
-
-	err := g.renderer.Render(field)
-	if err != nil {
-		fmt.Println("Error rendering game state:", err)
-		panic(err)
-	}
-}
-
-// Генерирует двумерное поле, где 0 — пусто, 1 — персонаж
 func (g *Game) makeField() [][]int {
 	field := make([][]int, g.fieldHeight)
 	for y := range field {
 		field[y] = make([]int, g.fieldWidth)
 	}
-
 	px := g.player.Character.Shape.Point.X
 	py := g.player.Character.Shape.Point.Y
-
 	if py >= 0 && py < g.fieldHeight && px >= 0 && px < g.fieldWidth {
 		field[py][px] = 1
 	}

@@ -16,7 +16,6 @@ type Game struct {
 	FPSLimit int
 }
 
-// NewGame создаёт новый игровой цикл с заданным FPS (по умолчанию 60)
 func NewGame(app *tview.Application, initialState state.State) *Game {
 	game := &Game{
 		States:   []state.State{initialState},
@@ -95,7 +94,7 @@ func (g *Game) handleSignal(s signal.Type) {
 	case signal.Stop:
 		g.PopState()
 	case signal.NewGame:
-		// g.PushState(state.NewGame(g.App))
+		g.PushState(state.NewGame())
 	case signal.LoadGame:
 		// @todo push load game state
 	case signal.ShowScoreboard:
