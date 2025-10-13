@@ -3,7 +3,7 @@ package state
 import (
 	"gogue/model"
 	"gogue/model/signal"
-	"gogue/view/action"
+	"gogue/presentation/action"
 	viewcli "gogue/view/cli"
 
 	"github.com/gdamore/tcell/v2"

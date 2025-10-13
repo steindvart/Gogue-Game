@@ -3,7 +3,7 @@ package state
 import (
 	"gogue/model/entity"
 	"gogue/model/signal"
-	"gogue/view/action"
+	"gogue/presentation/action"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -31,6 +31,7 @@ func NewGame() *Game {
 		Weapon:   nil,
 	}
 
+	// @todo - выделить отрисовку в отдельный факл в view/cli
 	box := tview.NewBox().SetBorder(true).SetTitle("Game")
 
 	game := Game{
