@@ -49,7 +49,7 @@ func NewGame() *Game {
 	}
 
 	game.view.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		switch EventToAction(event) {
+		switch game.eventToAction(event) {
 		case action.MoveUp:
 			game.player.Character.Shape.Move(entity.Point2D[int]{X: 0, Y: -1})
 			return nil
@@ -77,6 +77,34 @@ func NewGame() *Game {
 	})
 
 	return &game
+}
+
+func (g *Game) eventToAction(event *tcell.EventKey) action.Type {
+	switch event.Key() {
+	case tcell.KeyUp:
+		return action.MoveUp
+	case tcell.KeyDown:
+		return action.MoveDown
+	case tcell.KeyLeft:
+		return action.MoveLeft
+	case tcell.KeyRight:
+		return action.MoveRight
+	case tcell.KeyEsc:
+		return action.Exit
+	}
+
+	switch event.Rune() {
+	case 'w', 'W', 'ц', 'Ц':
+		return action.MoveUp
+	case 's', 'S', 'ы', 'Ы':
+		return action.MoveDown
+	case 'a', 'A', 'ф', 'Ф':
+		return action.MoveLeft
+	case 'd', 'D', 'в', 'В':
+		return action.MoveRight
+	}
+
+	return action.NoAction
 }
 
 func (g *Game) Update(float64) signal.Type {

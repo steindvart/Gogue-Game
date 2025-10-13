@@ -32,7 +32,7 @@ func NewMainMenu() *MainMenu {
 	}
 
 	view.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		switch EventToAction(event) {
+		switch m.eventToAction(event) {
 		case action.MoveUp:
 			m.model.Previous()
 			m.view.SetActive(m.model.GetActive())
@@ -55,7 +55,7 @@ func NewMainMenu() *MainMenu {
 	return m
 }
 
-func EventToAction(event *tcell.EventKey) action.Type {
+func (m *MainMenu) eventToAction(event *tcell.EventKey) action.Type {
 	switch event.Key() {
 	case tcell.KeyUp:
 		return action.MoveUp
