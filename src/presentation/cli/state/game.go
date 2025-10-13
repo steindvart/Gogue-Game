@@ -9,18 +9,10 @@ import (
 	"github.com/rivo/tview"
 )
 
-const (
-	FieldHeight = 20
-	FieldWidth  = 40
-)
-
 type Game struct {
-	player      entity.Player
-	fieldWidth  int
-	fieldHeight int
-	view        *tview.Box
-	lastField   [][]int
-	signal      signal.Type
+	player entity.Player
+	view   *tview.Box
+	signal signal.Type
 }
 
 func NewGame() *Game {
@@ -42,11 +34,16 @@ func NewGame() *Game {
 	box := tview.NewBox().SetBorder(true).SetTitle("Game")
 
 	game := Game{
-		player:      player,
-		fieldWidth:  FieldWidth,
-		fieldHeight: FieldHeight,
-		view:        box,
+		player: player,
+		view:   box,
 	}
+
+	game.view.SetDrawFunc(func(screen tcell.Screen, x, y, width, height int) (int, int, int, int) {
+		// -2: учёт рамки
+		fw, fh := width-2, height-2
+		game.drawField(screen, x+1, y+1, fw, fh)
+		return x, y, width, height
+	})
 
 	game.view.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch game.eventToAction(event) {
@@ -68,12 +65,6 @@ func NewGame() *Game {
 		default:
 			return event
 		}
-	})
-
-	game.view.SetDrawFunc(func(screen tcell.Screen, x, y, width, height int) (int, int, int, int) {
-		game.view.Draw(screen)
-		game.drawField(screen, x+1, y+1, width-2, height-2)
-		return x, y, width, height
 	})
 
 	return &game
@@ -108,10 +99,9 @@ func (g *Game) eventToAction(event *tcell.EventKey) action.Type {
 }
 
 func (g *Game) Update(float64) signal.Type {
-	g.lastField = g.makeField()
-
+	// Нет lastField, всё строится на лету
 	sig := g.signal
-	g.signal = signal.NoSignal // сброс сигнала после чтения
+	g.signal = signal.NoSignal
 	return sig
 }
 
@@ -120,30 +110,26 @@ func (g *Game) Primitive() tview.Primitive {
 }
 
 func (g *Game) drawField(screen tcell.Screen, ox, oy, w, h int) {
-	field := g.lastField
-	if field == nil {
-		field = g.makeField()
-	}
-
-	for y := 0; y < g.fieldHeight && y < h; y++ {
-		for x := 0; x < g.fieldWidth && x < w; x++ {
+	field := g.makeField(w, h)
+	for y := 0; y < h; y++ {
+		for x := 0; x < w; x++ {
 			ch := ' '
 			if field[y][x] == 1 {
 				ch = '🦸'
 			}
-			screen.SetContent(ox+x, oy+y, ch, nil, tcell.StyleDefault)
+			screen.SetContent(ox+x, oy+y, ch, nil, tcell.StyleDefault.Background(tcell.ColorBlack))
 		}
 	}
 }
 
-func (g *Game) makeField() [][]int {
-	field := make([][]int, g.fieldHeight)
+func (g *Game) makeField(w, h int) [][]int {
+	field := make([][]int, h)
 	for y := range field {
-		field[y] = make([]int, g.fieldWidth)
+		field[y] = make([]int, w)
 	}
 	px := g.player.Character.Shape.Point.X
 	py := g.player.Character.Shape.Point.Y
-	if py >= 0 && py < g.fieldHeight && px >= 0 && px < g.fieldWidth {
+	if py >= 0 && py < h && px >= 0 && px < w {
 		field[py][px] = 1
 	}
 	return field
