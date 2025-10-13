@@ -5,7 +5,6 @@ go 1.22.0
 require (
 	github.com/gdamore/tcell/v2 v2.8.1
 	github.com/rivo/tview v0.42.1-0.20250929082832-e113793670e2
-	github.com/rthornton128/goncurses v0.0.0-20240804152857-da6485a3b6d7
 )
 
 require (
