@@ -1,7 +1,6 @@
 package entity
 
 import (
-	"errors"
 	"math/rand"
 )
 
@@ -12,6 +11,11 @@ const (
 	RoomWalls     = 2
 )
 
+const (
+	LEVEL_HEIGHT = 100
+	LEVEL_WIDTH  = 150
+)
+
 type Level struct {
 	Rooms       []Room
 	Passages    []Passage
@@ -19,7 +23,7 @@ type Level struct {
 	LevelEnd    Box
 }
 
-func (l *Level) GenerateRoomsOnLevel(sizeMapWidth int, sizeMapHeight int) error {
+func (l *Level) GenerateRoomsOnLevel() {
 	l.Rooms = make([]Room, RoomsCount)
 
 	indices := rand.Perm(RoomsCount)
@@ -27,12 +31,8 @@ func (l *Level) GenerateRoomsOnLevel(sizeMapWidth int, sizeMapHeight int) error 
 	finishIndex := indices[1]
 	var roomType RoomType
 
-	sizeSectionWidth := sizeMapWidth / 3
-	sizeSectionHeight := sizeMapHeight / 3
-
-	if sizeSectionWidth < RoomMinWidth || sizeSectionHeight < RoomMinHeight {
-		return errors.New("map size is too small: each room must be at least 3x3")
-	}
+	sizeSectionWidth := LEVEL_WIDTH / 3
+	sizeSectionHeight := LEVEL_HEIGHT / 3
 
 	for i := 0; i < 3; i++ {
 		for j := 0; j < 3; j++ {
@@ -72,5 +72,4 @@ func (l *Level) GenerateRoomsOnLevel(sizeMapWidth int, sizeMapHeight int) error 
 				})
 		}
 	}
-	return nil
 }
