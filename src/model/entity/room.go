@@ -16,10 +16,9 @@ type Room struct {
 	Scrolls []Scroll
 	Weapons []Weapon
 	Enemies []Enemy
-	Portal  *Box
 }
 
-func NewRoom(roomType RoomType, shape Box, portal *Box) *Room {
+func NewRoom(roomType RoomType, shape Box) *Room {
 	return &Room{
 		Shape:   shape,
 		Type:    roomType,
@@ -28,6 +27,5 @@ func NewRoom(roomType RoomType, shape Box, portal *Box) *Room {
 		Scrolls: []Scroll{},
 		Weapons: []Weapon{},
 		Enemies: []Enemy{},
-		Portal:  portal,
 	}
 }
