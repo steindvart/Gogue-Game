@@ -5,22 +5,28 @@ import (
 	"gogue/presentation/cli/state"
 	"time"
 
-	"gogue/view/action"
-	viewcli "gogue/view/cli"
-
-	gc "github.com/rthornton128/goncurses"
+	"github.com/rivo/tview"
 )
 
-const FPS_DEFAULT = 60
+const DefaultFPSLimit = 60
 
 type Game struct {
-	States []state.State
-	Window *gc.Window
+	States   []state.State
+	App      *tview.Application
+	FPSLimit int
+}
+
+func NewGame(app *tview.Application, initialState state.State) *Game {
+	game := &Game{
+		States:   []state.State{initialState},
+		App:      app,
+		FPSLimit: DefaultFPSLimit,
+	}
+	game.App.SetRoot(game.CurrentState().Primitive(), true)
+	return game
 }
 
 func (g *Game) PushState(state state.State) {
-	g.Window.Erase()
-	g.Window.Refresh()
 	g.States = append(g.States, state)
 }
 
@@ -29,8 +35,6 @@ func (g *Game) PopState() {
 		return
 	}
 
-	g.Window.Erase()
-	g.Window.Refresh()
 	g.States = g.States[:len(g.States)-1]
 }
 
@@ -42,48 +46,47 @@ func (g *Game) CurrentState() state.State {
 }
 
 func (g *Game) Run() {
-	actions := g.runInputActionsRoutine()
-	ticker := time.NewTicker(time.Second / FPS_DEFAULT)
-	defer ticker.Stop()
+	g.runUpdateLoop(g.FPSLimit)
 
-	for {
-		<-ticker.C // ограничение FPS
-
-		state := g.CurrentState()
-		if state == nil {
-			break
-		}
-
-		g.handleSignal(state.Input(<-actions))
-		state = g.CurrentState()
-		if state == nil {
-			break
-		}
-
-		g.handleSignal(state.Update())
-		state = g.CurrentState()
-		if state == nil {
-			break
-		}
-
-		state.Render()
-
-		err := gc.Update()
-		if err != nil {
-			panic(err)
-		}
+	if err := g.App.Run(); err != nil {
+		panic(err)
 	}
 }
 
-func (g *Game) runInputActionsRoutine() <-chan action.Type {
-	actions := make(chan action.Type, 1)
-	go func(ch chan<- action.Type) {
-		for {
-			ch <- viewcli.HandleInput(g.Window)
-		}
-	}(actions)
+// runUpdateLoop запускает обновление игровых состояний с опросом сигналов от них и с ограничением по FPS
+func (g *Game) runUpdateLoop(fpsLimit int) {
+	ticker := time.NewTicker(time.Second / time.Duration(fpsLimit))
+	var lastTime = time.Now()
+	go func() {
+		defer ticker.Stop()
+		for range ticker.C {
+			now := time.Now()
+			dt := now.Sub(lastTime).Seconds()
+			lastTime = now
 
-	return actions
+			state := g.CurrentState()
+			if state == nil {
+				g.App.Stop()
+				return
+			}
+
+			sig := state.Update(dt)
+
+			if sig != signal.NoSignal {
+				g.App.QueueUpdateDraw(func() {
+					g.handleSignal(sig)
+					if s := g.CurrentState(); s != nil {
+						g.App.SetRoot(s.Primitive(), true)
+					} else {
+						g.App.Stop()
+					}
+				})
+			} else {
+				// Для анимации: обновляем UI даже если сигнала нет
+				g.App.QueueUpdateDraw(func() {})
+			}
+		}
+	}()
 }
 
 func (g *Game) handleSignal(s signal.Type) {
@@ -91,7 +94,7 @@ func (g *Game) handleSignal(s signal.Type) {
 	case signal.Stop:
 		g.PopState()
 	case signal.NewGame:
-		g.PushState(state.NewGame(g.Window))
+		g.PushState(state.NewGame())
 	case signal.LoadGame:
 		// @todo push load game state
 	case signal.ShowScoreboard:

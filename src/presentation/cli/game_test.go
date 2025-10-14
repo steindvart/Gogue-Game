@@ -1,81 +1,65 @@
 package cli
 
-// import (
-// 	"gogue/model/signal"
-// 	"gogue/view/action"
-// )
+import (
+	"gogue/model/signal"
+	"testing"
 
-// type mockState struct {
-// 	inputCalled  bool
-// 	updateCalled bool
-// 	renderCalled bool
-// }
+	"github.com/rivo/tview"
+)
 
-// func (m *mockState) Input(action.Type) signal.Type {
-// 	m.inputCalled = true
-// 	return signal.NoSignal
-// }
+type mockState struct {
+	updateCalled bool
+}
 
-// func (m *mockState) Update() signal.Type {
-// 	m.updateCalled = true
-// 	return signal.NoSignal
-// }
+func (m *mockState) Update(dt float64) signal.Type {
+	m.updateCalled = true
+	return signal.NoSignal
+}
 
-// func (m *mockState) Render() { m.renderCalled = true }
+func (m *mockState) Primitive() tview.Primitive {
+	return tview.NewBox()
+}
 
-// @todo!!! - придумать как замокать gc.Window в Pop/Push state для тестов
-// func TestGame_PushPopState(t *testing.T) {
-// 	g := &Game{}
-// 	state1 := &mockState{}
-// 	state2 := &mockState{}
+func TestGame_PushPopState(t *testing.T) {
+	g := &Game{}
+	state1 := &mockState{}
+	state2 := &mockState{}
 
-// 	g.PushState(state1)
-// 	g.PushState(state2)
+	g.PushState(state1)
+	g.PushState(state2)
 
-// 	if len(g.States) != 2 {
-// 		t.Errorf("PushState: expected 2 states, got %d", len(g.States))
-// 	}
+	if len(g.States) != 2 {
+		t.Errorf("PushState: expected 2 states, got %d", len(g.States))
+	}
 
-// 	g.PopState()
-// 	if len(g.States) != 1 {
-// 		t.Errorf("PopState: expected 1 state, got %d", len(g.States))
-// 	}
+	g.PopState()
+	if len(g.States) != 1 {
+		t.Errorf("PopState: expected 1 state, got %d", len(g.States))
+	}
 
-// 	g.PopState()
-// 	if len(g.States) != 0 {
-// 		t.Errorf("PopState: expected 0 states, got %d", len(g.States))
-// 	}
+	g.PopState()
+	if len(g.States) != 0 {
+		t.Errorf("PopState: expected 0 states, got %d", len(g.States))
+	}
 
-// 	g.PopState() // Попытка удалить из пустого
-// 	if len(g.States) != 0 {
-// 		t.Errorf("PopState: expected 0 states after pop from empty, got %d", len(g.States))
-// 	}
-// }
+	g.PopState() // Попытка удалить из пустого
+	if len(g.States) != 0 {
+		t.Errorf("PopState: expected 0 states after pop from empty, got %d", len(g.States))
+	}
+}
 
-// func TestGame_CurrentState(t *testing.T) {
-// 	g := &Game{}
-// 	if g.CurrentState() != nil {
-// 		t.Errorf("CurrentState: expected nil for empty stack")
-// 	}
-// 	state := &mockState{}
-// 	g.PushState(state)
-// 	if g.CurrentState() != state {
-// 		t.Errorf("CurrentState: expected pushed state")
-// 	}
-// 	g.PopState()
-// 	if g.CurrentState() != nil {
-// 		t.Errorf("CurrentState: expected nil after pop")
-// 	}
-// }
-
-// @todo - пока этот тест отключён, т.к. появилась зависимость от gc.Winodow.
-//         Не знаю как замокать её в тестах. Если есть идеи - пишите.
-// func TestGame_Run(t *testing.T) {
-// 	g := &Game{}
-// 	state := &mockState{}
-// 	g.PushState(state)
-// 	g.Run()
-// 	if !state.inputCalled || !state.updateCalled || !state.renderCalled {
-// 		t.Errorf("Run: expected all methods to be called on state")
-// 	}
-// }
+func TestGame_CurrentState(t *testing.T) {
+	g := &Game{}
+	if g.CurrentState() != nil {
+		t.Errorf("CurrentState: expected nil for empty stack")
+	}
+	state := &mockState{}
+	g.PushState(state)
+	if g.CurrentState() != state {
+		t.Errorf("CurrentState: expected pushed state")
+	}
+	g.PopState()
+	if g.CurrentState() != nil {
+		t.Errorf("CurrentState: expected nil after pop")
+	}
+}
