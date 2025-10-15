@@ -1,6 +1,6 @@
 # Project Team 01 — Go_Bootcamp (Rogue Game)
 
-**Summary:** In this team project, you'll develop a console-based roguelike game application in the Go programming language using the curses library (goncurses for Go), inspired by the classic 1980 game _Rogue_.
+**Summary:** In this team project, you'll develop a console-based roguelike game application in the Go programming language using the curses library (goncurses for Go) or similar, inspired by the classic 1980 game _Rogue_.
 
 💡[Click here](https://new.oprosso.net/p/4cb31ec3f47a4596bc758ea1861fb624) to give us feedback on this project. It's anonymous and helps us improve the course. We recommend filling out the survey right after completing the project.
 
@@ -66,7 +66,7 @@ When developing applied projects involving data, business logic, and user interf
 
 **Separating logic into business and presentation layers will help organize the application's logic more effectively and decouple components with different levels of stability.**
 
-In the **presentation** layer, place the code responsible for rendering the UI and handling user input. This is where interaction with the goncurses library and the domain layer should be implemented.
+In the **presentation** layer, place the code responsible for rendering the UI and handling user input. This is where interaction with the goncurses library (or similar) and the domain layer should be implemented.
 
 The **domain** layer should encapsulate business logic that is independent of any frameworks. In this project, it includes the logic of game-related entities — such as the game itself, the player, enemies, levels, the map, and others — as well as the game mechanics. For example, the player's location and the logic for updating their position and attributes on the map must reside in this layer and then be passed to the presentation layer for rendering.  
 Note that, according to the **clean architecture** principle, the business logic layer must not depend on the other layers. This is achieved by applying the **dependency inversion principle**.
@@ -81,8 +81,7 @@ The **data layer** in this application is responsible for managing data — in t
 
 The game application:
 
-- must be implemented in Go version 1.22.0;
-- must have a console interface based on the goncurses library;
+- must have a console interface based on the goncurses library (or similar tcell, termui, ...);
 - must be controlled via keyboard;
 - must follow a well-designed, clean architecture with clear separation of layers;
 - must implement the core mechanics of the classic _Rogue_ (1980) game, with some simplifications (specific gameplay requirements are described in the following sections);
@@ -251,7 +250,7 @@ If the player is within the aggression radius but **there is no path** to reach 
 
 ### Task 4 — Cozy 2D
 
-Implement game rendering in the **presentation layer** using goncurses, based on the necessary **domain entities**.
+Implement game rendering in the **presentation layer** using goncurses (or similar), based on the necessary **domain entities**.
 
 **Rendering**
 
@@ -334,6 +333,6 @@ Add a **3D rendering mode**, in which:
     + S — move backward  
     + A — turn left  
     + D — turn right
-- To render rooms and corridors in 3D, use **Ray Casting** and the goncurses library.  
+- To render rooms and corridors in 3D, use **Ray Casting** and the goncurses library (or similar).  
 Walls in rooms and tunnels must have **textures**, so that the player's movement is **visually perceptible**.
 - An example implementation of 3D rendering can be found in the code-samples folder.
