@@ -1,7 +1,10 @@
 package entity
 
+// player constructor is needed
+
 type Player struct {
 	Character Character
+	Experience uint
 	Backpack  *Backpack
 	Weapon    *Weapon
 }
