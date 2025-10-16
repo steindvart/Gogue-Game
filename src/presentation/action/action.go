@@ -8,6 +8,10 @@ const (
 	MoveDown
 	MoveLeft
 	MoveRight
+	MoveLeftUpperCorner
+	MoveRightUpperCorner
+	MoveLefLowerCorner
+	MoveRightLowerCorner
 	Select
 	Exit
 )

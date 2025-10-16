@@ -4,6 +4,7 @@ import (
 	"gogue/model/entity"
 	"gogue/model/signal"
 	"gogue/presentation/action"
+	"unicode"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -31,7 +32,7 @@ func NewGame() *Game {
 		Weapon:   nil,
 	}
 
-	// @todo - выделить отрисовку в отдельный факл в view/cli
+	// @todo - выделить отрисовку в отдельный файл в view/cli
 	box := tview.NewBox().SetBorder(true).SetTitle("Game")
 
 	game := Game{
@@ -60,6 +61,18 @@ func NewGame() *Game {
 		case action.MoveRight:
 			game.player.Character.Shape.Move(entity.Point2D[int]{X: 1, Y: 0})
 			return nil
+		case action.MoveLeftUpperCorner:
+			game.player.Character.Shape.Move(entity.Point2D[int]{X: -1, Y: -1})
+			return nil
+		case action.MoveRightUpperCorner:
+			game.player.Character.Shape.Move(entity.Point2D[int]{X: 1, Y: -1})
+			return nil
+		case action.MoveLefLowerCorner:
+			game.player.Character.Shape.Move(entity.Point2D[int]{X: -1, Y: 1})
+			return nil
+		case action.MoveRightLowerCorner:
+			game.player.Character.Shape.Move(entity.Point2D[int]{X: 1, Y: 1})
+			return nil
 		case action.Exit:
 			game.signal = signal.Stop
 			return nil
@@ -85,15 +98,24 @@ func (g *Game) eventToAction(event *tcell.EventKey) action.Type {
 		return action.Exit
 	}
 
-	switch event.Rune() {
-	case 'w', 'W', 'ц', 'Ц':
+	ch := unicode.ToLower(event.Rune())
+	switch ch {
+	case 'w', 'ц':
 		return action.MoveUp
-	case 's', 'S', 'ы', 'Ы':
+	case 's', 'ы':
 		return action.MoveDown
-	case 'a', 'A', 'ф', 'Ф':
+	case 'a', 'ф':
 		return action.MoveLeft
-	case 'd', 'D', 'в', 'В':
+	case 'd', 'в':
 		return action.MoveRight
+	case 'y', 'н':
+		return action.MoveLeftUpperCorner
+	case 'u', 'г':
+		return action.MoveRightUpperCorner
+	case 'b', 'и':
+		return action.MoveLefLowerCorner
+	case 'n', 'т':
+		return action.MoveRightLowerCorner
 	}
 
 	return action.NoAction
