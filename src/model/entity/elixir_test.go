@@ -14,7 +14,7 @@ func TestNewElixir(t *testing.T) {
 		wantNames                   []string
 		wantEffectDurationLessThan  time.Duration
 		wantIncrementLessThan       uint
-		wantAffectedAttributesSlice []Attributes
+		wantAffectedAttributesList []Attributes
 	}{
 		{
 			name:      "elixir constructor",
@@ -33,7 +33,7 @@ func TestNewElixir(t *testing.T) {
 			},
 			wantEffectDurationLessThan: time.Duration(ElixirDurationBase+ElixirMaxDurationFactor) * time.Minute,
 			wantIncrementLessThan:      uint(IncreaseAttributeBaseParcentage + IncreaseAttributeMaxPercentage + 1),
-			wantAffectedAttributesSlice: []Attributes{
+			wantAffectedAttributesList: []Attributes{
 				{
 					MaxHealth: 1,
 					Agility:   0,
@@ -56,11 +56,11 @@ func TestNewElixir(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := NewElixir(tt.box)
-			if !(got.Shape == tt.wantShape) {
-				t.Errorf("NewElixir(): got Shape %v, want %v", got.Shape, tt.wantShape)
+			if !(got.Consumable.Shape == tt.wantShape) {
+				t.Errorf("NewElixir(): got Shape %v, want %v", got.Consumable.Shape, tt.wantShape)
 			}
-			if !(slices.Contains(tt.wantNames, got.Name)) {
-				t.Errorf("NewElixir(): got Name %v, want in %v", got.Name, tt.wantNames)
+			if !(slices.Contains(tt.wantNames, got.Consumable.Name)) {
+				t.Errorf("NewElixir(): got Name %v, want in %v", got.Consumable.Name, tt.wantNames)
 			}
 			if !(got.EffectDuration < tt.wantEffectDurationLessThan) {
 				t.Errorf("NewElixir(): got EffectDuration %v, want less than %v", got.EffectDuration, tt.wantEffectDurationLessThan)
@@ -68,8 +68,8 @@ func TestNewElixir(t *testing.T) {
 			if !(got.Increment < tt.wantIncrementLessThan) {
 				t.Errorf("NewElixir(): got Increment %v, want less than %v", got.Increment, tt.wantIncrementLessThan)
 			}
-			if !(slices.Contains(tt.wantAffectedAttributesSlice, got.AffectedAttribute)) {
-				t.Errorf("NewElixir(): got AffectedAttribute %v, want in %v", got.AffectedAttribute, tt.wantAffectedAttributesSlice)
+			if !(slices.Contains(tt.wantAffectedAttributesList, got.AffectedAttribute)) {
+				t.Errorf("NewElixir(): got AffectedAttribute %#v, want in %#v", got.AffectedAttribute, tt.wantAffectedAttributesList)
 			}
 		})
 	}

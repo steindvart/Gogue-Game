@@ -12,7 +12,7 @@ func TestNewScroll(t *testing.T) {
 		wantShape                   Box
 		wantNames                   []string
 		wantIncrementLessThan       uint
-		wantAffectedAttributesSlice []Attributes
+		wantAffectedAttributesList []Attributes
 	}{
 		{
 			name:      "scroll constructor",
@@ -30,7 +30,7 @@ func TestNewScroll(t *testing.T) {
 				"Parchment of Thunderous Roar",
 			},
 			wantIncrementLessThan: uint(IncreaseAttributeBaseParcentage + IncreaseAttributeMaxPercentage + 1),
-			wantAffectedAttributesSlice: []Attributes{
+			wantAffectedAttributesList: []Attributes{
 				{
 					MaxHealth: 1,
 					Agility:   0,
@@ -53,17 +53,17 @@ func TestNewScroll(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := NewScroll(tt.box)
-			if !(got.Shape == tt.wantShape) {
-				t.Errorf("NewScroll(): got Shape %v, want %v", got.Shape, tt.wantShape)
+			if !(got.Consumable.Shape == tt.wantShape) {
+				t.Errorf("NewScroll(): got Shape %v, want %v", got.Consumable.Shape, tt.wantShape)
 			}
-			if !(slices.Contains(tt.wantNames, got.Name)) {
-				t.Errorf("NewScroll(): got Name %v, want in %v", got.Name, tt.wantNames)
+			if !(slices.Contains(tt.wantNames, got.Consumable.Name)) {
+				t.Errorf("NewScroll(): got Name %v, want in %v", got.Consumable.Name, tt.wantNames)
 			}
 			if !(got.Increment < tt.wantIncrementLessThan) {
 				t.Errorf("NewScroll(): got Increment %v, want less than %v", got.Increment, tt.wantIncrementLessThan)
 			}
-			if !(slices.Contains(tt.wantAffectedAttributesSlice, got.AffectedAttribute)) {
-				t.Errorf("NewScroll(): got AffectedAttribute %v, want in %v", got.AffectedAttribute, tt.wantAffectedAttributesSlice)
+			if !(slices.Contains(tt.wantAffectedAttributesList, got.AffectedAttribute)) {
+				t.Errorf("NewScroll(): got AffectedAttribute %v, want in %v", got.AffectedAttribute, tt.wantAffectedAttributesList)
 			}
 		})
 	}

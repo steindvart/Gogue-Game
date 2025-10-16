@@ -1,12 +1,11 @@
 package entity
 
-// player constructor is needed
-
 type Player struct {
-	Character Character
-	Experience uint
-	Backpack  *Backpack
-	Weapon    *Weapon
+	Character      Character
+	Experience     uint
+	CharacterLevel uint
+	Backpack       *Backpack
+	Weapon         *Weapon
 }
 
 func (p *Player) IsAlive() bool {
@@ -37,4 +36,20 @@ func (p *Player) Attack() uint {
 
 func (p *Player) CheckEvasion() bool {
 	return p.Character.CheckEvasion()
+}
+
+func NewPlayer(box Box) *Player {
+	return &Player{
+		Character: Character{
+			Shape:     box,
+			Health:    float64(AttributeRateAverage),
+			MaxHealth: float64(AttributeRateAverage),
+			Strength:  uint(AttributeRateAverage),
+			Agility:   uint(AttributeRateAverage),
+		},
+		Experience:     0,
+		CharacterLevel: 1,
+		Backpack:       NewBackpack(),
+		Weapon:         nil,
+	}
 }

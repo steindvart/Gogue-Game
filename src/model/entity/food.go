@@ -1,9 +1,8 @@
 package entity
 
 type Food struct {
-	Shape              Box
+	Consumable         Consumable
 	HealthRegeneration uint
-	Name               string
 }
 
 func NewFood(box Box) *Food {
@@ -20,8 +19,10 @@ func NewFood(box Box) *Food {
 	}
 
 	return &Food{
-		Shape:              box,
+		Consumable: Consumable{
+			Shape:              box,
+			Name:               getAttributeRandomName(foodNames),
+		},
 		HealthRegeneration: getAttributeRandomPercentIncrease(),
-		Name:               getAttributeRandomName(foodNames),
 	}
 }

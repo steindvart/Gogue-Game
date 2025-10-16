@@ -11,11 +11,10 @@ const (
 )
 
 type Elixir struct {
-	Shape             Box
+	Consumable        Consumable
 	EffectDuration    time.Duration
 	AffectedAttribute Attributes
 	Increment         uint
-	Name              string
 }
 
 func NewElixir(box Box) *Elixir {
@@ -32,11 +31,13 @@ func NewElixir(box Box) *Elixir {
 	}
 
 	return &Elixir{
-		Shape:             box,
+		Consumable: Consumable{
+			Shape:             box,
+			Name:              getAttributeRandomName(elixirNames),
+		},
 		EffectDuration:    getRandomElixirDuration(),
 		AffectedAttribute: getRandomAttribute(),
 		Increment:         getAttributeRandomPercentIncrease(),
-		Name:              getAttributeRandomName(elixirNames),
 	}
 }
 

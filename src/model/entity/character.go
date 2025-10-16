@@ -2,10 +2,6 @@ package entity
 
 import "math/rand"
 
-type Attributes struct {
-	MaxHealth, Agility, Strength uint
-}
-
 type CharacterLike interface {
 	IsAlive() bool
 	Move(delta Point2D[int])

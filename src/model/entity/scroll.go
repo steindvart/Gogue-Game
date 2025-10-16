@@ -1,10 +1,9 @@
 package entity
 
 type Scroll struct {
-	Shape             Box
+	Consumable        Consumable
 	AffectedAttribute Attributes
 	Increment         uint
-	Name              string
 }
 
 func NewScroll(box Box) *Scroll {
@@ -21,9 +20,11 @@ func NewScroll(box Box) *Scroll {
 	}
 
 	return &Scroll{
-		Shape:             box,
+		Consumable: Consumable{
+			Shape:             box,
+			Name:              getAttributeRandomName(scrollNames),
+		},
 		AffectedAttribute: getRandomAttribute(),
 		Increment:         getAttributeRandomPercentIncrease(),
-		Name:              getAttributeRandomName(scrollNames),
 	}
 }
