@@ -8,35 +8,25 @@ import (
 func TestLevel_GenerateRoomsOnLevel(t *testing.T) {
 	tests := []struct {
 		name          string
-		mapWidth      int
-		mapHeight     int
-		want          bool
+		sizeMap       Size2D[uint]
+		wantErr       bool
 		errorContains string
 	}{
 		{
-			name:      "Valid map size 15x15",
-			mapWidth:  15,
-			mapHeight: 15,
-			want:      false,
-		},
-		{
-			name:      "Minimal valid size 9x9",
-			mapWidth:  9,
-			mapHeight: 9,
-			want:      false,
+			name:    "Valid map size 15x15",
+			sizeMap: Size2D[uint]{Height: 30, Width: 90},
+			wantErr: false,
 		},
 		{
 			name:          "Map too small width",
-			mapWidth:      8,
-			mapHeight:     6,
-			want:          true,
+			sizeMap:       Size2D[uint]{Height: 6, Width: 8},
+			wantErr:       true,
 			errorContains: "map size is too small",
 		},
 		{
 			name:          "Map too small height",
-			mapWidth:      6,
-			mapHeight:     8,
-			want:          true,
+			sizeMap:       Size2D[uint]{Height: 6, Width: 8},
+			wantErr:       true,
 			errorContains: "map size is too small",
 		},
 	}
@@ -45,9 +35,9 @@ func TestLevel_GenerateRoomsOnLevel(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			level := &Level{}
 
-			err := level.GenerateRoomsOnLevel(tt.mapWidth, tt.mapHeight)
+			err := level.GenerateNineRooms(tt.sizeMap)
 
-			if tt.want {
+			if tt.wantErr {
 				if err == nil {
 					t.Fatalf("Expected error containing %q, but got nil", tt.errorContains)
 				}

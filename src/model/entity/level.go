@@ -6,71 +6,93 @@ import (
 )
 
 const (
-	RoomsCount    = 9
-	RoomMinWidth  = 3
-	RoomMinHeight = 3
-	RoomWalls     = 2
+	RoomMinWidth     = 3
+	RoomMinHeight    = 3
+	MinRoomPadding   = 1
+	numberXYSections = 3
 )
 
 type Level struct {
-	Rooms       []Room
-	Passages    []Passage
-	LevelNumber uint
-	LevelEnd    Box
+	Rooms    []Room
+	Passages []Passage
+	Number   uint
+	End      Box
 }
 
-func (l *Level) GenerateRoomsOnLevel(sizeMapWidth int, sizeMapHeight int) error {
-	l.Rooms = make([]Room, RoomsCount)
+func calculateRoomSectionSize(sizeMap Size2D[uint]) (sectionSize Size2D[uint]) {
+	var totalPaddingWidth uint = MinRoomPadding * 2
+	var totalPaddingHeight uint = MinRoomPadding * 2
 
-	indices := rand.Perm(RoomsCount)
-	startIndex := indices[0]
-	finishIndex := indices[1]
-	var roomType RoomType
+	availableWidth := sizeMap.Width - totalPaddingWidth
+	availableHeight := sizeMap.Height - totalPaddingHeight
 
-	sizeSectionWidth := sizeMapWidth / 3
-	sizeSectionHeight := sizeMapHeight / 3
+	sectionSize.Width = availableWidth / numberXYSections
+	sectionSize.Height = availableHeight / numberXYSections
 
-	if sizeSectionWidth < RoomMinWidth || sizeSectionHeight < RoomMinHeight {
-		return errors.New("map size is too small: each room must be at least 3x3")
+	return sectionSize
+}
+
+func (l *Level) GenerateNineRooms(sizeMap Size2D[uint]) error {
+	sectionSize := calculateRoomSectionSize(sizeMap)
+	if sectionSize.Width < RoomMinWidth || sectionSize.Height < RoomMinHeight {
+		return errors.New("map size is too small: each room section must be at least min room size")
 	}
 
-	for i := 0; i < 3; i++ {
-		for j := 0; j < 3; j++ {
-			switch i*3 + j {
-			case startIndex:
+	roomsCount := 9
+	l.Rooms = make([]Room, roomsCount)
+	indices := rand.Perm(roomsCount)
+	startRoomIndex := indices[0]
+	finishRoomIndex := indices[1]
+	for y := 0; y < numberXYSections; y++ {
+		for x := 0; x < numberXYSections; x++ {
+			roomIndex := y*numberXYSections + x
+			var roomType RoomType
+			switch roomIndex {
+			case startRoomIndex:
 				roomType = RoomTypeStart
-			case finishIndex:
+			case finishRoomIndex:
 				roomType = RoomTypeFinish
 			default:
 				roomType = RoomTypeOrdinary
 			}
 
-			width := uint(rand.Intn(sizeSectionWidth-RoomMinWidth+1) + RoomMinWidth)
-			height := uint(rand.Intn(sizeSectionHeight-RoomMinHeight+1) + RoomMinHeight)
+			cellXStart := x*int(sectionSize.Width) + MinRoomPadding
+			cellYStart := y*int(sectionSize.Height) + MinRoomPadding
+			cellXEnd := (x+1)*int(sectionSize.Width) - MinRoomPadding
+			cellYEnd := (y+1)*int(sectionSize.Height) - MinRoomPadding
 
-			x := j*sizeSectionWidth + rand.Intn(int(width))
-			y := i*sizeSectionHeight + rand.Intn(int(height))
+			maxRoomWidth := cellXEnd - cellXStart
+			maxRoomHeight := cellYEnd - cellYStart
+
+			if maxRoomWidth < RoomMinWidth || maxRoomHeight < RoomMinHeight {
+				return errors.New("internal error: available space in section is smaller than minimum room size")
+			}
+
+			width := rand.Intn(maxRoomWidth-RoomMinWidth+1) + RoomMinWidth
+			height := rand.Intn(maxRoomHeight-RoomMinHeight+1) + RoomMinHeight
+
+			x := cellXStart + rand.Intn(maxRoomWidth-width+1)
+			y := cellYStart + rand.Intn(maxRoomHeight-height+1)
 
 			if roomType == RoomTypeFinish {
-				l.LevelEnd = Box{
-					Point: Point2D[int]{X: x + 1 + rand.Intn(int(width-RoomWalls)), Y: y + 1 + rand.Intn(int(height-RoomWalls))},
-					Size:  Size2D[uint]{Height: 1, Width: 1},
+				roomWall := 1
+				l.End = Box{
+					Point: Point2D[int]{
+						X: x + roomWall + rand.Intn(width-(roomWall*2)),
+						Y: y + roomWall + rand.Intn(height-(roomWall*2)),
+					},
+					Size: Size2D[uint]{Height: 1, Width: 1},
 				}
 			}
 
-			l.Rooms[i*3+j] = *NewRoom(
-				roomType,
-				Box{
-					Point: Point2D[int]{
-						X: x,
-						Y: y,
-					},
-					Size: Size2D[uint]{
-						Width:  width,
-						Height: height,
-					},
-				})
+			roomBox := Box{
+				Point: Point2D[int]{X: x, Y: y},
+				Size:  Size2D[uint]{Width: uint(width), Height: uint(height)},
+			}
+
+			l.Rooms[roomIndex] = *NewRoom(roomType, roomBox)
 		}
 	}
+
 	return nil
 }
