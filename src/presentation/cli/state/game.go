@@ -36,7 +36,8 @@ func NewGame() *Game {
 	box := tview.NewBox().SetBorder(true).SetTitle("Game")
 
 	level := entity.Level{}
-	level.GenerateRoomsOnLevel(90, 30)
+	// @todo - обработать ошибку
+	level.GenerateNineRooms(entity.Size2D[uint]{Height: 30, Width: 90})
 
 	game := Game{
 		player: player,
@@ -126,6 +127,8 @@ func (g *Game) drawField(screen tcell.Screen, ox, oy, w, h int) {
 				ch = '—'
 			} else if field[y][x] == 3 {
 				ch = '|'
+			} else if field[y][x] == 4 {
+				ch = 'O'
 			}
 			screen.SetContent(ox+x, oy+y, ch, nil, tcell.StyleDefault.Background(tcell.ColorBlack))
 		}
@@ -139,7 +142,7 @@ func (g *Game) makeField(w, h int) [][]int {
 	}
 
 	for _, room := range g.level.Rooms {
-		g.drawRoom(room, field)
+		g.drawRoom(room, g.level, field)
 	}
 
 	px := g.player.Character.Shape.Point.X
@@ -151,7 +154,7 @@ func (g *Game) makeField(w, h int) [][]int {
 	return field
 }
 
-func (g *Game) drawRoom(room entity.Room, field [][]int) {
+func (g *Game) drawRoom(room entity.Room, level entity.Level, field [][]int) {
 	for column := room.Shape.Point.X; column < room.Shape.Point.X+int(room.Shape.Size.Width); column++ {
 		field[room.Shape.Point.Y][column] = 2
 		field[room.Shape.Point.Y+int(room.Shape.Size.Height)][column] = 2
@@ -161,4 +164,6 @@ func (g *Game) drawRoom(room entity.Room, field [][]int) {
 		field[row][room.Shape.Point.X] = 3
 		field[row][room.Shape.Point.X+int(room.Shape.Size.Width)] = 3
 	}
+
+	field[level.End.Point.Y][level.End.Point.X] = 4
 }

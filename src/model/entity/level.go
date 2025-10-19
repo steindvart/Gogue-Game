@@ -6,71 +6,60 @@ import (
 )
 
 const (
-	RoomsCount     = 9
-	RoomMinWidth   = 3
-	RoomMinHeight  = 3
-	RoomWalls      = 2
-	MinRoomPadding = 1
+	RoomMinWidth     = 3
+	RoomMinHeight    = 3
+	MinRoomPadding   = 1
+	numberXYSections = 3
 )
 
 type Level struct {
-	Rooms       []Room
-	Passages    []Passage
-	LevelNumber uint
-	LevelEnd    Box
+	Rooms    []Room
+	Passages []Passage
+	Number   uint
+	End      Box
 }
 
-func calculateRoomSectionSize(mapWidth, mapHeight int) (sectionW, sectionH int, err error) {
-	totalPaddingW := (3 - 1) * MinRoomPadding * 2
-	totalPaddingH := (3 - 1) * MinRoomPadding * 2
+func calculateRoomSectionSize(sizeMap Size2D[uint]) (sectionSize Size2D[uint]) {
+	var totalPaddingWidth uint = MinRoomPadding * 2
+	var totalPaddingHeight uint = MinRoomPadding * 2
 
-	availableW := mapWidth - totalPaddingW
-	availableH := mapHeight - totalPaddingH
+	availableWidth := sizeMap.Width - totalPaddingWidth
+	availableHeight := sizeMap.Height - totalPaddingHeight
 
-	sectionW = availableW / 3
-	sectionH = availableH / 3
+	sectionSize.Width = availableWidth / numberXYSections
+	sectionSize.Height = availableHeight / numberXYSections
 
-	if sectionW < RoomMinWidth || sectionH < RoomMinHeight {
-		return 0, 0, errors.New("map size is too small: available space per section is smaller than minimum room size")
-	}
-
-	return sectionW, sectionH, nil
+	return sectionSize
 }
 
-func (l *Level) GenerateRoomsOnLevel(sizeMapWidth int, sizeMapHeight int) error {
-	l.Rooms = make([]Room, RoomsCount)
-
-	indices := rand.Perm(RoomsCount)
-	startIndex := indices[0]
-	finishIndex := indices[1]
-
-	sectionW, sectionH, err := calculateRoomSectionSize(sizeMapWidth, sizeMapHeight)
-	if err != nil {
-		return err
-	}
-
-	if sectionW < RoomMinWidth || sectionH < RoomMinHeight {
+func (l *Level) GenerateNineRooms(sizeMap Size2D[uint]) error {
+	sectionSize := calculateRoomSectionSize(sizeMap)
+	if sectionSize.Width < RoomMinWidth || sectionSize.Height < RoomMinHeight {
 		return errors.New("map size is too small: each room section must be at least min room size")
 	}
 
-	for i := 0; i < 3; i++ {
-		for j := 0; j < 3; j++ {
-			roomIndex := i*3 + j
+	roomsCount := 9
+	l.Rooms = make([]Room, roomsCount)
+	indices := rand.Perm(roomsCount)
+	startRoomIndex := indices[0]
+	finishRoomIndex := indices[1]
+	for y := 0; y < numberXYSections; y++ {
+		for x := 0; x < numberXYSections; x++ {
+			roomIndex := y*numberXYSections + x
 			var roomType RoomType
-
 			switch roomIndex {
-			case startIndex:
+			case startRoomIndex:
 				roomType = RoomTypeStart
-			case finishIndex:
+			case finishRoomIndex:
 				roomType = RoomTypeFinish
 			default:
 				roomType = RoomTypeOrdinary
 			}
 
-			cellXStart := j*sectionW + MinRoomPadding
-			cellYStart := i*sectionH + MinRoomPadding
-			cellXEnd := (j+1)*sectionW - MinRoomPadding
-			cellYEnd := (i+1)*sectionH - MinRoomPadding
+			cellXStart := x*int(sectionSize.Width) + MinRoomPadding
+			cellYStart := y*int(sectionSize.Height) + MinRoomPadding
+			cellXEnd := (x+1)*int(sectionSize.Width) - MinRoomPadding
+			cellYEnd := (y+1)*int(sectionSize.Height) - MinRoomPadding
 
 			maxRoomWidth := cellXEnd - cellXStart
 			maxRoomHeight := cellYEnd - cellYStart
@@ -86,13 +75,11 @@ func (l *Level) GenerateRoomsOnLevel(sizeMapWidth int, sizeMapHeight int) error 
 			y := cellYStart + rand.Intn(maxRoomHeight-height+1)
 
 			if roomType == RoomTypeFinish {
-				if width < RoomWalls || height < RoomWalls {
-					return errors.New("finish room is too small to place LevelEnd")
-				}
-				l.LevelEnd = Box{
+				roomWall := 1
+				l.End = Box{
 					Point: Point2D[int]{
-						X: x + 1 + rand.Intn(width-RoomWalls),
-						Y: y + 1 + rand.Intn(height-RoomWalls),
+						X: x + roomWall + rand.Intn(width-(roomWall*2)),
+						Y: y + roomWall + rand.Intn(height-(roomWall*2)),
 					},
 					Size: Size2D[uint]{Height: 1, Width: 1},
 				}
