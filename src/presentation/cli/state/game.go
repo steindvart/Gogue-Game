@@ -17,7 +17,7 @@ type Game struct {
 	signal signal.Type
 }
 
-func NewGame() *Game {
+func NewGame() (*Game, error) {
 	player := entity.Player{
 		Character: entity.Character{
 			Shape: entity.Box{
@@ -40,6 +40,7 @@ func NewGame() *Game {
 	// @todo - обработать ошибку
 	err := level.GenerateNineRooms(entity.Size2D[uint]{Height: 30, Width: 90})
 	if err != nil {
+		return nil, err
 	}
 
 	game := Game{
@@ -89,7 +90,7 @@ func NewGame() *Game {
 		}
 	})
 
-	return &game
+	return &game, nil
 }
 
 func (g *Game) eventToAction(event *tcell.EventKey) action.Type {
