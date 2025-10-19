@@ -38,7 +38,9 @@ func NewGame() *Game {
 
 	level := entity.Level{}
 	// @todo - обработать ошибку
-	level.GenerateNineRooms(entity.Size2D[uint]{Height: 30, Width: 90})
+	err := level.GenerateNineRooms(entity.Size2D[uint]{Height: 30, Width: 90})
+	if err != nil {
+	}
 
 	game := Game{
 		player: player,
