@@ -19,7 +19,7 @@ type Level struct {
 	End      Box
 }
 
-func calculateRoomSection(mapSize Size2D[uint]) (sectionSize Size2D[uint]) {
+func calculateRoomSectionSize(mapSize Size2D[uint]) (sectionSize Size2D[uint]) {
 	totalPaddingWidth := uint(MinRoomPadding * 2)
 	totalPaddingHeight := uint(MinRoomPadding * 2)
 
@@ -33,16 +33,17 @@ func calculateRoomSection(mapSize Size2D[uint]) (sectionSize Size2D[uint]) {
 }
 
 func (l *Level) GenerateNineRooms(sizeMap Size2D[uint]) error {
-	sectionSize := calculateRoomSection(sizeMap)
+	sectionSize := calculateRoomSectionSize(sizeMap)
 	if sectionSize.Width < RoomMinWidth || sectionSize.Height < RoomMinHeight {
 		return errors.New("map size is too small: each room section must be at least min room size")
 	}
 
 	roomsCount := 9
 	l.Rooms = make([]Room, roomsCount)
-	indices := rand.Perm(roomsCount)
-	startRoomIndex := indices[0]
-	finishRoomIndex := indices[1]
+	// rand.Perm(9) возвращает массив перемешанных чисел от 0 до 8, чтобы далее не было повторений index для Start и Finish
+	indexes := rand.Perm(roomsCount)
+	startRoomIndex := indexes[0]
+	finishRoomIndex := indexes[1]
 	for y := 0; y < numberXYSections; y++ {
 		for x := 0; x < numberXYSections; x++ {
 			roomIndex := y*numberXYSections + x
