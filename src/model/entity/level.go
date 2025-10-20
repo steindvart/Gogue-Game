@@ -19,12 +19,12 @@ type Level struct {
 	End      Box
 }
 
-func calculateRoomSectionSize(sizeMap Size2D[uint]) (sectionSize Size2D[uint]) {
-	var totalPaddingWidth uint = MinRoomPadding * 2
-	var totalPaddingHeight uint = MinRoomPadding * 2
+func calculateRoomSection(mapSize Size2D[uint]) (sectionSize Size2D[uint]) {
+	totalPaddingWidth := uint(MinRoomPadding * 2)
+	totalPaddingHeight := uint(MinRoomPadding * 2)
 
-	availableWidth := sizeMap.Width - totalPaddingWidth
-	availableHeight := sizeMap.Height - totalPaddingHeight
+	availableWidth := mapSize.Width - totalPaddingWidth
+	availableHeight := mapSize.Height - totalPaddingHeight
 
 	sectionSize.Width = availableWidth / numberXYSections
 	sectionSize.Height = availableHeight / numberXYSections
@@ -33,7 +33,7 @@ func calculateRoomSectionSize(sizeMap Size2D[uint]) (sectionSize Size2D[uint]) {
 }
 
 func (l *Level) GenerateNineRooms(sizeMap Size2D[uint]) error {
-	sectionSize := calculateRoomSectionSize(sizeMap)
+	sectionSize := calculateRoomSection(sizeMap)
 	if sectionSize.Width < RoomMinWidth || sectionSize.Height < RoomMinHeight {
 		return errors.New("map size is too small: each room section must be at least min room size")
 	}
