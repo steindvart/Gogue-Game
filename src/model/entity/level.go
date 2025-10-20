@@ -38,7 +38,7 @@ func (l *Level) GenerateNineRooms(sizeMap Size2D[uint]) error {
 		return errors.New("map size is too small: each room section must be at least min room size")
 	}
 
-	roomsCount := 9
+	const roomsCount = 9
 	l.Rooms = make([]Room, roomsCount)
 	// rand.Perm(9) возвращает массив перемешанных чисел от 0 до 8, чтобы далее не было повторений index для Start и Finish
 	indexes := rand.Perm(roomsCount)
