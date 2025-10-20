@@ -7,10 +7,10 @@ import (
 
 func TestLevel_GenerateRoomsOnLevel(t *testing.T) {
 	tests := []struct {
-		name          string
-		sizeMap       Size2D[uint]
-		wantErr       bool
-		errorContains string
+		name      string
+		sizeMap   Size2D[uint]
+		wantErr   bool
+		errorText string
 	}{
 		{
 			name:    "Valid map size 15x15",
@@ -18,16 +18,16 @@ func TestLevel_GenerateRoomsOnLevel(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:          "Map too small width",
-			sizeMap:       Size2D[uint]{Height: 6, Width: 8},
-			wantErr:       true,
-			errorContains: "map size is too small",
+			name:      "Map too small width",
+			sizeMap:   Size2D[uint]{Height: 6, Width: 8},
+			wantErr:   true,
+			errorText: "map size is too small",
 		},
 		{
-			name:          "Map too small height",
-			sizeMap:       Size2D[uint]{Height: 6, Width: 8},
-			wantErr:       true,
-			errorContains: "map size is too small",
+			name:      "Map too small height",
+			sizeMap:   Size2D[uint]{Height: 6, Width: 8},
+			wantErr:   true,
+			errorText: "map size is too small",
 		},
 	}
 
@@ -39,10 +39,10 @@ func TestLevel_GenerateRoomsOnLevel(t *testing.T) {
 
 			if tt.wantErr {
 				if err == nil {
-					t.Fatalf("Expected error containing %q, but got nil", tt.errorContains)
+					t.Fatalf("Expected error containing %q, but got nil", tt.errorText)
 				}
-				if !strings.Contains(err.Error(), tt.errorContains) {
-					t.Errorf("Expected error to contain %q, got %q", tt.errorContains, err.Error())
+				if !strings.Contains(err.Error(), tt.errorText) {
+					t.Errorf("Expected error to contain %q, got %q", tt.errorText, err.Error())
 				}
 			} else {
 				if err != nil {
