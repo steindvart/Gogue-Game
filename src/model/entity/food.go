@@ -20,9 +20,21 @@ func NewFood(box Box) *Food {
 
 	return &Food{
 		Consumable: Consumable{
-			Shape:              box,
-			Name:               getAttributeRandomName(foodNames),
+			Shape: box,
+			Name:  getAttributeRandomName(foodNames),
 		},
 		HealthRegeneration: getAttributeRandomPercentIncrease(),
 	}
+}
+
+func (f *Food) Taken() {
+	f.Consumable.Shape = Box{}
+}
+
+func (f *Food) Dropped(box Box) {
+	f.Consumable.Shape = box
+}
+
+func (f *Food) Use() string {
+	return f.Consumable.Name
 }

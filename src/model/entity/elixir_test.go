@@ -8,12 +8,12 @@ import (
 
 func TestNewElixir(t *testing.T) {
 	tests := []struct {
-		name                        string
-		box                         Box
-		wantShape                   Box
-		wantNames                   []string
-		wantEffectDurationLessThan  time.Duration
-		wantIncrementLessThan       uint
+		name                       string
+		box                        Box
+		wantShape                  Box
+		wantNames                  []string
+		wantEffectDurationLessThan time.Duration
+		wantIncrementLessThan      uint
 		wantAffectedAttributesList []Attributes
 	}{
 		{
@@ -70,6 +70,107 @@ func TestNewElixir(t *testing.T) {
 			}
 			if !(slices.Contains(tt.wantAffectedAttributesList, got.AffectedAttribute)) {
 				t.Errorf("NewElixir(): got AffectedAttribute %#v, want in %#v", got.AffectedAttribute, tt.wantAffectedAttributesList)
+			}
+		})
+	}
+}
+
+func TestElixir_Taken(t *testing.T) {
+	tests := []struct {
+		name string
+		want Box
+	}{
+		{
+			name: "elixir is taken",
+			want: Box{},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			elixir := &Elixir{
+				Consumable: Consumable{
+					Shape: Box{
+						Point: Point2D[int]{X: 1, Y: 2},
+						Size:  Size2D[uint]{Height: 1, Width: 1},
+					},
+					Name: "Awkward Elixir",
+				},
+				EffectDuration:    time.Minute,
+				AffectedAttribute: Attributes{MaxHealth: 1, Agility: 0, Strength: 0},
+				Increment: 1,
+			}
+			elixir.Taken()
+			if elixir.Consumable.Shape != tt.want {
+				t.Errorf("Taken() = (%v), want (%v)", elixir.Consumable.Shape, tt.want)
+			}
+		})
+	}
+}
+
+func TestElixir_Dropped(t *testing.T) {
+	tests := []struct {
+		name string
+		box  Box
+		want Box
+	}{
+		{
+			name: "consumable is dropped",
+			box:  Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 1}},
+			want: Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 1}},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			elixir := &Elixir{
+				Consumable: Consumable{
+					Shape: Box{
+						Point: Point2D[int]{X: 1, Y: 2},
+						Size:  Size2D[uint]{Height: 1, Width: 1},
+					},
+					Name: "Awkward Elixir",
+				},
+				EffectDuration:    time.Minute,
+				AffectedAttribute: Attributes{MaxHealth: 1, Agility: 0, Strength: 0},
+				Increment: 1,
+			}
+			elixir.Dropped(tt.box)
+			if elixir.Consumable.Shape != tt.want {
+				t.Errorf("Dropped() = (%v), want (%v)", elixir.Consumable.Shape, tt.want)
+			}
+		})
+	}
+}
+
+func TestElixir_Use(t *testing.T) {
+	tests := []struct {
+		name string
+		want string
+	}{
+		{
+			name: "use elixir",
+			want: "Awkward Elixir",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			elixir := &Elixir{
+				Consumable: Consumable{
+					Shape: Box{
+						Point: Point2D[int]{X: 1, Y: 2},
+						Size:  Size2D[uint]{Height: 1, Width: 1},
+					},
+					Name: "Awkward Elixir",
+				},
+				EffectDuration:    time.Minute,
+				AffectedAttribute: Attributes{MaxHealth: 1, Agility: 0, Strength: 0},
+				Increment: 1,
+			}
+			name := elixir.Use()
+			if name != tt.want {
+				t.Errorf("Use() = (%v), want (%v)", name, tt.want)
 			}
 		})
 	}

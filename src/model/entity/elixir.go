@@ -41,6 +41,18 @@ func NewElixir(box Box) *Elixir {
 	}
 }
 
+func (e *Elixir) Taken() {
+	e.Consumable.Shape = Box{}
+}
+
+func (e *Elixir) Dropped(box Box) {
+	e.Consumable.Shape = box
+}
+
+func (e *Elixir) Use() string {
+	return e.Consumable.Name
+}
+
 func getRandomElixirDuration() time.Duration {
 	return time.Duration(time.Duration(ElixirDurationBase+rand.Uint32()%ElixirMaxDurationFactor) * time.Minute)
 }

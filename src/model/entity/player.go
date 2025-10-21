@@ -1,5 +1,9 @@
 package entity
 
+import (
+	"fmt"
+)
+
 type Player struct {
 	Character      Character
 	Experience     uint
@@ -36,6 +40,31 @@ func (p *Player) Attack() uint {
 
 func (p *Player) CheckEvasion() bool {
 	return p.Character.CheckEvasion()
+}
+
+func (p *Player) TakeConsumableLike(consumableLike ConsumableLike) error {
+	if p.Backpack.ItemsNum < p.Backpack.Capacity {
+		p.Backpack.Consumables = append(p.Backpack.Consumables, consumableLike)
+		p.Backpack.ItemsNum += 1
+
+		consumableLike.Taken()
+		return nil
+	} else {
+		return fmt.Errorf("backpack is full, drop something")
+	}
+}
+
+func (p *Player) DropConsumableLike(consumableLike ConsumableLike, box Box) {
+	consumableLike.Dropped(box)
+}
+
+func (p *Player) UseConsumableLike(consumableLike ConsumableLike) string {
+	for idx, item := range p.Backpack.Consumables {
+		if item == consumableLike {
+			p.Backpack.Consumables = append(p.Backpack.Consumables[:idx], p.Backpack.Consumables[idx+1:]...)
+		}
+	}
+	return consumableLike.Use()
 }
 
 func NewPlayer(box Box) *Player {

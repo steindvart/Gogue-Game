@@ -8,16 +8,15 @@ const (
 )
 
 type Treasure struct {
-	Consumable Consumable
+	Shape Box
+	Name  string
 	Value      uint
 }
 
 func NewTreasure(box Box) *Treasure {
 	return &Treasure{
-		Consumable: Consumable{
-			Shape: box,
-			Name:  "Gold",
-		},
+		Shape: box,
+		Name:  "Gold",
 		Value: getTreasureRandomValue(),
 	}
 }

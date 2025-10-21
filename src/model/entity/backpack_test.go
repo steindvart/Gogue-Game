@@ -13,13 +13,14 @@ func TestNewBackpack(t *testing.T) {
 		{
 			name: "backpack constructor",
 			want: &Backpack{
-				Capacity:  BackpackDefaultCapacity,
-				ItemsNum:  0,
-				Foods:     []Food{},
-				Elixirs:   []Elixir{},
-				Scrolls:   []Scroll{},
-				Weapon:    []Weapon{},
-				Treasures: []Treasure{},
+				Capacity:    BackpackDefaultCapacity,
+				ItemsNum:    0,
+				Consumables: []ConsumableLike{},
+				// Foods:     []Food{},
+				// Elixirs:   []Elixir{},
+				// Scrolls:   []Scroll{},
+				// Weapon:    []Weapon{},
+				Treasures: 0,
 			},
 		},
 	}

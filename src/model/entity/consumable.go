@@ -22,17 +22,17 @@ type Attributes struct {
 	MaxHealth, Agility, Strength uint
 }
 
-func (consumable *Consumable) Taken() {
-	consumable.Shape = Box{}
-}
+// func (consumable *Consumable) Taken() {
+// 	consumable.Shape = Box{}
+// }
 
-func (consumable *Consumable) Dropped(box Box) {
-	consumable.Shape = box
-}
+// func (consumable *Consumable) Dropped(box Box) {
+// 	consumable.Shape = box
+// }
 
-func (consumable *Consumable) Use() string {
-	return consumable.Name
-}
+// func (consumable *Consumable) Use() string {
+// 	return consumable.Name
+// }
 
 func getAttributeRandomPercentIncrease() uint {
 	return uint(IncreaseAttributeBaseParcentage + rand.Intn(IncreaseAttributeMaxPercentage+1))

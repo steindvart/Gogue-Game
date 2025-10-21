@@ -28,3 +28,16 @@ func NewScroll(box Box) *Scroll {
 		Increment:         getAttributeRandomPercentIncrease(),
 	}
 }
+
+
+func (s *Scroll) Taken() {
+	s.Consumable.Shape = Box{}
+}
+
+func (s *Scroll) Dropped(box Box) {
+	s.Consumable.Shape = box
+}
+
+func (s *Scroll) Use() string {
+	return s.Consumable.Name
+}

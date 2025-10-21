@@ -1,9 +1,8 @@
 package entity
 
 type Weapon struct {
-	Shape        Box
+	Consumable   Consumable
 	StrengthBuff uint
-	Name         string
 }
 
 func NewWeapon(box Box) *Weapon {
@@ -20,8 +19,22 @@ func NewWeapon(box Box) *Weapon {
 	}
 
 	return &Weapon{
-		Shape:        box,
+		Consumable: Consumable{
+			Shape: box,
+			Name:  getAttributeRandomName(weaponNames),
+		},
 		StrengthBuff: getAttributeRandomPercentIncrease(),
-		Name:         getAttributeRandomName(weaponNames),
 	}
+}
+
+func (w *Weapon) Taken() {
+	w.Consumable.Shape = Box{}
+}
+
+func (w *Weapon) Dropped(box Box) {
+	w.Consumable.Shape = box
+}
+
+func (w *Weapon) Use() string {
+	return w.Consumable.Name
 }

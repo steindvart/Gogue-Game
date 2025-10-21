@@ -35,11 +35,11 @@ func TestNewWeapon(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := NewWeapon(tt.box)
-			if !(got.Shape == tt.wantShape) {
-				t.Errorf("NewWeapon(): got Shape %v, want %v", got.Shape, tt.wantShape)
+			if !(got.Consumable.Shape == tt.wantShape) {
+				t.Errorf("NewWeapon(): got Shape %v, want %v", got.Consumable.Shape, tt.wantShape)
 			}
-			if !(slices.Contains(tt.wantNames, got.Name)) {
-				t.Errorf("NewWeapon(): got Name %v, want in %v", got.Name, tt.wantNames)
+			if !(slices.Contains(tt.wantNames, got.Consumable.Name)) {
+				t.Errorf("NewWeapon(): got Name %v, want in %v", got.Consumable.Name, tt.wantNames)
 			}
 			if !(got.StrengthBuff < tt.wantStrengthBuffLessThan) {
 				t.Errorf("NewWeapon(): got StrengthBuff %v, want less than %v", got.StrengthBuff, tt.wantStrengthBuffLessThan)

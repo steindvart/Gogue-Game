@@ -24,14 +24,14 @@ func TestNewTreasure(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := NewTreasure(tt.box)
-			if !(got.Consumable.Shape == tt.wantShape) {
-				t.Errorf("NewTreasure(): got Shape %v, want %v", got.Consumable.Shape, tt.wantShape)
+			if !(got.Shape == tt.wantShape) {
+				t.Errorf("NewTreasure(): got Shape %v, want %v", got.Shape, tt.wantShape)
 			}
 			if !(got.Value < tt.wantValueLessThan) {
 				t.Errorf("NewTreasure(): got Value %v, want less than %v", got.Value, tt.wantValueLessThan)
 			}
-			if !(got.Consumable.Name == tt.wantName) {
-				t.Errorf("NewTreasure(): got Name %v, want %v", got.Consumable.Name, tt.wantName)
+			if !(got.Name == tt.wantName) {
+				t.Errorf("NewTreasure(): got Name %v, want %v", got.Name, tt.wantName)
 			}
 		})
 	}

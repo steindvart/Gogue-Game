@@ -1,7 +1,9 @@
 package entity
 
 import (
+	"reflect"
 	"testing"
+	"time"
 )
 
 func TestPlayer_IsAlive(t *testing.T) {
@@ -223,6 +225,343 @@ func TestPlayer_CheckEvasion(t *testing.T) {
 			}
 			if count == tries {
 				t.Errorf("CheckEvasion() should never be 100%%")
+			}
+		})
+	}
+}
+
+func TestPlayer_TakeConsumableLike(t *testing.T) {
+	tests := []struct {
+		name        string
+		consumables []ConsumableLike
+		want        Backpack
+	}{
+		{
+			name: "take elixir",
+			consumables: []ConsumableLike{
+				&Elixir{
+					Consumable: Consumable{
+						Shape: Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Name:  "Awkward Elixir",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 1,
+						Agility:   0,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+			},
+			want: Backpack{
+				Capacity:    BackpackDefaultCapacity,
+				ItemsNum:    1,
+				Consumables: []ConsumableLike{},
+				Treasures:   0,
+			},
+		},
+		{
+			name: "take two elixirs",
+			consumables: []ConsumableLike{
+				&Elixir{
+					Consumable: Consumable{
+						Shape: Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Name:  "Awkward Elixir One",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 1,
+						Agility:   0,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+				&Elixir{
+					Consumable: Consumable{
+						Shape: Box{Point: Point2D[int]{X: 1, Y: 3}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Name:  "Awkward Elixir Two",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 0,
+						Agility:   1,
+						Strength:  0,
+					},
+					Increment: 15,
+				},
+			},
+			want: Backpack{
+				Capacity:    BackpackDefaultCapacity,
+				ItemsNum:    2,
+				Consumables: []ConsumableLike{},
+				Treasures:   0,
+			},
+		},
+		{
+			name: "take elixir and two foods",
+			consumables: []ConsumableLike{
+				&Elixir{
+					Consumable: Consumable{
+						Shape: Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Name:  "Awkward Elixir",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 1,
+						Agility:   0,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+				&Food{
+					Consumable: Consumable{
+						Shape: Box{Point: Point2D[int]{X: 1, Y: 3}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Name:  "Awkward Food One",
+					},
+					HealthRegeneration: 15,
+				},
+				&Food{
+					Consumable: Consumable{
+						Shape: Box{Point: Point2D[int]{X: 1, Y: 4}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Name:  "Awkward Food Two",
+					},
+					HealthRegeneration: 15,
+				},
+			},
+			want: Backpack{
+				Capacity:    BackpackDefaultCapacity,
+				ItemsNum:    3,
+				Consumables: []ConsumableLike{},
+				Treasures:   0,
+			},
+		},
+		{
+			name: "take elixir and food and scroll and weapon",
+			consumables: []ConsumableLike{
+				&Elixir{
+					Consumable: Consumable{
+						Shape: Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Name:  "Awkward Elixir",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 1,
+						Agility:   0,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+				&Food{
+					Consumable: Consumable{
+						Shape: Box{Point: Point2D[int]{X: 1, Y: 3}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Name:  "Awkward Food",
+					},
+					HealthRegeneration: 15,
+				},
+				&Scroll{
+					Consumable: Consumable{
+						Shape: Box{Point: Point2D[int]{X: 1, Y: 4}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Name:  "Awkward Scroll",
+					},
+					AffectedAttribute: Attributes{
+						MaxHealth: 0,
+						Agility:   1,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+				&Weapon{
+					Consumable: Consumable{
+						Shape: Box{Point: Point2D[int]{X: 1, Y: 5}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Name:  "Awkward Weapon",
+					},
+					StrengthBuff: 10,
+				},
+			},
+			want: Backpack{
+				Capacity:    BackpackDefaultCapacity,
+				ItemsNum:    4,
+				Consumables: []ConsumableLike{},
+				Treasures:   0,
+			},
+		},
+		{
+			name: "take nine elixirs",
+			consumables: []ConsumableLike{
+				&Elixir{
+					Consumable: Consumable{
+						Shape: Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Name:  "Awkward Elixir One",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 1,
+						Agility:   0,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+				&Elixir{
+					Consumable: Consumable{
+						Shape: Box{Point: Point2D[int]{X: 1, Y: 3}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Name:  "Awkward Elixir Two",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 0,
+						Agility:   1,
+						Strength:  0,
+					},
+					Increment: 15,
+				},
+				&Elixir{
+					Consumable: Consumable{
+						Shape: Box{Point: Point2D[int]{X: 1, Y: 4}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Name:  "Awkward Elixir Three",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 0,
+						Agility:   0,
+						Strength:  1,
+					},
+					Increment: 15,
+				},
+				&Elixir{
+					Consumable: Consumable{
+						Shape: Box{Point: Point2D[int]{X: 1, Y: 5}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Name:  "Awkward Elixir Four",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 0,
+						Agility:   1,
+						Strength:  0,
+					},
+					Increment: 15,
+				},
+				&Elixir{
+					Consumable: Consumable{
+						Shape: Box{Point: Point2D[int]{X: 1, Y: 6}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Name:  "Awkward Elixir Five",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 0,
+						Agility:   1,
+						Strength:  0,
+					},
+					Increment: 15,
+				},
+				&Elixir{
+					Consumable: Consumable{
+						Shape: Box{Point: Point2D[int]{X: 1, Y: 7}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Name:  "Awkward Elixir Six",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 0,
+						Agility:   1,
+						Strength:  0,
+					},
+					Increment: 15,
+				},
+				&Elixir{
+					Consumable: Consumable{
+						Shape: Box{Point: Point2D[int]{X: 1, Y: 8}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Name:  "Awkward Elixir Seven",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 0,
+						Agility:   1,
+						Strength:  0,
+					},
+					Increment: 15,
+				},
+				&Elixir{
+					Consumable: Consumable{
+						Shape: Box{Point: Point2D[int]{X: 1, Y: 9}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Name:  "Awkward Elixir Eight",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 0,
+						Agility:   1,
+						Strength:  0,
+					},
+					Increment: 15,
+				},
+				&Elixir{
+					Consumable: Consumable{
+						Shape: Box{Point: Point2D[int]{X: 1, Y: 10}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Name:  "Awkward Elixir Nine",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 0,
+						Agility:   1,
+						Strength:  0,
+					},
+					Increment: 15,
+				},
+			},
+			want: Backpack{
+				Capacity:    BackpackDefaultCapacity,
+				ItemsNum:    9,
+				Consumables: []ConsumableLike{},
+				Treasures:   0,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := NewPlayer(Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 2}})
+
+			for _, item := range tt.consumables {
+				p.TakeConsumableLike(item)
+				tt.want.Consumables = append(tt.want.Consumables, item)
+			}
+
+			got := *p.Backpack
+
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("TakeConsumableLike() = %#v, want %#v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestNewPlayer(t *testing.T) {
+	tests := []struct {
+		name string
+		box  Box
+		want *Player
+	}{
+		{
+			name: "player constructor",
+			box:  Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 2}},
+			want: &Player{
+				Character: Character{
+					Shape:     Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 2}},
+					Health:    float64(AttributeRateAverage),
+					MaxHealth: float64(AttributeRateAverage),
+					Strength:  uint(AttributeRateAverage),
+					Agility:   uint(AttributeRateAverage),
+				},
+				Experience:     0,
+				CharacterLevel: 1,
+				Backpack:       NewBackpack(),
+				Weapon:         nil,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := NewPlayer(tt.box)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewPlayer() = %#v, want %#v", got, tt.want)
 			}
 		})
 	}
