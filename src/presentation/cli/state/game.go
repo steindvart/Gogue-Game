@@ -12,11 +12,12 @@ import (
 
 type Game struct {
 	player entity.Player
+	level  entity.Level
 	view   *tview.Box
 	signal signal.Type
 }
 
-func NewGame() *Game {
+func NewGame() (*Game, error) {
 	player := entity.Player{
 		Character: entity.Character{
 			Shape: entity.Box{
@@ -35,8 +36,16 @@ func NewGame() *Game {
 	// @todo - выделить отрисовку в отдельный файл в view/cli
 	box := tview.NewBox().SetBorder(true).SetTitle("Game")
 
+	level := entity.Level{}
+	// @todo - обработать ошибку
+	err := level.GenerateNineRooms(entity.Size2D[uint]{Height: 30, Width: 90})
+	if err != nil {
+		return nil, err
+	}
+
 	game := Game{
 		player: player,
+		level:  level,
 		view:   box,
 	}
 
@@ -81,7 +90,7 @@ func NewGame() *Game {
 		}
 	})
 
-	return &game
+	return &game, nil
 }
 
 func (g *Game) eventToAction(event *tcell.EventKey) action.Type {
@@ -139,6 +148,12 @@ func (g *Game) drawField(screen tcell.Screen, ox, oy, w, h int) {
 			ch := ' '
 			if field[y][x] == 1 {
 				ch = '🦸'
+			} else if field[y][x] == 2 {
+				ch = '—'
+			} else if field[y][x] == 3 {
+				ch = '|'
+			} else if field[y][x] == 4 {
+				ch = 'O'
 			}
 			screen.SetContent(ox+x, oy+y, ch, nil, tcell.StyleDefault.Background(tcell.ColorBlack))
 		}
@@ -150,10 +165,30 @@ func (g *Game) makeField(w, h int) [][]int {
 	for y := range field {
 		field[y] = make([]int, w)
 	}
+
+	for _, room := range g.level.Rooms {
+		g.drawRoom(room, g.level, field)
+	}
+
 	px := g.player.Character.Shape.Point.X
 	py := g.player.Character.Shape.Point.Y
 	if py >= 0 && py < h && px >= 0 && px < w {
 		field[py][px] = 1
 	}
+
 	return field
+}
+
+func (g *Game) drawRoom(room entity.Room, level entity.Level, field [][]int) {
+	for column := room.Shape.Point.X; column < room.Shape.Point.X+int(room.Shape.Size.Width); column++ {
+		field[room.Shape.Point.Y][column] = 2
+		field[room.Shape.Point.Y+int(room.Shape.Size.Height)][column] = 2
+	}
+
+	for row := room.Shape.Point.Y; row < room.Shape.Point.Y+int(room.Shape.Size.Height); row++ {
+		field[row][room.Shape.Point.X] = 3
+		field[row][room.Shape.Point.X+int(room.Shape.Size.Width)] = 3
+	}
+
+	field[level.End.Point.Y][level.End.Point.X] = 4
 }

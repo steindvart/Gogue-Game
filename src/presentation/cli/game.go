@@ -94,7 +94,11 @@ func (g *Game) handleSignal(s signal.Type) {
 	case signal.Stop:
 		g.PopState()
 	case signal.NewGame:
-		g.PushState(state.NewGame())
+		game, err := state.NewGame()
+		if err != nil {
+			panic(err)
+		}
+		g.PushState(game)
 	case signal.LoadGame:
 		// @todo push load game state
 	case signal.ShowScoreboard:
