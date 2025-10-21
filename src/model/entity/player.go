@@ -1,8 +1,10 @@
 package entity
 
-import (
-	"fmt"
-)
+type BackpackIsFullError struct{}
+
+func (BackpackIsFullError) Error() string {
+	return "backpack is full, drop something"
+}
 
 type Player struct {
 	Character      Character
@@ -50,12 +52,20 @@ func (p *Player) TakeConsumableLike(consumableLike ConsumableLike) error {
 		consumableLike.Taken()
 		return nil
 	} else {
-		return fmt.Errorf("backpack is full, drop something")
+		return BackpackIsFullError{}
 	}
 }
 
-func (p *Player) DropConsumableLike(consumableLike ConsumableLike, box Box) {
-	consumableLike.Dropped(box)
+func (p *Player) DropConsumableLike(consumableLike *ConsumableLike, box Box) ConsumableLike {
+	for idx, item := range p.Backpack.Consumables {
+		if item == *consumableLike {
+			p.Backpack.Consumables = append(p.Backpack.Consumables[:idx], p.Backpack.Consumables[idx+1:]...)
+			p.Backpack.ItemsNum -= 1
+		}
+	}
+	
+	(*consumableLike).Dropped(box)
+	return (*consumableLike)
 }
 
 func (p *Player) UseConsumableLike(consumableLike ConsumableLike) string {
