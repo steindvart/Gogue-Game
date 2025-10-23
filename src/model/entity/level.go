@@ -97,3 +97,11 @@ func (l *Level) GenerateNineRooms(sizeMap Size2D[uint]) error {
 
 	return nil
 }
+
+func (l *Level) GeneratePassages() error {
+	doorOne := Point2D[int]{X: 30, Y: 30}
+	doorTwo := Point2D[int]{X: 40, Y: 35}
+
+	l.Passages = append(l.Passages, *NewPassageX(doorOne, doorTwo))
+	return nil
+}
