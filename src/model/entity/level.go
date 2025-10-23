@@ -72,22 +72,22 @@ func (l *Level) GenerateNineRooms(sizeMap Size2D[uint]) error {
 			width := rand.Intn(maxRoomWidth-RoomMinWidth+1) + RoomMinWidth
 			height := rand.Intn(maxRoomHeight-RoomMinHeight+1) + RoomMinHeight
 
-			x := cellXStart + rand.Intn(maxRoomWidth-width+1)
-			y := cellYStart + rand.Intn(maxRoomHeight-height+1)
+			xCell := cellXStart + rand.Intn(maxRoomWidth-width+1)
+			yCell := cellYStart + rand.Intn(maxRoomHeight-height+1)
 
 			if roomType == RoomTypeFinish {
 				roomWall := 1
 				l.End = Box{
 					Point: Point2D[int]{
-						X: x + roomWall + rand.Intn(width-(roomWall*2)),
-						Y: y + roomWall + rand.Intn(height-(roomWall*2)),
+						X: xCell + roomWall + rand.Intn(width-(roomWall*2)),
+						Y: yCell + roomWall + rand.Intn(height-(roomWall*2)),
 					},
 					Size: Size2D[uint]{Height: 1, Width: 1},
 				}
 			}
 
 			roomBox := Box{
-				Point: Point2D[int]{X: x, Y: y},
+				Point: Point2D[int]{X: xCell, Y: yCell},
 				Size:  Size2D[uint]{Width: uint(width), Height: uint(height)},
 			}
 
@@ -99,9 +99,30 @@ func (l *Level) GenerateNineRooms(sizeMap Size2D[uint]) error {
 }
 
 func (l *Level) GeneratePassages() error {
-	doorOne := Point2D[int]{X: 30, Y: 30}
-	doorTwo := Point2D[int]{X: 40, Y: 35}
+	const wall = 1
+	doorOneCellYFrom := l.Rooms[0].Shape.Point.Y + wall
+	doorOneCellYTo := l.Rooms[0].Shape.Point.Y + int(l.Rooms[0].Shape.Size.Height) - wall
+	doorOne := Point2D[int]{X: l.Rooms[0].Shape.Point.X + int(l.Rooms[0].Shape.Size.Width),
+		Y: rand.Intn(doorOneCellYTo-doorOneCellYFrom) + doorOneCellYFrom}
 
-	l.Passages = append(l.Passages, *NewPassageX(doorOne, doorTwo))
+	doorTwoCellYFrom := l.Rooms[1].Shape.Point.Y + wall
+	doorTwoCellYTo := l.Rooms[1].Shape.Point.Y + int(l.Rooms[1].Shape.Size.Height) - wall
+	doorTwo := Point2D[int]{X: l.Rooms[1].Shape.Point.X,
+		Y: rand.Intn(doorTwoCellYTo-doorTwoCellYFrom) + doorTwoCellYFrom}
+
+	l.Passages = append(l.Passages, *NewPassageOnX(doorOne, doorTwo))
+
+	doorOne2CellXFrom := l.Rooms[0].Shape.Point.X + wall
+	doorOne2CellXTo := l.Rooms[0].Shape.Point.X + int(l.Rooms[0].Shape.Size.Width)
+	doorOne2 := Point2D[int]{X: rand.Intn(doorOne2CellXTo-doorOne2CellXFrom) + doorOne2CellXFrom,
+		Y: l.Rooms[0].Shape.Point.Y + int(l.Rooms[0].Shape.Size.Height)}
+
+	doorTwo2CellYFrom := l.Rooms[3].Shape.Point.X + wall
+	doorTwo2CellYTo := l.Rooms[3].Shape.Point.X + int(l.Rooms[3].Shape.Size.Width) - wall
+	doorTwo2 := Point2D[int]{X: rand.Intn(doorTwo2CellYTo-doorTwo2CellYFrom) + doorTwo2CellYFrom,
+		Y: l.Rooms[3].Shape.Point.Y}
+
+	l.Passages = append(l.Passages, *NewPassageOnY(doorOne2, doorTwo2))
+
 	return nil
 }
