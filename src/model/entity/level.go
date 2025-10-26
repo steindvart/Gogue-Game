@@ -19,6 +19,36 @@ type Level struct {
 	End      Box
 }
 
+var gridNeighborsRooms = [][]int{
+	{1, 3},
+	{0, 2, 4},
+	{1, 5},
+	{0, 4, 6},
+	{1, 3, 5, 7},
+	{2, 4, 8},
+	{3, 7},
+	{6, 4, 8},
+	{5, 7},
+}
+
+var xPassages = [][2]int{
+	{0, 1},
+	{1, 2},
+	{3, 4},
+	{4, 5},
+	{6, 7},
+	{7, 8},
+}
+
+var yPassages = [][2]int{
+	{0, 3},
+	{3, 6},
+	{1, 4},
+	{4, 7},
+	{2, 5},
+	{5, 8},
+}
+
 func calculateRoomSectionSize(mapSize Size2D[uint]) (sectionSize Size2D[uint]) {
 	totalPaddingWidth := uint(MinRoomPadding * 2)
 	totalPaddingHeight := uint(MinRoomPadding * 2)
@@ -98,31 +128,111 @@ func (l *Level) GenerateNineRooms(sizeMap Size2D[uint]) error {
 	return nil
 }
 
-func (l *Level) GeneratePassages() error {
+func getDoorLeftWall(room Room) Point2D[int] {
 	const wall = 1
-	doorOneCellYFrom := l.Rooms[0].Shape.Point.Y + wall
-	doorOneCellYTo := l.Rooms[0].Shape.Point.Y + int(l.Rooms[0].Shape.Size.Height) - wall
-	doorOne := Point2D[int]{X: l.Rooms[0].Shape.Point.X + int(l.Rooms[0].Shape.Size.Width),
-		Y: rand.Intn(doorOneCellYTo-doorOneCellYFrom) + doorOneCellYFrom}
+	doorYFrom := room.Shape.Point.Y + wall
+	doorYTo := room.Shape.Point.Y + int(room.Shape.Size.Height) - wall
+	return Point2D[int]{X: room.Shape.Point.X, Y: rand.Intn(doorYTo-doorYFrom) + doorYFrom}
+}
 
-	doorTwoCellYFrom := l.Rooms[1].Shape.Point.Y + wall
-	doorTwoCellYTo := l.Rooms[1].Shape.Point.Y + int(l.Rooms[1].Shape.Size.Height) - wall
-	doorTwo := Point2D[int]{X: l.Rooms[1].Shape.Point.X,
-		Y: rand.Intn(doorTwoCellYTo-doorTwoCellYFrom) + doorTwoCellYFrom}
+func getDoorRightWall(room Room) Point2D[int] {
+	const wall = 1
+	doorYFrom := room.Shape.Point.Y + wall
+	doorYTo := room.Shape.Point.Y + int(room.Shape.Size.Height) - wall
+	return Point2D[int]{X: room.Shape.Point.X + int(room.Shape.Size.Width), Y: rand.Intn(doorYTo-doorYFrom) + doorYFrom}
+}
 
-	l.Passages = append(l.Passages, *NewPassageOnX(doorOne, doorTwo))
+func getDoorTopWall(room Room) Point2D[int] {
+	const wall = 1
+	doorXFrom := room.Shape.Point.X + wall
+	doorXTo := room.Shape.Point.X + int(room.Shape.Size.Width) - wall
+	return Point2D[int]{X: rand.Intn(doorXTo-doorXFrom) + doorXFrom, Y: room.Shape.Point.Y}
+}
 
-	doorOne2CellXFrom := l.Rooms[0].Shape.Point.X + wall
-	doorOne2CellXTo := l.Rooms[0].Shape.Point.X + int(l.Rooms[0].Shape.Size.Width)
-	doorOne2 := Point2D[int]{X: rand.Intn(doorOne2CellXTo-doorOne2CellXFrom) + doorOne2CellXFrom,
-		Y: l.Rooms[0].Shape.Point.Y + int(l.Rooms[0].Shape.Size.Height)}
+func getDoorDownWall(room Room) Point2D[int] {
+	const wall = 1
+	doorXFrom := room.Shape.Point.X + wall
+	doorXTo := room.Shape.Point.X + int(room.Shape.Size.Width)
+	return Point2D[int]{X: rand.Intn(doorXTo-doorXFrom) + doorXFrom, Y: room.Shape.Point.Y + int(room.Shape.Size.Height)}
+}
 
-	doorTwo2CellYFrom := l.Rooms[3].Shape.Point.X + wall
-	doorTwo2CellYTo := l.Rooms[3].Shape.Point.X + int(l.Rooms[3].Shape.Size.Width) - wall
-	doorTwo2 := Point2D[int]{X: rand.Intn(doorTwo2CellYTo-doorTwo2CellYFrom) + doorTwo2CellYFrom,
-		Y: l.Rooms[3].Shape.Point.Y}
+func generatePassagesTree(startRoom int) (map[int][]int, error) {
+	if startRoom < 0 || startRoom > 9 {
+		return nil, errors.New("start room must be between 0 and 9")
+	}
+	graph := make(map[int][]int)
+	stack := []int{startRoom}
+	visit := make(map[int]bool)
+	visit[startRoom] = true
 
-	l.Passages = append(l.Passages, *NewPassageOnY(doorOne2, doorTwo2))
+	for len(stack) > 0 {
+		currentRoom := stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+
+		allNeighborsRooms := gridNeighborsRooms[currentRoom]
+		unvisitNeighborsRooms := []int{}
+		for _, neighborRoom := range allNeighborsRooms {
+			if !visit[neighborRoom] {
+				unvisitNeighborsRooms = append(unvisitNeighborsRooms, neighborRoom)
+			}
+		}
+
+		// rand.Shuffle перемешивает значения в слайсе unvisitNeighborsRooms
+		rand.Shuffle(len(unvisitNeighborsRooms), func(i, j int) {
+			unvisitNeighborsRooms[i], unvisitNeighborsRooms[j] = unvisitNeighborsRooms[j], unvisitNeighborsRooms[i]
+		})
+
+		for _, nextRoom := range unvisitNeighborsRooms {
+			graph[currentRoom] = append(graph[currentRoom], nextRoom)
+			graph[nextRoom] = append(graph[nextRoom], currentRoom)
+			visit[nextRoom] = true
+
+			stack = append(stack, nextRoom)
+		}
+	}
+
+	return graph, nil
+}
+
+func (l *Level) GeneratePassages() error {
+	tree, err := generatePassagesTree(0)
+	if err != nil {
+		return err
+	}
+
+	// [2]int - две комнаты, между которыми тоннель. bool - наличие тоннеля.
+	laidPassages := make(map[[2]int]bool)
+	for roomOne, connectedRooms := range tree {
+		for _, roomTwo := range connectedRooms {
+			var key [2]int
+			if roomOne < roomTwo {
+				key = [2]int{roomOne, roomTwo}
+			} else {
+				key = [2]int{roomTwo, roomOne}
+			}
+			if !laidPassages[key] {
+				laidPassages[key] = true
+				for _, passageKey := range xPassages {
+					if key == passageKey {
+						indexOne := passageKey[0]
+						indexTwo := passageKey[1]
+						doorOne := getDoorRightWall(l.Rooms[indexOne])
+						doorTwo := getDoorLeftWall(l.Rooms[indexTwo])
+						l.Passages = append(l.Passages, *NewPassageOnX(doorOne, doorTwo))
+					}
+				}
+				for _, passageKey := range yPassages {
+					if key == passageKey {
+						indexOne := passageKey[0]
+						indexTwo := passageKey[1]
+						doorOne := getDoorDownWall(l.Rooms[indexOne])
+						doorTwo := getDoorTopWall(l.Rooms[indexTwo])
+						l.Passages = append(l.Passages, *NewPassageOnY(doorOne, doorTwo))
+					}
+				}
+			}
+		}
+	}
 
 	return nil
 }
