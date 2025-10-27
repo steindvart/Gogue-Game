@@ -9,6 +9,8 @@ import (
 const (
 	RoomMinWidth     = 3
 	RoomMinHeight    = 3
+	RoomMaxWidth     = 200
+	RoomMaxHeight    = 150
 	MinRoomPadding   = 1
 	numberXYSections = 3
 )
@@ -51,9 +53,9 @@ var verticalNeighborRoomsSet = map[[2]int]struct{}{
 }
 
 func (l *Level) GenerateNineRooms(sizeMap Size2D[uint]) error {
-	sectionSize := calculateRoomSectionSize(sizeMap)
-	if sectionSize.Width < RoomMinWidth || sectionSize.Height < RoomMinHeight {
-		return errors.New("map size is too small: each room section must be at least min room size")
+	sectionSize, err := calculateRoomSectionSize(sizeMap)
+	if err != nil {
+		return err
 	}
 
 	const roomsCount = 9
@@ -84,7 +86,7 @@ func (l *Level) GenerateNineRooms(sizeMap Size2D[uint]) error {
 			maxRoomHeight := cellYEnd - cellYStart
 
 			if maxRoomWidth < RoomMinWidth || maxRoomHeight < RoomMinHeight {
-				return errors.New("internal error: available space in section is smaller than minimum room size")
+				return errors.New("available space in section is smaller than minimum room size")
 			}
 
 			width := rand.Intn(maxRoomWidth-RoomMinWidth+1) + RoomMinWidth
@@ -116,17 +118,26 @@ func (l *Level) GenerateNineRooms(sizeMap Size2D[uint]) error {
 	return nil
 }
 
-func calculateRoomSectionSize(mapSize Size2D[uint]) (sectionSize Size2D[uint]) {
+func calculateRoomSectionSize(sizeMap Size2D[uint]) (Size2D[uint], error) {
+	if sizeMap.Width > RoomMaxWidth || sizeMap.Height > RoomMaxHeight {
+		return Size2D[uint]{}, errors.New("game map size is too big")
+	}
+
 	totalPaddingWidth := uint(MinRoomPadding * 2)
 	totalPaddingHeight := uint(MinRoomPadding * 2)
 
-	availableWidth := mapSize.Width - totalPaddingWidth
-	availableHeight := mapSize.Height - totalPaddingHeight
+	availableWidth := sizeMap.Width - totalPaddingWidth
+	availableHeight := sizeMap.Height - totalPaddingHeight
 
+	var sectionSize Size2D[uint]
 	sectionSize.Width = availableWidth / numberXYSections
 	sectionSize.Height = availableHeight / numberXYSections
 
-	return sectionSize
+	if sectionSize.Width < RoomMinWidth || sectionSize.Height < RoomMinHeight {
+		return Size2D[uint]{}, errors.New("game map size is too small")
+	}
+
+	return sectionSize, nil
 }
 
 func (l *Level) GeneratePassages() error {
@@ -186,7 +197,6 @@ func generateSpanningTree(startRoom int) ([][2]int, error) {
 				unvisitNeighborsRooms = append(unvisitNeighborsRooms, neighborRoom)
 			}
 		}
-
 		// rand.Shuffle перемешивает значения в существующем слайсе unvisitNeighborsRooms
 		rand.Shuffle(len(unvisitNeighborsRooms), func(i, j int) {
 			unvisitNeighborsRooms[i], unvisitNeighborsRooms[j] = unvisitNeighborsRooms[j], unvisitNeighborsRooms[i]
@@ -204,6 +214,13 @@ func generateSpanningTree(startRoom int) ([][2]int, error) {
 }
 
 func addRandomEdges(sourceEdges [][2]int, extraEdgesCount int) [][2]int {
+	if extraEdgesCount > 4 {
+		extraEdgesCount = 4
+	}
+	if extraEdgesCount < 0 {
+		extraEdgesCount = 0
+	}
+
 	existingConnections := make(map[[2]int]struct{})
 	for _, connectedRooms := range sourceEdges {
 		minIndex, maxIndex := sortByOrderAsc(connectedRooms[0], connectedRooms[1])
@@ -249,6 +266,12 @@ func addRandomEdges(sourceEdges [][2]int, extraEdgesCount int) [][2]int {
 	return resultEdges
 }
 
+func sortByOrderAsc(first, second int) (int, int) {
+	minIndex := int(math.Min(float64(first), float64(second)))
+	maxIndex := int(math.Max(float64(first), float64(second)))
+	return minIndex, maxIndex
+}
+
 func getDoorLeftWall(room Room) Point2D[int] {
 	const wall = 1
 	doorYFrom := room.Shape.Point.Y + wall
@@ -275,10 +298,4 @@ func getDoorDownWall(room Room) Point2D[int] {
 	doorXFrom := room.Shape.Point.X + wall
 	doorXTo := room.Shape.Point.X + int(room.Shape.Size.Width)
 	return Point2D[int]{X: rand.Intn(doorXTo-doorXFrom) + doorXFrom, Y: room.Shape.Point.Y + int(room.Shape.Size.Height)}
-}
-
-func sortByOrderAsc(first, second int) (int, int) {
-	minIndex := int(math.Min(float64(first), float64(second)))
-	maxIndex := int(math.Max(float64(first), float64(second)))
-	return minIndex, maxIndex
 }

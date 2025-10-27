@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func Test_NewPassageOnX(t *testing.T) {
+func TestPassage_NewPassageOnX(t *testing.T) {
 	cases := []struct {
 		name      string
 		doorOne   Point2D[int]
@@ -78,7 +78,7 @@ func Test_NewPassageOnX(t *testing.T) {
 	}
 }
 
-func Test_NewPassageOnY(t *testing.T) {
+func TestPassage_NewPassageOnY(t *testing.T) {
 	cases := []struct {
 		name      string
 		doorOne   Point2D[int]
