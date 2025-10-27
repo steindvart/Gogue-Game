@@ -13,13 +13,13 @@ func TestLevel_GenerateRoomsOnLevel(t *testing.T) {
 		errorText string
 	}{
 		{
-			name:    "Valid map size 15x15",
+			name:    "Valid map size 30x90",
 			sizeMap: Size2D[uint]{Height: 30, Width: 90},
 			wantErr: false,
 		},
 		{
 			name:      "Map too small width",
-			sizeMap:   Size2D[uint]{Height: 6, Width: 8},
+			sizeMap:   Size2D[uint]{Height: 8, Width: 6},
 			wantErr:   true,
 			errorText: "map size is too small",
 		},

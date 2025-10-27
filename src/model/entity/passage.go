@@ -1,6 +1,9 @@
 package entity
 
-import "math/rand"
+import (
+	"errors"
+	"math/rand"
+)
 
 type Passage struct {
 	DoorOne Point2D[int]
@@ -8,8 +11,12 @@ type Passage struct {
 	DoorTwo Point2D[int]
 }
 
-func NewPassageOnX(doorOne Point2D[int], doorTwo Point2D[int]) *Passage {
+func NewPassageOnX(doorOne Point2D[int], doorTwo Point2D[int]) (*Passage, error) {
 	// если будут введены координаты дверей справа налево, а не слева направо, я их переставляю будто слева направо
+	if doorOne.X == doorTwo.X {
+		return nil, errors.New("NewPassageOnX: doors cannot be positioned on the same x axis")
+	}
+
 	if doorOne.X > doorTwo.X {
 		doorTemp := doorOne
 		doorOne = doorTwo
@@ -45,10 +52,14 @@ func NewPassageOnX(doorOne Point2D[int], doorTwo Point2D[int]) *Passage {
 		passage = append(passage, Point2D[int]{X: lastElement.X + 1, Y: lastElement.Y})
 	}
 
-	return &Passage{DoorOne: doorOne, Passage: passage, DoorTwo: doorTwo}
+	return &Passage{DoorOne: doorOne, Passage: passage, DoorTwo: doorTwo}, nil
 }
 
-func NewPassageOnY(doorOne Point2D[int], doorTwo Point2D[int]) *Passage {
+func NewPassageOnY(doorOne Point2D[int], doorTwo Point2D[int]) (*Passage, error) {
+	if doorOne.Y == doorTwo.Y {
+		return nil, errors.New("NewPassageOnY: doors cannot be positioned on the same y axis")
+	}
+
 	if doorOne.Y > doorTwo.Y {
 		doorTemp := doorOne
 		doorOne = doorTwo
@@ -84,5 +95,5 @@ func NewPassageOnY(doorOne Point2D[int], doorTwo Point2D[int]) *Passage {
 		passage = append(passage, Point2D[int]{X: lastElement.X, Y: lastElement.Y + 1})
 	}
 
-	return &Passage{DoorOne: doorOne, Passage: passage, DoorTwo: doorTwo}
+	return &Passage{DoorOne: doorOne, Passage: passage, DoorTwo: doorTwo}, nil
 }

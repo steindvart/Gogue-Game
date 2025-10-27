@@ -145,12 +145,20 @@ func (l *Level) GeneratePassages() error {
 		if _, exists := horizontalNeighborRoomsSet[key]; exists {
 			doorOne := getDoorRightWall(l.Rooms[minIndex])
 			doorTwo := getDoorLeftWall(l.Rooms[maxIndex])
-			l.Passages = append(l.Passages, *NewPassageOnX(doorOne, doorTwo))
+			passage, err := NewPassageOnX(doorOne, doorTwo)
+			if err != nil {
+				return err
+			}
+			l.Passages = append(l.Passages, *passage)
 		}
 		if _, exists := verticalNeighborRoomsSet[key]; exists {
 			doorOne := getDoorDownWall(l.Rooms[minIndex])
 			doorTwo := getDoorTopWall(l.Rooms[maxIndex])
-			l.Passages = append(l.Passages, *NewPassageOnY(doorOne, doorTwo))
+			passage, err := NewPassageOnY(doorOne, doorTwo)
+			if err != nil {
+				return err
+			}
+			l.Passages = append(l.Passages, *passage)
 		}
 	}
 
