@@ -231,9 +231,7 @@ func addRandomEdges(sourceEdges [][2]int, extraEdgesCount int) [][2]int {
 	})
 
 	resultEdges := make([][2]int, len(sourceEdges))
-	for i := range sourceEdges {
-		resultEdges[i] = sourceEdges[i]
-	}
+	copy(resultEdges, sourceEdges)
 
 	for i := 0; i < extraEdgesCount; i++ {
 		element := potentialEdges[i]
