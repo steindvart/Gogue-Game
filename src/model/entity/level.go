@@ -136,7 +136,7 @@ func (l *Level) GeneratePassages() error {
 		return err
 	}
 
-	extraEdgesCount := rand.Intn(4)
+	extraEdgesCount := rand.Intn(3) + 1
 	treeEdges = addRandomEdges(treeEdges, extraEdgesCount)
 
 	for _, connectedRooms := range treeEdges {
