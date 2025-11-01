@@ -188,6 +188,41 @@ func TestPlayer_Attack(t *testing.T) {
 	}
 }
 
+func TestPlayer_AttackWithWeapon(t *testing.T) {
+	tests := []struct {
+		name     string
+		strength uint
+		want     uint
+	}{
+		{
+			name:     "normal attack",
+			strength: 7,
+			want:     7,
+		},
+		{
+			name:     "zero strength",
+			strength: 0,
+			want:     0,
+		},
+		{
+			name:     "high strength",
+			strength: 100,
+			want:     100,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := &Player{Character: Character{Strength: tt.strength}}
+			p.Weapon = NewWeapon(Box{})
+
+			got := p.Attack()
+			if got != tt.want+p.Weapon.Damage {
+				t.Errorf("Attack() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestPlayer_CheckEvasion(t *testing.T) {
 	tests := []struct {
 		name         string
@@ -231,6 +266,44 @@ func TestPlayer_CheckEvasion(t *testing.T) {
 	}
 }
 
+func TestPlayer_TakeTreasure(t *testing.T) {
+	tests := []struct {
+		name     string
+		treasure Treasure
+		want     uint
+	}{
+		{
+			name: "take treasure cost 10",
+			treasure: Treasure{
+				Shape: Box{},
+				Name:  "Gold",
+				Value: 10,
+			},
+			want: 10,
+		},
+		{
+			name: "take treasure cost 0",
+			treasure: Treasure{
+				Shape: Box{},
+				Name:  "Gold",
+				Value: 0,
+			},
+			want: 0,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := NewPlayer(Box{})
+
+			p.TakeTreasure(&tt.treasure)
+			got := p.Backpack.Treasures
+			if got != tt.want {
+				t.Errorf("TakeTreasure(): Backpack Treasures got %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestPlayer_TakeConsumableLike(t *testing.T) {
 	tests := []struct {
 		name        string
@@ -243,7 +316,7 @@ func TestPlayer_TakeConsumableLike(t *testing.T) {
 			consumables: []ConsumableLike{
 				&Elixir{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Elixir",
 					},
 					EffectDuration: time.Minute,
@@ -268,7 +341,7 @@ func TestPlayer_TakeConsumableLike(t *testing.T) {
 			consumables: []ConsumableLike{
 				&Elixir{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Elixir One",
 					},
 					EffectDuration: time.Minute,
@@ -281,7 +354,7 @@ func TestPlayer_TakeConsumableLike(t *testing.T) {
 				},
 				&Elixir{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 3}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Elixir Two",
 					},
 					EffectDuration: time.Minute,
@@ -306,7 +379,7 @@ func TestPlayer_TakeConsumableLike(t *testing.T) {
 			consumables: []ConsumableLike{
 				&Elixir{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Elixir",
 					},
 					EffectDuration: time.Minute,
@@ -319,14 +392,14 @@ func TestPlayer_TakeConsumableLike(t *testing.T) {
 				},
 				&Food{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 3}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Food One",
 					},
 					HealthRegeneration: 15,
 				},
 				&Food{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 4}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Food Two",
 					},
 					HealthRegeneration: 15,
@@ -345,7 +418,7 @@ func TestPlayer_TakeConsumableLike(t *testing.T) {
 			consumables: []ConsumableLike{
 				&Elixir{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Elixir",
 					},
 					EffectDuration: time.Minute,
@@ -358,14 +431,14 @@ func TestPlayer_TakeConsumableLike(t *testing.T) {
 				},
 				&Food{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 3}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Food",
 					},
 					HealthRegeneration: 15,
 				},
 				&Scroll{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 4}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Scroll",
 					},
 					AffectedAttribute: Attributes{
@@ -377,10 +450,10 @@ func TestPlayer_TakeConsumableLike(t *testing.T) {
 				},
 				&Weapon{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 5}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Weapon",
 					},
-					StrengthBuff: 10,
+					Damage: 10,
 				},
 			},
 			want: Backpack{
@@ -396,7 +469,7 @@ func TestPlayer_TakeConsumableLike(t *testing.T) {
 			consumables: []ConsumableLike{
 				&Elixir{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Elixir One",
 					},
 					EffectDuration: time.Minute,
@@ -409,7 +482,7 @@ func TestPlayer_TakeConsumableLike(t *testing.T) {
 				},
 				&Elixir{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 3}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Elixir Two",
 					},
 					EffectDuration: time.Minute,
@@ -422,7 +495,7 @@ func TestPlayer_TakeConsumableLike(t *testing.T) {
 				},
 				&Elixir{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 4}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Elixir Three",
 					},
 					EffectDuration: time.Minute,
@@ -435,7 +508,7 @@ func TestPlayer_TakeConsumableLike(t *testing.T) {
 				},
 				&Elixir{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 5}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Elixir Four",
 					},
 					EffectDuration: time.Minute,
@@ -448,7 +521,7 @@ func TestPlayer_TakeConsumableLike(t *testing.T) {
 				},
 				&Elixir{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 6}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Elixir Five",
 					},
 					EffectDuration: time.Minute,
@@ -461,7 +534,7 @@ func TestPlayer_TakeConsumableLike(t *testing.T) {
 				},
 				&Elixir{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 7}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Elixir Six",
 					},
 					EffectDuration: time.Minute,
@@ -474,7 +547,7 @@ func TestPlayer_TakeConsumableLike(t *testing.T) {
 				},
 				&Elixir{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 8}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Elixir Seven",
 					},
 					EffectDuration: time.Minute,
@@ -487,7 +560,7 @@ func TestPlayer_TakeConsumableLike(t *testing.T) {
 				},
 				&Elixir{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 9}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Elixir Eight",
 					},
 					EffectDuration: time.Minute,
@@ -500,7 +573,7 @@ func TestPlayer_TakeConsumableLike(t *testing.T) {
 				},
 				&Elixir{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 10}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Elixir Nine",
 					},
 					EffectDuration: time.Minute,
@@ -525,7 +598,7 @@ func TestPlayer_TakeConsumableLike(t *testing.T) {
 			consumables: []ConsumableLike{
 				&Elixir{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Elixir One",
 					},
 					EffectDuration: time.Minute,
@@ -538,7 +611,7 @@ func TestPlayer_TakeConsumableLike(t *testing.T) {
 				},
 				&Elixir{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 3}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Elixir Two",
 					},
 					EffectDuration: time.Minute,
@@ -551,7 +624,7 @@ func TestPlayer_TakeConsumableLike(t *testing.T) {
 				},
 				&Elixir{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 4}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Elixir Three",
 					},
 					EffectDuration: time.Minute,
@@ -564,7 +637,7 @@ func TestPlayer_TakeConsumableLike(t *testing.T) {
 				},
 				&Elixir{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 5}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Elixir Four",
 					},
 					EffectDuration: time.Minute,
@@ -577,7 +650,7 @@ func TestPlayer_TakeConsumableLike(t *testing.T) {
 				},
 				&Elixir{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 6}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Elixir Five",
 					},
 					EffectDuration: time.Minute,
@@ -590,7 +663,7 @@ func TestPlayer_TakeConsumableLike(t *testing.T) {
 				},
 				&Elixir{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 7}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Elixir Six",
 					},
 					EffectDuration: time.Minute,
@@ -603,7 +676,7 @@ func TestPlayer_TakeConsumableLike(t *testing.T) {
 				},
 				&Elixir{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 8}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Elixir Seven",
 					},
 					EffectDuration: time.Minute,
@@ -616,7 +689,7 @@ func TestPlayer_TakeConsumableLike(t *testing.T) {
 				},
 				&Elixir{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 9}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Elixir Eight",
 					},
 					EffectDuration: time.Minute,
@@ -629,7 +702,7 @@ func TestPlayer_TakeConsumableLike(t *testing.T) {
 				},
 				&Elixir{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 10}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Elixir Nine",
 					},
 					EffectDuration: time.Minute,
@@ -642,7 +715,7 @@ func TestPlayer_TakeConsumableLike(t *testing.T) {
 				},
 				&Elixir{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 10}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Elixir Ten",
 					},
 					EffectDuration: time.Minute,
@@ -665,7 +738,7 @@ func TestPlayer_TakeConsumableLike(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := NewPlayer(Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 2}})
+			p := NewPlayer(Box{})
 
 			for idx := range tt.consumables {
 				err := p.TakeConsumableLike(tt.consumables[idx])
@@ -689,18 +762,18 @@ func TestPlayer_TakeConsumableLike(t *testing.T) {
 
 func TestPlayer_DropConsumableLike(t *testing.T) {
 	tests := []struct {
-		name             string
-		consumables      []ConsumableLike
+		name                string
+		consumables         []ConsumableLike
 		consumableToDropIdx int
-		wantConsumables []ConsumableLike
-		want             Backpack
+		wantConsumables     []ConsumableLike
+		want                Backpack
 	}{
 		{
 			name: "drop elixir from elixir and food and scroll and weapon",
 			consumables: []ConsumableLike{
 				&Elixir{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Elixir",
 					},
 					EffectDuration: time.Minute,
@@ -713,14 +786,14 @@ func TestPlayer_DropConsumableLike(t *testing.T) {
 				},
 				&Food{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 3}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Food",
 					},
 					HealthRegeneration: 15,
 				},
 				&Scroll{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 4}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Scroll",
 					},
 					AffectedAttribute: Attributes{
@@ -732,10 +805,10 @@ func TestPlayer_DropConsumableLike(t *testing.T) {
 				},
 				&Weapon{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 5}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Weapon",
 					},
-					StrengthBuff: 10,
+					Damage: 10,
 				},
 			},
 			consumableToDropIdx: 0,
@@ -751,7 +824,7 @@ func TestPlayer_DropConsumableLike(t *testing.T) {
 			consumables: []ConsumableLike{
 				&Elixir{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Elixir",
 					},
 					EffectDuration: time.Minute,
@@ -764,14 +837,14 @@ func TestPlayer_DropConsumableLike(t *testing.T) {
 				},
 				&Food{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 3}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Food",
 					},
 					HealthRegeneration: 15,
 				},
 				&Scroll{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 4}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Scroll",
 					},
 					AffectedAttribute: Attributes{
@@ -783,10 +856,10 @@ func TestPlayer_DropConsumableLike(t *testing.T) {
 				},
 				&Weapon{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 5}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Weapon",
 					},
-					StrengthBuff: 10,
+					Damage: 10,
 				},
 			},
 			consumableToDropIdx: 1,
@@ -802,7 +875,7 @@ func TestPlayer_DropConsumableLike(t *testing.T) {
 			consumables: []ConsumableLike{
 				&Elixir{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Elixir",
 					},
 					EffectDuration: time.Minute,
@@ -815,14 +888,14 @@ func TestPlayer_DropConsumableLike(t *testing.T) {
 				},
 				&Food{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 3}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Food",
 					},
 					HealthRegeneration: 15,
 				},
 				&Scroll{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 4}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Scroll",
 					},
 					AffectedAttribute: Attributes{
@@ -834,10 +907,10 @@ func TestPlayer_DropConsumableLike(t *testing.T) {
 				},
 				&Weapon{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 5}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Weapon",
 					},
-					StrengthBuff: 10,
+					Damage: 10,
 				},
 			},
 			consumableToDropIdx: 2,
@@ -853,7 +926,7 @@ func TestPlayer_DropConsumableLike(t *testing.T) {
 			consumables: []ConsumableLike{
 				&Elixir{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Elixir",
 					},
 					EffectDuration: time.Minute,
@@ -866,14 +939,14 @@ func TestPlayer_DropConsumableLike(t *testing.T) {
 				},
 				&Food{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 3}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Food",
 					},
 					HealthRegeneration: 15,
 				},
 				&Scroll{
 					Consumable: Consumable{
-						Shape: Box{Point: Point2D[int]{X: 1, Y: 4}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Shape: Box{},
 						Name:  "Awkward Scroll",
 					},
 					AffectedAttribute: Attributes{
@@ -888,7 +961,7 @@ func TestPlayer_DropConsumableLike(t *testing.T) {
 						Shape: Box{Point: Point2D[int]{X: 1, Y: 5}, Size: Size2D[uint]{Height: 1, Width: 1}},
 						Name:  "Awkward Weapon",
 					},
-					StrengthBuff: 10,
+					Damage: 10,
 				},
 			},
 			consumableToDropIdx: 3,
@@ -902,7 +975,7 @@ func TestPlayer_DropConsumableLike(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			curShape := Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 2}}
+			curShape := Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 1}}
 
 			tt.want.Consumables = make([]ConsumableLike, len(tt.consumables))
 			copy(tt.want.Consumables, tt.consumables)
@@ -916,7 +989,7 @@ func TestPlayer_DropConsumableLike(t *testing.T) {
 				p.TakeConsumableLike(item)
 			}
 
-			gotItem := p.DropConsumableLike(&tt.consumables[tt.consumableToDropIdx], curShape)
+			gotItem := p.DropConsumableLike(tt.consumables[tt.consumableToDropIdx], curShape)
 			if gotItem != wantDroppedItem {
 				t.Errorf("DropConsumableLike() = %#v, want %#v", gotItem, wantDroppedItem)
 			}
@@ -924,6 +997,206 @@ func TestPlayer_DropConsumableLike(t *testing.T) {
 			gotBackpack := *p.Backpack
 			if !reflect.DeepEqual(gotBackpack, tt.want) {
 				t.Errorf("DropConsumableLike(): Backpack %#v, want %#v", gotBackpack, tt.want)
+			}
+		})
+	}
+}
+
+func TestPlayer_UseConsumableLike(t *testing.T) {
+	currentWeapon := NewWeapon(Box{})
+
+	tests := []struct {
+		name         string
+		consumables  []ConsumableLike
+		wantBackpack Backpack
+		wantPtr      ConsumableLike
+		want         string
+	}{
+		{
+			name: "use elixir",
+			consumables: []ConsumableLike{
+				&Elixir{
+					Consumable: Consumable{
+						Shape: Box{},
+						Name:  "Awkward Elixir",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 1,
+						Agility:   0,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+			},
+			wantBackpack: Backpack{
+				Capacity:    BackpackDefaultCapacity,
+				ItemsNum:    0,
+				Consumables: []ConsumableLike{},
+				Treasures:   0,
+			},
+			wantPtr: nil,
+			want:    "You drank the Awkward Elixir, your MaxHealth has increased by 10",
+		},
+		{
+			name: "use scroll",
+			consumables: []ConsumableLike{
+				&Scroll{
+					Consumable: Consumable{
+						Shape: Box{},
+						Name:  "Awkward Scroll",
+					},
+					AffectedAttribute: Attributes{
+						MaxHealth: 0,
+						Agility:   1,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+				&Elixir{
+					Consumable: Consumable{
+						Shape: Box{},
+						Name:  "Awkward Elixir",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 1,
+						Agility:   0,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+			},
+			wantBackpack: Backpack{
+				Capacity:    BackpackDefaultCapacity,
+				ItemsNum:    1,
+				Consumables: []ConsumableLike{},
+				Treasures:   0,
+			},
+			wantPtr: nil,
+			want:    "You read the Awkward Scroll, your Agility has increased by 10",
+		},
+		{
+			name: "use food",
+			consumables: []ConsumableLike{
+				&Food{
+					Consumable: Consumable{
+						Shape: Box{},
+						Name:  "Awkward Food",
+					},
+					HealthRegeneration: 5,
+				},
+				&Scroll{
+					Consumable: Consumable{
+						Shape: Box{},
+						Name:  "Awkward Scroll",
+					},
+					AffectedAttribute: Attributes{
+						MaxHealth: 0,
+						Agility:   1,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+				&Elixir{
+					Consumable: Consumable{
+						Shape: Box{},
+						Name:  "Awkward Elixir",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 1,
+						Agility:   0,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+			},
+			wantBackpack: Backpack{
+				Capacity:    BackpackDefaultCapacity,
+				ItemsNum:    2,
+				Consumables: []ConsumableLike{},
+				Treasures:   0,
+			},
+			wantPtr: nil,
+			want:    "You ate the Awkward Food, your Health has increased by 5",
+		},
+		{
+			name: "use weapon",
+			consumables: []ConsumableLike{
+				&Weapon{
+					Consumable: Consumable{
+						Shape: Box{},
+						Name:  "Awkward Weapon",
+					},
+					Damage: 5,
+				},
+				&Food{
+					Consumable: Consumable{
+						Shape: Box{},
+						Name:  "Awkward Food",
+					},
+					HealthRegeneration: 5,
+				},
+				&Scroll{
+					Consumable: Consumable{
+						Shape: Box{},
+						Name:  "Awkward Scroll",
+					},
+					AffectedAttribute: Attributes{
+						MaxHealth: 0,
+						Agility:   1,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+				&Elixir{
+					Consumable: Consumable{
+						Shape: Box{},
+						Name:  "Awkward Elixir",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 1,
+						Agility:   0,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+			},
+			wantBackpack: Backpack{
+				Capacity:    BackpackDefaultCapacity,
+				ItemsNum:    3,
+				Consumables: []ConsumableLike{},
+				Treasures:   0,
+			},
+			wantPtr: currentWeapon,
+			want:    "You picked up the Awkward Weapon, now all your attacks have 5 extra damage",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(t.Name(), func(t *testing.T) {
+			player := NewPlayer(Box{})
+			for _, item := range tt.consumables {
+				player.TakeConsumableLike(item)
+			}
+			player.Weapon = currentWeapon
+
+			got, ptr := player.UseConsumableLike(tt.consumables[0])
+
+			tt.wantBackpack.Consumables = append(tt.wantBackpack.Consumables, tt.consumables[1:]...)
+
+			if got != tt.want {
+				t.Errorf("UseConsumableLike() = %#v, want %#v", got, tt.want)
+			}
+
+			if ptr != tt.wantPtr {
+				t.Errorf("UseConsumableLike(): ConsumableLike pointer got %#v, want %#v", ptr, tt.wantPtr)
+			}
+
+			gotBackpack := *player.Backpack
+			if !reflect.DeepEqual(gotBackpack, tt.wantBackpack) {
+				t.Errorf("UseConsumableLike(): Backpack %#v, want %#v", gotBackpack, tt.wantBackpack)
 			}
 		})
 	}

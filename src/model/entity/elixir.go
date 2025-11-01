@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"fmt"
 	"math/rand"
 	"time"
 )
@@ -32,25 +33,50 @@ func NewElixir(box Box) *Elixir {
 
 	return &Elixir{
 		Consumable: Consumable{
-			Shape:             box,
-			Name:              getAttributeRandomName(elixirNames),
+			Shape: box,
+			Name:  getAttributeRandomName(elixirNames),
 		},
-		EffectDuration:    getRandomElixirDuration(),
 		AffectedAttribute: getRandomAttribute(),
 		Increment:         getAttributeRandomPercentIncrease(),
+		EffectDuration:    getRandomElixirDuration(),
 	}
 }
 
 func (e *Elixir) Taken() {
-	e.Consumable.Shape = Box{}
+	e.Consumable.Taken()
 }
 
-func (e *Elixir) Dropped(box Box) {
-	e.Consumable.Shape = box
+func (e *Elixir) Dropped(box Box) ConsumableLike {
+	e.Consumable.Dropped(box)
+	return e
 }
 
-func (e *Elixir) Use() string {
-	return e.Consumable.Name
+func (e *Elixir) Use(p *Player) (string, ConsumableLike) {
+	go func() {
+		defer func() {
+			p.Character.MaxHealth -= float64(e.Increment)
+			p.Character.Agility -= e.Increment
+			p.Character.Strength -= e.Increment
+		}()
+
+		if e.AffectedAttribute.MaxHealth == 1 {
+			p.Character.MaxHealth += float64(e.Increment)
+		} else if e.AffectedAttribute.Agility == 1 {
+			p.Character.Agility += e.Increment
+		} else if e.AffectedAttribute.Strength == 1 {
+			p.Character.Strength += e.Increment
+		} else {
+		}
+
+		time.Sleep(e.EffectDuration)
+	}()
+
+	return fmt.Sprintf(
+		"You drank the %v, your %v has increased by %v",
+		e.Consumable.Name,
+		e.AffectedAttribute.GetAffectedAttributeName(),
+		e.Increment,
+	), nil
 }
 
 func getRandomElixirDuration() time.Duration {

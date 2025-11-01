@@ -98,82 +98,119 @@ func TestGetRandomAttribute(t *testing.T) {
 	}
 }
 
-// func TestConsumable_Taken(t *testing.T) {
-// 	tests := []struct {
-// 		name string
-// 		want Box
-// 	}{
-// 		{
-// 			name: "consumable is taken",
-// 			want: Box{},
-// 		},
-// 	}
+func TestConsumable_Taken(t *testing.T) {
+	tests := []struct {
+		name string
+		want Box
+	}{
+		{
+			name: "consumable is taken",
+			want: Box{},
+		},
+	}
 
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			consumable := &Consumable{
-// 				Shape: Box{
-// 					Point: Point2D[int]{X: 1, Y: 2},
-// 					Size:  Size2D[uint]{Height: 1, Width: 1},
-// 				},
-// 			}
-// 			consumable.Taken()
-// 			if consumable.Shape != tt.want {
-// 				t.Errorf("Taken() = (%v), want (%v)", consumable.Shape, tt.want)
-// 			}
-// 		})
-// 	}
-// }
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			consumable := &Consumable{
+				Shape: Box{
+					Point: Point2D[int]{X: 1, Y: 2},
+					Size:  Size2D[uint]{Height: 1, Width: 1},
+				},
+			}
+			consumable.Taken()
+			if consumable.Shape != tt.want {
+				t.Errorf("Taken() = (%v), want (%v)", consumable.Shape, tt.want)
+			}
+		})
+	}
+}
 
-// func TestConsumable_Dropped(t *testing.T) {
-// 	tests := []struct {
-// 		name string
-// 		box  Box
-// 		want Box
-// 	}{
-// 		{
-// 			name: "consumable is dropped",
-// 			box:  Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 1}},
-// 			want: Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 1}},
-// 		},
-// 	}
+func TestConsumable_Dropped(t *testing.T) {
+	tests := []struct {
+		name string
+		box  Box
+		want Box
+	}{
+		{
+			name: "consumable is dropped",
+			box:  Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 1}},
+			want: Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 1}},
+		},
+	}
 
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			consumable := &Consumable{
-// 				Shape: Box{
-// 					Point: Point2D[int]{X: 1, Y: 2},
-// 					Size:  Size2D[uint]{Height: 1, Width: 1},
-// 				},
-// 			}
-// 			consumable.Dropped(tt.box)
-// 			if consumable.Shape != tt.want {
-// 				t.Errorf("Dropped() = (%v), want (%v)", consumable.Shape, tt.want)
-// 			}
-// 		})
-// 	}
-// }
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			consumable := &Consumable{
+				Shape: Box{},
+			}
+			consumable.Dropped(tt.box)
+			if consumable.Shape != tt.want {
+				t.Errorf("Dropped() = (%v), want (%v)", consumable.Shape, tt.want)
+			}
+		})
+	}
+}
 
-// func TestConsumable_Use(t *testing.T) {
-// 	tests := []struct {
-// 		name string
-// 		want string
-// 	}{
-// 		{
-// 			name: "use consumable",
-// 			want: "Awkward Consumable",
-// 		},
-// 	}
+func TestAttribute_GetAffectedAttributeName(t *testing.T) {
+	tests := []struct {
+		name       string
+		attributes Attributes
+		want       string
+	}{
+		{
+			name: "get MaxHealth",
+			attributes: Attributes{
+				MaxHealth: 1,
+				Agility:   0,
+				Strength:  0,
+			},
+			want: "MaxHealth",
+		},
+		{
+			name: "get Agility",
+			attributes: Attributes{
+				MaxHealth: 0,
+				Agility:   1,
+				Strength:  0,
+			},
+			want: "Agility",
+		},
+		{
+			name: "get Strength",
+			attributes: Attributes{
+				MaxHealth: 0,
+				Agility:   0,
+				Strength:  1,
+			},
+			want: "Strength",
+		},
+		{
+			name: "no affected attributes",
+			attributes: Attributes{
+				MaxHealth: 0,
+				Agility:   0,
+				Strength:  0,
+			},
+			want: "None",
+		},
+		{
+			name: "multiple affected attributes",
+			attributes: Attributes{
+				MaxHealth: 1,
+				Agility:   1,
+				Strength:  0,
+			},
+			want: "None",
+		},
+	}
 
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			consumable := &Consumable{
-// 				Name: "Awkward Consumable",
-// 			}
-// 			consumable.Taken()
-// 			if consumable.Name != tt.want {
-// 				t.Errorf("Use() = (%v), want (%v)", consumable.Name, tt.want)
-// 			}
-// 		})
-// 	}
-// }
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.attributes.GetAffectedAttributeName()
+
+			if got != tt.want {
+				t.Errorf("GetAffectedAttributeName(): got %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

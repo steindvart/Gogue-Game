@@ -1,6 +1,8 @@
 package entity
 
-import "math/rand"
+import (
+	"math/rand"
+)
 
 const (
 	IncreaseAttributeBaseParcentage int = 5
@@ -9,8 +11,8 @@ const (
 
 type ConsumableLike interface {
 	Taken()
-	Dropped(box Box)
-	Use() string
+	Dropped(box Box) ConsumableLike
+	Use(p *Player) (string, ConsumableLike)
 }
 
 type Consumable struct {
@@ -22,17 +24,25 @@ type Attributes struct {
 	MaxHealth, Agility, Strength uint
 }
 
-// func (consumable *Consumable) Taken() {
-// 	consumable.Shape = Box{}
-// }
+func (c *Consumable) Taken() {
+	c.Shape = Box{}
+}
 
-// func (consumable *Consumable) Dropped(box Box) {
-// 	consumable.Shape = box
-// }
+func (c *Consumable) Dropped(box Box) {
+	c.Shape = box
+}
 
-// func (consumable *Consumable) Use() string {
-// 	return consumable.Name
-// }
+func (a *Attributes) GetAffectedAttributeName() string {
+	if a.MaxHealth == 1 && a.Agility == 0 && a.Strength == 0 {
+		return "MaxHealth"
+	} else if a.Agility == 1 && a.MaxHealth == 0 && a.Strength == 0 {
+		return "Agility"
+	} else if a.Strength == 1 && a.MaxHealth == 0 && a.Agility == 0 {
+		return "Strength"
+	} else {
+		return "None"
+	}
+}
 
 func getAttributeRandomPercentIncrease() uint {
 	return uint(IncreaseAttributeBaseParcentage + rand.Intn(IncreaseAttributeMaxPercentage+1))

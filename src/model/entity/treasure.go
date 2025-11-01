@@ -10,7 +10,7 @@ const (
 type Treasure struct {
 	Shape Box
 	Name  string
-	Value      uint
+	Value uint
 }
 
 func NewTreasure(box Box) *Treasure {

@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestNewtFood(t *testing.T) {
+func TestNewFood(t *testing.T) {
 	tests := []struct {
 		name                           string
 		box                            Box
@@ -43,6 +43,111 @@ func TestNewtFood(t *testing.T) {
 			}
 			if !(slices.Contains(tt.wantNames, got.Consumable.Name)) {
 				t.Errorf("NewFood(): got Name %v, want in %v", got.Consumable.Name, tt.wantNames)
+			}
+		})
+	}
+}
+
+func TestFood_Taken(t *testing.T) {
+	tests := []struct {
+		name string
+		want Box
+	}{
+		{
+			name: "food is taken",
+			want: Box{},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			food := &Food{
+				Consumable: Consumable{
+					Shape: Box{
+						Point: Point2D[int]{X: 1, Y: 2},
+						Size:  Size2D[uint]{Height: 1, Width: 1},
+					},
+					Name: "Awkward Food",
+				},
+				HealthRegeneration: 5,
+			}
+			food.Taken()
+			if food.Consumable.Shape != tt.want {
+				t.Errorf("Taken() = (%v), want (%v)", food.Consumable.Shape, tt.want)
+			}
+		})
+	}
+}
+
+func TestFood_Dropped(t *testing.T) {
+	tests := []struct {
+		name string
+		box  Box
+		want Box
+	}{
+		{
+			name: "food is dropped",
+			box:  Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 1}},
+			want: Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 1}},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			food := &Food{
+				Consumable: Consumable{
+					Shape: Box{},
+					Name:  "Awkward Food",
+				},
+				HealthRegeneration: 5,
+			}
+			item := food.Dropped(tt.box)
+
+			if item != food {
+				t.Errorf("Dropped() = %#v, want %#v", item, food)
+			}
+
+			if food.Consumable.Shape != tt.want {
+				t.Errorf("Dropped(): Shape %v, want %v", food.Consumable.Shape, tt.want)
+			}
+		})
+	}
+}
+
+func TestFood_Use(t *testing.T) {
+	tests := []struct {
+		name string
+		food *Food
+		want string
+	}{
+		{
+			name: "use food",
+			food: &Food{
+				Consumable: Consumable{
+					Shape: Box{},
+					Name:  "Awkward Food",
+				},
+				HealthRegeneration: 5,
+			},
+			want: "You ate the Awkward Food, your Health has increased by 5",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			player := NewPlayer(Box{})
+			line, ptr := tt.food.Use(player)
+
+			if ptr != nil {
+				t.Errorf("Use(): ConsumableLike pointer got %#v, want %#v", ptr, nil)
+			}
+
+			if player.Character.Health == float64(AttributeRateAverage) {
+				t.Errorf("Use(): got %#v, want %#v", player.Character.MaxHealth, float64(AttributeRateAverage)+float64(tt.food.HealthRegeneration))
+			}
+
+			if !(line == tt.want) {
+				t.Errorf("Use() = (%v), want (%v)", line, tt.want)
 			}
 		})
 	}

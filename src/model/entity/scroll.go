@@ -1,5 +1,7 @@
 package entity
 
+import "fmt"
+
 type Scroll struct {
 	Consumable        Consumable
 	AffectedAttribute Attributes
@@ -21,23 +23,37 @@ func NewScroll(box Box) *Scroll {
 
 	return &Scroll{
 		Consumable: Consumable{
-			Shape:             box,
-			Name:              getAttributeRandomName(scrollNames),
+			Shape: box,
+			Name:  getAttributeRandomName(scrollNames),
 		},
 		AffectedAttribute: getRandomAttribute(),
 		Increment:         getAttributeRandomPercentIncrease(),
 	}
 }
 
-
 func (s *Scroll) Taken() {
-	s.Consumable.Shape = Box{}
+	s.Consumable.Taken()
 }
 
-func (s *Scroll) Dropped(box Box) {
-	s.Consumable.Shape = box
+func (s *Scroll) Dropped(box Box) ConsumableLike {
+	s.Consumable.Dropped(box)
+	return s
 }
 
-func (s *Scroll) Use() string {
-	return s.Consumable.Name
+func (s *Scroll) Use(p *Player) (string, ConsumableLike) {
+	if s.AffectedAttribute.MaxHealth == 1 {
+		p.Character.MaxHealth += float64(s.Increment)
+	} else if s.AffectedAttribute.Agility == 1 {
+		p.Character.Agility += s.Increment
+	} else if s.AffectedAttribute.Strength == 1 {
+		p.Character.Strength += s.Increment
+	} else {
+	}
+
+	return fmt.Sprintf(
+		"You read the %v, your %v has increased by %v",
+		s.Consumable.Name,
+		s.AffectedAttribute.GetAffectedAttributeName(),
+		s.Increment,
+	), nil
 }

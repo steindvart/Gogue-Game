@@ -32,11 +32,9 @@ func (p *Player) Heal(amount float64) {
 
 func (p *Player) Attack() uint {
 	damage := p.Character.Attack()
-	// @todo - логика атаки с оружием
-	// if p.Weapon != nil {
-	// 	damage += p.Weapon.Damage
-	// }
-
+	if p.Weapon != nil {
+		damage += p.Weapon.Damage
+	}
 	return damage
 }
 
@@ -44,10 +42,14 @@ func (p *Player) CheckEvasion() bool {
 	return p.Character.CheckEvasion()
 }
 
+func (p *Player) TakeTreasure(treasure *Treasure) {
+	p.Backpack.Treasures += treasure.Value
+}
+
 func (p *Player) TakeConsumableLike(consumableLike ConsumableLike) error {
 	if p.Backpack.ItemsNum < p.Backpack.Capacity {
 		p.Backpack.Consumables = append(p.Backpack.Consumables, consumableLike)
-		p.Backpack.ItemsNum += 1
+		p.Backpack.ItemsNum++
 
 		consumableLike.Taken()
 		return nil
@@ -56,25 +58,24 @@ func (p *Player) TakeConsumableLike(consumableLike ConsumableLike) error {
 	}
 }
 
-func (p *Player) DropConsumableLike(consumableLike *ConsumableLike, box Box) ConsumableLike {
-	for idx, item := range p.Backpack.Consumables {
-		if item == *consumableLike {
-			p.Backpack.Consumables = append(p.Backpack.Consumables[:idx], p.Backpack.Consumables[idx+1:]...)
-			p.Backpack.ItemsNum -= 1
-		}
-	}
-	
-	(*consumableLike).Dropped(box)
-	return (*consumableLike)
-}
-
-func (p *Player) UseConsumableLike(consumableLike ConsumableLike) string {
+func (p *Player) DropConsumableLike(consumableLike ConsumableLike, box Box) ConsumableLike {
 	for idx, item := range p.Backpack.Consumables {
 		if item == consumableLike {
 			p.Backpack.Consumables = append(p.Backpack.Consumables[:idx], p.Backpack.Consumables[idx+1:]...)
+			p.Backpack.ItemsNum--
 		}
 	}
-	return consumableLike.Use()
+	return consumableLike.Dropped(box)
+}
+
+func (p *Player) UseConsumableLike(consumableLike ConsumableLike) (string, ConsumableLike) {
+	for idx, item := range p.Backpack.Consumables {
+		if item == consumableLike {
+			p.Backpack.Consumables = append(p.Backpack.Consumables[:idx], p.Backpack.Consumables[idx+1:]...)
+			p.Backpack.ItemsNum--
+		}
+	}
+	return consumableLike.Use(p)
 }
 
 func NewPlayer(box Box) *Player {

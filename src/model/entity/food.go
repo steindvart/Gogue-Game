@@ -1,5 +1,7 @@
 package entity
 
+import "fmt"
+
 type Food struct {
 	Consumable         Consumable
 	HealthRegeneration uint
@@ -28,13 +30,20 @@ func NewFood(box Box) *Food {
 }
 
 func (f *Food) Taken() {
-	f.Consumable.Shape = Box{}
+	f.Consumable.Taken()
 }
 
-func (f *Food) Dropped(box Box) {
-	f.Consumable.Shape = box
+func (f *Food) Dropped(box Box) ConsumableLike {
+	f.Consumable.Dropped(box)
+	return f
 }
 
-func (f *Food) Use() string {
-	return f.Consumable.Name
+func (f *Food) Use(p *Player) (string, ConsumableLike) {
+	p.Character.Health += float64(f.HealthRegeneration)
+
+	return fmt.Sprintf(
+		"You ate the %v, your Health has increased by %v",
+		f.Consumable.Name,
+		f.HealthRegeneration,
+	), nil
 }

@@ -16,11 +16,7 @@ func TestNewBackpack(t *testing.T) {
 				Capacity:    BackpackDefaultCapacity,
 				ItemsNum:    0,
 				Consumables: []ConsumableLike{},
-				// Foods:     []Food{},
-				// Elixirs:   []Elixir{},
-				// Scrolls:   []Scroll{},
-				// Weapon:    []Weapon{},
-				Treasures: 0,
+				Treasures:   0,
 			},
 		},
 	}

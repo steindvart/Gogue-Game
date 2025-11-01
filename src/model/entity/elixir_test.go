@@ -96,9 +96,9 @@ func TestElixir_Taken(t *testing.T) {
 					},
 					Name: "Awkward Elixir",
 				},
-				EffectDuration:    time.Minute,
 				AffectedAttribute: Attributes{MaxHealth: 1, Agility: 0, Strength: 0},
-				Increment: 1,
+				Increment:         1,
+				EffectDuration:    time.Minute,
 			}
 			elixir.Taken()
 			if elixir.Consumable.Shape != tt.want {
@@ -115,7 +115,7 @@ func TestElixir_Dropped(t *testing.T) {
 		want Box
 	}{
 		{
-			name: "consumable is dropped",
+			name: "elixir is dropped",
 			box:  Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 1}},
 			want: Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 1}},
 		},
@@ -125,19 +125,21 @@ func TestElixir_Dropped(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			elixir := &Elixir{
 				Consumable: Consumable{
-					Shape: Box{
-						Point: Point2D[int]{X: 1, Y: 2},
-						Size:  Size2D[uint]{Height: 1, Width: 1},
-					},
-					Name: "Awkward Elixir",
+					Shape: Box{},
+					Name:  "Awkward Elixir",
 				},
-				EffectDuration:    time.Minute,
 				AffectedAttribute: Attributes{MaxHealth: 1, Agility: 0, Strength: 0},
-				Increment: 1,
+				Increment:         1,
+				EffectDuration:    time.Minute,
 			}
-			elixir.Dropped(tt.box)
+			item := elixir.Dropped(tt.box)
+
+			if item != elixir {
+				t.Errorf("Dropped() = %#v, want %#v", item, elixir)
+			}
+
 			if elixir.Consumable.Shape != tt.want {
-				t.Errorf("Dropped() = (%v), want (%v)", elixir.Consumable.Shape, tt.want)
+				t.Errorf("Dropped(): Shape %v, want %v", elixir.Consumable.Shape, tt.want)
 			}
 		})
 	}
@@ -145,32 +147,48 @@ func TestElixir_Dropped(t *testing.T) {
 
 func TestElixir_Use(t *testing.T) {
 	tests := []struct {
-		name string
-		want string
+		name   string
+		elixir *Elixir
+		want   string
 	}{
 		{
 			name: "use elixir",
-			want: "Awkward Elixir",
+			elixir: &Elixir{
+				Consumable: Consumable{
+					Shape: Box{},
+					Name:  "Awkward Elixir",
+				},
+				AffectedAttribute: Attributes{MaxHealth: 1, Agility: 0, Strength: 0},
+				Increment:         5,
+				EffectDuration:    20 * time.Millisecond,
+			},
+			want: "You drank the Awkward Elixir, your MaxHealth has increased by 5",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			elixir := &Elixir{
-				Consumable: Consumable{
-					Shape: Box{
-						Point: Point2D[int]{X: 1, Y: 2},
-						Size:  Size2D[uint]{Height: 1, Width: 1},
-					},
-					Name: "Awkward Elixir",
-				},
-				EffectDuration:    time.Minute,
-				AffectedAttribute: Attributes{MaxHealth: 1, Agility: 0, Strength: 0},
-				Increment: 1,
+			player := NewPlayer(Box{})
+			line, ptr := tt.elixir.Use(player)
+
+			if ptr != nil {
+				t.Errorf("Use(): ConsumableLike pointer got %#v, want %#v", ptr, nil)
 			}
-			name := elixir.Use()
-			if name != tt.want {
-				t.Errorf("Use() = (%v), want (%v)", name, tt.want)
+
+			time.Sleep(2 * time.Millisecond)
+
+			if player.Character.MaxHealth == float64(AttributeRateAverage) {
+				t.Errorf("Use(): got %#v, want %#v", player.Character.MaxHealth, float64(AttributeRateAverage)+float64(tt.elixir.Increment))
+			}
+
+			time.Sleep(30 * time.Millisecond)
+
+			if player.Character.MaxHealth != float64(AttributeRateAverage) {
+				t.Errorf("Use(): got %#v, want %#v", player.Character.MaxHealth, float64(AttributeRateAverage))
+			}
+
+			if !(line == tt.want) {
+				t.Errorf("Use() = (%v), want (%v)", line, tt.want)
 			}
 		})
 	}

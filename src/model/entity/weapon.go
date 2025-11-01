@@ -1,8 +1,10 @@
 package entity
 
+import "fmt"
+
 type Weapon struct {
-	Consumable   Consumable
-	StrengthBuff uint
+	Consumable Consumable
+	Damage     uint
 }
 
 func NewWeapon(box Box) *Weapon {
@@ -23,18 +25,26 @@ func NewWeapon(box Box) *Weapon {
 			Shape: box,
 			Name:  getAttributeRandomName(weaponNames),
 		},
-		StrengthBuff: getAttributeRandomPercentIncrease(),
+		Damage: getAttributeRandomPercentIncrease(),
 	}
 }
 
 func (w *Weapon) Taken() {
-	w.Consumable.Shape = Box{}
+	w.Consumable.Taken()
 }
 
-func (w *Weapon) Dropped(box Box) {
-	w.Consumable.Shape = box
+func (w *Weapon) Dropped(box Box) ConsumableLike {
+	w.Consumable.Dropped(box)
+	return w
 }
 
-func (w *Weapon) Use() string {
-	return w.Consumable.Name
+func (w *Weapon) Use(p *Player) (string, ConsumableLike) {
+	currentWeapon := p.Weapon
+	p.Weapon = w
+
+	return fmt.Sprintf(
+		"You picked up the %v, now all your attacks have %v extra damage",
+		w.Consumable.Name,
+		w.Damage,
+	), currentWeapon
 }
