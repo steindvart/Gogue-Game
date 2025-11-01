@@ -61,11 +61,12 @@ func (e *Elixir) Use(p *Player) (string, ConsumableLike) {
 
 		if e.AffectedAttribute.MaxHealth == 1 {
 			p.Character.MaxHealth += float64(e.Increment)
-		} else if e.AffectedAttribute.Agility == 1 {
+		}
+		if e.AffectedAttribute.Agility == 1 {
 			p.Character.Agility += e.Increment
-		} else if e.AffectedAttribute.Strength == 1 {
+		}
+		if e.AffectedAttribute.Strength == 1 {
 			p.Character.Strength += e.Increment
-		} else {
 		}
 
 		time.Sleep(e.EffectDuration)

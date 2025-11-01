@@ -986,7 +986,7 @@ func TestPlayer_DropConsumableLike(t *testing.T) {
 
 			p := NewPlayer(curShape)
 			for _, item := range tt.consumables {
-				p.TakeConsumableLike(item)
+				_ = p.TakeConsumableLike(item)
 			}
 
 			gotItem := p.DropConsumableLike(tt.consumables[tt.consumableToDropIdx], curShape)
@@ -1178,7 +1178,7 @@ func TestPlayer_UseConsumableLike(t *testing.T) {
 		t.Run(t.Name(), func(t *testing.T) {
 			player := NewPlayer(Box{})
 			for _, item := range tt.consumables {
-				player.TakeConsumableLike(item)
+				_ = player.TakeConsumableLike(item)
 			}
 			player.Weapon = currentWeapon
 
