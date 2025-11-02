@@ -53,11 +53,11 @@ func TestNewScroll(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := NewScroll(tt.box)
-			if !(got.Consumable.Shape == tt.wantShape) {
-				t.Errorf("NewScroll(): got Shape %v, want %v", got.Consumable.Shape, tt.wantShape)
+			if !(got.Item.Shape == tt.wantShape) {
+				t.Errorf("NewScroll(): got Shape %v, want %v", got.Item.Shape, tt.wantShape)
 			}
-			if !(slices.Contains(tt.wantNames, got.Consumable.Name)) {
-				t.Errorf("NewScroll(): got Name %v, want in %v", got.Consumable.Name, tt.wantNames)
+			if !(slices.Contains(tt.wantNames, got.Item.Name)) {
+				t.Errorf("NewScroll(): got Name %v, want in %v", got.Item.Name, tt.wantNames)
 			}
 			if !(got.Increment < tt.wantIncrementLessThan) {
 				t.Errorf("NewScroll(): got Increment %v, want less than %v", got.Increment, tt.wantIncrementLessThan)
@@ -83,7 +83,7 @@ func TestScroll_Taken(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			scroll := &Scroll{
-				Consumable: Consumable{
+				Item: Item{
 					Shape: Box{
 						Point: Point2D[int]{X: 1, Y: 2},
 						Size:  Size2D[uint]{Height: 1, Width: 1},
@@ -94,8 +94,8 @@ func TestScroll_Taken(t *testing.T) {
 				Increment:         1,
 			}
 			scroll.Taken()
-			if scroll.Consumable.Shape != tt.want {
-				t.Errorf("Taken() = (%v), want (%v)", scroll.Consumable.Shape, tt.want)
+			if scroll.Item.Shape != tt.want {
+				t.Errorf("Taken() = (%v), want (%v)", scroll.Item.Shape, tt.want)
 			}
 		})
 	}
@@ -117,7 +117,7 @@ func TestScroll_Dropped(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			scroll := &Scroll{
-				Consumable: Consumable{
+				Item: Item{
 					Shape: Box{},
 					Name:  "Awkward Scroll",
 				},
@@ -131,8 +131,8 @@ func TestScroll_Dropped(t *testing.T) {
 				t.Errorf("Dropped() = %#v, want %#v", item, scroll)
 			}
 
-			if scroll.Consumable.Shape != tt.want {
-				t.Errorf("Dropped(): Shape %v, want %v", scroll.Consumable.Shape, tt.want)
+			if scroll.Item.Shape != tt.want {
+				t.Errorf("Dropped(): Shape %v, want %v", scroll.Item.Shape, tt.want)
 			}
 		})
 	}
@@ -147,7 +147,7 @@ func TestScroll_Use(t *testing.T) {
 		{
 			name: "use scroll",
 			scroll: &Scroll{
-				Consumable: Consumable{
+				Item: Item{
 					Shape: Box{},
 					Name:  "Awkward Scroll",
 				},
@@ -164,7 +164,7 @@ func TestScroll_Use(t *testing.T) {
 			line, ptr := tt.scroll.Use(player)
 
 			if ptr != nil {
-				t.Errorf("Use(): ConsumableLike pointer got %#v, want %#v", ptr, nil)
+				t.Errorf("Use(): ItemLike pointer got %#v, want %#v", ptr, nil)
 			}
 
 			if player.Character.MaxHealth == float64(AttributeRateAverage) {

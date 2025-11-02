@@ -12,7 +12,7 @@ const (
 )
 
 type Elixir struct {
-	Consumable        Consumable
+	Item              Item
 	EffectDuration    time.Duration
 	AffectedAttribute Attributes
 	Increment         uint
@@ -32,7 +32,7 @@ func NewElixir(box Box) *Elixir {
 	}
 
 	return &Elixir{
-		Consumable: Consumable{
+		Item: Item{
 			Shape: box,
 			Name:  getAttributeRandomName(elixirNames),
 		},
@@ -43,15 +43,15 @@ func NewElixir(box Box) *Elixir {
 }
 
 func (e *Elixir) Taken() {
-	e.Consumable.Taken()
+	e.Item.Taken()
 }
 
-func (e *Elixir) Dropped(box Box) ConsumableLike {
-	e.Consumable.Dropped(box)
+func (e *Elixir) Dropped(box Box) ItemLike {
+	e.Item.Dropped(box)
 	return e
 }
 
-func (e *Elixir) Use(p *Player) (string, ConsumableLike) {
+func (e *Elixir) Use(p *Player) (string, ItemLike) {
 	go func() {
 		defer func() {
 			p.Character.MaxHealth -= float64(e.Increment)
@@ -74,7 +74,7 @@ func (e *Elixir) Use(p *Player) (string, ConsumableLike) {
 
 	return fmt.Sprintf(
 		"You drank the %v, your %v has increased by %v",
-		e.Consumable.Name,
+		e.Item.Name,
 		e.AffectedAttribute.GetAffectedAttributeName(),
 		e.Increment,
 	), nil

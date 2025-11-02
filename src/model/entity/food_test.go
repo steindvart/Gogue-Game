@@ -35,14 +35,14 @@ func TestNewFood(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := NewFood(tt.box)
-			if !(got.Consumable.Shape == tt.wantShape) {
-				t.Errorf("NewFood(): got Shape %v, want %v", got.Consumable.Shape, tt.wantShape)
+			if !(got.Item.Shape == tt.wantShape) {
+				t.Errorf("NewFood(): got Shape %v, want %v", got.Item.Shape, tt.wantShape)
 			}
 			if !(got.HealthRegeneration < tt.wantHealthRegenerationLessThan) {
 				t.Errorf("NewFood(): got HealthRegeneration %v, want less than %v", got.HealthRegeneration, tt.wantHealthRegenerationLessThan)
 			}
-			if !(slices.Contains(tt.wantNames, got.Consumable.Name)) {
-				t.Errorf("NewFood(): got Name %v, want in %v", got.Consumable.Name, tt.wantNames)
+			if !(slices.Contains(tt.wantNames, got.Item.Name)) {
+				t.Errorf("NewFood(): got Name %v, want in %v", got.Item.Name, tt.wantNames)
 			}
 		})
 	}
@@ -62,7 +62,7 @@ func TestFood_Taken(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			food := &Food{
-				Consumable: Consumable{
+				Item: Item{
 					Shape: Box{
 						Point: Point2D[int]{X: 1, Y: 2},
 						Size:  Size2D[uint]{Height: 1, Width: 1},
@@ -72,8 +72,8 @@ func TestFood_Taken(t *testing.T) {
 				HealthRegeneration: 5,
 			}
 			food.Taken()
-			if food.Consumable.Shape != tt.want {
-				t.Errorf("Taken() = (%v), want (%v)", food.Consumable.Shape, tt.want)
+			if food.Item.Shape != tt.want {
+				t.Errorf("Taken() = (%v), want (%v)", food.Item.Shape, tt.want)
 			}
 		})
 	}
@@ -95,7 +95,7 @@ func TestFood_Dropped(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			food := &Food{
-				Consumable: Consumable{
+				Item: Item{
 					Shape: Box{},
 					Name:  "Awkward Food",
 				},
@@ -107,8 +107,8 @@ func TestFood_Dropped(t *testing.T) {
 				t.Errorf("Dropped() = %#v, want %#v", item, food)
 			}
 
-			if food.Consumable.Shape != tt.want {
-				t.Errorf("Dropped(): Shape %v, want %v", food.Consumable.Shape, tt.want)
+			if food.Item.Shape != tt.want {
+				t.Errorf("Dropped(): Shape %v, want %v", food.Item.Shape, tt.want)
 			}
 		})
 	}
@@ -123,7 +123,7 @@ func TestFood_Use(t *testing.T) {
 		{
 			name: "use food",
 			food: &Food{
-				Consumable: Consumable{
+				Item: Item{
 					Shape: Box{},
 					Name:  "Awkward Food",
 				},
@@ -139,7 +139,7 @@ func TestFood_Use(t *testing.T) {
 			line, ptr := tt.food.Use(player)
 
 			if ptr != nil {
-				t.Errorf("Use(): ConsumableLike pointer got %#v, want %#v", ptr, nil)
+				t.Errorf("Use(): ItemLike pointer got %#v, want %#v", ptr, nil)
 			}
 
 			if player.Character.Health == float64(AttributeRateAverage) {

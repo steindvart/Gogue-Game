@@ -5,8 +5,8 @@ import (
 )
 
 type Weapon struct {
-	Consumable Consumable
-	Damage     uint
+	Item   Item
+	Damage uint
 }
 
 func NewWeapon(box Box) *Weapon {
@@ -23,7 +23,7 @@ func NewWeapon(box Box) *Weapon {
 	}
 
 	return &Weapon{
-		Consumable: Consumable{
+		Item: Item{
 			Shape: box,
 			Name:  getAttributeRandomName(weaponNames),
 		},
@@ -32,21 +32,21 @@ func NewWeapon(box Box) *Weapon {
 }
 
 func (w *Weapon) Taken() {
-	w.Consumable.Taken()
+	w.Item.Taken()
 }
 
-func (w *Weapon) Dropped(box Box) ConsumableLike {
-	w.Consumable.Dropped(box)
+func (w *Weapon) Dropped(box Box) ItemLike {
+	w.Item.Dropped(box)
 	return w
 }
 
-func (w *Weapon) Use(p *Player) (string, ConsumableLike) {
+func (w *Weapon) Use(p *Player) (string, ItemLike) {
 	currentWeapon := p.Weapon
 	p.Weapon = w
 
 	return fmt.Sprintf(
 		"You picked up the %v, now all your attacks have %v extra damage",
-		w.Consumable.Name,
+		w.Item.Name,
 		w.Damage,
 	), currentWeapon
 }

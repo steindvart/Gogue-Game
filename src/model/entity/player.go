@@ -36,20 +36,20 @@ func (p *Player) CheckEvasion() bool {
 	return p.Character.CheckEvasion()
 }
 
-func (p *Player) TakeTreasure(treasure *Treasure) {
-	p.Backpack.Treasures += treasure.Value
+func (p *Player) TakeTreasure(t *Treasure) {
+	p.Backpack.Treasures += t.Value
 }
 
-func (p *Player) TakeConsumableLike(consumableLike ConsumableLike) error {
-	return p.Backpack.AddItem(consumableLike)
+func (p *Player) TakeItem(i ItemLike) error {
+	return p.Backpack.AddItem(i)
 }
 
-func (p *Player) DropConsumableLike(consumableLike ConsumableLike, box Box) ConsumableLike {
-	return p.Backpack.RemoveItem(consumableLike, box)
+func (p *Player) DropItem(i ItemLike, box Box) ItemLike {
+	return p.Backpack.RemoveItem(i, box)
 }
 
-func (p *Player) UseConsumableLike(consumableLike ConsumableLike) (string, ConsumableLike) {
-	return p.Backpack.RemoveItem(consumableLike, Box{}).Use(p)
+func (p *Player) UseItem(i ItemLike) (string, ItemLike) {
+	return p.Backpack.RemoveItem(i, Box{}).Use(p)
 }
 
 func NewPlayer(box Box) *Player {

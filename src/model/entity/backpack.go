@@ -22,29 +22,29 @@ type Backpack struct {
 	Treasures uint
 }
 
-func (b *Backpack) AddItem(c ConsumableLike) error {
+func (b *Backpack) AddItem(i ItemLike) error {
 	if b.ItemsNum < b.Capacity {
-		e, ok := c.(*Elixir)
+		e, ok := i.(*Elixir)
 		if ok {
-			b.Elixirs[e.Consumable.Name] = append(b.Elixirs[e.Consumable.Name], e)
+			b.Elixirs[e.Item.Name] = append(b.Elixirs[e.Item.Name], e)
 		}
 
-		s, ok := c.(*Scroll)
+		s, ok := i.(*Scroll)
 		if ok {
-			b.Scrolls[s.Consumable.Name] = append(b.Scrolls[s.Consumable.Name], s)
+			b.Scrolls[s.Item.Name] = append(b.Scrolls[s.Item.Name], s)
 		}
 
-		f, ok := c.(*Food)
+		f, ok := i.(*Food)
 		if ok {
-			b.Foods[f.Consumable.Name] = append(b.Foods[f.Consumable.Name], f)
+			b.Foods[f.Item.Name] = append(b.Foods[f.Item.Name], f)
 		}
 
-		w, ok := c.(*Weapon)
+		w, ok := i.(*Weapon)
 		if ok {
-			b.Weapons[w.Consumable.Name] = append(b.Weapons[w.Consumable.Name], w)
+			b.Weapons[w.Item.Name] = append(b.Weapons[w.Item.Name], w)
 		}
 
-		c.Taken()
+		i.Taken()
 		b.ItemsNum++
 	} else {
 		return BackpackIsFullError{}
@@ -53,49 +53,49 @@ func (b *Backpack) AddItem(c ConsumableLike) error {
 	return nil
 }
 
-func (b *Backpack) RemoveItem(c ConsumableLike, box Box) ConsumableLike {
-	e, ok := c.(*Elixir)
+func (b *Backpack) RemoveItem(i ItemLike, box Box) ItemLike {
+	e, ok := i.(*Elixir)
 	if ok {
-		if len(b.Elixirs[e.Consumable.Name]) > 1 {
-			idx := slices.Index(b.Elixirs[e.Consumable.Name], e)
-			b.Elixirs[e.Consumable.Name] = append(b.Elixirs[e.Consumable.Name][:idx], b.Elixirs[e.Consumable.Name][idx+1:]...)
+		if len(b.Elixirs[e.Item.Name]) > 1 {
+			idx := slices.Index(b.Elixirs[e.Item.Name], e)
+			b.Elixirs[e.Item.Name] = append(b.Elixirs[e.Item.Name][:idx], b.Elixirs[e.Item.Name][idx+1:]...)
 		} else {
-			delete(b.Elixirs, e.Consumable.Name)
+			delete(b.Elixirs, e.Item.Name)
 		}
 	}
 
-	s, ok := c.(*Scroll)
+	s, ok := i.(*Scroll)
 	if ok {
-		if len(b.Scrolls[s.Consumable.Name]) > 1 {
-			idx := slices.Index(b.Scrolls[s.Consumable.Name], s)
-			b.Scrolls[s.Consumable.Name] = append(b.Scrolls[s.Consumable.Name][:idx], b.Scrolls[s.Consumable.Name][idx+1:]...)
+		if len(b.Scrolls[s.Item.Name]) > 1 {
+			idx := slices.Index(b.Scrolls[s.Item.Name], s)
+			b.Scrolls[s.Item.Name] = append(b.Scrolls[s.Item.Name][:idx], b.Scrolls[s.Item.Name][idx+1:]...)
 		} else {
-			delete(b.Scrolls, s.Consumable.Name)
+			delete(b.Scrolls, s.Item.Name)
 		}
 	}
 
-	f, ok := c.(*Food)
+	f, ok := i.(*Food)
 	if ok {
-		if len(b.Foods[f.Consumable.Name]) > 1 {
-			idx := slices.Index(b.Foods[f.Consumable.Name], f)
-			b.Foods[f.Consumable.Name] = append(b.Foods[f.Consumable.Name][:idx], b.Foods[f.Consumable.Name][idx+1:]...)
+		if len(b.Foods[f.Item.Name]) > 1 {
+			idx := slices.Index(b.Foods[f.Item.Name], f)
+			b.Foods[f.Item.Name] = append(b.Foods[f.Item.Name][:idx], b.Foods[f.Item.Name][idx+1:]...)
 		} else {
-			delete(b.Foods, f.Consumable.Name)
+			delete(b.Foods, f.Item.Name)
 		}
 	}
 
-	w, ok := c.(*Weapon)
+	w, ok := i.(*Weapon)
 	if ok {
-		if len(b.Weapons[w.Consumable.Name]) > 1 {
-			idx := slices.Index(b.Weapons[w.Consumable.Name], w)
-			b.Weapons[w.Consumable.Name] = append(b.Weapons[w.Consumable.Name][:idx], b.Weapons[w.Consumable.Name][idx+1:]...)
+		if len(b.Weapons[w.Item.Name]) > 1 {
+			idx := slices.Index(b.Weapons[w.Item.Name], w)
+			b.Weapons[w.Item.Name] = append(b.Weapons[w.Item.Name][:idx], b.Weapons[w.Item.Name][idx+1:]...)
 		} else {
-			delete(b.Weapons, w.Consumable.Name)
+			delete(b.Weapons, w.Item.Name)
 		}
 	}
 
 	b.ItemsNum--
-	return c.Dropped(box)
+	return i.Dropped(box)
 }
 
 func (b *Backpack) GetItemsList() map[string]int {

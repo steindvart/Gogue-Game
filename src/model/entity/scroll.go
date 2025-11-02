@@ -5,7 +5,7 @@ import (
 )
 
 type Scroll struct {
-	Consumable        Consumable
+	Item              Item
 	AffectedAttribute Attributes
 	Increment         uint
 }
@@ -24,7 +24,7 @@ func NewScroll(box Box) *Scroll {
 	}
 
 	return &Scroll{
-		Consumable: Consumable{
+		Item: Item{
 			Shape: box,
 			Name:  getAttributeRandomName(scrollNames),
 		},
@@ -34,15 +34,15 @@ func NewScroll(box Box) *Scroll {
 }
 
 func (s *Scroll) Taken() {
-	s.Consumable.Taken()
+	s.Item.Taken()
 }
 
-func (s *Scroll) Dropped(box Box) ConsumableLike {
-	s.Consumable.Dropped(box)
+func (s *Scroll) Dropped(box Box) ItemLike {
+	s.Item.Dropped(box)
 	return s
 }
 
-func (s *Scroll) Use(p *Player) (string, ConsumableLike) {
+func (s *Scroll) Use(p *Player) (string, ItemLike) {
 	if s.AffectedAttribute.MaxHealth == 1 {
 		p.Character.MaxHealth += float64(s.Increment)
 	}
@@ -55,7 +55,7 @@ func (s *Scroll) Use(p *Player) (string, ConsumableLike) {
 
 	return fmt.Sprintf(
 		"You read the %v, your %v has increased by %v",
-		s.Consumable.Name,
+		s.Item.Name,
 		s.AffectedAttribute.GetAffectedAttributeName(),
 		s.Increment,
 	), nil

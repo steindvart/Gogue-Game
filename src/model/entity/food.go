@@ -5,7 +5,7 @@ import (
 )
 
 type Food struct {
-	Consumable         Consumable
+	Item               Item
 	HealthRegeneration uint
 }
 
@@ -23,7 +23,7 @@ func NewFood(box Box) *Food {
 	}
 
 	return &Food{
-		Consumable: Consumable{
+		Item: Item{
 			Shape: box,
 			Name:  getAttributeRandomName(foodNames),
 		},
@@ -32,20 +32,20 @@ func NewFood(box Box) *Food {
 }
 
 func (f *Food) Taken() {
-	f.Consumable.Taken()
+	f.Item.Taken()
 }
 
-func (f *Food) Dropped(box Box) ConsumableLike {
-	f.Consumable.Dropped(box)
+func (f *Food) Dropped(box Box) ItemLike {
+	f.Item.Dropped(box)
 	return f
 }
 
-func (f *Food) Use(p *Player) (string, ConsumableLike) {
+func (f *Food) Use(p *Player) (string, ItemLike) {
 	p.Character.Health += float64(f.HealthRegeneration)
 
 	return fmt.Sprintf(
 		"You ate the %v, your Health has increased by %v",
-		f.Consumable.Name,
+		f.Item.Name,
 		f.HealthRegeneration,
 	), nil
 }

@@ -56,11 +56,11 @@ func TestNewElixir(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := NewElixir(tt.box)
-			if !(got.Consumable.Shape == tt.wantShape) {
-				t.Errorf("NewElixir(): got Shape %v, want %v", got.Consumable.Shape, tt.wantShape)
+			if !(got.Item.Shape == tt.wantShape) {
+				t.Errorf("NewElixir(): got Shape %v, want %v", got.Item.Shape, tt.wantShape)
 			}
-			if !(slices.Contains(tt.wantNames, got.Consumable.Name)) {
-				t.Errorf("NewElixir(): got Name %v, want in %v", got.Consumable.Name, tt.wantNames)
+			if !(slices.Contains(tt.wantNames, got.Item.Name)) {
+				t.Errorf("NewElixir(): got Name %v, want in %v", got.Item.Name, tt.wantNames)
 			}
 			if !(got.EffectDuration < tt.wantEffectDurationLessThan) {
 				t.Errorf("NewElixir(): got EffectDuration %v, want less than %v", got.EffectDuration, tt.wantEffectDurationLessThan)
@@ -89,7 +89,7 @@ func TestElixir_Taken(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			elixir := &Elixir{
-				Consumable: Consumable{
+				Item: Item{
 					Shape: Box{
 						Point: Point2D[int]{X: 1, Y: 2},
 						Size:  Size2D[uint]{Height: 1, Width: 1},
@@ -101,8 +101,8 @@ func TestElixir_Taken(t *testing.T) {
 				EffectDuration:    time.Minute,
 			}
 			elixir.Taken()
-			if elixir.Consumable.Shape != tt.want {
-				t.Errorf("Taken() = (%v), want (%v)", elixir.Consumable.Shape, tt.want)
+			if elixir.Item.Shape != tt.want {
+				t.Errorf("Taken() = (%v), want (%v)", elixir.Item.Shape, tt.want)
 			}
 		})
 	}
@@ -124,7 +124,7 @@ func TestElixir_Dropped(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			elixir := &Elixir{
-				Consumable: Consumable{
+				Item: Item{
 					Shape: Box{},
 					Name:  "Awkward Elixir",
 				},
@@ -138,8 +138,8 @@ func TestElixir_Dropped(t *testing.T) {
 				t.Errorf("Dropped() = %#v, want %#v", item, elixir)
 			}
 
-			if elixir.Consumable.Shape != tt.want {
-				t.Errorf("Dropped(): Shape %v, want %v", elixir.Consumable.Shape, tt.want)
+			if elixir.Item.Shape != tt.want {
+				t.Errorf("Dropped(): Shape %v, want %v", elixir.Item.Shape, tt.want)
 			}
 		})
 	}
@@ -154,7 +154,7 @@ func TestElixir_Use(t *testing.T) {
 		{
 			name: "use elixir",
 			elixir: &Elixir{
-				Consumable: Consumable{
+				Item: Item{
 					Shape: Box{},
 					Name:  "Awkward Elixir",
 				},
@@ -172,7 +172,7 @@ func TestElixir_Use(t *testing.T) {
 			line, ptr := tt.elixir.Use(player)
 
 			if ptr != nil {
-				t.Errorf("Use(): ConsumableLike pointer got %#v, want %#v", ptr, nil)
+				t.Errorf("Use(): ItemLike pointer got %#v, want %#v", ptr, nil)
 			}
 
 			time.Sleep(2 * time.Millisecond)

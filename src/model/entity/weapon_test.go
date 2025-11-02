@@ -35,11 +35,11 @@ func TestNewWeapon(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := NewWeapon(tt.box)
-			if !(got.Consumable.Shape == tt.wantShape) {
-				t.Errorf("NewWeapon(): got Shape %v, want %v", got.Consumable.Shape, tt.wantShape)
+			if !(got.Item.Shape == tt.wantShape) {
+				t.Errorf("NewWeapon(): got Shape %v, want %v", got.Item.Shape, tt.wantShape)
 			}
-			if !(slices.Contains(tt.wantNames, got.Consumable.Name)) {
-				t.Errorf("NewWeapon(): got Name %v, want in %v", got.Consumable.Name, tt.wantNames)
+			if !(slices.Contains(tt.wantNames, got.Item.Name)) {
+				t.Errorf("NewWeapon(): got Name %v, want in %v", got.Item.Name, tt.wantNames)
 			}
 			if !(got.Damage < tt.wantDamageLessThan) {
 				t.Errorf("NewWeapon(): got Damage %v, want less than %v", got.Damage, tt.wantDamageLessThan)
@@ -62,7 +62,7 @@ func TestWeapon_Taken(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			weapon := &Weapon{
-				Consumable: Consumable{
+				Item: Item{
 					Shape: Box{
 						Point: Point2D[int]{X: 1, Y: 2},
 						Size:  Size2D[uint]{Height: 1, Width: 1},
@@ -72,8 +72,8 @@ func TestWeapon_Taken(t *testing.T) {
 				Damage: 5,
 			}
 			weapon.Taken()
-			if weapon.Consumable.Shape != tt.want {
-				t.Errorf("Taken() = (%v), want (%v)", weapon.Consumable.Shape, tt.want)
+			if weapon.Item.Shape != tt.want {
+				t.Errorf("Taken() = (%v), want (%v)", weapon.Item.Shape, tt.want)
 			}
 		})
 	}
@@ -95,7 +95,7 @@ func TestWeapon_Dropped(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			weapon := &Weapon{
-				Consumable: Consumable{
+				Item: Item{
 					Shape: Box{},
 					Name:  "Awkward Weapon",
 				},
@@ -107,8 +107,8 @@ func TestWeapon_Dropped(t *testing.T) {
 				t.Errorf("Dropped() = %#v, want %#v", item, weapon)
 			}
 
-			if weapon.Consumable.Shape != tt.want {
-				t.Errorf("Dropped(): Shape %v, want %v", weapon.Consumable.Shape, tt.want)
+			if weapon.Item.Shape != tt.want {
+				t.Errorf("Dropped(): Shape %v, want %v", weapon.Item.Shape, tt.want)
 			}
 		})
 	}
@@ -123,7 +123,7 @@ func TestWeapon_Use(t *testing.T) {
 		{
 			name: "use weapon",
 			weapon: &Weapon{
-				Consumable: Consumable{
+				Item: Item{
 					Shape: Box{},
 					Name:  "Awkward Weapon",
 				},
@@ -141,7 +141,7 @@ func TestWeapon_Use(t *testing.T) {
 			line, ptr := tt.weapon.Use(player)
 
 			if ptr != currentWeapon {
-				t.Errorf("Use(): ConsumableLike pointer got %#v, want %#v", ptr, nil)
+				t.Errorf("Use(): ItemLike pointer got %#v, want %#v", ptr, nil)
 			}
 
 			if !(line == tt.want) {
