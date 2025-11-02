@@ -22,6 +22,11 @@ type Backpack struct {
 	Treasures uint
 }
 
+type ListElement struct {
+	Name string
+	Num int
+}
+
 func (b *Backpack) AddItem(i ItemLike) error {
 	if b.ItemsNum < b.Capacity {
 		e, ok := i.(*Elixir)
@@ -98,63 +103,63 @@ func (b *Backpack) RemoveItem(i ItemLike, box Box) ItemLike {
 	return i.Dropped(box)
 }
 
-func (b *Backpack) GetItemsList() map[string]int {
-	list := map[string]int{}
+func (b *Backpack) GetItemsList() []ListElement {
+	list := []ListElement{}
 
 	for key := range b.Elixirs {
-		list[key] = len(b.Elixirs[key])
+		list = append(list, ListElement{Name: key, Num: len(b.Elixirs[key])})
 	}
 
 	for key := range b.Scrolls {
-		list[key] = len(b.Scrolls[key])
+		list = append(list, ListElement{Name: key, Num: len(b.Scrolls[key])})
 	}
 
 	for key := range b.Foods {
-		list[key] = len(b.Foods[key])
+		list = append(list, ListElement{Name: key, Num: len(b.Foods[key])})
 	}
 
 	for key := range b.Weapons {
-		list[key] = len(b.Weapons[key])
+		list = append(list, ListElement{Name: key, Num: len(b.Weapons[key])})
 	}
 
 	return list
 }
 
-func (b *Backpack) GetElixirsList() map[string]int {
-	list := map[string]int{}
+func (b *Backpack) GetElixirsList() []ListElement {
+	list := []ListElement{}
 
 	for key := range b.Elixirs {
-		list[key] = len(b.Elixirs[key])
+		list = append(list, ListElement{Name: key, Num: len(b.Elixirs[key])})
 	}
 
 	return list
 }
 
-func (b *Backpack) GetScrollsList() map[string]int {
-	list := map[string]int{}
+func (b *Backpack) GetScrollsList() []ListElement {
+	list := []ListElement{}
 
 	for key := range b.Scrolls {
-		list[key] = len(b.Scrolls[key])
+		list = append(list, ListElement{Name: key, Num: len(b.Scrolls[key])})
 	}
 
 	return list
 }
 
-func (b *Backpack) GetFoodsList() map[string]int {
-	list := map[string]int{}
+func (b *Backpack) GetFoodsList() []ListElement {
+	list := []ListElement{}
 
 	for key := range b.Foods {
-		list[key] = len(b.Foods[key])
+		list = append(list, ListElement{Name: key, Num: len(b.Foods[key])})
 	}
 
 	return list
 }
 
-func (b *Backpack) GetWeaponsList() map[string]int {
-	list := map[string]int{}
+func (b *Backpack) GetWeaponsList() []ListElement {
+	list := []ListElement{}
 
 	for key := range b.Weapons {
-		list[key] = len(b.Weapons[key])
+		list = append(list, ListElement{Name: key, Num: len(b.Weapons[key])})
 	}
 
 	return list
