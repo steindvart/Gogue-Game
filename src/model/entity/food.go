@@ -1,6 +1,8 @@
 package entity
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type Food struct {
 	Consumable         Consumable

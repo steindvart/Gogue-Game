@@ -1,11 +1,5 @@
 package entity
 
-type BackpackIsFullError struct{}
-
-func (BackpackIsFullError) Error() string {
-	return "backpack is full, drop something"
-}
-
 type Player struct {
 	Character      Character
 	Experience     uint
@@ -47,35 +41,15 @@ func (p *Player) TakeTreasure(treasure *Treasure) {
 }
 
 func (p *Player) TakeConsumableLike(consumableLike ConsumableLike) error {
-	if p.Backpack.ItemsNum < p.Backpack.Capacity {
-		p.Backpack.Consumables = append(p.Backpack.Consumables, consumableLike)
-		p.Backpack.ItemsNum++
-
-		consumableLike.Taken()
-		return nil
-	} else {
-		return BackpackIsFullError{}
-	}
+	return p.Backpack.AddItem(consumableLike)
 }
 
 func (p *Player) DropConsumableLike(consumableLike ConsumableLike, box Box) ConsumableLike {
-	for idx, item := range p.Backpack.Consumables {
-		if item == consumableLike {
-			p.Backpack.Consumables = append(p.Backpack.Consumables[:idx], p.Backpack.Consumables[idx+1:]...)
-			p.Backpack.ItemsNum--
-		}
-	}
-	return consumableLike.Dropped(box)
+	return p.Backpack.RemoveItem(consumableLike, box)
 }
 
 func (p *Player) UseConsumableLike(consumableLike ConsumableLike) (string, ConsumableLike) {
-	for idx, item := range p.Backpack.Consumables {
-		if item == consumableLike {
-			p.Backpack.Consumables = append(p.Backpack.Consumables[:idx], p.Backpack.Consumables[idx+1:]...)
-			p.Backpack.ItemsNum--
-		}
-	}
-	return consumableLike.Use(p)
+	return p.Backpack.RemoveItem(consumableLike, Box{}).Use(p)
 }
 
 func NewPlayer(box Box) *Player {
