@@ -33,3 +33,9 @@ func TestNewBackpack(t *testing.T) {
 		})
 	}
 }
+
+func TestBackpack_AddItem(t *testing.T) {
+	tests := []struct {
+		//
+	}
+}

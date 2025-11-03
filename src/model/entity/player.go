@@ -44,8 +44,8 @@ func (p *Player) TakeItem(i ItemLike) error {
 	return p.Backpack.AddItem(i)
 }
 
-func (p *Player) DropItem(i ItemLike, box Box) ItemLike {
-	return p.Backpack.RemoveItem(i, box)
+func (p *Player) DropItem(i ItemLike) ItemLike {
+	return p.Backpack.RemoveItem(i, p.Character.Shape)
 }
 
 func (p *Player) UseItem(i ItemLike) (string, ItemLike) {

@@ -1,7 +1,5 @@
 package entity
 
-import "slices"
-
 const (
 	BackpackDefaultCapacity uint = 9
 )
@@ -9,7 +7,7 @@ const (
 type BackpackIsFullError struct{}
 
 func (BackpackIsFullError) Error() string {
-	return "backpack is full, drop something"
+	return "Backpack is full, drop something"
 }
 
 type Backpack struct {
@@ -22,9 +20,10 @@ type Backpack struct {
 	Treasures uint
 }
 
-type ListElement struct {
+type listElement struct {
 	Name string
 	Num int
+	Item ItemLike
 }
 
 func (b *Backpack) AddItem(i ItemLike) error {
@@ -62,8 +61,7 @@ func (b *Backpack) RemoveItem(i ItemLike, box Box) ItemLike {
 	e, ok := i.(*Elixir)
 	if ok {
 		if len(b.Elixirs[e.Item.Name]) > 1 {
-			idx := slices.Index(b.Elixirs[e.Item.Name], e)
-			b.Elixirs[e.Item.Name] = append(b.Elixirs[e.Item.Name][:idx], b.Elixirs[e.Item.Name][idx+1:]...)
+			b.Elixirs[e.Item.Name] = b.Elixirs[e.Item.Name][1:]
 		} else {
 			delete(b.Elixirs, e.Item.Name)
 		}
@@ -72,8 +70,7 @@ func (b *Backpack) RemoveItem(i ItemLike, box Box) ItemLike {
 	s, ok := i.(*Scroll)
 	if ok {
 		if len(b.Scrolls[s.Item.Name]) > 1 {
-			idx := slices.Index(b.Scrolls[s.Item.Name], s)
-			b.Scrolls[s.Item.Name] = append(b.Scrolls[s.Item.Name][:idx], b.Scrolls[s.Item.Name][idx+1:]...)
+			b.Scrolls[e.Item.Name] = b.Scrolls[e.Item.Name][1:]
 		} else {
 			delete(b.Scrolls, s.Item.Name)
 		}
@@ -82,8 +79,7 @@ func (b *Backpack) RemoveItem(i ItemLike, box Box) ItemLike {
 	f, ok := i.(*Food)
 	if ok {
 		if len(b.Foods[f.Item.Name]) > 1 {
-			idx := slices.Index(b.Foods[f.Item.Name], f)
-			b.Foods[f.Item.Name] = append(b.Foods[f.Item.Name][:idx], b.Foods[f.Item.Name][idx+1:]...)
+			b.Foods[e.Item.Name] = b.Foods[e.Item.Name][1:]
 		} else {
 			delete(b.Foods, f.Item.Name)
 		}
@@ -92,8 +88,7 @@ func (b *Backpack) RemoveItem(i ItemLike, box Box) ItemLike {
 	w, ok := i.(*Weapon)
 	if ok {
 		if len(b.Weapons[w.Item.Name]) > 1 {
-			idx := slices.Index(b.Weapons[w.Item.Name], w)
-			b.Weapons[w.Item.Name] = append(b.Weapons[w.Item.Name][:idx], b.Weapons[w.Item.Name][idx+1:]...)
+			b.Weapons[e.Item.Name] = b.Weapons[e.Item.Name][1:]
 		} else {
 			delete(b.Weapons, w.Item.Name)
 		}
@@ -103,63 +98,52 @@ func (b *Backpack) RemoveItem(i ItemLike, box Box) ItemLike {
 	return i.Dropped(box)
 }
 
-func (b *Backpack) GetItemsList() []ListElement {
-	list := []ListElement{}
+func (b *Backpack) GetItemsList() []listElement {
+	list := []listElement{}
+
+	list = append(list, b.GetElixirsList()...)
+	list = append(list, b.GetScrollsList()...)
+	list = append(list, b.GetFoodsList()...)
+	list = append(list, b.GetWeaponsList()...)
+
+	return list
+}
+
+func (b *Backpack) GetElixirsList() []listElement {
+	list := []listElement{}
 
 	for key := range b.Elixirs {
-		list = append(list, ListElement{Name: key, Num: len(b.Elixirs[key])})
+		list = append(list, listElement{Name: key, Num: len(b.Elixirs[key]), Item: b.Elixirs[key][0]})
 	}
+
+	return list
+}
+
+func (b *Backpack) GetScrollsList() []listElement {
+	list := []listElement{}
 
 	for key := range b.Scrolls {
-		list = append(list, ListElement{Name: key, Num: len(b.Scrolls[key])})
+		list = append(list, listElement{Name: key, Num: len(b.Scrolls[key]), Item: b.Elixirs[key][0]})
 	}
+
+	return list
+}
+
+func (b *Backpack) GetFoodsList() []listElement {
+	list := []listElement{}
 
 	for key := range b.Foods {
-		list = append(list, ListElement{Name: key, Num: len(b.Foods[key])})
+		list = append(list, listElement{Name: key, Num: len(b.Foods[key]), Item: b.Elixirs[key][0]})
 	}
+
+	return list
+}
+
+func (b *Backpack) GetWeaponsList() []listElement {
+	list := []listElement{}
 
 	for key := range b.Weapons {
-		list = append(list, ListElement{Name: key, Num: len(b.Weapons[key])})
-	}
-
-	return list
-}
-
-func (b *Backpack) GetElixirsList() []ListElement {
-	list := []ListElement{}
-
-	for key := range b.Elixirs {
-		list = append(list, ListElement{Name: key, Num: len(b.Elixirs[key])})
-	}
-
-	return list
-}
-
-func (b *Backpack) GetScrollsList() []ListElement {
-	list := []ListElement{}
-
-	for key := range b.Scrolls {
-		list = append(list, ListElement{Name: key, Num: len(b.Scrolls[key])})
-	}
-
-	return list
-}
-
-func (b *Backpack) GetFoodsList() []ListElement {
-	list := []ListElement{}
-
-	for key := range b.Foods {
-		list = append(list, ListElement{Name: key, Num: len(b.Foods[key])})
-	}
-
-	return list
-}
-
-func (b *Backpack) GetWeaponsList() []ListElement {
-	list := []ListElement{}
-
-	for key := range b.Weapons {
-		list = append(list, ListElement{Name: key, Num: len(b.Weapons[key])})
+		list = append(list, listElement{Name: key, Num: len(b.Weapons[key]), Item: b.Elixirs[key][0]})
 	}
 
 	return list
