@@ -37,12 +37,11 @@ func (s *Scroll) Taken() {
 	s.Item.Taken()
 }
 
-func (s *Scroll) Dropped(box Box) ItemLike {
+func (s *Scroll) Dropped(box Box) {
 	s.Item.Dropped(box)
-	return s
 }
 
-func (s *Scroll) Use(p *Player) (string, ItemLike) {
+func (s *Scroll) Use(p *Player) string {
 	if s.AffectedAttribute.MaxHealth == 1 {
 		p.Character.MaxHealth += float64(s.Increment)
 	}
@@ -58,5 +57,5 @@ func (s *Scroll) Use(p *Player) (string, ItemLike) {
 		s.Item.Name,
 		s.AffectedAttribute.GetAffectedAttributeName(),
 		s.Increment,
-	), nil
+	)
 }

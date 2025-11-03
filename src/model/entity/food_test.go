@@ -101,11 +101,8 @@ func TestFood_Dropped(t *testing.T) {
 				},
 				HealthRegeneration: 5,
 			}
-			item := food.Dropped(tt.box)
 
-			if item != food {
-				t.Errorf("Dropped() = %#v, want %#v", item, food)
-			}
+			food.Dropped(tt.box)
 
 			if food.Item.Shape != tt.want {
 				t.Errorf("Dropped(): Shape %v, want %v", food.Item.Shape, tt.want)
@@ -136,11 +133,7 @@ func TestFood_Use(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			player := NewPlayer(Box{})
-			line, ptr := tt.food.Use(player)
-
-			if ptr != nil {
-				t.Errorf("Use(): ItemLike pointer got %#v, want %#v", ptr, nil)
-			}
+			line := tt.food.Use(player)
 
 			if player.Character.Health == float64(AttributeRateAverage) {
 				t.Errorf("Use(): got %#v, want %#v", player.Character.MaxHealth, float64(AttributeRateAverage)+float64(tt.food.HealthRegeneration))

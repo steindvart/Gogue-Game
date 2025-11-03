@@ -35,18 +35,20 @@ func (w *Weapon) Taken() {
 	w.Item.Taken()
 }
 
-func (w *Weapon) Dropped(box Box) ItemLike {
+func (w *Weapon) Dropped(box Box) {
 	w.Item.Dropped(box)
-	return w
 }
 
-func (w *Weapon) Use(p *Player) (string, ItemLike) {
-	currentWeapon := p.Weapon
+func (w *Weapon) Use(p *Player) string {
+	if p.Weapon != nil {
+		currentWeapon := p.Weapon
+		currentWeapon.Dropped(p.Character.Shape)
+	}
 	p.Weapon = w
 
 	return fmt.Sprintf(
 		"You picked up the %v, now all your attacks have %v extra damage",
 		w.Item.Name,
 		w.Damage,
-	), currentWeapon
+	)
 }

@@ -35,17 +35,16 @@ func (f *Food) Taken() {
 	f.Item.Taken()
 }
 
-func (f *Food) Dropped(box Box) ItemLike {
+func (f *Food) Dropped(box Box) {
 	f.Item.Dropped(box)
-	return f
 }
 
-func (f *Food) Use(p *Player) (string, ItemLike) {
+func (f *Food) Use(p *Player) string {
 	p.Character.Health += float64(f.HealthRegeneration)
 
 	return fmt.Sprintf(
 		"You ate the %v, your Health has increased by %v",
 		f.Item.Name,
 		f.HealthRegeneration,
-	), nil
+	)
 }

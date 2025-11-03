@@ -101,11 +101,8 @@ func TestWeapon_Dropped(t *testing.T) {
 				},
 				Damage: 5,
 			}
-			item := weapon.Dropped(tt.box)
 
-			if item != weapon {
-				t.Errorf("Dropped() = %#v, want %#v", item, weapon)
-			}
+			weapon.Dropped(tt.box)
 
 			if weapon.Item.Shape != tt.want {
 				t.Errorf("Dropped(): Shape %v, want %v", weapon.Item.Shape, tt.want)
@@ -116,18 +113,40 @@ func TestWeapon_Dropped(t *testing.T) {
 
 func TestWeapon_Use(t *testing.T) {
 	tests := []struct {
-		name   string
-		weapon *Weapon
-		want   string
+		name    string
+		weapons []*Weapon
+		want    string
 	}{
 		{
 			name: "use weapon",
-			weapon: &Weapon{
-				Item: Item{
-					Shape: Box{},
-					Name:  "Awkward Weapon",
+			weapons: []*Weapon{
+				{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Weapon 1",
+					},
+					Damage: 5,
 				},
-				Damage: 5,
+				{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Weapon 2",
+					},
+					Damage: 5,
+				},
+			},
+			want: "You picked up the Awkward Weapon 2, now all your attacks have 5 extra damage",
+		},
+		{
+			name: "use first weapon",
+			weapons: []*Weapon{
+				{
+					Item: Item{
+						Shape: Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 1}},
+						Name:  "Awkward Weapon",
+					},
+					Damage: 5,
+				},
 			},
 			want: "You picked up the Awkward Weapon, now all your attacks have 5 extra damage",
 		},
@@ -135,17 +154,42 @@ func TestWeapon_Use(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			player := NewPlayer(Box{})
-			currentWeapon := player.Weapon
+			player := NewPlayer(Box{Point: Point2D[int]{X: 1, Y: 2}, Size: Size2D[uint]{Height: 1, Width: 1}})
 
-			line, ptr := tt.weapon.Use(player)
-
-			if ptr != currentWeapon {
-				t.Errorf("Use(): ItemLike pointer got %#v, want %#v", ptr, nil)
+			for idx := range tt.weapons {
+				_ = player.TakeItem(tt.weapons[idx])
 			}
 
-			if !(line == tt.want) {
-				t.Errorf("Use() = (%v), want (%v)", line, tt.want)
+			if len(tt.weapons) > 1 {
+				player.Weapon = tt.weapons[0]
+				currentWeapon := player.Weapon
+				if currentWeapon.Item.Shape == player.Character.Shape {
+					t.Errorf("Use(): Shape got %#v, got %#v", currentWeapon.Item.Shape, player.Character.Shape)
+				}
+
+				line := tt.weapons[1].Use(player)
+
+				if !(currentWeapon.Item.Shape == player.Character.Shape) {
+					t.Errorf("Use(): Shape got %#v, got %#v", currentWeapon.Item.Shape, player.Character.Shape)
+				}
+
+				if !(player.Weapon == tt.weapons[1]) {
+					t.Errorf("Use(): Weapon got %#v, got %#v", player.Weapon, tt.weapons[1])
+				}
+
+				if !(line == tt.want) {
+					t.Errorf("Use() = (%v), want (%v)", line, tt.want)
+				}
+			} else {
+				line := tt.weapons[0].Use(player)
+
+				if !(player.Weapon == tt.weapons[0]) {
+					t.Errorf("Use(): Weapon got %#v, want %#v", player.Weapon, tt.weapons[0])
+				}
+
+				if !(line == tt.want) {
+					t.Errorf("Use() = (%v), want (%v)", line, tt.want)
+				}
 			}
 		})
 	}

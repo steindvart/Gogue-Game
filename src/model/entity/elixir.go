@@ -46,12 +46,11 @@ func (e *Elixir) Taken() {
 	e.Item.Taken()
 }
 
-func (e *Elixir) Dropped(box Box) ItemLike {
+func (e *Elixir) Dropped(box Box) {
 	e.Item.Dropped(box)
-	return e
 }
 
-func (e *Elixir) Use(p *Player) (string, ItemLike) {
+func (e *Elixir) Use(p *Player) string {
 	go func() {
 		defer func() {
 			p.Character.MaxHealth -= float64(e.Increment)
@@ -77,7 +76,7 @@ func (e *Elixir) Use(p *Player) (string, ItemLike) {
 		e.Item.Name,
 		e.AffectedAttribute.GetAffectedAttributeName(),
 		e.Increment,
-	), nil
+	)
 }
 
 func getRandomElixirDuration() time.Duration {

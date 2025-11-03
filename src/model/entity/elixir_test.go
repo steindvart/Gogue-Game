@@ -132,11 +132,8 @@ func TestElixir_Dropped(t *testing.T) {
 				Increment:         1,
 				EffectDuration:    time.Minute,
 			}
-			item := elixir.Dropped(tt.box)
 
-			if item != elixir {
-				t.Errorf("Dropped() = %#v, want %#v", item, elixir)
-			}
+			elixir.Dropped(tt.box)
 
 			if elixir.Item.Shape != tt.want {
 				t.Errorf("Dropped(): Shape %v, want %v", elixir.Item.Shape, tt.want)
@@ -169,11 +166,7 @@ func TestElixir_Use(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			player := NewPlayer(Box{})
-			line, ptr := tt.elixir.Use(player)
-
-			if ptr != nil {
-				t.Errorf("Use(): ItemLike pointer got %#v, want %#v", ptr, nil)
-			}
+			line := tt.elixir.Use(player)
 
 			time.Sleep(2 * time.Millisecond)
 

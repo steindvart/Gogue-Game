@@ -125,11 +125,7 @@ func TestScroll_Dropped(t *testing.T) {
 				Increment:         1,
 			}
 
-			item := scroll.Dropped(tt.box)
-
-			if item != scroll {
-				t.Errorf("Dropped() = %#v, want %#v", item, scroll)
-			}
+			scroll.Dropped(tt.box)
 
 			if scroll.Item.Shape != tt.want {
 				t.Errorf("Dropped(): Shape %v, want %v", scroll.Item.Shape, tt.want)
@@ -161,11 +157,7 @@ func TestScroll_Use(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			player := NewPlayer(Box{})
-			line, ptr := tt.scroll.Use(player)
-
-			if ptr != nil {
-				t.Errorf("Use(): ItemLike pointer got %#v, want %#v", ptr, nil)
-			}
+			line := tt.scroll.Use(player)
 
 			if player.Character.MaxHealth == float64(AttributeRateAverage) {
 				t.Errorf("Use(): got %#v, want %#v", player.Character.MaxHealth, float64(AttributeRateAverage)+float64(tt.scroll.Increment))

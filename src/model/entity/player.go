@@ -44,12 +44,22 @@ func (p *Player) TakeItem(i ItemLike) error {
 	return p.Backpack.AddItem(i)
 }
 
-func (p *Player) DropItem(i ItemLike) ItemLike {
+func (p *Player) DropItem(i ItemLike) error {
 	return p.Backpack.RemoveItem(i, p.Character.Shape)
 }
 
-func (p *Player) UseItem(i ItemLike) (string, ItemLike) {
-	return p.Backpack.RemoveItem(i, Box{}).Use(p)
+func (p *Player) UseItem(i ItemLike) (string, error) {
+	w, ok := i.(*Weapon)
+	if ok {
+		return w.Use(p), nil
+	}
+
+	err := p.Backpack.RemoveItem(i, p.Character.Shape)
+	if err == nil {
+		return i.Use(p), nil
+	}
+
+	return "", ItemIsNotInBackpackError{}
 }
 
 func NewPlayer(box Box) *Player {

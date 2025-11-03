@@ -11,8 +11,8 @@ const (
 
 type ItemLike interface {
 	Taken()
-	Dropped(box Box) ItemLike
-	Use(p *Player) (string, ItemLike)
+	Dropped(box Box)
+	Use(p *Player) string
 }
 
 type Item struct {
