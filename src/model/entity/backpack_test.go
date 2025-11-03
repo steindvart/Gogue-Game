@@ -176,92 +176,92 @@ var elixir9 = Elixir{
 	Increment: 10,
 }
 
-var scroll1 = Scroll{
-	Item: Item{
-		Shape: Box{},
-		Name:  "Awkward Scroll 1",
-	},
-	AffectedAttribute: Attributes{
-		MaxHealth: 0,
-		Agility:   1,
-		Strength:  0,
-	},
-	Increment: 10,
-}
+// var scroll1 = Scroll{
+// 	Item: Item{
+// 		Shape: Box{},
+// 		Name:  "Awkward Scroll 1",
+// 	},
+// 	AffectedAttribute: Attributes{
+// 		MaxHealth: 0,
+// 		Agility:   1,
+// 		Strength:  0,
+// 	},
+// 	Increment: 10,
+// }
 
-var scroll2 = Scroll{
-	Item: Item{
-		Shape: Box{},
-		Name:  "Awkward Scroll 2",
-	},
-	AffectedAttribute: Attributes{
-		MaxHealth: 0,
-		Agility:   1,
-		Strength:  0,
-	},
-	Increment: 10,
-}
+// var scroll2 = Scroll{
+// 	Item: Item{
+// 		Shape: Box{},
+// 		Name:  "Awkward Scroll 2",
+// 	},
+// 	AffectedAttribute: Attributes{
+// 		MaxHealth: 0,
+// 		Agility:   1,
+// 		Strength:  0,
+// 	},
+// 	Increment: 10,
+// }
 
-var scroll3 = Scroll{
-	Item: Item{
-		Shape: Box{},
-		Name:  "Awkward Scroll 3",
-	},
-	AffectedAttribute: Attributes{
-		MaxHealth: 0,
-		Agility:   1,
-		Strength:  0,
-	},
-	Increment: 10,
-}
+// var scroll3 = Scroll{
+// 	Item: Item{
+// 		Shape: Box{},
+// 		Name:  "Awkward Scroll 3",
+// 	},
+// 	AffectedAttribute: Attributes{
+// 		MaxHealth: 0,
+// 		Agility:   1,
+// 		Strength:  0,
+// 	},
+// 	Increment: 10,
+// }
 
-var food1 = Food{
-	Item: Item{
-		Shape: Box{},
-		Name:  "Awkward Food 1",
-	},
-	HealthRegeneration: 15,
-}
+// var food1 = Food{
+// 	Item: Item{
+// 		Shape: Box{},
+// 		Name:  "Awkward Food 1",
+// 	},
+// 	HealthRegeneration: 15,
+// }
 
-var food2 = Food{
-	Item: Item{
-		Shape: Box{},
-		Name:  "Awkward Food 2",
-	},
-	HealthRegeneration: 15,
-}
+// var food2 = Food{
+// 	Item: Item{
+// 		Shape: Box{},
+// 		Name:  "Awkward Food 2",
+// 	},
+// 	HealthRegeneration: 15,
+// }
 
-var food3 = Food{
-	Item: Item{
-		Shape: Box{},
-		Name:  "Awkward Food 3",
-	},
-	HealthRegeneration: 15,
-}
+// var food3 = Food{
+// 	Item: Item{
+// 		Shape: Box{},
+// 		Name:  "Awkward Food 3",
+// 	},
+// 	HealthRegeneration: 15,
+// }
 
-var weapon1 = Weapon{
-	Item: Item{
-		Shape: Box{},
-		Name:  "Awkward Weapon 1",
-	},
-	Damage: 10,
-}
+// var weapon1 = Weapon{
+// 	Item: Item{
+// 		Shape: Box{},
+// 		Name:  "Awkward Weapon 1",
+// 	},
+// 	Damage: 10,
+// }
 
-var weapon2 = Weapon{
-	Item: Item{
-		Shape: Box{},
-		Name:  "Awkward Weapon 2",
-	},
-	Damage: 10,
-}
+// var weapon2 = Weapon{
+// 	Item: Item{
+// 		Shape: Box{},
+// 		Name:  "Awkward Weapon 2",
+// 	},
+// 	Damage: 10,
+// }
 
-var weapon3 = Weapon{
-	Item: Item{
-		Shape: Box{},
-		Name:  "Awkward Weapon 3",
-	},
-	Damage: 10,
-}
+// var weapon3 = Weapon{
+// 	Item: Item{
+// 		Shape: Box{},
+// 		Name:  "Awkward Weapon 3",
+// 	},
+// 	Damage: 10,
+// }
 
 func TestBackpack_AddItem(t *testing.T) {
 	tests := []struct {
