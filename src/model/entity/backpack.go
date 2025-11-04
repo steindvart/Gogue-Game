@@ -32,25 +32,25 @@ type listElement struct {
 	Item ItemLike
 }
 
+func (b *Backpack) AddTreasure(t *Treasure) {
+	b.Treasures += t.Value
+}
+
 func (b *Backpack) AddItem(i ItemLike) error {
 	if b.ItemsNum < b.Capacity {
-		e, ok := i.(*Elixir)
-		if ok {
+		if e := IsElixir(i); e != nil {
 			b.Elixirs[e.Item.Name] = append(b.Elixirs[e.Item.Name], *e)
 		}
 
-		s, ok := i.(*Scroll)
-		if ok {
+		if s := IsScroll(i); s != nil {
 			b.Scrolls[s.Item.Name] = append(b.Scrolls[s.Item.Name], *s)
 		}
 
-		f, ok := i.(*Food)
-		if ok {
+		if f := IsFood(i); f != nil {
 			b.Foods[f.Item.Name] = append(b.Foods[f.Item.Name], *f)
 		}
 
-		w, ok := i.(*Weapon)
-		if ok {
+		if w := IsWeapon(i); w != nil {
 			b.Weapons[w.Item.Name] = append(b.Weapons[w.Item.Name], *w)
 		}
 
@@ -64,79 +64,95 @@ func (b *Backpack) AddItem(i ItemLike) error {
 }
 
 func (b *Backpack) RemoveItem(i ItemLike, box Box) error {
-	e, ok := i.(*Elixir)
-	if ok {
-		if len(b.Elixirs[e.Item.Name]) > 1 {
-			b.Elixirs[e.Item.Name] = b.Elixirs[e.Item.Name][1:]
-		} else {
-			_, ok := b.Elixirs[e.Item.Name]
-			if ok {
+	if e := IsElixir(i); e != nil {
+		if _, ok := b.Elixirs[e.Item.Name]; ok {
+			if len(b.Elixirs[e.Item.Name]) > 1 {
+				b.Elixirs[e.Item.Name] = b.Elixirs[e.Item.Name][1:]
+			} else {
 				delete(b.Elixirs, e.Item.Name)
-			} else {
-				return ItemIsNotInBackpackError{}
 			}
-		}
 
-		b.ItemsNum--
-		i.Dropped(box)
-		return nil
+			i.Dropped(box)
+			b.ItemsNum--
+			return nil
+		}
 	}
 
-	s, ok := i.(*Scroll)
-	if ok {
-		if len(b.Scrolls[s.Item.Name]) > 1 {
-			b.Scrolls[s.Item.Name] = b.Scrolls[s.Item.Name][1:]
-		} else {
-			_, ok := b.Scrolls[s.Item.Name]
-			if ok {
+	if s := IsScroll(i); s != nil {
+		if _, ok := b.Scrolls[s.Item.Name]; ok {
+			if len(b.Scrolls[s.Item.Name]) > 1 {
+				b.Scrolls[s.Item.Name] = b.Scrolls[s.Item.Name][1:]
+			} else {
 				delete(b.Scrolls, s.Item.Name)
-			} else {
-				return ItemIsNotInBackpackError{}
 			}
-		}
 
-		b.ItemsNum--
-		i.Dropped(box)
-		return nil
+			b.ItemsNum--
+			i.Dropped(box)
+			return nil
+		}
 	}
 
-	f, ok := i.(*Food)
-	if ok {
-		if len(b.Foods[f.Item.Name]) > 1 {
-			b.Foods[f.Item.Name] = b.Foods[f.Item.Name][1:]
-		} else {
-			_, ok := b.Foods[f.Item.Name]
-			if ok {
+	if f := IsFood(i); f != nil {
+		if _, ok := b.Foods[f.Item.Name]; ok {
+			if len(b.Foods[f.Item.Name]) > 1 {
+				b.Foods[f.Item.Name] = b.Foods[f.Item.Name][1:]
+			} else {
 				delete(b.Foods, f.Item.Name)
-			} else {
-				return ItemIsNotInBackpackError{}
 			}
-		}
 
-		b.ItemsNum--
-		i.Dropped(box)
-		return nil
+			b.ItemsNum--
+			i.Dropped(box)
+			return nil
+		}
 	}
 
-	w, ok := i.(*Weapon)
-	if ok {
-		if len(b.Weapons[w.Item.Name]) > 1 {
-			b.Weapons[w.Item.Name] = b.Weapons[w.Item.Name][1:]
-		} else {
-			_, ok := b.Weapons[w.Item.Name]
-			if ok {
-				delete(b.Weapons, w.Item.Name)
+	if w := IsWeapon(i); w != nil {
+		if _, ok := b.Weapons[w.Item.Name]; ok {
+			if len(b.Weapons[w.Item.Name]) > 1 {
+				b.Weapons[w.Item.Name] = b.Weapons[w.Item.Name][1:]
 			} else {
-				return ItemIsNotInBackpackError{}
+				delete(b.Weapons, w.Item.Name)
 			}
-		}
 
-		b.ItemsNum--
-		i.Dropped(box)
-		return nil
+			b.ItemsNum--
+			i.Dropped(box)
+			return nil
+		}
 	}
 
 	return ItemIsNotInBackpackError{}
+}
+
+func IsElixir(i ItemLike) *Elixir {
+	e, ok := i.(*Elixir)
+	if ok {
+		return e
+	}
+	return nil
+}
+
+func IsScroll(i ItemLike) *Scroll {
+	s, ok := i.(*Scroll)
+	if ok {
+		return s
+	}
+	return nil
+}
+
+func IsFood(i ItemLike) *Food {
+	f, ok := i.(*Food)
+	if ok {
+		return f
+	}
+	return nil
+}
+
+func IsWeapon(i ItemLike) *Weapon {
+	w, ok := i.(*Weapon)
+	if ok {
+		return w
+	}
+	return nil
 }
 
 func (b *Backpack) GetItemsList() []listElement {

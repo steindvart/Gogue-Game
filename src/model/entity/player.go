@@ -37,7 +37,7 @@ func (p *Player) CheckEvasion() bool {
 }
 
 func (p *Player) TakeTreasure(t *Treasure) {
-	p.Backpack.Treasures += t.Value
+	p.Backpack.AddTreasure(t)
 }
 
 func (p *Player) TakeItem(i ItemLike) error {
@@ -48,18 +48,14 @@ func (p *Player) DropItem(i ItemLike) error {
 	return p.Backpack.RemoveItem(i, p.Character.Shape)
 }
 
-func (p *Player) UseItem(i ItemLike) (string, error) {
-	w, ok := i.(*Weapon)
-	if ok {
-		return w.Use(p), nil
-	}
-
+func (p *Player) UseItem(i ItemLike) error {
 	err := p.Backpack.RemoveItem(i, p.Character.Shape)
 	if err == nil {
-		return i.Use(p), nil
+		i.Use(p)
+		return nil
 	}
 
-	return "", ItemIsNotInBackpackError{}
+	return err
 }
 
 func NewPlayer(box Box) *Player {

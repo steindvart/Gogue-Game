@@ -12,7 +12,7 @@ const (
 type ItemLike interface {
 	Taken()
 	Dropped(box Box)
-	Use(p *Player) string
+	Use(p *Player)
 }
 
 type Item struct {
@@ -30,7 +30,7 @@ func (i *Item) Taken() {
 
 func (i *Item) Dropped(box Box) {
 	i.Shape = box
-}
+}	
 
 func (a *Attributes) GetAffectedAttributeName() string {
 	if a.MaxHealth == 1 && a.Agility == 0 && a.Strength == 0 {

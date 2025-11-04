@@ -550,7 +550,6 @@ func TestPlayer_UseItem(t *testing.T) {
 				Backpack:       NewBackpack(),
 				Weapon:         &weapon,
 			},
-			wantString: "You picked up the Awkward Weapon, now all your attacks have 10 extra damage",
 			wantError:  nil,
 		},
 	}
@@ -564,16 +563,12 @@ func TestPlayer_UseItem(t *testing.T) {
 				_ = p.Backpack.AddItem(tt.items[idx])
 			}
 
-			gotString, gotErr := p.UseItem(tt.item)
+			gotErr := p.UseItem(tt.item)
 
 			time.Sleep(1 * time.Millisecond)
 
 			if !errors.Is(gotErr, tt.wantError) {
 				t.Errorf("UseItem(): error got %#v, want %#v", gotErr, tt.wantError)
-			}
-
-			if gotString != tt.wantString {
-				t.Errorf("UseItem(): string got %#v, want %#v", gotString, tt.wantString)
 			}
 
 			if !reflect.DeepEqual(*p, tt.wantPlayer) {

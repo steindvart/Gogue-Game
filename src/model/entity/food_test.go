@@ -115,7 +115,6 @@ func TestFood_Use(t *testing.T) {
 	tests := []struct {
 		name string
 		food *Food
-		want string
 	}{
 		{
 			name: "use food",
@@ -126,21 +125,16 @@ func TestFood_Use(t *testing.T) {
 				},
 				HealthRegeneration: 5,
 			},
-			want: "You ate the Awkward Food, your Health has increased by 5",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			player := NewPlayer(Box{})
-			line := tt.food.Use(player)
+			tt.food.Use(player)
 
 			if player.Character.Health == float64(AttributeRateAverage) {
 				t.Errorf("Use(): got %#v, want %#v", player.Character.MaxHealth, float64(AttributeRateAverage)+float64(tt.food.HealthRegeneration))
-			}
-
-			if !(line == tt.want) {
-				t.Errorf("Use() = (%v), want (%v)", line, tt.want)
 			}
 		})
 	}

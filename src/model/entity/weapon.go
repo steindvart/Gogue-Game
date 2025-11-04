@@ -1,9 +1,5 @@
 package entity
 
-import (
-	"fmt"
-)
-
 type Weapon struct {
 	Item   Item
 	Damage uint
@@ -39,16 +35,10 @@ func (w *Weapon) Dropped(box Box) {
 	w.Item.Dropped(box)
 }
 
-func (w *Weapon) Use(p *Player) string {
+func (w *Weapon) Use(p *Player) {
 	if p.Weapon != nil {
 		currentWeapon := p.Weapon
 		currentWeapon.Dropped(p.Character.Shape)
 	}
 	p.Weapon = w
-
-	return fmt.Sprintf(
-		"You picked up the %v, now all your attacks have %v extra damage",
-		w.Item.Name,
-		w.Damage,
-	)
 }

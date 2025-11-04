@@ -1,9 +1,5 @@
 package entity
 
-import (
-	"fmt"
-)
-
 type Food struct {
 	Item               Item
 	HealthRegeneration uint
@@ -39,12 +35,6 @@ func (f *Food) Dropped(box Box) {
 	f.Item.Dropped(box)
 }
 
-func (f *Food) Use(p *Player) string {
+func (f *Food) Use(p *Player) {
 	p.Character.Health += float64(f.HealthRegeneration)
-
-	return fmt.Sprintf(
-		"You ate the %v, your Health has increased by %v",
-		f.Item.Name,
-		f.HealthRegeneration,
-	)
 }

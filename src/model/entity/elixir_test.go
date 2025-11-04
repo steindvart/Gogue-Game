@@ -146,7 +146,6 @@ func TestElixir_Use(t *testing.T) {
 	tests := []struct {
 		name   string
 		elixir *Elixir
-		want   string
 	}{
 		{
 			name: "use elixir",
@@ -159,14 +158,13 @@ func TestElixir_Use(t *testing.T) {
 				Increment:         5,
 				EffectDuration:    20 * time.Millisecond,
 			},
-			want: "You drank the Awkward Elixir, your MaxHealth has increased by 5",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			player := NewPlayer(Box{})
-			line := tt.elixir.Use(player)
+			tt.elixir.Use(player)
 
 			time.Sleep(2 * time.Millisecond)
 
@@ -178,10 +176,6 @@ func TestElixir_Use(t *testing.T) {
 
 			if player.Character.MaxHealth != float64(AttributeRateAverage) {
 				t.Errorf("Use(): got %#v, want %#v", player.Character.MaxHealth, float64(AttributeRateAverage))
-			}
-
-			if !(line == tt.want) {
-				t.Errorf("Use() = (%v), want (%v)", line, tt.want)
 			}
 		})
 	}

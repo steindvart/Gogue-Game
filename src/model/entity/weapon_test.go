@@ -115,7 +115,6 @@ func TestWeapon_Use(t *testing.T) {
 	tests := []struct {
 		name    string
 		weapons []*Weapon
-		want    string
 	}{
 		{
 			name: "use weapon",
@@ -135,7 +134,6 @@ func TestWeapon_Use(t *testing.T) {
 					Damage: 5,
 				},
 			},
-			want: "You picked up the Awkward Weapon 2, now all your attacks have 5 extra damage",
 		},
 		{
 			name: "use first weapon",
@@ -148,7 +146,6 @@ func TestWeapon_Use(t *testing.T) {
 					Damage: 5,
 				},
 			},
-			want: "You picked up the Awkward Weapon, now all your attacks have 5 extra damage",
 		},
 	}
 
@@ -167,7 +164,7 @@ func TestWeapon_Use(t *testing.T) {
 					t.Errorf("Use(): Shape got %#v, got %#v", currentWeapon.Item.Shape, player.Character.Shape)
 				}
 
-				line := tt.weapons[1].Use(player)
+				tt.weapons[1].Use(player)
 
 				if !(currentWeapon.Item.Shape == player.Character.Shape) {
 					t.Errorf("Use(): Shape got %#v, got %#v", currentWeapon.Item.Shape, player.Character.Shape)
@@ -176,19 +173,11 @@ func TestWeapon_Use(t *testing.T) {
 				if !(player.Weapon == tt.weapons[1]) {
 					t.Errorf("Use(): Weapon got %#v, got %#v", player.Weapon, tt.weapons[1])
 				}
-
-				if !(line == tt.want) {
-					t.Errorf("Use() = (%v), want (%v)", line, tt.want)
-				}
 			} else {
-				line := tt.weapons[0].Use(player)
+				tt.weapons[0].Use(player)
 
 				if !(player.Weapon == tt.weapons[0]) {
 					t.Errorf("Use(): Weapon got %#v, want %#v", player.Weapon, tt.weapons[0])
-				}
-
-				if !(line == tt.want) {
-					t.Errorf("Use() = (%v), want (%v)", line, tt.want)
 				}
 			}
 		})

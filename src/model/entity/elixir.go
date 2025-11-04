@@ -1,7 +1,6 @@
 package entity
 
 import (
-	"fmt"
 	"math/rand"
 	"time"
 )
@@ -50,7 +49,7 @@ func (e *Elixir) Dropped(box Box) {
 	e.Item.Dropped(box)
 }
 
-func (e *Elixir) Use(p *Player) string {
+func (e *Elixir) Use(p *Player) {
 	go func() {
 		defer func() {
 			p.Character.MaxHealth -= float64(e.Increment)
@@ -70,13 +69,6 @@ func (e *Elixir) Use(p *Player) string {
 
 		time.Sleep(e.EffectDuration)
 	}()
-
-	return fmt.Sprintf(
-		"You drank the %v, your %v has increased by %v",
-		e.Item.Name,
-		e.AffectedAttribute.GetAffectedAttributeName(),
-		e.Increment,
-	)
 }
 
 func getRandomElixirDuration() time.Duration {

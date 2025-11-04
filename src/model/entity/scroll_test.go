@@ -138,7 +138,6 @@ func TestScroll_Use(t *testing.T) {
 	tests := []struct {
 		name   string
 		scroll *Scroll
-		want   string
 	}{
 		{
 			name: "use scroll",
@@ -150,21 +149,16 @@ func TestScroll_Use(t *testing.T) {
 				AffectedAttribute: Attributes{MaxHealth: 1, Agility: 0, Strength: 0},
 				Increment:         5,
 			},
-			want: "You read the Awkward Scroll, your MaxHealth has increased by 5",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			player := NewPlayer(Box{})
-			line := tt.scroll.Use(player)
+			tt.scroll.Use(player)
 
 			if player.Character.MaxHealth == float64(AttributeRateAverage) {
 				t.Errorf("Use(): got %#v, want %#v", player.Character.MaxHealth, float64(AttributeRateAverage)+float64(tt.scroll.Increment))
-			}
-
-			if !(line == tt.want) {
-				t.Errorf("Use() = (%v), want (%v)", line, tt.want)
 			}
 		})
 	}

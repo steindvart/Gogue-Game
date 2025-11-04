@@ -1,9 +1,5 @@
 package entity
 
-import (
-	"fmt"
-)
-
 type Scroll struct {
 	Item              Item
 	AffectedAttribute Attributes
@@ -41,7 +37,7 @@ func (s *Scroll) Dropped(box Box) {
 	s.Item.Dropped(box)
 }
 
-func (s *Scroll) Use(p *Player) string {
+func (s *Scroll) Use(p *Player) {
 	if s.AffectedAttribute.MaxHealth == 1 {
 		p.Character.MaxHealth += float64(s.Increment)
 	}
@@ -51,11 +47,4 @@ func (s *Scroll) Use(p *Player) string {
 	if s.AffectedAttribute.Strength == 1 {
 		p.Character.Strength += s.Increment
 	}
-
-	return fmt.Sprintf(
-		"You read the %v, your %v has increased by %v",
-		s.Item.Name,
-		s.AffectedAttribute.GetAffectedAttributeName(),
-		s.Increment,
-	)
 }
