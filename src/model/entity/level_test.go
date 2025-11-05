@@ -201,32 +201,32 @@ func TestLevel_AddRandomEdges(t *testing.T) {
 			name:            "Add zero extra edges",
 			sourceEdges:     [][2]int{{0, 1}},
 			extraEdgesCount: 0,
-			wantEdgeCount:   1 + 0,
+			wantEdgeCount:   1 + 1,
 		},
 		{
 
 			name:            "Add positive extra edges",
 			sourceEdges:     [][2]int{},
-			extraEdgesCount: 3,
-			wantEdgeCount:   3,
+			extraEdgesCount: 2,
+			wantEdgeCount:   2,
 		},
 		{
 			name:            "Add more extra edges than possible",
 			sourceEdges:     [][2]int{},
 			extraEdgesCount: 20,
-			wantEdgeCount:   4,
+			wantEdgeCount:   2,
 		},
 		{
 			name:            "Add extra edges when some connections already exist",
 			sourceEdges:     [][2]int{{0, 1}, {1, 2}},
 			extraEdgesCount: 3,
-			wantEdgeCount:   2 + 3,
+			wantEdgeCount:   2 + 2,
 		},
 		{
 			name:            "Add negative extra edges",
 			sourceEdges:     [][2]int{{0, 1}, {1, 2}, {2, 3}},
 			extraEdgesCount: -5,
-			wantEdgeCount:   3 + 0,
+			wantEdgeCount:   3 + 1,
 		},
 	}
 
@@ -240,12 +240,12 @@ func TestLevel_AddRandomEdges(t *testing.T) {
 
 			resultMap := make(map[[2]int]bool)
 			for _, edge := range result {
-				min, max := sortByOrderAsc(edge[0], edge[1])
-				resultMap[[2]int{min, max}] = true
+				minIdx, maxIdx := sortByOrderAsc(edge[0], edge[1])
+				resultMap[[2]int{minIdx, maxIdx}] = true
 			}
 			for _, originalEdge := range tt.sourceEdges {
-				min, max := sortByOrderAsc(originalEdge[0], originalEdge[1])
-				originalKey := [2]int{min, max}
+				minIdx, maxIdx := sortByOrderAsc(originalEdge[0], originalEdge[1])
+				originalKey := [2]int{minIdx, maxIdx}
 				if !resultMap[originalKey] {
 					t.Errorf("Original edge %v (key %v) is missing from the result", originalEdge, originalKey)
 				}

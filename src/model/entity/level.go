@@ -2,17 +2,20 @@ package entity
 
 import (
 	"errors"
+	"fmt"
 	"math"
 	"math/rand"
 )
 
 const (
-	RoomMinWidth     = 3
-	RoomMinHeight    = 3
-	RoomMaxWidth     = 200
-	RoomMaxHeight    = 150
-	MinRoomPadding   = 1
-	numberXYSections = 3
+	RoomMinWidth         = 3
+	RoomMinHeight        = 3
+	RoomMaxWidth         = 200
+	RoomMaxHeight        = 150
+	MinRoomPadding       = 1
+	MaxExtraPassageCount = 2
+	numberXYSections     = 3
+	roomsCount           = 9
 )
 
 type Level struct {
@@ -58,7 +61,6 @@ func (l *Level) GenerateNineRooms(sizeMap Size2D[uint]) error {
 		return err
 	}
 
-	const roomsCount = 9
 	l.Rooms = make([]Room, roomsCount)
 	// rand.Perm(9) возвращает массив перемешанных чисел от 0 до 8, чтобы далее не было повторений index для Start и Finish
 	indexes := rand.Perm(roomsCount)
@@ -129,9 +131,10 @@ func calculateRoomSectionSize(sizeMap Size2D[uint]) (Size2D[uint], error) {
 	availableWidth := sizeMap.Width - totalPaddingWidth
 	availableHeight := sizeMap.Height - totalPaddingHeight
 
-	var sectionSize Size2D[uint]
-	sectionSize.Width = availableWidth / numberXYSections
-	sectionSize.Height = availableHeight / numberXYSections
+	sectionSize := Size2D[uint]{
+		Width:  availableWidth / numberXYSections,
+		Height: availableHeight / numberXYSections,
+	}
 
 	if sectionSize.Width < RoomMinWidth || sectionSize.Height < RoomMinHeight {
 		return Size2D[uint]{}, errors.New("game map size is too small")
@@ -141,13 +144,13 @@ func calculateRoomSectionSize(sizeMap Size2D[uint]) (Size2D[uint], error) {
 }
 
 func (l *Level) GeneratePassages() error {
-	roomIndex := rand.Intn(9)
+	roomIndex := rand.Intn(roomsCount)
 	treeEdges, err := generateSpanningTree(roomIndex)
 	if err != nil {
 		return err
 	}
 
-	extraEdgesCount := rand.Intn(3) + 1
+	extraEdgesCount := rand.Intn(MaxExtraPassageCount) + 1
 	treeEdges = addRandomEdges(treeEdges, extraEdgesCount)
 
 	for _, connectedRooms := range treeEdges {
@@ -177,8 +180,8 @@ func (l *Level) GeneratePassages() error {
 }
 
 func generateSpanningTree(startRoom int) ([][2]int, error) {
-	if startRoom < 0 || startRoom > 9 {
-		return nil, errors.New("start room must be between 0 and 9")
+	if startRoom < 0 || startRoom > roomsCount {
+		return nil, errors.New(fmt.Sprintf("start room must be between 0 and %d", roomsCount))
 	}
 
 	edges := make([][2]int, 0)
@@ -214,11 +217,12 @@ func generateSpanningTree(startRoom int) ([][2]int, error) {
 }
 
 func addRandomEdges(sourceEdges [][2]int, extraEdgesCount int) [][2]int {
-	if extraEdgesCount > 4 {
-		extraEdgesCount = 4
+	const minExtraPassageCount = 1
+	if extraEdgesCount < minExtraPassageCount {
+		extraEdgesCount = minExtraPassageCount
 	}
-	if extraEdgesCount < 0 {
-		extraEdgesCount = 0
+	if extraEdgesCount > MaxExtraPassageCount {
+		extraEdgesCount = MaxExtraPassageCount
 	}
 
 	existingConnections := make(map[[2]int]struct{})
@@ -246,7 +250,7 @@ func addRandomEdges(sourceEdges [][2]int, extraEdgesCount int) [][2]int {
 		}
 	}
 
-	potentialEdges := make([][2]int, len(resultSet))
+	potentialEdges := make([][2]int, 0)
 	for k := range resultSet {
 		potentialEdges = append(potentialEdges, k)
 	}
