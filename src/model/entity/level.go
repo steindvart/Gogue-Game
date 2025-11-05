@@ -181,7 +181,7 @@ func (l *Level) GeneratePassages() error {
 
 func generateSpanningTree(startRoom int) ([][2]int, error) {
 	if startRoom < 0 || startRoom > roomsCount {
-		return nil, errors.New(fmt.Sprintf("start room must be between 0 and %d", roomsCount))
+		return nil, fmt.Errorf("start room must be between 0 and %d", roomsCount)
 	}
 
 	edges := make([][2]int, 0)
