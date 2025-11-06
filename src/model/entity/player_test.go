@@ -312,13 +312,41 @@ func TestPlayer_TakeItem(t *testing.T) {
 		want         []error
 	}{
 		{
-			name:  "take elixir",
-			items: []ItemLike{&elixir},
+			name: "take elixir",
+			items: []ItemLike{
+				&Elixir{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Elixir",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 1,
+						Agility:   0,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+			},
 			wantBackpack: Backpack{
 				Capacity: BackpackDefaultCapacity,
 				ItemsNum: 1,
 				Elixirs: map[string][]Elixir{
-					"Awkward Elixir": {elixir},
+					"Awkward Elixir": {
+						Elixir{
+							Item: Item{
+								Shape: Box{},
+								Name:  "Awkward Elixir",
+							},
+							EffectDuration: time.Minute,
+							AffectedAttribute: Attributes{
+								MaxHealth: 1,
+								Agility:   0,
+								Strength:  0,
+							},
+							Increment: 10,
+						},
+					},
 				},
 				Scrolls:   map[string][]Scroll{},
 				Foods:     map[string][]Food{},
@@ -328,13 +356,249 @@ func TestPlayer_TakeItem(t *testing.T) {
 			want: []error{nil},
 		},
 		{
-			name:  "take nine elixirs",
-			items: []ItemLike{&elixir, &elixir, &elixir, &elixir, &elixir, &elixir, &elixir, &elixir, &elixir},
+			name: "take nine elixirs",
+			items: []ItemLike{
+				&Elixir{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Elixir",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 1,
+						Agility:   0,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+				&Elixir{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Elixir",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 1,
+						Agility:   0,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+				&Elixir{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Elixir",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 1,
+						Agility:   0,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+				&Elixir{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Elixir",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 1,
+						Agility:   0,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+				&Elixir{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Elixir",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 1,
+						Agility:   0,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+				&Elixir{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Elixir",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 1,
+						Agility:   0,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+				&Elixir{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Elixir",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 1,
+						Agility:   0,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+				&Elixir{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Elixir",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 1,
+						Agility:   0,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+				&Elixir{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Elixir",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 1,
+						Agility:   0,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+			},
 			wantBackpack: Backpack{
 				Capacity: BackpackDefaultCapacity,
 				ItemsNum: 9,
 				Elixirs: map[string][]Elixir{
-					"Awkward Elixir": {elixir, elixir, elixir, elixir, elixir, elixir, elixir, elixir, elixir},
+					"Awkward Elixir": {
+						Elixir{
+							Item: Item{
+								Shape: Box{},
+								Name:  "Awkward Elixir",
+							},
+							EffectDuration: time.Minute,
+							AffectedAttribute: Attributes{
+								MaxHealth: 1,
+								Agility:   0,
+								Strength:  0,
+							},
+							Increment: 10,
+						},
+						Elixir{
+							Item: Item{
+								Shape: Box{},
+								Name:  "Awkward Elixir",
+							},
+							EffectDuration: time.Minute,
+							AffectedAttribute: Attributes{
+								MaxHealth: 1,
+								Agility:   0,
+								Strength:  0,
+							},
+							Increment: 10,
+						},
+						Elixir{
+							Item: Item{
+								Shape: Box{},
+								Name:  "Awkward Elixir",
+							},
+							EffectDuration: time.Minute,
+							AffectedAttribute: Attributes{
+								MaxHealth: 1,
+								Agility:   0,
+								Strength:  0,
+							},
+							Increment: 10,
+						},
+						Elixir{
+							Item: Item{
+								Shape: Box{},
+								Name:  "Awkward Elixir",
+							},
+							EffectDuration: time.Minute,
+							AffectedAttribute: Attributes{
+								MaxHealth: 1,
+								Agility:   0,
+								Strength:  0,
+							},
+							Increment: 10,
+						},
+						Elixir{
+							Item: Item{
+								Shape: Box{},
+								Name:  "Awkward Elixir",
+							},
+							EffectDuration: time.Minute,
+							AffectedAttribute: Attributes{
+								MaxHealth: 1,
+								Agility:   0,
+								Strength:  0,
+							},
+							Increment: 10,
+						},
+						Elixir{
+							Item: Item{
+								Shape: Box{},
+								Name:  "Awkward Elixir",
+							},
+							EffectDuration: time.Minute,
+							AffectedAttribute: Attributes{
+								MaxHealth: 1,
+								Agility:   0,
+								Strength:  0,
+							},
+							Increment: 10,
+						},
+						Elixir{
+							Item: Item{
+								Shape: Box{},
+								Name:  "Awkward Elixir",
+							},
+							EffectDuration: time.Minute,
+							AffectedAttribute: Attributes{
+								MaxHealth: 1,
+								Agility:   0,
+								Strength:  0,
+							},
+							Increment: 10,
+						},
+						Elixir{
+							Item: Item{
+								Shape: Box{},
+								Name:  "Awkward Elixir",
+							},
+							EffectDuration: time.Minute,
+							AffectedAttribute: Attributes{
+								MaxHealth: 1,
+								Agility:   0,
+								Strength:  0,
+							},
+							Increment: 10,
+						},
+						Elixir{
+							Item: Item{
+								Shape: Box{},
+								Name:  "Awkward Elixir",
+							},
+							EffectDuration: time.Minute,
+							AffectedAttribute: Attributes{
+								MaxHealth: 1,
+								Agility:   0,
+								Strength:  0,
+							},
+							Increment: 10,
+						},
+					},
 				},
 				Scrolls:   map[string][]Scroll{},
 				Foods:     map[string][]Food{},
@@ -344,13 +608,262 @@ func TestPlayer_TakeItem(t *testing.T) {
 			want: []error{nil, nil, nil, nil, nil, nil, nil, nil, nil},
 		},
 		{
-			name:  "take ten elixirs",
-			items: []ItemLike{&elixir, &elixir, &elixir, &elixir, &elixir, &elixir, &elixir, &elixir, &elixir, &elixir},
+			name: "take ten elixirs",
+			items: []ItemLike{
+				&Elixir{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Elixir",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 1,
+						Agility:   0,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+				&Elixir{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Elixir",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 1,
+						Agility:   0,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+				&Elixir{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Elixir",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 1,
+						Agility:   0,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+				&Elixir{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Elixir",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 1,
+						Agility:   0,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+				&Elixir{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Elixir",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 1,
+						Agility:   0,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+				&Elixir{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Elixir",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 1,
+						Agility:   0,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+				&Elixir{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Elixir",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 1,
+						Agility:   0,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+				&Elixir{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Elixir",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 1,
+						Agility:   0,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+				&Elixir{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Elixir",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 1,
+						Agility:   0,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+				&Elixir{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Elixir",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 1,
+						Agility:   0,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+			},
 			wantBackpack: Backpack{
 				Capacity: BackpackDefaultCapacity,
 				ItemsNum: 9,
 				Elixirs: map[string][]Elixir{
-					"Awkward Elixir": {elixir, elixir, elixir, elixir, elixir, elixir, elixir, elixir, elixir},
+					"Awkward Elixir": {
+						Elixir{
+							Item: Item{
+								Shape: Box{},
+								Name:  "Awkward Elixir",
+							},
+							EffectDuration: time.Minute,
+							AffectedAttribute: Attributes{
+								MaxHealth: 1,
+								Agility:   0,
+								Strength:  0,
+							},
+							Increment: 10,
+						},
+						Elixir{
+							Item: Item{
+								Shape: Box{},
+								Name:  "Awkward Elixir",
+							},
+							EffectDuration: time.Minute,
+							AffectedAttribute: Attributes{
+								MaxHealth: 1,
+								Agility:   0,
+								Strength:  0,
+							},
+							Increment: 10,
+						},
+						Elixir{
+							Item: Item{
+								Shape: Box{},
+								Name:  "Awkward Elixir",
+							},
+							EffectDuration: time.Minute,
+							AffectedAttribute: Attributes{
+								MaxHealth: 1,
+								Agility:   0,
+								Strength:  0,
+							},
+							Increment: 10,
+						},
+						Elixir{
+							Item: Item{
+								Shape: Box{},
+								Name:  "Awkward Elixir",
+							},
+							EffectDuration: time.Minute,
+							AffectedAttribute: Attributes{
+								MaxHealth: 1,
+								Agility:   0,
+								Strength:  0,
+							},
+							Increment: 10,
+						},
+						Elixir{
+							Item: Item{
+								Shape: Box{},
+								Name:  "Awkward Elixir",
+							},
+							EffectDuration: time.Minute,
+							AffectedAttribute: Attributes{
+								MaxHealth: 1,
+								Agility:   0,
+								Strength:  0,
+							},
+							Increment: 10,
+						},
+						Elixir{
+							Item: Item{
+								Shape: Box{},
+								Name:  "Awkward Elixir",
+							},
+							EffectDuration: time.Minute,
+							AffectedAttribute: Attributes{
+								MaxHealth: 1,
+								Agility:   0,
+								Strength:  0,
+							},
+							Increment: 10,
+						},
+						Elixir{
+							Item: Item{
+								Shape: Box{},
+								Name:  "Awkward Elixir",
+							},
+							EffectDuration: time.Minute,
+							AffectedAttribute: Attributes{
+								MaxHealth: 1,
+								Agility:   0,
+								Strength:  0,
+							},
+							Increment: 10,
+						},
+						Elixir{
+							Item: Item{
+								Shape: Box{},
+								Name:  "Awkward Elixir",
+							},
+							EffectDuration: time.Minute,
+							AffectedAttribute: Attributes{
+								MaxHealth: 1,
+								Agility:   0,
+								Strength:  0,
+							},
+							Increment: 10,
+						},
+						Elixir{
+							Item: Item{
+								Shape: Box{},
+								Name:  "Awkward Elixir",
+							},
+							EffectDuration: time.Minute,
+							AffectedAttribute: Attributes{
+								MaxHealth: 1,
+								Agility:   0,
+								Strength:  0,
+							},
+							Increment: 10,
+						},
+					},
 				},
 				Scrolls:   map[string][]Scroll{},
 				Foods:     map[string][]Food{},
@@ -392,7 +905,19 @@ func TestPlayer_DropItem(t *testing.T) {
 		{
 			name:  "drop elixir from empty backpack",
 			items: []ItemLike{},
-			item:  &elixir,
+			item: &Elixir{
+				Item: Item{
+					Shape: Box{},
+					Name:  "Awkward Elixir",
+				},
+				EffectDuration: time.Minute,
+				AffectedAttribute: Attributes{
+					MaxHealth: 1,
+					Agility:   0,
+					Strength:  0,
+				},
+				Increment: 10,
+			},
 			wantBackpack: Backpack{
 				Capacity:  BackpackDefaultCapacity,
 				ItemsNum:  0,
@@ -405,14 +930,93 @@ func TestPlayer_DropItem(t *testing.T) {
 			want: ItemIsNotInBackpackError{},
 		},
 		{
-			name:  "drop elixir",
-			items: []ItemLike{&elixir, &elixir, &elixir},
-			item:  &elixir,
+			name: "drop elixir",
+			items: []ItemLike{
+				&Elixir{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Elixir",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 1,
+						Agility:   0,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+				&Elixir{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Elixir",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 1,
+						Agility:   0,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+				&Elixir{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Elixir",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 1,
+						Agility:   0,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+			},
+			item: &Elixir{
+				Item: Item{
+					Shape: Box{},
+					Name:  "Awkward Elixir",
+				},
+				EffectDuration: time.Minute,
+				AffectedAttribute: Attributes{
+					MaxHealth: 1,
+					Agility:   0,
+					Strength:  0,
+				},
+				Increment: 10,
+			},
 			wantBackpack: Backpack{
 				Capacity: BackpackDefaultCapacity,
 				ItemsNum: 2,
 				Elixirs: map[string][]Elixir{
-					"Awkward Elixir": {elixir, elixir},
+					"Awkward Elixir": {
+						Elixir{
+							Item: Item{
+								Shape: Box{},
+								Name:  "Awkward Elixir",
+							},
+							EffectDuration: time.Minute,
+							AffectedAttribute: Attributes{
+								MaxHealth: 1,
+								Agility:   0,
+								Strength:  0,
+							},
+							Increment: 10,
+						},
+						Elixir{
+							Item: Item{
+								Shape: Box{},
+								Name:  "Awkward Elixir",
+							},
+							EffectDuration: time.Minute,
+							AffectedAttribute: Attributes{
+								MaxHealth: 1,
+								Agility:   0,
+								Strength:  0,
+							},
+							Increment: 10,
+						},
+					},
 				},
 				Scrolls:   map[string][]Scroll{},
 				Foods:     map[string][]Food{},
@@ -450,13 +1054,24 @@ func TestPlayer_UseItem(t *testing.T) {
 		items      []ItemLike
 		item       ItemLike
 		wantPlayer Player
-		wantString string
 		wantError  error
 	}{
 		{
 			name:  "use elixir, which is not in backpack",
 			items: []ItemLike{},
-			item:  &elixir,
+			item: &Elixir{
+				Item: Item{
+					Shape: Box{},
+					Name:  "Awkward Elixir",
+				},
+				EffectDuration: time.Minute,
+				AffectedAttribute: Attributes{
+					MaxHealth: 1,
+					Agility:   0,
+					Strength:  0,
+				},
+				Increment: 10,
+			},
 			wantPlayer: Player{
 				Character: Character{
 					Shape:     Box{},
@@ -470,13 +1085,38 @@ func TestPlayer_UseItem(t *testing.T) {
 				Backpack:       NewBackpack(),
 				Weapon:         nil,
 			},
-			wantString: "",
-			wantError:  ItemIsNotInBackpackError{},
+			wantError: ItemIsNotInBackpackError{},
 		},
 		{
-			name:  "use elixir",
-			items: []ItemLike{&elixir},
-			item:  &elixir,
+			name: "use elixir",
+			items: []ItemLike{
+				&Elixir{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Elixir",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 1,
+						Agility:   0,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+			},
+			item: &Elixir{
+				Item: Item{
+					Shape: Box{},
+					Name:  "Awkward Elixir",
+				},
+				EffectDuration: time.Minute,
+				AffectedAttribute: Attributes{
+					MaxHealth: 1,
+					Agility:   0,
+					Strength:  0,
+				},
+				Increment: 10,
+			},
 			wantPlayer: Player{
 				Character: Character{
 					Shape:     Box{},
@@ -490,13 +1130,36 @@ func TestPlayer_UseItem(t *testing.T) {
 				Backpack:       NewBackpack(),
 				Weapon:         nil,
 			},
-			wantString: "You drank the Awkward Elixir, your MaxHealth has increased by 10",
-			wantError:  nil,
+			wantError: nil,
 		},
 		{
-			name:  "use scroll",
-			items: []ItemLike{&scroll},
-			item:  &scroll,
+			name: "use scroll",
+			items: []ItemLike{
+				&Scroll{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Scroll",
+					},
+					AffectedAttribute: Attributes{
+						MaxHealth: 0,
+						Agility:   1,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+			},
+			item: &Scroll{
+				Item: Item{
+					Shape: Box{},
+					Name:  "Awkward Scroll",
+				},
+				AffectedAttribute: Attributes{
+					MaxHealth: 0,
+					Agility:   1,
+					Strength:  0,
+				},
+				Increment: 10,
+			},
 			wantPlayer: Player{
 				Character: Character{
 					Shape:     Box{},
@@ -510,13 +1173,26 @@ func TestPlayer_UseItem(t *testing.T) {
 				Backpack:       NewBackpack(),
 				Weapon:         nil,
 			},
-			wantString: "You read the Awkward Scroll, your Agility has increased by 10",
-			wantError:  nil,
+			wantError: nil,
 		},
 		{
-			name:  "use food",
-			items: []ItemLike{&food},
-			item:  &food,
+			name: "use food",
+			items: []ItemLike{
+				&Food{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Food",
+					},
+					HealthRegeneration: 15,
+				},
+			},
+			item: &Food{
+				Item: Item{
+					Shape: Box{},
+					Name:  "Awkward Food",
+				},
+				HealthRegeneration: 15,
+			},
 			wantPlayer: Player{
 				Character: Character{
 					Shape:     Box{},
@@ -530,13 +1206,26 @@ func TestPlayer_UseItem(t *testing.T) {
 				Backpack:       NewBackpack(),
 				Weapon:         nil,
 			},
-			wantString: "You ate the Awkward Food, your Health has increased by 15",
-			wantError:  nil,
+			wantError: nil,
 		},
 		{
-			name:  "use weapon",
-			items: []ItemLike{&weapon},
-			item:  &weapon,
+			name: "use weapon",
+			items: []ItemLike{
+				&Weapon{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Weapon",
+					},
+					Damage: 10,
+				},
+			},
+			item: &Weapon{
+				Item: Item{
+					Shape: Box{},
+					Name:  "Awkward Weapon",
+				},
+				Damage: 10,
+			},
 			wantPlayer: Player{
 				Character: Character{
 					Shape:     Box{},
@@ -548,16 +1237,21 @@ func TestPlayer_UseItem(t *testing.T) {
 				Experience:     0,
 				CharacterLevel: 1,
 				Backpack:       NewBackpack(),
-				Weapon:         &weapon,
+				Weapon: &Weapon{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Weapon",
+					},
+					Damage: 10,
+				},
 			},
-			wantError:  nil,
+			wantError: nil,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := NewPlayer(Box{})
-			p.Backpack = tt.wantPlayer.Backpack
 
 			for idx := range tt.items {
 				_ = p.Backpack.AddItem(tt.items[idx])
@@ -566,6 +1260,308 @@ func TestPlayer_UseItem(t *testing.T) {
 			gotErr := p.UseItem(tt.item)
 
 			time.Sleep(1 * time.Millisecond)
+
+			if !errors.Is(gotErr, tt.wantError) {
+				t.Errorf("UseItem(): error got %#v, want %#v", gotErr, tt.wantError)
+			}
+
+			if !reflect.DeepEqual(*p, tt.wantPlayer) {
+				t.Errorf("UseItem(): Player got %#v, want %#v", *p, tt.wantPlayer)
+			}
+		})
+	}
+}
+
+func TestPlayer_GetItemsListAndUseItem(t *testing.T) {
+	tests := []struct {
+		name       string
+		items      []ItemLike
+		wantPlayer Player
+		wantError  error
+	}{
+		{
+			name: "get and use elixir",
+			items: []ItemLike{
+				&Elixir{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Elixir",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 1,
+						Agility:   0,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+			},
+			wantPlayer: Player{
+				Character: Character{
+					Shape:     Box{},
+					Health:    float64(AttributeRateAverage),
+					MaxHealth: float64(AttributeRateAverage) + float64(10),
+					Strength:  uint(AttributeRateAverage),
+					Agility:   uint(AttributeRateAverage),
+				},
+				Experience:     0,
+				CharacterLevel: 1,
+				Backpack:       NewBackpack(),
+				Weapon:         nil,
+			},
+			wantError: nil,
+		},
+		{
+			name: "get and use scroll",
+			items: []ItemLike{
+				&Scroll{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Scroll",
+					},
+					AffectedAttribute: Attributes{
+						MaxHealth: 0,
+						Agility:   1,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+			},
+			wantPlayer: Player{
+				Character: Character{
+					Shape:     Box{},
+					Health:    float64(AttributeRateAverage),
+					MaxHealth: float64(AttributeRateAverage),
+					Strength:  uint(AttributeRateAverage),
+					Agility:   uint(AttributeRateAverage) + 10,
+				},
+				Experience:     0,
+				CharacterLevel: 1,
+				Backpack:       NewBackpack(),
+				Weapon:         nil,
+			},
+			wantError: nil,
+		},
+		{
+			name: "get and use food",
+			items: []ItemLike{
+				&Food{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Food",
+					},
+					HealthRegeneration: 15,
+				},
+			},
+			wantPlayer: Player{
+				Character: Character{
+					Shape:     Box{},
+					Health:    float64(AttributeRateAverage) + float64(15),
+					MaxHealth: float64(AttributeRateAverage),
+					Strength:  uint(AttributeRateAverage),
+					Agility:   uint(AttributeRateAverage),
+				},
+				Experience:     0,
+				CharacterLevel: 1,
+				Backpack:       NewBackpack(),
+				Weapon:         nil,
+			},
+			wantError: nil,
+		},
+		{
+			name: "get and use weapon",
+			items: []ItemLike{
+				&Weapon{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Weapon",
+					},
+					Damage: 10,
+				},
+			},
+			wantPlayer: Player{
+				Character: Character{
+					Shape:     Box{},
+					Health:    float64(AttributeRateAverage),
+					MaxHealth: float64(AttributeRateAverage),
+					Strength:  uint(AttributeRateAverage),
+					Agility:   uint(AttributeRateAverage),
+				},
+				Experience:     0,
+				CharacterLevel: 1,
+				Backpack:       NewBackpack(),
+				Weapon: &Weapon{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Weapon",
+					},
+					Damage: 10,
+				},
+			},
+			wantError: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := NewPlayer(Box{})
+
+			for idx := range tt.items {
+				_ = p.Backpack.AddItem(tt.items[idx])
+			}
+
+			l := p.Backpack.GetItemsList()
+
+			gotErr := p.UseItem(l[0].Item)
+
+			time.Sleep(1 * time.Millisecond)
+
+			if !errors.Is(gotErr, tt.wantError) {
+				t.Errorf("UseItem(): error got %#v, want %#v", gotErr, tt.wantError)
+			}
+
+			if !reflect.DeepEqual(*p, tt.wantPlayer) {
+				t.Errorf("UseItem(): Player got %#v, want %#v", *p, tt.wantPlayer)
+			}
+		})
+	}
+}
+
+func TestPlayer_GetItemsListAndDropItem(t *testing.T) {
+	tests := []struct {
+		name       string
+		items      []ItemLike
+		wantPlayer Player
+		wantError  error
+	}{
+		{
+			name: "get and drop elixir",
+			items: []ItemLike{
+				&Elixir{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Elixir",
+					},
+					EffectDuration: time.Minute,
+					AffectedAttribute: Attributes{
+						MaxHealth: 1,
+						Agility:   0,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+			},
+			wantPlayer: Player{
+				Character: Character{
+					Shape:     Box{},
+					Health:    float64(AttributeRateAverage),
+					MaxHealth: float64(AttributeRateAverage),
+					Strength:  uint(AttributeRateAverage),
+					Agility:   uint(AttributeRateAverage),
+				},
+				Experience:     0,
+				CharacterLevel: 1,
+				Backpack:       NewBackpack(),
+				Weapon:         nil,
+			},
+			wantError: nil,
+		},
+		{
+			name: "get and drop scroll",
+			items: []ItemLike{
+				&Scroll{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Scroll",
+					},
+					AffectedAttribute: Attributes{
+						MaxHealth: 0,
+						Agility:   1,
+						Strength:  0,
+					},
+					Increment: 10,
+				},
+			},
+			wantPlayer: Player{
+				Character: Character{
+					Shape:     Box{},
+					Health:    float64(AttributeRateAverage),
+					MaxHealth: float64(AttributeRateAverage),
+					Strength:  uint(AttributeRateAverage),
+					Agility:   uint(AttributeRateAverage),
+				},
+				Experience:     0,
+				CharacterLevel: 1,
+				Backpack:       NewBackpack(),
+				Weapon:         nil,
+			},
+			wantError: nil,
+		},
+		{
+			name: "get and drop food",
+			items: []ItemLike{
+				&Food{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Food",
+					},
+					HealthRegeneration: 15,
+				},
+			},
+			wantPlayer: Player{
+				Character: Character{
+					Shape:     Box{},
+					Health:    float64(AttributeRateAverage),
+					MaxHealth: float64(AttributeRateAverage),
+					Strength:  uint(AttributeRateAverage),
+					Agility:   uint(AttributeRateAverage),
+				},
+				Experience:     0,
+				CharacterLevel: 1,
+				Backpack:       NewBackpack(),
+				Weapon:         nil,
+			},
+			wantError: nil,
+		},
+		{
+			name: "get and drop weapon",
+			items: []ItemLike{
+				&Weapon{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Weapon",
+					},
+					Damage: 10,
+				},
+			},
+			wantPlayer: Player{
+				Character: Character{
+					Shape:     Box{},
+					Health:    float64(AttributeRateAverage),
+					MaxHealth: float64(AttributeRateAverage),
+					Strength:  uint(AttributeRateAverage),
+					Agility:   uint(AttributeRateAverage),
+				},
+				Experience:     0,
+				CharacterLevel: 1,
+				Backpack:       NewBackpack(),
+				Weapon:         nil,
+			},
+			wantError: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := NewPlayer(Box{})
+
+			for idx := range tt.items {
+				_ = p.Backpack.AddItem(tt.items[idx])
+			}
+
+			l := p.Backpack.GetItemsList()
+
+			gotErr := p.DropItem(l[0].Item)
 
 			if !errors.Is(gotErr, tt.wantError) {
 				t.Errorf("UseItem(): error got %#v, want %#v", gotErr, tt.wantError)

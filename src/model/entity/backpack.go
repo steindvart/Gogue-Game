@@ -1,5 +1,9 @@
 package entity
 
+import (
+	"sort"
+)
+
 const (
 	BackpackDefaultCapacity uint = 9
 )
@@ -26,11 +30,13 @@ type Backpack struct {
 	Treasures uint
 }
 
-type listElement struct {
+type Element struct {
 	Name string
 	Num  int
 	Item ItemLike
 }
+
+type ElementsList []Element
 
 func (b *Backpack) AddTreasure(t *Treasure) {
 	b.Treasures += t.Value
@@ -155,8 +161,8 @@ func IsWeapon(i ItemLike) *Weapon {
 	return nil
 }
 
-func (b *Backpack) GetItemsList() []listElement {
-	list := []listElement{}
+func (b *Backpack) GetItemsList() ElementsList {
+	list := ElementsList{}
 
 	list = append(list, b.GetElixirsList()...)
 	list = append(list, b.GetScrollsList()...)
@@ -166,44 +172,58 @@ func (b *Backpack) GetItemsList() []listElement {
 	return list
 }
 
-func (b *Backpack) GetElixirsList() []listElement {
-	list := []listElement{}
+func (b *Backpack) GetElixirsList() ElementsList {
+	list := ElementsList{}
 
 	for key := range b.Elixirs {
-		list = append(list, listElement{Name: key, Num: len(b.Elixirs[key]), Item: &b.Elixirs[key][0]})
+		list = append(list, Element{Name: key, Num: len(b.Elixirs[key]), Item: &b.Elixirs[key][0]})
 	}
+
+	list.Sort()
 
 	return list
 }
 
-func (b *Backpack) GetScrollsList() []listElement {
-	list := []listElement{}
+func (b *Backpack) GetScrollsList() ElementsList {
+	list := ElementsList{}
 
 	for key := range b.Scrolls {
-		list = append(list, listElement{Name: key, Num: len(b.Scrolls[key]), Item: &b.Scrolls[key][0]})
+		list = append(list, Element{Name: key, Num: len(b.Scrolls[key]), Item: &b.Scrolls[key][0]})
 	}
+
+	list.Sort()
 
 	return list
 }
 
-func (b *Backpack) GetFoodsList() []listElement {
-	list := []listElement{}
+func (b *Backpack) GetFoodsList() ElementsList {
+	list := ElementsList{}
 
 	for key := range b.Foods {
-		list = append(list, listElement{Name: key, Num: len(b.Foods[key]), Item: &b.Foods[key][0]})
+		list = append(list, Element{Name: key, Num: len(b.Foods[key]), Item: &b.Foods[key][0]})
 	}
+
+	list.Sort()
 
 	return list
 }
 
-func (b *Backpack) GetWeaponsList() []listElement {
-	list := []listElement{}
+func (b *Backpack) GetWeaponsList() ElementsList {
+	list := ElementsList{}
 
 	for key := range b.Weapons {
-		list = append(list, listElement{Name: key, Num: len(b.Weapons[key]), Item: &b.Weapons[key][0]})
+		list = append(list, Element{Name: key, Num: len(b.Weapons[key]), Item: &b.Weapons[key][0]})
 	}
 
+	list.Sort()
+
 	return list
+}
+
+func (l *ElementsList) Sort() {
+	sort.Slice(*l, func(i int, j int) bool {
+		return (*l)[i].Name < (*l)[j].Name
+	})
 }
 
 func NewBackpack() *Backpack {
