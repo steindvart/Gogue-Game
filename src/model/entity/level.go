@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"math/rand"
+	"sort"
 )
 
 const (
@@ -17,13 +17,6 @@ const (
 	numberXYSections     = 3
 	roomsCount           = 9
 )
-
-type Level struct {
-	Rooms    []Room
-	Passages []Passage
-	Number   uint
-	End      Box
-}
 
 var gridNeighborsRooms = [][]int{
 	{1, 3},
@@ -55,6 +48,26 @@ var verticalNeighborRoomsSet = map[[2]int]struct{}{
 	{5, 8}: {},
 }
 
+type RandomSource interface {
+	Intn(n int) int
+	Perm(n int) []int
+	Shuffle(n int, swap func(i, j int))
+}
+
+type Level struct {
+	Rooms    []Room
+	Passages []Passage
+	Number   uint
+	End      Box
+	random   RandomSource
+}
+
+func NewLevel(random RandomSource) *Level {
+	return &Level{
+		random: random,
+	}
+}
+
 func (l *Level) GenerateNineRooms(sizeMap Size2D[uint]) error {
 	sectionSize, err := calculateRoomSectionSize(sizeMap)
 	if err != nil {
@@ -63,7 +76,7 @@ func (l *Level) GenerateNineRooms(sizeMap Size2D[uint]) error {
 
 	l.Rooms = make([]Room, roomsCount)
 	// rand.Perm(9) возвращает массив перемешанных чисел от 0 до 8, чтобы далее не было повторений index для Start и Finish
-	indexes := rand.Perm(roomsCount)
+	indexes := l.random.Perm(roomsCount)
 	startRoomIndex := indexes[0]
 	finishRoomIndex := indexes[1]
 	for y := 0; y < numberXYSections; y++ {
@@ -91,18 +104,18 @@ func (l *Level) GenerateNineRooms(sizeMap Size2D[uint]) error {
 				return errors.New("available space in section is smaller than minimum room size")
 			}
 
-			width := rand.Intn(maxRoomWidth-RoomMinWidth+1) + RoomMinWidth
-			height := rand.Intn(maxRoomHeight-RoomMinHeight+1) + RoomMinHeight
+			width := l.random.Intn(maxRoomWidth-RoomMinWidth+1) + RoomMinWidth
+			height := l.random.Intn(maxRoomHeight-RoomMinHeight+1) + RoomMinHeight
 
-			xCell := cellXStart + rand.Intn(maxRoomWidth-width+1)
-			yCell := cellYStart + rand.Intn(maxRoomHeight-height+1)
+			xCell := cellXStart + l.random.Intn(maxRoomWidth-width+1)
+			yCell := cellYStart + l.random.Intn(maxRoomHeight-height+1)
 
 			if roomType == RoomTypeFinish {
 				roomWall := 1
 				l.End = Box{
 					Point: Point2D[int]{
-						X: xCell + roomWall + rand.Intn(width-(roomWall*2)),
-						Y: yCell + roomWall + rand.Intn(height-(roomWall*2)),
+						X: xCell + roomWall + l.random.Intn(width-(roomWall*2)),
+						Y: yCell + roomWall + l.random.Intn(height-(roomWall*2)),
 					},
 					Size: Size2D[uint]{Height: 1, Width: 1},
 				}
@@ -144,42 +157,44 @@ func calculateRoomSectionSize(sizeMap Size2D[uint]) (Size2D[uint], error) {
 }
 
 func (l *Level) GeneratePassages() error {
-	roomIndex := rand.Intn(roomsCount)
-	treeEdges, err := generateSpanningTree(roomIndex)
+	if len(l.Rooms) < 9 {
+		return fmt.Errorf("number of rooms is less than expected. expected %d, got %d", roomsCount, len(l.Rooms))
+	}
+	roomIndex := l.random.Intn(roomsCount)
+	treeEdges, err := generateSpanningTree(roomIndex, l.random)
 	if err != nil {
 		return err
 	}
 
-	extraEdgesCount := rand.Intn(MaxExtraPassageCount) + 1
-	treeEdges = addRandomEdges(treeEdges, extraEdgesCount)
+	extraEdgesCount := l.random.Intn(MaxExtraPassageCount) + 1
+	treeEdges = addRandomEdges(treeEdges, extraEdgesCount, l.random)
 
 	for _, connectedRooms := range treeEdges {
 		minIndex, maxIndex := sortByOrderAsc(connectedRooms[0], connectedRooms[1])
 		key := [2]int{minIndex, maxIndex}
 		if _, exists := horizontalNeighborRoomsSet[key]; exists {
-			doorOne := getDoorRightWall(l.Rooms[minIndex])
-			doorTwo := getDoorLeftWall(l.Rooms[maxIndex])
-			passage, err := NewPassageOnX(doorOne, doorTwo)
+			doorOne := getDoorRightWall(l.Rooms[minIndex], l.random)
+			doorTwo := getDoorLeftWall(l.Rooms[maxIndex], l.random)
+			passage, err := NewPassageOnX(doorOne, doorTwo, l.random)
 			if err != nil {
 				return err
 			}
 			l.Passages = append(l.Passages, *passage)
 		}
 		if _, exists := verticalNeighborRoomsSet[key]; exists {
-			doorOne := getDoorDownWall(l.Rooms[minIndex])
-			doorTwo := getDoorTopWall(l.Rooms[maxIndex])
-			passage, err := NewPassageOnY(doorOne, doorTwo)
+			doorOne := getDoorDownWall(l.Rooms[minIndex], l.random)
+			doorTwo := getDoorTopWall(l.Rooms[maxIndex], l.random)
+			passage, err := NewPassageOnY(doorOne, doorTwo, l.random)
 			if err != nil {
 				return err
 			}
 			l.Passages = append(l.Passages, *passage)
 		}
 	}
-
 	return nil
 }
 
-func generateSpanningTree(startRoom int) ([][2]int, error) {
+func generateSpanningTree(startRoom int, random RandomSource) ([][2]int, error) {
 	if startRoom < 0 || startRoom > roomsCount {
 		return nil, fmt.Errorf("start room must be between 0 and %d", roomsCount)
 	}
@@ -201,7 +216,7 @@ func generateSpanningTree(startRoom int) ([][2]int, error) {
 			}
 		}
 		// rand.Shuffle перемешивает значения в существующем слайсе unvisitNeighborsRooms
-		rand.Shuffle(len(unvisitNeighborsRooms), func(i, j int) {
+		random.Shuffle(len(unvisitNeighborsRooms), func(i, j int) {
 			unvisitNeighborsRooms[i], unvisitNeighborsRooms[j] = unvisitNeighborsRooms[j], unvisitNeighborsRooms[i]
 		})
 
@@ -216,7 +231,7 @@ func generateSpanningTree(startRoom int) ([][2]int, error) {
 	return edges, nil
 }
 
-func addRandomEdges(sourceEdges [][2]int, extraEdgesCount int) [][2]int {
+func addRandomEdges(sourceEdges [][2]int, extraEdgesCount int, random RandomSource) [][2]int {
 	const minExtraPassageCount = 1
 	if extraEdgesCount < minExtraPassageCount {
 		extraEdgesCount = minExtraPassageCount
@@ -255,7 +270,18 @@ func addRandomEdges(sourceEdges [][2]int, extraEdgesCount int) [][2]int {
 		potentialEdges = append(potentialEdges, k)
 	}
 
-	rand.Shuffle(len(potentialEdges), func(i, j int) {
+	sort.Slice(potentialEdges, func(i, j int) bool {
+		if potentialEdges[i][0] != potentialEdges[j][0] {
+			return potentialEdges[i][0] < potentialEdges[j][0]
+		}
+		return potentialEdges[i][1] < potentialEdges[j][1]
+	})
+
+	random.Shuffle(len(potentialEdges), func(i, j int) {
+		potentialEdges[i], potentialEdges[j] = potentialEdges[j], potentialEdges[i]
+	})
+
+	random.Shuffle(len(potentialEdges), func(i, j int) {
 		potentialEdges[i], potentialEdges[j] = potentialEdges[j], potentialEdges[i]
 	})
 
@@ -276,30 +302,30 @@ func sortByOrderAsc(first, second int) (int, int) {
 	return minIndex, maxIndex
 }
 
-func getDoorLeftWall(room Room) Point2D[int] {
+func getDoorLeftWall(room Room, random RandomSource) Point2D[int] {
 	const wall = 1
 	doorYFrom := room.Shape.Point.Y + wall
 	doorYTo := room.Shape.Point.Y + int(room.Shape.Size.Height) - wall
-	return Point2D[int]{X: room.Shape.Point.X, Y: rand.Intn(doorYTo-doorYFrom) + doorYFrom}
+	return Point2D[int]{X: room.Shape.Point.X, Y: random.Intn(doorYTo-doorYFrom) + doorYFrom}
 }
 
-func getDoorRightWall(room Room) Point2D[int] {
+func getDoorRightWall(room Room, random RandomSource) Point2D[int] {
 	const wall = 1
 	doorYFrom := room.Shape.Point.Y + wall
 	doorYTo := room.Shape.Point.Y + int(room.Shape.Size.Height) - wall
-	return Point2D[int]{X: room.Shape.Point.X + int(room.Shape.Size.Width), Y: rand.Intn(doorYTo-doorYFrom) + doorYFrom}
+	return Point2D[int]{X: room.Shape.Point.X + int(room.Shape.Size.Width), Y: random.Intn(doorYTo-doorYFrom) + doorYFrom}
 }
 
-func getDoorTopWall(room Room) Point2D[int] {
+func getDoorTopWall(room Room, random RandomSource) Point2D[int] {
 	const wall = 1
 	doorXFrom := room.Shape.Point.X + wall
 	doorXTo := room.Shape.Point.X + int(room.Shape.Size.Width) - wall
-	return Point2D[int]{X: rand.Intn(doorXTo-doorXFrom) + doorXFrom, Y: room.Shape.Point.Y}
+	return Point2D[int]{X: random.Intn(doorXTo-doorXFrom) + doorXFrom, Y: room.Shape.Point.Y}
 }
 
-func getDoorDownWall(room Room) Point2D[int] {
+func getDoorDownWall(room Room, random RandomSource) Point2D[int] {
 	const wall = 1
 	doorXFrom := room.Shape.Point.X + wall
 	doorXTo := room.Shape.Point.X + int(room.Shape.Size.Width)
-	return Point2D[int]{X: rand.Intn(doorXTo-doorXFrom) + doorXFrom, Y: room.Shape.Point.Y + int(room.Shape.Size.Height)}
+	return Point2D[int]{X: random.Intn(doorXTo-doorXFrom) + doorXFrom, Y: room.Shape.Point.Y + int(room.Shape.Size.Height)}
 }

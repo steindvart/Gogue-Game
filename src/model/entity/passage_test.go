@@ -1,7 +1,7 @@
-// entity_test.go
 package entity
 
 import (
+	"math/rand"
 	"strings"
 	"testing"
 )
@@ -42,15 +42,15 @@ func TestPassage_NewPassageOnX(t *testing.T) {
 	}
 
 	for _, tt := range cases {
+		source := rand.New(rand.NewSource(42))
 		t.Run(tt.name, func(t *testing.T) {
-			passage, err := NewPassageOnX(tt.doorOne, tt.doorTwo)
+			passage, err := NewPassageOnX(tt.doorOne, tt.doorTwo, source)
 
 			if !tt.wantErr {
 				if passage == nil {
 					t.Errorf("Expected a valid Passage, got nil")
 				}
 
-				// Проверка, что каждая точка соединена с предыдущей с шагом 1
 				for i := 1; i < len(passage.Passage); i++ {
 					current := passage.Passage[i]
 					previous := passage.Passage[i-1]
@@ -114,15 +114,15 @@ func TestPassage_NewPassageOnY(t *testing.T) {
 	}
 
 	for _, tt := range cases {
+		source := rand.New(rand.NewSource(42))
 		t.Run(tt.name, func(t *testing.T) {
-			passage, err := NewPassageOnY(tt.doorOne, tt.doorTwo)
+			passage, err := NewPassageOnY(tt.doorOne, tt.doorTwo, source)
 
 			if !tt.wantErr {
 				if passage == nil {
 					t.Errorf("Expected a valid Passage, got nil")
 				}
 
-				// Проверка, что каждая точка соединена с предыдущей с шагом 1
 				for i := 1; i < len(passage.Passage); i++ {
 					current := passage.Passage[i]
 					previous := passage.Passage[i-1]

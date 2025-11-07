@@ -1,18 +1,19 @@
 package state
 
 import (
+	"github.com/gdamore/tcell/v2"
+	"github.com/rivo/tview"
 	"gogue/model/entity"
 	"gogue/model/signal"
 	"gogue/presentation/action"
+	"math/rand"
+	"time"
 	"unicode"
-
-	"github.com/gdamore/tcell/v2"
-	"github.com/rivo/tview"
 )
 
 type Game struct {
 	player entity.Player
-	level  entity.Level
+	level  *entity.Level
 	view   *tview.Box
 	signal signal.Type
 }
@@ -36,8 +37,8 @@ func NewGame() (*Game, error) {
 	// @todo - выделить отрисовку в отдельный файл в view/cli
 	box := tview.NewBox().SetBorder(true).SetTitle("Game")
 
-	level := entity.Level{}
-	// @todo - обработать ошибку
+	source := rand.New(rand.NewSource(time.Now().UnixNano()))
+	level := entity.NewLevel(source)
 	err := level.GenerateNineRooms(entity.Size2D[uint]{Height: 30, Width: 90})
 	if err != nil {
 		return nil, err
@@ -195,7 +196,7 @@ func (g *Game) makeField(w, h int) [][]int {
 }
 
 // Тут можно класть только lvl, так как room я получаю из него же шагом выше, а могу и тут
-func (g *Game) drawRoom(room entity.Room, level entity.Level, field [][]int) {
+func (g *Game) drawRoom(room entity.Room, level *entity.Level, field [][]int) {
 	for column := room.Shape.Point.X; column < room.Shape.Point.X+int(room.Shape.Size.Width); column++ {
 		field[room.Shape.Point.Y][column] = 2
 		field[room.Shape.Point.Y+int(room.Shape.Size.Height)][column] = 2

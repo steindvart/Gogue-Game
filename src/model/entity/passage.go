@@ -2,7 +2,6 @@ package entity
 
 import (
 	"errors"
-	"math/rand"
 )
 
 type Passage struct {
@@ -11,7 +10,7 @@ type Passage struct {
 	DoorTwo Point2D[int]
 }
 
-func NewPassageOnX(doorOne Point2D[int], doorTwo Point2D[int]) (*Passage, error) {
+func NewPassageOnX(doorOne Point2D[int], doorTwo Point2D[int], random RandomSource) (*Passage, error) {
 	// если будут введены координаты дверей справа налево, а не слева направо, я их переставляю будто слева направо
 	if doorOne.X == doorTwo.X {
 		return nil, errors.New("NewPassageOnX: doors cannot be positioned on the same x axis")
@@ -26,7 +25,7 @@ func NewPassageOnX(doorOne Point2D[int], doorTwo Point2D[int]) (*Passage, error)
 	var passage []Point2D[int]
 	passage = append(passage, Point2D[int]{X: doorOne.X + 1, Y: doorOne.Y})
 
-	pontKinkOnX := rand.Intn(doorTwo.X-doorOne.X-1) + doorOne.X
+	pontKinkOnX := random.Intn(doorTwo.X-doorOne.X-1) + doorOne.X
 	lastElement := passage[len(passage)-1]
 	for x := lastElement.X; x < pontKinkOnX; x++ {
 		lastElement = passage[len(passage)-1]
@@ -55,7 +54,7 @@ func NewPassageOnX(doorOne Point2D[int], doorTwo Point2D[int]) (*Passage, error)
 	return &Passage{DoorOne: doorOne, Passage: passage, DoorTwo: doorTwo}, nil
 }
 
-func NewPassageOnY(doorOne Point2D[int], doorTwo Point2D[int]) (*Passage, error) {
+func NewPassageOnY(doorOne Point2D[int], doorTwo Point2D[int], random RandomSource) (*Passage, error) {
 	if doorOne.Y == doorTwo.Y {
 		return nil, errors.New("NewPassageOnY: doors cannot be positioned on the same y axis")
 	}
@@ -69,7 +68,7 @@ func NewPassageOnY(doorOne Point2D[int], doorTwo Point2D[int]) (*Passage, error)
 	var passage []Point2D[int]
 	passage = append(passage, Point2D[int]{X: doorOne.X, Y: doorOne.Y + 1})
 
-	pointKinkOnY := rand.Intn(doorTwo.Y-doorOne.Y-1) + doorOne.Y
+	pointKinkOnY := random.Intn(doorTwo.Y-doorOne.Y-1) + doorOne.Y
 	lastElement := passage[len(passage)-1]
 	for y := lastElement.Y; y < pointKinkOnY; y++ {
 		lastElement = passage[len(passage)-1]

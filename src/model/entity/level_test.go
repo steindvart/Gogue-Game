@@ -2,11 +2,13 @@ package entity
 
 import (
 	"errors"
+	"math/rand"
 	"strings"
 	"testing"
 )
 
 func TestLevel_GenerateNineRooms(t *testing.T) {
+	source := rand.New(rand.NewSource(42))
 	tests := []struct {
 		name      string
 		sizeMap   Size2D[uint]
@@ -34,7 +36,7 @@ func TestLevel_GenerateNineRooms(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			level := &Level{}
+			level := NewLevel(source)
 
 			err := level.GenerateNineRooms(tt.sizeMap)
 
@@ -143,6 +145,7 @@ func TestLevel_CalculateRoomSectionSize(t *testing.T) {
 }
 
 func TestLevel_GenerateSpanningTree_Errors(t *testing.T) {
+	source := rand.New(rand.NewSource(42))
 	type testCase struct {
 		name      string
 		startRoom int
@@ -174,7 +177,7 @@ func TestLevel_GenerateSpanningTree_Errors(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := generateSpanningTree(tt.startRoom)
+			_, err := generateSpanningTree(tt.startRoom, source)
 
 			if tt.wantErr != nil {
 				if err == nil {
@@ -190,6 +193,7 @@ func TestLevel_GenerateSpanningTree_Errors(t *testing.T) {
 }
 
 func TestLevel_AddRandomEdges(t *testing.T) {
+	source := rand.New(rand.NewSource(42))
 	type testCase struct {
 		name            string
 		sourceEdges     [][2]int
@@ -232,7 +236,7 @@ func TestLevel_AddRandomEdges(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := addRandomEdges(tt.sourceEdges, tt.extraEdgesCount)
+			result := addRandomEdges(tt.sourceEdges, tt.extraEdgesCount, source)
 
 			if len(result) != tt.wantEdgeCount {
 				t.Errorf("Expected %d edges, got %d. Input sourceEdges: %v, extraEdgesCount: %d", tt.wantEdgeCount, len(result), tt.sourceEdges, tt.extraEdgesCount)
