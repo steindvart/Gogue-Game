@@ -12,7 +12,7 @@ jobs:
     container:
       image: golang:1.22
       env:
-        GOFLAGS: "-buildvcs=false"
+        GOFLAGS: "-buildvcs=false" # fix issue with golangci-lint and vcs
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
