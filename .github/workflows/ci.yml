@@ -20,6 +20,7 @@ jobs:
         uses: golangci/golangci-lint-action@v6
         with:
           version: v1.60
+          working-directory: src
 
   analyze:
     runs-on: ubuntu-latest
@@ -37,6 +38,7 @@ jobs:
           ignore_pattern: '_test|_mock|mock_|.pb.go|proto'
           over: '20'
           top: '10'
+          working-directory: src
 
       - name: Post Results
         uses: marocchino/sticky-pull-request-comment@v2
