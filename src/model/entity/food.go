@@ -1,7 +1,40 @@
 package entity
 
 type Food struct {
-	Shape              Box
+	Item               Item
 	HealthRegeneration uint
-	Name               string
+}
+
+func NewFood(box Box) *Food {
+	foodNames := []string{
+		"Ration of the Ironclad",
+		"Crimson Berry Cluster",
+		"Loaf of the Forgotten Baker",
+		"Smoked Wyrm Jerky",
+		"Golden Apple of Vitality",
+		"Hardtack of the Endless March",
+		"Spiced Venison Strips",
+		"Honeyed Nectar Bread",
+		"Dried Mushrooms of the Deep",
+	}
+
+	return &Food{
+		Item: Item{
+			Shape: box,
+			Name:  getAttributeRandomName(foodNames),
+		},
+		HealthRegeneration: getAttributeRandomPercentIncrease(),
+	}
+}
+
+func (f *Food) Take() {
+	f.Item.Take()
+}
+
+func (f *Food) Drop(box Box) {
+	f.Item.Drop(box)
+}
+
+func (f *Food) Use(p *Player) {
+	p.Character.Health += float64(f.HealthRegeneration)
 }
