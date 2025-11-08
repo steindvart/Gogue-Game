@@ -179,7 +179,7 @@ func (g *Game) makeField(w, h int) [][]int {
 	}
 
 	for _, room := range g.level.Rooms {
-		g.drawRoom(room, g.level, field)
+		g.drawRoom(room, g.level.FinishPortal, field)
 	}
 
 	for _, passages := range g.level.Passages {
@@ -196,7 +196,7 @@ func (g *Game) makeField(w, h int) [][]int {
 }
 
 // Тут можно класть только lvl, так как room я получаю из него же шагом выше, а могу и тут
-func (g *Game) drawRoom(room entity.Room, level *entity.Level, field [][]int) {
+func (g *Game) drawRoom(room entity.Room, finishPortal entity.Box, field [][]int) {
 	for column := room.Shape.Point.X; column < room.Shape.Point.X+int(room.Shape.Size.Width); column++ {
 		field[room.Shape.Point.Y][column] = 2
 		field[room.Shape.Point.Y+int(room.Shape.Size.Height)][column] = 2
@@ -207,7 +207,7 @@ func (g *Game) drawRoom(room entity.Room, level *entity.Level, field [][]int) {
 		field[row][room.Shape.Point.X+int(room.Shape.Size.Width)] = 3
 	}
 
-	field[level.End.Point.Y][level.End.Point.X] = 4
+	field[finishPortal.Point.Y][finishPortal.Point.X] = 4
 }
 
 func (g *Game) drawPassage(passage entity.Passage, field [][]int) {

@@ -55,11 +55,11 @@ type RandomSource interface {
 }
 
 type Level struct {
-	Rooms    []Room
-	Passages []Passage
-	Number   uint
-	End      Box
-	random   RandomSource
+	Rooms        []Room
+	Passages     []Passage
+	Number       uint
+	FinishPortal Box
+	random       RandomSource
 }
 
 func NewLevel(random RandomSource) *Level {
@@ -112,7 +112,7 @@ func (l *Level) GenerateNineRooms(sizeMap Size2D[uint]) error {
 
 			if roomType == RoomTypeFinish {
 				roomWall := 1
-				l.End = Box{
+				l.FinishPortal = Box{
 					Point: Point2D[int]{
 						X: xCell + roomWall + l.random.Intn(width-(roomWall*2)),
 						Y: yCell + roomWall + l.random.Intn(height-(roomWall*2)),

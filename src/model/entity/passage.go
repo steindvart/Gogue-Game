@@ -11,9 +11,8 @@ type Passage struct {
 }
 
 func NewPassageOnX(doorOne Point2D[int], doorTwo Point2D[int], random RandomSource) (*Passage, error) {
-	// если будут введены координаты дверей справа налево, а не слева направо, я их переставляю будто слева направо
 	if doorOne.X == doorTwo.X {
-		return nil, errors.New("NewPassageOnX: doors cannot be positioned on the same x axis")
+		return nil, errors.New("doors cannot be positioned on the same x axis")
 	}
 
 	if doorOne.X > doorTwo.X {
@@ -22,16 +21,21 @@ func NewPassageOnX(doorOne Point2D[int], doorTwo Point2D[int], random RandomSour
 		doorTwo = doorTemp
 	}
 
-	var passage []Point2D[int]
-	passage = append(passage, Point2D[int]{X: doorOne.X + 1, Y: doorOne.Y})
+	// прокладываю первый кубик(?) тоннеля от двери
+	passage := []Point2D[int]{
+		{X: doorOne.X + 1, Y: doorOne.Y},
+	}
 
-	pontKinkOnX := random.Intn(doorTwo.X-doorOne.X-1) + doorOne.X
+	// pointKinkOnX - рандомная точка, на которой тоннель свернёт
+	// иду по прямой до этой точки
+	pointKinkOnX := random.Intn(doorTwo.X-doorOne.X-1) + doorOne.X
 	lastElement := passage[len(passage)-1]
-	for x := lastElement.X; x < pontKinkOnX; x++ {
+	for x := lastElement.X; x < pointKinkOnX; x++ {
 		lastElement = passage[len(passage)-1]
 		passage = append(passage, Point2D[int]{X: lastElement.X + 1, Y: lastElement.Y})
 	}
 
+	// поднимаюсь или опускаюсь, пока не буду на одной линии с финишной дверью
 	lastElement = passage[len(passage)-1]
 	if doorOne.Y < doorTwo.Y {
 		for y := lastElement.Y; y < doorTwo.Y; y++ {
@@ -45,6 +49,7 @@ func NewPassageOnX(doorOne Point2D[int], doorTwo Point2D[int], random RandomSour
 		}
 	}
 
+	// иду по прямой до финишной двери
 	lastElement = passage[len(passage)-1]
 	for x := lastElement.X; x < doorTwo.X; x++ {
 		lastElement = passage[len(passage)-1]
@@ -56,7 +61,7 @@ func NewPassageOnX(doorOne Point2D[int], doorTwo Point2D[int], random RandomSour
 
 func NewPassageOnY(doorOne Point2D[int], doorTwo Point2D[int], random RandomSource) (*Passage, error) {
 	if doorOne.Y == doorTwo.Y {
-		return nil, errors.New("NewPassageOnY: doors cannot be positioned on the same y axis")
+		return nil, errors.New("doors cannot be positioned on the same y axis")
 	}
 
 	if doorOne.Y > doorTwo.Y {
@@ -65,9 +70,13 @@ func NewPassageOnY(doorOne Point2D[int], doorTwo Point2D[int], random RandomSour
 		doorTwo = doorTemp
 	}
 
-	var passage []Point2D[int]
-	passage = append(passage, Point2D[int]{X: doorOne.X, Y: doorOne.Y + 1})
+	// прокладываю первый кубик(?) тоннеля от двери
+	passage := []Point2D[int]{
+		{X: doorOne.X, Y: doorOne.Y + 1},
+	}
 
+	// pointKinkOnX - рандомная точка, на которой тоннель свернёт
+	// иду по прямой до этой точки
 	pointKinkOnY := random.Intn(doorTwo.Y-doorOne.Y-1) + doorOne.Y
 	lastElement := passage[len(passage)-1]
 	for y := lastElement.Y; y < pointKinkOnY; y++ {
@@ -75,6 +84,7 @@ func NewPassageOnY(doorOne Point2D[int], doorTwo Point2D[int], random RandomSour
 		passage = append(passage, Point2D[int]{X: lastElement.X, Y: lastElement.Y + 1})
 	}
 
+	// двигаюсь влево или вправо, пока не буду на одной линии с финишной дверью
 	lastElement = passage[len(passage)-1]
 	if doorOne.X < doorTwo.X {
 		for x := lastElement.X; x < doorTwo.X; x++ {
@@ -88,6 +98,7 @@ func NewPassageOnY(doorOne Point2D[int], doorTwo Point2D[int], random RandomSour
 		}
 	}
 
+	// иду по прямой до финишной двери
 	lastElement = passage[len(passage)-1]
 	for y := lastElement.Y; y < doorTwo.Y; y++ {
 		lastElement = passage[len(passage)-1]
