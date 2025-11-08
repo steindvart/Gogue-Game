@@ -156,10 +156,10 @@ func removeItemFromMap[V items.Type](key string, itemsMap map[string][]V) bool {
 // 	})
 // }
 
-func (b *Backpack) weaponIsInBackpack(w *items.Weapon) error {
-	if _, ok := b.Weapons[w.Item.Name]; !ok {
-		return ItemIsNotInBackpackError{}
-	}
+// func (b *Backpack) weaponIsInBackpack(w *items.Weapon) error {
+// 	if _, ok := b.Weapons[w.Item.Name]; !ok {
+// 		return ItemIsNotInBackpackError{}
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
