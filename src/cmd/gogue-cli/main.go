@@ -2,9 +2,8 @@ package main
 
 import (
 	"fmt"
-
-	"gogue/presentation/cli"
-	"gogue/presentation/cli/state"
+	"gogue/internal/presentation/cli"
+	"gogue/internal/presentation/cli/state"
 
 	"github.com/rivo/tview"
 )
