@@ -37,7 +37,7 @@ func TestPassage_NewPassageOnX(t *testing.T) {
 			doorOne:   Point2D[int]{X: 6, Y: 1},
 			doorTwo:   Point2D[int]{X: 6, Y: 5},
 			wantErr:   true,
-			errorText: "NewPassageOnX: doors cannot be positioned on the same x axis",
+			errorText: "doors cannot be positioned on the same x axis",
 		},
 	}
 
@@ -109,7 +109,7 @@ func TestPassage_NewPassageOnY(t *testing.T) {
 			doorOne:   Point2D[int]{X: 1, Y: 6},
 			doorTwo:   Point2D[int]{X: 5, Y: 6},
 			wantErr:   true,
-			errorText: "NewPassageOnY: doors cannot be positioned on the same y axis",
+			errorText: "doors cannot be positioned on the same y axis",
 		},
 	}
 
