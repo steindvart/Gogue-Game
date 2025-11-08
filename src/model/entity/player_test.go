@@ -1258,6 +1258,7 @@ func TestPlayer_UseWeapon(t *testing.T) {
 		currentWeaponIdx int
 		useWeaponIdx     int
 		wantPlayer       Player
+		wantErr          error
 	}{
 		{
 			name: "use first weapon with current weapon nil",
@@ -1299,6 +1300,7 @@ func TestPlayer_UseWeapon(t *testing.T) {
 				Backpack:       NewBackpack(),
 				Weapon:         nil,
 			},
+			wantErr: nil,
 		},
 		{
 			name: "use second weapon with current weapon nil",
@@ -1340,6 +1342,7 @@ func TestPlayer_UseWeapon(t *testing.T) {
 				Backpack:       NewBackpack(),
 				Weapon:         nil,
 			},
+			wantErr: nil,
 		},
 		{
 			name: "use first weapon with current weapon third",
@@ -1381,6 +1384,7 @@ func TestPlayer_UseWeapon(t *testing.T) {
 				Backpack:       NewBackpack(),
 				Weapon:         nil,
 			},
+			wantErr: nil,
 		},
 		{
 			name: "use second weapon with current weapon third",
@@ -1422,6 +1426,7 @@ func TestPlayer_UseWeapon(t *testing.T) {
 				Backpack:       NewBackpack(),
 				Weapon:         nil,
 			},
+			wantErr: nil,
 		},
 		{
 			name: "use third weapon with current weapon third",
@@ -1463,6 +1468,7 @@ func TestPlayer_UseWeapon(t *testing.T) {
 				Backpack:       NewBackpack(),
 				Weapon:         nil,
 			},
+			wantErr: nil,
 		},
 	}
 
@@ -1483,7 +1489,11 @@ func TestPlayer_UseWeapon(t *testing.T) {
 			}
 			tt.wantPlayer.Weapon = &tt.wantPlayer.Backpack.Weapons[tt.weapons[tt.useWeaponIdx].(*Weapon).Item.Name][0]
 
-			p.UseItem(&p.Backpack.Weapons[tt.weapons[tt.useWeaponIdx].(*Weapon).Item.Name][0])
+			gotErr := p.UseItem(&p.Backpack.Weapons[tt.weapons[tt.useWeaponIdx].(*Weapon).Item.Name][0])
+
+			if !errors.Is(gotErr, tt.wantErr) {
+				t.Errorf("UseItem(): error got %#v, want %#v", gotErr, tt.wantErr)
+			}
 
 			if !reflect.DeepEqual(*p, tt.wantPlayer) {
 				t.Errorf("UseItem(): Player got %#v, want %#v", *p, tt.wantPlayer)
