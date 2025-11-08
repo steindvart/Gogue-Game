@@ -44,14 +44,6 @@ jobs:
           top: '10'
           working-directory: src
 
-      - name: Post Results
-        uses: marocchino/sticky-pull-request-comment@v2
-        with:
-          recreate: true
-          header: gocyclo Report
-          message: |
-            ${{ env.gocyclo_report }}
-
   build:
     runs-on: ubuntu-latest
     container:
