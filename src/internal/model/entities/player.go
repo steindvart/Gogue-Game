@@ -2,7 +2,7 @@ package entities
 
 import (
 	"gogue/internal/model/items"
-	"gogue/internal/model/primitive"
+	"gogue/internal/model/primitives"
 )
 
 type Player struct {
@@ -17,7 +17,7 @@ func (p *Player) IsAlive() bool {
 	return p.Character.IsAlive()
 }
 
-func (p *Player) Move(delta primitive.Point2D[int]) {
+func (p *Player) Move(delta primitives.Point2D[int]) {
 	p.Character.Move(delta)
 }
 
@@ -77,11 +77,11 @@ func (p *Player) TakeItemToBackpack(item any) error {
 // 	return err
 // }
 
-func NewPlayer(box primitive.Box) *Player {
+func NewPlayer(box primitives.Box) *Player {
 	return &Player{
 		Character: Character{
 			Shape: box,
-			Attributes: primitive.Attributes{
+			Attributes: primitives.Attributes{
 				Health:    float64(AttributeRateAverage),
 				MaxHealth: float64(AttributeRateAverage),
 				Strength:  float64(AttributeRateAverage),

@@ -31,7 +31,7 @@ func NewMainMenu(options []string, active int) *MainMenu {
 	title := newTitle()
 	list := newList(options, active)
 
-	// Создаём пустой primitive.Box с тёмным фоном для выравнивания элементов
+	// Создаём пустой primitives.Box с тёмным фоном для выравнивания элементов
 	gapBox := tview.NewBox().SetBackgroundColor(tcell.ColorBlack)
 
 	barLength := len(titleArt[0]) + 35

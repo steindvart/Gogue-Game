@@ -1,4 +1,4 @@
-package primitive
+package primitives
 
 type Attributes struct {
 	MaxHealth, Health, Agility, Strength float64

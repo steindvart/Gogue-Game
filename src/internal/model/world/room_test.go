@@ -3,7 +3,7 @@ package world
 import (
 	"gogue/internal/model/entities"
 	"gogue/internal/model/items"
-	"gogue/internal/model/primitive"
+	"gogue/internal/model/primitives"
 	"reflect"
 	"testing"
 )
@@ -12,16 +12,16 @@ func TestNewRoom(t *testing.T) {
 	tests := []struct {
 		name     string
 		roomType RoomType
-		shape    primitive.Box
-		portal   *primitive.Box
+		shape    primitives.Box
+		portal   *primitives.Box
 		want     Room
 	}{
 		{
 			name:     "New finish room",
 			roomType: RoomTypeFinish,
-			shape:    primitive.Box{Point: primitive.Point2D[int]{X: 6, Y: 3}, Size: primitive.Size2D[uint]{Height: 10, Width: 10}},
+			shape:    primitives.Box{Point: primitives.Point2D[int]{X: 6, Y: 3}, Size: primitives.Size2D[uint]{Height: 10, Width: 10}},
 			want: Room{
-				Shape:   primitive.Box{Point: primitive.Point2D[int]{X: 6, Y: 3}, Size: primitive.Size2D[uint]{Height: 10, Width: 10}},
+				Shape:   primitives.Box{Point: primitives.Point2D[int]{X: 6, Y: 3}, Size: primitives.Size2D[uint]{Height: 10, Width: 10}},
 				Type:    RoomTypeFinish,
 				Foods:   []items.Food{},
 				Elixirs: []items.Elixir{},
@@ -33,9 +33,9 @@ func TestNewRoom(t *testing.T) {
 		{
 			name:     "New ordinary room",
 			roomType: RoomTypeOrdinary,
-			shape:    primitive.Box{Point: primitive.Point2D[int]{X: 6, Y: 3}, Size: primitive.Size2D[uint]{Height: 10, Width: 10}},
+			shape:    primitives.Box{Point: primitives.Point2D[int]{X: 6, Y: 3}, Size: primitives.Size2D[uint]{Height: 10, Width: 10}},
 			want: Room{
-				Shape:   primitive.Box{Point: primitive.Point2D[int]{X: 6, Y: 3}, Size: primitive.Size2D[uint]{Height: 10, Width: 10}},
+				Shape:   primitives.Box{Point: primitives.Point2D[int]{X: 6, Y: 3}, Size: primitives.Size2D[uint]{Height: 10, Width: 10}},
 				Type:    RoomTypeOrdinary,
 				Foods:   []items.Food{},
 				Elixirs: []items.Elixir{},
@@ -47,9 +47,9 @@ func TestNewRoom(t *testing.T) {
 		{
 			name:     "New start room",
 			roomType: RoomTypeStart,
-			shape:    primitive.Box{Point: primitive.Point2D[int]{X: 6, Y: 3}, Size: primitive.Size2D[uint]{Height: 10, Width: 10}},
+			shape:    primitives.Box{Point: primitives.Point2D[int]{X: 6, Y: 3}, Size: primitives.Size2D[uint]{Height: 10, Width: 10}},
 			want: Room{
-				Shape:   primitive.Box{Point: primitive.Point2D[int]{X: 6, Y: 3}, Size: primitive.Size2D[uint]{Height: 10, Width: 10}},
+				Shape:   primitives.Box{Point: primitives.Point2D[int]{X: 6, Y: 3}, Size: primitives.Size2D[uint]{Height: 10, Width: 10}},
 				Type:    RoomTypeStart,
 				Foods:   []items.Food{},
 				Elixirs: []items.Elixir{},

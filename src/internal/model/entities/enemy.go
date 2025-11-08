@@ -1,6 +1,6 @@
 package entities
 
-import "gogue/internal/model/primitive"
+import "gogue/internal/model/primitives"
 
 type EnemyType float64
 
@@ -74,12 +74,12 @@ type SnakeMage struct {
 	Enemy Enemy
 }
 
-func NewZombie(box primitive.Box) *Zombie {
+func NewZombie(box primitives.Box) *Zombie {
 	return &Zombie{
 		Enemy: Enemy{
 			Character: Character{
 				Shape: box,
-				Attributes: primitive.Attributes{
+				Attributes: primitives.Attributes{
 					Agility:   float64(AttributeRateLow),
 					Strength:  float64(AttributeRateAverage),
 					Health:    float64(AttributeRateHigh),
@@ -93,12 +93,12 @@ func NewZombie(box primitive.Box) *Zombie {
 	}
 }
 
-func NewVampire(box primitive.Box) *Vampire {
+func NewVampire(box primitives.Box) *Vampire {
 	return &Vampire{
 		Enemy: Enemy{
 			Character: Character{
 				Shape: box,
-				Attributes: primitive.Attributes{
+				Attributes: primitives.Attributes{
 					Agility:   float64(AttributeRateHigh),
 					Strength:  float64(AttributeRateAverage),
 					Health:    float64(AttributeRateHigh),
@@ -113,12 +113,12 @@ func NewVampire(box primitive.Box) *Vampire {
 	}
 }
 
-func NewGhost(box primitive.Box) *Ghost {
+func NewGhost(box primitives.Box) *Ghost {
 	return &Ghost{
 		Enemy: Enemy{
 			Character: Character{
 				Shape: box,
-				Attributes: primitive.Attributes{
+				Attributes: primitives.Attributes{
 					Agility:   float64(AttributeRateHigh),
 					Strength:  float64(AttributeRateLow),
 					Health:    float64(AttributeRateLow),
@@ -133,12 +133,12 @@ func NewGhost(box primitive.Box) *Ghost {
 	}
 }
 
-func NewOgre(box primitive.Box) *Ogre {
+func NewOgre(box primitives.Box) *Ogre {
 	return &Ogre{
 		Enemy: Enemy{
 			Character: Character{
 				Shape: box,
-				Attributes: primitive.Attributes{
+				Attributes: primitives.Attributes{
 					Agility:   float64(AttributeRateLow),
 					Strength:  float64(AttributeRateVeryHigh),
 					Health:    float64(AttributeRateVeryHigh),
@@ -153,12 +153,12 @@ func NewOgre(box primitive.Box) *Ogre {
 	}
 }
 
-func NewSnakeMage(box primitive.Box) *SnakeMage {
+func NewSnakeMage(box primitives.Box) *SnakeMage {
 	return &SnakeMage{
 		Enemy: Enemy{
 			Character: Character{
 				Shape: box,
-				Attributes: primitive.Attributes{
+				Attributes: primitives.Attributes{
 					Agility:   float64(AttributeRateVeryHigh),
 					Strength:  float64(AttributeRateAverage),
 					Health:    float64(AttributeRateHigh),

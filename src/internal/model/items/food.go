@@ -1,15 +1,13 @@
 package items
 
-import (
-	"gogue/internal/model/primitive"
-)
+import "gogue/internal/model/primitives"
 
 type Food struct {
 	Item               Item
 	HealthRegeneration float64
 }
 
-func NewFood(box primitive.Box) *Food {
+func NewFood(box primitives.Box) *Food {
 	foodNames := []string{
 		"Ration of the Ironclad",
 		"Crimson Berry Cluster",
@@ -35,12 +33,12 @@ func (f *Food) Take() {
 	f.Item.Take()
 }
 
-func (f *Food) Drop(box primitive.Box) {
+func (f *Food) Drop(box primitives.Box) {
 	f.Item.Drop(box)
 }
 
-func (e *Food) Use() primitive.Attributes {
-	return primitive.Attributes{
+func (e *Food) Use() primitives.Attributes {
+	return primitives.Attributes{
 		Health: float64(e.HealthRegeneration),
 	}
 }

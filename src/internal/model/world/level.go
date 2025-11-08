@@ -2,7 +2,7 @@ package world
 
 import (
 	"errors"
-	"gogue/internal/model/primitive"
+	"gogue/internal/model/primitives"
 	"math/rand"
 )
 
@@ -17,10 +17,10 @@ type Level struct {
 	Rooms    []Room
 	Passages []Passage
 	Number   uint
-	End      primitive.Box
+	End      primitives.Box
 }
 
-func calculateRoomSectionSize(mapSize primitive.Size2D[uint]) (sectionSize primitive.Size2D[uint]) {
+func calculateRoomSectionSize(mapSize primitives.Size2D[uint]) (sectionSize primitives.Size2D[uint]) {
 	totalPaddingWidth := uint(MinRoomPadding * 2)
 	totalPaddingHeight := uint(MinRoomPadding * 2)
 
@@ -33,7 +33,7 @@ func calculateRoomSectionSize(mapSize primitive.Size2D[uint]) (sectionSize primi
 	return sectionSize
 }
 
-func (l *Level) GenerateNineRooms(sizeMap primitive.Size2D[uint]) error {
+func (l *Level) GenerateNineRooms(sizeMap primitives.Size2D[uint]) error {
 	sectionSize := calculateRoomSectionSize(sizeMap)
 	if sectionSize.Width < RoomMinWidth || sectionSize.Height < RoomMinHeight {
 		return errors.New("map size is too small: each room section must be at least min room size")
@@ -78,18 +78,18 @@ func (l *Level) GenerateNineRooms(sizeMap primitive.Size2D[uint]) error {
 
 			if roomType == RoomTypeFinish {
 				roomWall := 1
-				l.End = primitive.Box{
-					Point: primitive.Point2D[int]{
+				l.End = primitives.Box{
+					Point: primitives.Point2D[int]{
 						X: x + roomWall + rand.Intn(width-(roomWall*2)),
 						Y: y + roomWall + rand.Intn(height-(roomWall*2)),
 					},
-					Size: primitive.Size2D[uint]{Height: 1, Width: 1},
+					Size: primitives.Size2D[uint]{Height: 1, Width: 1},
 				}
 			}
 
-			roomBox := primitive.Box{
-				Point: primitive.Point2D[int]{X: x, Y: y},
-				Size:  primitive.Size2D[uint]{Width: uint(width), Height: uint(height)},
+			roomBox := primitives.Box{
+				Point: primitives.Point2D[int]{X: x, Y: y},
+				Size:  primitives.Size2D[uint]{Width: uint(width), Height: uint(height)},
 			}
 
 			l.Rooms[roomIndex] = *NewRoom(roomType, roomBox)

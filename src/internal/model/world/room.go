@@ -3,7 +3,7 @@ package world
 import (
 	"gogue/internal/model/entities"
 	"gogue/internal/model/items"
-	"gogue/internal/model/primitive"
+	"gogue/internal/model/primitives"
 )
 
 type RoomType uint
@@ -15,7 +15,7 @@ const (
 )
 
 type Room struct {
-	Shape   primitive.Box
+	Shape   primitives.Box
 	Type    RoomType
 	Foods   []items.Food
 	Elixirs []items.Elixir
@@ -24,7 +24,7 @@ type Room struct {
 	Enemies []entities.Enemy
 }
 
-func NewRoom(roomType RoomType, shape primitive.Box) *Room {
+func NewRoom(roomType RoomType, shape primitives.Box) *Room {
 	return &Room{
 		Shape:   shape,
 		Type:    roomType,

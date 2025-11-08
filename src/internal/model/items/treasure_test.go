@@ -1,22 +1,22 @@
 package items
 
 import (
-	"gogue/internal/model/primitive"
+	"gogue/internal/model/primitives"
 	"testing"
 )
 
 func TestNewTreasure(t *testing.T) {
 	tests := []struct {
 		name              string
-		box               primitive.Box
-		wantShape         primitive.Box
+		box               primitives.Box
+		wantShape         primitives.Box
 		wantName          string
 		wantValueLessThan uint
 	}{
 		{
 			name:              "treasure constructor",
-			box:               primitive.Box{Point: primitive.Point2D[int]{X: 1, Y: 2}, Size: primitive.Size2D[uint]{Height: 1, Width: 1}},
-			wantShape:         primitive.Box{Point: primitive.Point2D[int]{X: 1, Y: 2}, Size: primitive.Size2D[uint]{Height: 1, Width: 1}},
+			box:               primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 1}},
+			wantShape:         primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 1}},
 			wantName:          "Gold",
 			wantValueLessThan: uint(TreasureBaseValue + TreasureMaxValue),
 		},

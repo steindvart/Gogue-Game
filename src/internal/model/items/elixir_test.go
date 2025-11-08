@@ -11,17 +11,17 @@ package items
 // func TestNewElixir(t *testing.T) {
 // 	tests := []struct {
 // 		name                       string
-// 		box                        primitive.Box
-// 		wantShape                  primitive.Box
+// 		box                        primitives.Box
+// 		wantShape                  primitives.Box
 // 		wantNames                  []string
 // 		wantEffectDurationLessThan time.Duration
 // 		wantIncrementLessThan      uint
-// 		wantAffectedAttributesList []primitive.Attributes
+// 		wantAffectedAttributesList []primitives.Attributes
 // 	}{
 // 		{
 // 			name:      "elixir constructor",
-// 			box:       primitive.Box{Point: primitive.Point2D[int]{X: 1, Y: 2}, Size: primitive.Size2D[uint]{Height: 1, Width: 1}},
-// 			wantShape: primitive.Box{Point: primitive.Point2D[int]{X: 1, Y: 2}, Size: primitive.Size2D[uint]{Height: 1, Width: 1}},
+// 			box:       primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 1}},
+// 			wantShape: primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 1}},
 // 			wantNames: []string{
 // 				"Elixir of the Jade Serpent",
 // 				"Potion of the Phantom's Breath",
@@ -35,7 +35,7 @@ package items
 // 			},
 // 			wantEffectDurationLessThan: time.Duration(ElixirDurationBase+ElixirMaxDurationFactor) * time.Minute,
 // 			wantIncrementLessThan:      uint(IncreaseAttributeBaseParcentage + IncreaseAttributeMaxPercentage + 1),
-// 			wantAffectedAttributesList: []primitive.Attributes{
+// 			wantAffectedAttributesList: []primitives.Attributes{
 // 				{
 // 					MaxHealth: 1,
 // 					Agility:   0,
@@ -80,11 +80,11 @@ package items
 // func TestElixir_Take(t *testing.T) {
 // 	tests := []struct {
 // 		name string
-// 		want primitive.Box
+// 		want primitives.Box
 // 	}{
 // 		{
 // 			name: "elixir is taken",
-// 			want: primitive.Box{},
+// 			want: primitives.Box{},
 // 		},
 // 	}
 
@@ -92,13 +92,13 @@ package items
 // 		t.Run(tt.name, func(t *testing.T) {
 // 			elixir := &Elixir{
 // 				Item: Item{
-// 					Shape: primitive.Box{
-// 						Point: primitive.Point2D[int]{X: 1, Y: 2},
-// 						Size:  primitive.Size2D[uint]{Height: 1, Width: 1},
+// 					Shape: primitives.Box{
+// 						Point: primitives.Point2D[int]{X: 1, Y: 2},
+// 						Size:  primitives.Size2D[uint]{Height: 1, Width: 1},
 // 					},
 // 					Name: "Awkward Elixir",
 // 				},
-// 				AffectedAttribute: primitive.Attributes{MaxHealth: 1, Agility: 0, Strength: 0},
+// 				AffectedAttribute: primitives.Attributes{MaxHealth: 1, Agility: 0, Strength: 0},
 // 				Increment:         1,
 // 				EffectDuration:    time.Minute,
 // 			}
@@ -113,13 +113,13 @@ package items
 // func TestElixir_Drop(t *testing.T) {
 // 	tests := []struct {
 // 		name string
-// 		box  primitive.Box
-// 		want primitive.Box
+// 		box  primitives.Box
+// 		want primitives.Box
 // 	}{
 // 		{
 // 			name: "elixir is dropped",
-// 			box:  primitive.Box{Point: primitive.Point2D[int]{X: 1, Y: 2}, Size: primitive.Size2D[uint]{Height: 1, Width: 1}},
-// 			want: primitive.Box{Point: primitive.Point2D[int]{X: 1, Y: 2}, Size: primitive.Size2D[uint]{Height: 1, Width: 1}},
+// 			box:  primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 1}},
+// 			want: primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 1}},
 // 		},
 // 	}
 
@@ -127,10 +127,10 @@ package items
 // 		t.Run(tt.name, func(t *testing.T) {
 // 			elixir := &Elixir{
 // 				Item: Item{
-// 					Shape: primitive.Box{},
+// 					Shape: primitives.Box{},
 // 					Name:  "Awkward Elixir",
 // 				},
-// 				AffectedAttribute: primitive.Attributes{MaxHealth: 1, Agility: 0, Strength: 0},
+// 				AffectedAttribute: primitives.Attributes{MaxHealth: 1, Agility: 0, Strength: 0},
 // 				Increment:         1,
 // 				EffectDuration:    time.Minute,
 // 			}
@@ -153,10 +153,10 @@ package items
 // 			name: "use elixir",
 // 			elixir: &Elixir{
 // 				Item: Item{
-// 					Shape: primitive.Box{},
+// 					Shape: primitives.Box{},
 // 					Name:  "Awkward Elixir",
 // 				},
-// 				AffectedAttribute: primitive.Attributes{MaxHealth: 1, Agility: 0, Strength: 0},
+// 				AffectedAttribute: primitives.Attributes{MaxHealth: 1, Agility: 0, Strength: 0},
 // 				Increment:         5,
 // 				EffectDuration:    20 * time.Millisecond,
 // 			},
@@ -165,7 +165,7 @@ package items
 
 // 	for _, tt := range tests {
 // 		t.Run(tt.name, func(t *testing.T) {
-// 			player := entities.NewPlayer(primitive.Box{})
+// 			player := entities.NewPlayer(primitives.Box{})
 // 			tt.elixir.Use(player)
 
 // 			time.Sleep(2 * time.Millisecond)

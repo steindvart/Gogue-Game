@@ -9,16 +9,16 @@ package entities
 // func TestNewZombie(t *testing.T) {
 // 	tests := []struct {
 // 		name string
-// 		box  primitive.Box
+// 		box  primitives.Box
 // 		want *Zombie
 // 	}{
 // 		{
 // 			name: "zombie constructor",
-// 			box:  primitive.Box{Point: primitive.Point2D[int]{X: 1, Y: 2}, Size: primitive.Size2D[uint]{Height: 1, Width: 2}},
+// 			box:  primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 2}},
 // 			want: &Zombie{
 // 				Enemy: Enemy{
 // 					Character: Character{
-// 						Shape:     primitive.Box{Point: primitive.Point2D[int]{X: 1, Y: 2}, Size: primitive.Size2D[uint]{Height: 1, Width: 2}},
+// 						Shape:     primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 2}},
 // 						Agility:   uint(AttributeRateLow),
 // 						Strength:  uint(AttributeRateAverage),
 // 						Health:    float64(AttributeRateHigh),
@@ -46,16 +46,16 @@ package entities
 // func TestNewVampire(t *testing.T) {
 // 	tests := []struct {
 // 		name string
-// 		box  primitive.Box
+// 		box  primitives.Box
 // 		want *Vampire
 // 	}{
 // 		{
 // 			name: "vampire constructor",
-// 			box:  primitive.Box{Point: primitive.Point2D[int]{X: 1, Y: 2}, Size: primitive.Size2D[uint]{Height: 1, Width: 2}},
+// 			box:  primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 2}},
 // 			want: &Vampire{
 // 				Enemy: Enemy{
 // 					Character: Character{
-// 						Shape:     primitive.Box{Point: primitive.Point2D[int]{X: 1, Y: 2}, Size: primitive.Size2D[uint]{Height: 1, Width: 2}},
+// 						Shape:     primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 2}},
 // 						Agility:   uint(AttributeRateHigh),
 // 						Strength:  uint(AttributeRateAverage),
 // 						Health:    float64(AttributeRateHigh),
@@ -84,16 +84,16 @@ package entities
 // func TestNewGhost(t *testing.T) {
 // 	tests := []struct {
 // 		name string
-// 		box  primitive.Box
+// 		box  primitives.Box
 // 		want *Ghost
 // 	}{
 // 		{
 // 			name: "ghost constructor",
-// 			box:  primitive.Box{Point: primitive.Point2D[int]{X: 1, Y: 2}, Size: primitive.Size2D[uint]{Height: 1, Width: 2}},
+// 			box:  primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 2}},
 // 			want: &Ghost{
 // 				Enemy: Enemy{
 // 					Character: Character{
-// 						Shape:     primitive.Box{Point: primitive.Point2D[int]{X: 1, Y: 2}, Size: primitive.Size2D[uint]{Height: 1, Width: 2}},
+// 						Shape:     primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 2}},
 // 						Agility:   uint(AttributeRateHigh),
 // 						Strength:  uint(AttributeRateLow),
 // 						Health:    float64(AttributeRateLow),
@@ -122,16 +122,16 @@ package entities
 // func TestNewOgre(t *testing.T) {
 // 	tests := []struct {
 // 		name string
-// 		box  primitive.Box
+// 		box  primitives.Box
 // 		want *Ogre
 // 	}{
 // 		{
 // 			name: "ogre constructor",
-// 			box:  primitive.Box{Point: primitive.Point2D[int]{X: 1, Y: 2}, Size: primitive.Size2D[uint]{Height: 1, Width: 2}},
+// 			box:  primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 2}},
 // 			want: &Ogre{
 // 				Enemy: Enemy{
 // 					Character: Character{
-// 						Shape:     primitive.Box{Point: primitive.Point2D[int]{X: 1, Y: 2}, Size: primitive.Size2D[uint]{Height: 1, Width: 2}},
+// 						Shape:     primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 2}},
 // 						Agility:   uint(AttributeRateLow),
 // 						Strength:  uint(AttributeRateVeryHigh),
 // 						Health:    float64(AttributeRateVeryHigh),
@@ -160,16 +160,16 @@ package entities
 // func TestNewSnakeMage(t *testing.T) {
 // 	tests := []struct {
 // 		name string
-// 		box  primitive.Box
+// 		box  primitives.Box
 // 		want *SnakeMage
 // 	}{
 // 		{
 // 			name: "snake mage constructor",
-// 			box:  primitive.Box{Point: primitive.Point2D[int]{X: 1, Y: 2}, Size: primitive.Size2D[uint]{Height: 1, Width: 2}},
+// 			box:  primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 2}},
 // 			want: &SnakeMage{
 // 				Enemy: Enemy{
 // 					Character: Character{
-// 						Shape:     primitive.Box{Point: primitive.Point2D[int]{X: 1, Y: 2}, Size: primitive.Size2D[uint]{Height: 1, Width: 2}},
+// 						Shape:     primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 2}},
 // 						Agility:   uint(AttributeRateVeryHigh),
 // 						Strength:  uint(AttributeRateAverage),
 // 						Health:    float64(AttributeRateHigh),

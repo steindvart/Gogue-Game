@@ -1,15 +1,13 @@
 package items
 
-import (
-	"gogue/internal/model/primitive"
-)
+import "gogue/internal/model/primitives"
 
 type Weapon struct {
 	Item   Item
 	Damage float64
 }
 
-func NewWeapon(box primitive.Box) *Weapon {
+func NewWeapon(box primitives.Box) *Weapon {
 	weaponNames := []string{
 		"Blade of the Forgotten Dawn",
 		"Obsidian Reaver",
@@ -35,12 +33,12 @@ func (w *Weapon) Take() {
 	w.Item.Take()
 }
 
-func (w *Weapon) Drop(box primitive.Box) {
+func (w *Weapon) Drop(box primitives.Box) {
 	w.Item.Drop(box)
 }
 
-func (w *Weapon) Use() primitive.Attributes {
-	return primitive.Attributes{
+func (w *Weapon) Use() primitives.Attributes {
+	return primitives.Attributes{
 		Strength: float64(w.Damage),
 	}
 }

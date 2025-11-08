@@ -1,7 +1,7 @@
 package items
 
 import (
-	"gogue/internal/model/primitive"
+	"gogue/internal/model/primitives"
 	"math/rand"
 )
 
@@ -11,12 +11,12 @@ const (
 )
 
 type Treasure struct {
-	Shape primitive.Box
+	Shape primitives.Box
 	Name  string
 	Value uint
 }
 
-func NewTreasure(box primitive.Box) *Treasure {
+func NewTreasure(box primitives.Box) *Treasure {
 	return &Treasure{
 		Shape: box,
 		Name:  "Gold",

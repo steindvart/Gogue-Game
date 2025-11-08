@@ -1,7 +1,7 @@
 package items
 
 import (
-	"gogue/internal/model/primitive"
+	"gogue/internal/model/primitives"
 	"math/rand"
 	"time"
 )
@@ -14,10 +14,10 @@ const (
 type Elixir struct {
 	Item              Item
 	EffectDuration    time.Duration
-	AffectedAttribute primitive.Attributes
+	AffectedAttribute primitives.Attributes
 }
 
-func NewElixir(box primitive.Box) *Elixir {
+func NewElixir(box primitives.Box) *Elixir {
 	elixirNames := []string{
 		"Elixir of the Jade Serpent",
 		"Potion of the Phantom's Breath",
@@ -44,11 +44,11 @@ func (e *Elixir) Take() {
 	e.Item.Take()
 }
 
-func (e *Elixir) Drop(box primitive.Box) {
+func (e *Elixir) Drop(box primitives.Box) {
 	e.Item.Drop(box)
 }
 
-func (e *Elixir) Use() primitive.Attributes {
+func (e *Elixir) Use() primitives.Attributes {
 	return e.AffectedAttribute
 }
 

@@ -44,32 +44,32 @@ package entities
 // func TestPlayer_Move(t *testing.T) {
 // 	tests := []struct {
 // 		name  string
-// 		start primitive.Point2D[int]
-// 		delta primitive.Point2D[int]
-// 		want  primitive.Point2D[int]
+// 		start primitives.Point2D[int]
+// 		delta primitives.Point2D[int]
+// 		want  primitives.Point2D[int]
 // 	}{
 // 		{
 // 			name:  "move positive",
-// 			start: primitive.Point2D[int]{X: 0, Y: 0},
-// 			delta: primitive.Point2D[int]{X: 2, Y: 3},
-// 			want:  primitive.Point2D[int]{X: 2, Y: 3},
+// 			start: primitives.Point2D[int]{X: 0, Y: 0},
+// 			delta: primitives.Point2D[int]{X: 2, Y: 3},
+// 			want:  primitives.Point2D[int]{X: 2, Y: 3},
 // 		},
 // 		{
 // 			name:  "move negative",
-// 			start: primitive.Point2D[int]{X: 5, Y: 5},
-// 			delta: primitive.Point2D[int]{X: -2, Y: -3},
-// 			want:  primitive.Point2D[int]{X: 3, Y: 2},
+// 			start: primitives.Point2D[int]{X: 5, Y: 5},
+// 			delta: primitives.Point2D[int]{X: -2, Y: -3},
+// 			want:  primitives.Point2D[int]{X: 3, Y: 2},
 // 		},
 // 		{
 // 			name:  "move zero",
-// 			start: primitive.Point2D[int]{X: 1, Y: 1},
-// 			delta: primitive.Point2D[int]{X: 0, Y: 0},
-// 			want:  primitive.Point2D[int]{X: 1, Y: 1},
+// 			start: primitives.Point2D[int]{X: 1, Y: 1},
+// 			delta: primitives.Point2D[int]{X: 0, Y: 0},
+// 			want:  primitives.Point2D[int]{X: 1, Y: 1},
 // 		},
 // 	}
 // 	for _, tt := range tests {
 // 		t.Run(tt.name, func(t *testing.T) {
-// 			p := &Player{Character: Character{Shape: primitive.Box{Point: tt.start}}}
+// 			p := &Player{Character: Character{Shape: primitives.Box{Point: tt.start}}}
 // 			p.Move(tt.delta)
 // 			if p.Character.Shape.Point != tt.want {
 // 				t.Errorf("Move() = (%v), want (%v)", p.Character.Shape.Point, tt.want)
@@ -199,7 +199,7 @@ package entities
 // 			name: "damage 0",
 // 			weapon: &Weapon{
 // 				Item: Item{
-// 					Shape: primitive.Box{},
+// 					Shape: primitives.Box{},
 // 					Name:  "Awkward Weapon",
 // 				},
 // 				Damage: 0,
@@ -210,7 +210,7 @@ package entities
 // 			name: "damage 10",
 // 			weapon: &Weapon{
 // 				Item: Item{
-// 					Shape: primitive.Box{},
+// 					Shape: primitives.Box{},
 // 					Name:  "Awkward Weapon",
 // 				},
 // 				Damage: 10,
@@ -221,7 +221,7 @@ package entities
 // 			name: "damage 50",
 // 			weapon: &Weapon{
 // 				Item: Item{
-// 					Shape: primitive.Box{},
+// 					Shape: primitives.Box{},
 // 					Name:  "Awkward Weapon",
 // 				},
 // 				Damage: 50,
@@ -231,7 +231,7 @@ package entities
 // 	}
 // 	for _, tt := range tests {
 // 		t.Run(tt.name, func(t *testing.T) {
-// 			p := NewPlayer(primitive.Box{})
+// 			p := NewPlayer(primitives.Box{})
 // 			p.Weapon = tt.weapon
 
 // 			got := p.Attack()
@@ -294,7 +294,7 @@ package entities
 // 		{
 // 			name: "take treasure cost 10",
 // 			treasure: Treasure{
-// 				Shape: primitive.Box{},
+// 				Shape: primitives.Box{},
 // 				Name:  "Gold",
 // 				Value: 10,
 // 			},
@@ -303,7 +303,7 @@ package entities
 // 		{
 // 			name: "take treasure cost 0",
 // 			treasure: Treasure{
-// 				Shape: primitive.Box{},
+// 				Shape: primitives.Box{},
 // 				Name:  "Gold",
 // 				Value: 0,
 // 			},
@@ -312,7 +312,7 @@ package entities
 // 	}
 // 	for _, tt := range tests {
 // 		t.Run(tt.name, func(t *testing.T) {
-// 			p := NewPlayer(primitive.Box{})
+// 			p := NewPlayer(primitives.Box{})
 
 // 			p.TakeTreasure(&tt.treasure)
 // 			got := p.Backpack.Treasures
@@ -335,11 +335,11 @@ package entities
 // 			items: []ItemLike{
 // 				&Elixir{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Elixir",
 // 					},
 // 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitive.Attributes{
+// 					AffectedAttribute: primitives.Attributes{
 // 						MaxHealth: 1,
 // 						Agility:   0,
 // 						Strength:  0,
@@ -354,11 +354,11 @@ package entities
 // 					"Awkward Elixir": {
 // 						Elixir{
 // 							Item: Item{
-// 								Shape: primitive.Box{},
+// 								Shape: primitives.Box{},
 // 								Name:  "Awkward Elixir",
 // 							},
 // 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitive.Attributes{
+// 							AffectedAttribute: primitives.Attributes{
 // 								MaxHealth: 1,
 // 								Agility:   0,
 // 								Strength:  0,
@@ -379,11 +379,11 @@ package entities
 // 			items: []ItemLike{
 // 				&Elixir{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Elixir",
 // 					},
 // 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitive.Attributes{
+// 					AffectedAttribute: primitives.Attributes{
 // 						MaxHealth: 1,
 // 						Agility:   0,
 // 						Strength:  0,
@@ -392,11 +392,11 @@ package entities
 // 				},
 // 				&Elixir{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Elixir",
 // 					},
 // 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitive.Attributes{
+// 					AffectedAttribute: primitives.Attributes{
 // 						MaxHealth: 1,
 // 						Agility:   0,
 // 						Strength:  0,
@@ -405,11 +405,11 @@ package entities
 // 				},
 // 				&Elixir{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Elixir",
 // 					},
 // 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitive.Attributes{
+// 					AffectedAttribute: primitives.Attributes{
 // 						MaxHealth: 1,
 // 						Agility:   0,
 // 						Strength:  0,
@@ -418,11 +418,11 @@ package entities
 // 				},
 // 				&Elixir{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Elixir",
 // 					},
 // 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitive.Attributes{
+// 					AffectedAttribute: primitives.Attributes{
 // 						MaxHealth: 1,
 // 						Agility:   0,
 // 						Strength:  0,
@@ -431,11 +431,11 @@ package entities
 // 				},
 // 				&Elixir{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Elixir",
 // 					},
 // 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitive.Attributes{
+// 					AffectedAttribute: primitives.Attributes{
 // 						MaxHealth: 1,
 // 						Agility:   0,
 // 						Strength:  0,
@@ -444,11 +444,11 @@ package entities
 // 				},
 // 				&Elixir{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Elixir",
 // 					},
 // 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitive.Attributes{
+// 					AffectedAttribute: primitives.Attributes{
 // 						MaxHealth: 1,
 // 						Agility:   0,
 // 						Strength:  0,
@@ -457,11 +457,11 @@ package entities
 // 				},
 // 				&Elixir{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Elixir",
 // 					},
 // 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitive.Attributes{
+// 					AffectedAttribute: primitives.Attributes{
 // 						MaxHealth: 1,
 // 						Agility:   0,
 // 						Strength:  0,
@@ -470,11 +470,11 @@ package entities
 // 				},
 // 				&Elixir{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Elixir",
 // 					},
 // 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitive.Attributes{
+// 					AffectedAttribute: primitives.Attributes{
 // 						MaxHealth: 1,
 // 						Agility:   0,
 // 						Strength:  0,
@@ -483,11 +483,11 @@ package entities
 // 				},
 // 				&Elixir{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Elixir",
 // 					},
 // 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitive.Attributes{
+// 					AffectedAttribute: primitives.Attributes{
 // 						MaxHealth: 1,
 // 						Agility:   0,
 // 						Strength:  0,
@@ -502,11 +502,11 @@ package entities
 // 					"Awkward Elixir": {
 // 						Elixir{
 // 							Item: Item{
-// 								Shape: primitive.Box{},
+// 								Shape: primitives.Box{},
 // 								Name:  "Awkward Elixir",
 // 							},
 // 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitive.Attributes{
+// 							AffectedAttribute: primitives.Attributes{
 // 								MaxHealth: 1,
 // 								Agility:   0,
 // 								Strength:  0,
@@ -515,11 +515,11 @@ package entities
 // 						},
 // 						Elixir{
 // 							Item: Item{
-// 								Shape: primitive.Box{},
+// 								Shape: primitives.Box{},
 // 								Name:  "Awkward Elixir",
 // 							},
 // 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitive.Attributes{
+// 							AffectedAttribute: primitives.Attributes{
 // 								MaxHealth: 1,
 // 								Agility:   0,
 // 								Strength:  0,
@@ -528,11 +528,11 @@ package entities
 // 						},
 // 						Elixir{
 // 							Item: Item{
-// 								Shape: primitive.Box{},
+// 								Shape: primitives.Box{},
 // 								Name:  "Awkward Elixir",
 // 							},
 // 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitive.Attributes{
+// 							AffectedAttribute: primitives.Attributes{
 // 								MaxHealth: 1,
 // 								Agility:   0,
 // 								Strength:  0,
@@ -541,11 +541,11 @@ package entities
 // 						},
 // 						Elixir{
 // 							Item: Item{
-// 								Shape: primitive.Box{},
+// 								Shape: primitives.Box{},
 // 								Name:  "Awkward Elixir",
 // 							},
 // 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitive.Attributes{
+// 							AffectedAttribute: primitives.Attributes{
 // 								MaxHealth: 1,
 // 								Agility:   0,
 // 								Strength:  0,
@@ -554,11 +554,11 @@ package entities
 // 						},
 // 						Elixir{
 // 							Item: Item{
-// 								Shape: primitive.Box{},
+// 								Shape: primitives.Box{},
 // 								Name:  "Awkward Elixir",
 // 							},
 // 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitive.Attributes{
+// 							AffectedAttribute: primitives.Attributes{
 // 								MaxHealth: 1,
 // 								Agility:   0,
 // 								Strength:  0,
@@ -567,11 +567,11 @@ package entities
 // 						},
 // 						Elixir{
 // 							Item: Item{
-// 								Shape: primitive.Box{},
+// 								Shape: primitives.Box{},
 // 								Name:  "Awkward Elixir",
 // 							},
 // 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitive.Attributes{
+// 							AffectedAttribute: primitives.Attributes{
 // 								MaxHealth: 1,
 // 								Agility:   0,
 // 								Strength:  0,
@@ -580,11 +580,11 @@ package entities
 // 						},
 // 						Elixir{
 // 							Item: Item{
-// 								Shape: primitive.Box{},
+// 								Shape: primitives.Box{},
 // 								Name:  "Awkward Elixir",
 // 							},
 // 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitive.Attributes{
+// 							AffectedAttribute: primitives.Attributes{
 // 								MaxHealth: 1,
 // 								Agility:   0,
 // 								Strength:  0,
@@ -593,11 +593,11 @@ package entities
 // 						},
 // 						Elixir{
 // 							Item: Item{
-// 								Shape: primitive.Box{},
+// 								Shape: primitives.Box{},
 // 								Name:  "Awkward Elixir",
 // 							},
 // 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitive.Attributes{
+// 							AffectedAttribute: primitives.Attributes{
 // 								MaxHealth: 1,
 // 								Agility:   0,
 // 								Strength:  0,
@@ -606,11 +606,11 @@ package entities
 // 						},
 // 						Elixir{
 // 							Item: Item{
-// 								Shape: primitive.Box{},
+// 								Shape: primitives.Box{},
 // 								Name:  "Awkward Elixir",
 // 							},
 // 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitive.Attributes{
+// 							AffectedAttribute: primitives.Attributes{
 // 								MaxHealth: 1,
 // 								Agility:   0,
 // 								Strength:  0,
@@ -631,11 +631,11 @@ package entities
 // 			items: []ItemLike{
 // 				&Elixir{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Elixir",
 // 					},
 // 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitive.Attributes{
+// 					AffectedAttribute: primitives.Attributes{
 // 						MaxHealth: 1,
 // 						Agility:   0,
 // 						Strength:  0,
@@ -644,11 +644,11 @@ package entities
 // 				},
 // 				&Elixir{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Elixir",
 // 					},
 // 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitive.Attributes{
+// 					AffectedAttribute: primitives.Attributes{
 // 						MaxHealth: 1,
 // 						Agility:   0,
 // 						Strength:  0,
@@ -657,11 +657,11 @@ package entities
 // 				},
 // 				&Elixir{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Elixir",
 // 					},
 // 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitive.Attributes{
+// 					AffectedAttribute: primitives.Attributes{
 // 						MaxHealth: 1,
 // 						Agility:   0,
 // 						Strength:  0,
@@ -670,11 +670,11 @@ package entities
 // 				},
 // 				&Elixir{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Elixir",
 // 					},
 // 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitive.Attributes{
+// 					AffectedAttribute: primitives.Attributes{
 // 						MaxHealth: 1,
 // 						Agility:   0,
 // 						Strength:  0,
@@ -683,11 +683,11 @@ package entities
 // 				},
 // 				&Elixir{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Elixir",
 // 					},
 // 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitive.Attributes{
+// 					AffectedAttribute: primitives.Attributes{
 // 						MaxHealth: 1,
 // 						Agility:   0,
 // 						Strength:  0,
@@ -696,11 +696,11 @@ package entities
 // 				},
 // 				&Elixir{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Elixir",
 // 					},
 // 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitive.Attributes{
+// 					AffectedAttribute: primitives.Attributes{
 // 						MaxHealth: 1,
 // 						Agility:   0,
 // 						Strength:  0,
@@ -709,11 +709,11 @@ package entities
 // 				},
 // 				&Elixir{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Elixir",
 // 					},
 // 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitive.Attributes{
+// 					AffectedAttribute: primitives.Attributes{
 // 						MaxHealth: 1,
 // 						Agility:   0,
 // 						Strength:  0,
@@ -722,11 +722,11 @@ package entities
 // 				},
 // 				&Elixir{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Elixir",
 // 					},
 // 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitive.Attributes{
+// 					AffectedAttribute: primitives.Attributes{
 // 						MaxHealth: 1,
 // 						Agility:   0,
 // 						Strength:  0,
@@ -735,11 +735,11 @@ package entities
 // 				},
 // 				&Elixir{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Elixir",
 // 					},
 // 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitive.Attributes{
+// 					AffectedAttribute: primitives.Attributes{
 // 						MaxHealth: 1,
 // 						Agility:   0,
 // 						Strength:  0,
@@ -748,11 +748,11 @@ package entities
 // 				},
 // 				&Elixir{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Elixir",
 // 					},
 // 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitive.Attributes{
+// 					AffectedAttribute: primitives.Attributes{
 // 						MaxHealth: 1,
 // 						Agility:   0,
 // 						Strength:  0,
@@ -767,11 +767,11 @@ package entities
 // 					"Awkward Elixir": {
 // 						Elixir{
 // 							Item: Item{
-// 								Shape: primitive.Box{},
+// 								Shape: primitives.Box{},
 // 								Name:  "Awkward Elixir",
 // 							},
 // 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitive.Attributes{
+// 							AffectedAttribute: primitives.Attributes{
 // 								MaxHealth: 1,
 // 								Agility:   0,
 // 								Strength:  0,
@@ -780,11 +780,11 @@ package entities
 // 						},
 // 						Elixir{
 // 							Item: Item{
-// 								Shape: primitive.Box{},
+// 								Shape: primitives.Box{},
 // 								Name:  "Awkward Elixir",
 // 							},
 // 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitive.Attributes{
+// 							AffectedAttribute: primitives.Attributes{
 // 								MaxHealth: 1,
 // 								Agility:   0,
 // 								Strength:  0,
@@ -793,11 +793,11 @@ package entities
 // 						},
 // 						Elixir{
 // 							Item: Item{
-// 								Shape: primitive.Box{},
+// 								Shape: primitives.Box{},
 // 								Name:  "Awkward Elixir",
 // 							},
 // 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitive.Attributes{
+// 							AffectedAttribute: primitives.Attributes{
 // 								MaxHealth: 1,
 // 								Agility:   0,
 // 								Strength:  0,
@@ -806,11 +806,11 @@ package entities
 // 						},
 // 						Elixir{
 // 							Item: Item{
-// 								Shape: primitive.Box{},
+// 								Shape: primitives.Box{},
 // 								Name:  "Awkward Elixir",
 // 							},
 // 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitive.Attributes{
+// 							AffectedAttribute: primitives.Attributes{
 // 								MaxHealth: 1,
 // 								Agility:   0,
 // 								Strength:  0,
@@ -819,11 +819,11 @@ package entities
 // 						},
 // 						Elixir{
 // 							Item: Item{
-// 								Shape: primitive.Box{},
+// 								Shape: primitives.Box{},
 // 								Name:  "Awkward Elixir",
 // 							},
 // 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitive.Attributes{
+// 							AffectedAttribute: primitives.Attributes{
 // 								MaxHealth: 1,
 // 								Agility:   0,
 // 								Strength:  0,
@@ -832,11 +832,11 @@ package entities
 // 						},
 // 						Elixir{
 // 							Item: Item{
-// 								Shape: primitive.Box{},
+// 								Shape: primitives.Box{},
 // 								Name:  "Awkward Elixir",
 // 							},
 // 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitive.Attributes{
+// 							AffectedAttribute: primitives.Attributes{
 // 								MaxHealth: 1,
 // 								Agility:   0,
 // 								Strength:  0,
@@ -845,11 +845,11 @@ package entities
 // 						},
 // 						Elixir{
 // 							Item: Item{
-// 								Shape: primitive.Box{},
+// 								Shape: primitives.Box{},
 // 								Name:  "Awkward Elixir",
 // 							},
 // 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitive.Attributes{
+// 							AffectedAttribute: primitives.Attributes{
 // 								MaxHealth: 1,
 // 								Agility:   0,
 // 								Strength:  0,
@@ -858,11 +858,11 @@ package entities
 // 						},
 // 						Elixir{
 // 							Item: Item{
-// 								Shape: primitive.Box{},
+// 								Shape: primitives.Box{},
 // 								Name:  "Awkward Elixir",
 // 							},
 // 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitive.Attributes{
+// 							AffectedAttribute: primitives.Attributes{
 // 								MaxHealth: 1,
 // 								Agility:   0,
 // 								Strength:  0,
@@ -871,11 +871,11 @@ package entities
 // 						},
 // 						Elixir{
 // 							Item: Item{
-// 								Shape: primitive.Box{},
+// 								Shape: primitives.Box{},
 // 								Name:  "Awkward Elixir",
 // 							},
 // 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitive.Attributes{
+// 							AffectedAttribute: primitives.Attributes{
 // 								MaxHealth: 1,
 // 								Agility:   0,
 // 								Strength:  0,
@@ -895,7 +895,7 @@ package entities
 
 // 	for _, tt := range tests {
 // 		t.Run(tt.name, func(t *testing.T) {
-// 			p := NewPlayer(primitive.Box{})
+// 			p := NewPlayer(primitives.Box{})
 // 			for idx := range tt.items {
 // 				err := p.TakeItem(tt.items[idx])
 // 				errWant := tt.want[idx]
@@ -926,11 +926,11 @@ package entities
 // 			items: []ItemLike{},
 // 			item: &Elixir{
 // 				Item: Item{
-// 					Shape: primitive.Box{},
+// 					Shape: primitives.Box{},
 // 					Name:  "Awkward Elixir",
 // 				},
 // 				EffectDuration: time.Minute,
-// 				AffectedAttribute: primitive.Attributes{
+// 				AffectedAttribute: primitives.Attributes{
 // 					MaxHealth: 1,
 // 					Agility:   0,
 // 					Strength:  0,
@@ -953,11 +953,11 @@ package entities
 // 			items: []ItemLike{
 // 				&Elixir{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Elixir",
 // 					},
 // 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitive.Attributes{
+// 					AffectedAttribute: primitives.Attributes{
 // 						MaxHealth: 1,
 // 						Agility:   0,
 // 						Strength:  0,
@@ -966,11 +966,11 @@ package entities
 // 				},
 // 				&Elixir{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Elixir",
 // 					},
 // 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitive.Attributes{
+// 					AffectedAttribute: primitives.Attributes{
 // 						MaxHealth: 1,
 // 						Agility:   0,
 // 						Strength:  0,
@@ -979,11 +979,11 @@ package entities
 // 				},
 // 				&Elixir{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Elixir",
 // 					},
 // 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitive.Attributes{
+// 					AffectedAttribute: primitives.Attributes{
 // 						MaxHealth: 1,
 // 						Agility:   0,
 // 						Strength:  0,
@@ -993,11 +993,11 @@ package entities
 // 			},
 // 			item: &Elixir{
 // 				Item: Item{
-// 					Shape: primitive.Box{},
+// 					Shape: primitives.Box{},
 // 					Name:  "Awkward Elixir",
 // 				},
 // 				EffectDuration: time.Minute,
-// 				AffectedAttribute: primitive.Attributes{
+// 				AffectedAttribute: primitives.Attributes{
 // 					MaxHealth: 1,
 // 					Agility:   0,
 // 					Strength:  0,
@@ -1011,11 +1011,11 @@ package entities
 // 					"Awkward Elixir": {
 // 						Elixir{
 // 							Item: Item{
-// 								Shape: primitive.Box{},
+// 								Shape: primitives.Box{},
 // 								Name:  "Awkward Elixir",
 // 							},
 // 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitive.Attributes{
+// 							AffectedAttribute: primitives.Attributes{
 // 								MaxHealth: 1,
 // 								Agility:   0,
 // 								Strength:  0,
@@ -1024,11 +1024,11 @@ package entities
 // 						},
 // 						Elixir{
 // 							Item: Item{
-// 								Shape: primitive.Box{},
+// 								Shape: primitives.Box{},
 // 								Name:  "Awkward Elixir",
 // 							},
 // 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitive.Attributes{
+// 							AffectedAttribute: primitives.Attributes{
 // 								MaxHealth: 1,
 // 								Agility:   0,
 // 								Strength:  0,
@@ -1048,7 +1048,7 @@ package entities
 
 // 	for _, tt := range tests {
 // 		t.Run(tt.name, func(t *testing.T) {
-// 			p := NewPlayer(primitive.Box{})
+// 			p := NewPlayer(primitives.Box{})
 
 // 			for idx := range tt.items {
 // 				_ = p.Backpack.AddItem(tt.items[idx])
@@ -1080,11 +1080,11 @@ package entities
 // 			items: []ItemLike{},
 // 			item: &Elixir{
 // 				Item: Item{
-// 					Shape: primitive.Box{},
+// 					Shape: primitives.Box{},
 // 					Name:  "Awkward Elixir",
 // 				},
 // 				EffectDuration: time.Minute,
-// 				AffectedAttribute: primitive.Attributes{
+// 				AffectedAttribute: primitives.Attributes{
 // 					MaxHealth: 1,
 // 					Agility:   0,
 // 					Strength:  0,
@@ -1093,7 +1093,7 @@ package entities
 // 			},
 // 			wantPlayer: Player{
 // 				Character: Character{
-// 					Shape:     primitive.Box{},
+// 					Shape:     primitives.Box{},
 // 					Health:    float64(AttributeRateAverage),
 // 					MaxHealth: float64(AttributeRateAverage),
 // 					Strength:  uint(AttributeRateAverage),
@@ -1111,11 +1111,11 @@ package entities
 // 			items: []ItemLike{
 // 				&Elixir{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Elixir",
 // 					},
 // 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitive.Attributes{
+// 					AffectedAttribute: primitives.Attributes{
 // 						MaxHealth: 1,
 // 						Agility:   0,
 // 						Strength:  0,
@@ -1125,11 +1125,11 @@ package entities
 // 			},
 // 			item: &Elixir{
 // 				Item: Item{
-// 					Shape: primitive.Box{},
+// 					Shape: primitives.Box{},
 // 					Name:  "Awkward Elixir",
 // 				},
 // 				EffectDuration: time.Minute,
-// 				AffectedAttribute: primitive.Attributes{
+// 				AffectedAttribute: primitives.Attributes{
 // 					MaxHealth: 1,
 // 					Agility:   0,
 // 					Strength:  0,
@@ -1138,7 +1138,7 @@ package entities
 // 			},
 // 			wantPlayer: Player{
 // 				Character: Character{
-// 					Shape:     primitive.Box{},
+// 					Shape:     primitives.Box{},
 // 					Health:    float64(AttributeRateAverage),
 // 					MaxHealth: float64(AttributeRateAverage) + float64(10),
 // 					Strength:  uint(AttributeRateAverage),
@@ -1156,10 +1156,10 @@ package entities
 // 			items: []ItemLike{
 // 				&Scroll{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Scroll",
 // 					},
-// 					AffectedAttribute: primitive.Attributes{
+// 					AffectedAttribute: primitives.Attributes{
 // 						MaxHealth: 0,
 // 						Agility:   1,
 // 						Strength:  0,
@@ -1169,10 +1169,10 @@ package entities
 // 			},
 // 			item: &Scroll{
 // 				Item: Item{
-// 					Shape: primitive.Box{},
+// 					Shape: primitives.Box{},
 // 					Name:  "Awkward Scroll",
 // 				},
-// 				AffectedAttribute: primitive.Attributes{
+// 				AffectedAttribute: primitives.Attributes{
 // 					MaxHealth: 0,
 // 					Agility:   1,
 // 					Strength:  0,
@@ -1181,7 +1181,7 @@ package entities
 // 			},
 // 			wantPlayer: Player{
 // 				Character: Character{
-// 					Shape:     primitive.Box{},
+// 					Shape:     primitives.Box{},
 // 					Health:    float64(AttributeRateAverage),
 // 					MaxHealth: float64(AttributeRateAverage),
 // 					Strength:  uint(AttributeRateAverage),
@@ -1199,7 +1199,7 @@ package entities
 // 			items: []ItemLike{
 // 				&Food{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Food",
 // 					},
 // 					HealthRegeneration: 15,
@@ -1207,14 +1207,14 @@ package entities
 // 			},
 // 			item: &Food{
 // 				Item: Item{
-// 					Shape: primitive.Box{},
+// 					Shape: primitives.Box{},
 // 					Name:  "Awkward Food",
 // 				},
 // 				HealthRegeneration: 15,
 // 			},
 // 			wantPlayer: Player{
 // 				Character: Character{
-// 					Shape:     primitive.Box{},
+// 					Shape:     primitives.Box{},
 // 					Health:    float64(AttributeRateAverage) + float64(15),
 // 					MaxHealth: float64(AttributeRateAverage),
 // 					Strength:  uint(AttributeRateAverage),
@@ -1231,7 +1231,7 @@ package entities
 
 // 	for _, tt := range tests {
 // 		t.Run(tt.name, func(t *testing.T) {
-// 			p := NewPlayer(primitive.Box{})
+// 			p := NewPlayer(primitives.Box{})
 
 // 			for idx := range tt.items {
 // 				_ = p.Backpack.AddItem(tt.items[idx])
@@ -1266,21 +1266,21 @@ package entities
 // 			weapons: []ItemLike{
 // 				&Weapon{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Weapon 1",
 // 					},
 // 					Damage: 1,
 // 				},
 // 				&Weapon{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Weapon 2",
 // 					},
 // 					Damage: 10,
 // 				},
 // 				&Weapon{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Weapon 3",
 // 					},
 // 					Damage: 50,
@@ -1290,7 +1290,7 @@ package entities
 // 			useWeaponIdx:     0,
 // 			wantPlayer: Player{
 // 				Character: Character{
-// 					Shape:     primitive.Box{},
+// 					Shape:     primitives.Box{},
 // 					Health:    float64(AttributeRateAverage),
 // 					MaxHealth: float64(AttributeRateAverage),
 // 					Strength:  uint(AttributeRateAverage),
@@ -1308,21 +1308,21 @@ package entities
 // 			weapons: []ItemLike{
 // 				&Weapon{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Weapon 1",
 // 					},
 // 					Damage: 1,
 // 				},
 // 				&Weapon{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Weapon 2",
 // 					},
 // 					Damage: 10,
 // 				},
 // 				&Weapon{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Weapon 3",
 // 					},
 // 					Damage: 50,
@@ -1332,7 +1332,7 @@ package entities
 // 			useWeaponIdx:     1,
 // 			wantPlayer: Player{
 // 				Character: Character{
-// 					Shape:     primitive.Box{},
+// 					Shape:     primitives.Box{},
 // 					Health:    float64(AttributeRateAverage),
 // 					MaxHealth: float64(AttributeRateAverage),
 // 					Strength:  uint(AttributeRateAverage),
@@ -1350,21 +1350,21 @@ package entities
 // 			weapons: []ItemLike{
 // 				&Weapon{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Weapon 1",
 // 					},
 // 					Damage: 1,
 // 				},
 // 				&Weapon{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Weapon 2",
 // 					},
 // 					Damage: 10,
 // 				},
 // 				&Weapon{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Weapon 3",
 // 					},
 // 					Damage: 50,
@@ -1374,7 +1374,7 @@ package entities
 // 			useWeaponIdx:     0,
 // 			wantPlayer: Player{
 // 				Character: Character{
-// 					Shape:     primitive.Box{},
+// 					Shape:     primitives.Box{},
 // 					Health:    float64(AttributeRateAverage),
 // 					MaxHealth: float64(AttributeRateAverage),
 // 					Strength:  uint(AttributeRateAverage),
@@ -1392,21 +1392,21 @@ package entities
 // 			weapons: []ItemLike{
 // 				&Weapon{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Weapon 1",
 // 					},
 // 					Damage: 1,
 // 				},
 // 				&Weapon{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Weapon 2",
 // 					},
 // 					Damage: 10,
 // 				},
 // 				&Weapon{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Weapon 3",
 // 					},
 // 					Damage: 50,
@@ -1416,7 +1416,7 @@ package entities
 // 			useWeaponIdx:     1,
 // 			wantPlayer: Player{
 // 				Character: Character{
-// 					Shape:     primitive.Box{},
+// 					Shape:     primitives.Box{},
 // 					Health:    float64(AttributeRateAverage),
 // 					MaxHealth: float64(AttributeRateAverage),
 // 					Strength:  uint(AttributeRateAverage),
@@ -1434,21 +1434,21 @@ package entities
 // 			weapons: []ItemLike{
 // 				&Weapon{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Weapon 1",
 // 					},
 // 					Damage: 1,
 // 				},
 // 				&Weapon{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Weapon 2",
 // 					},
 // 					Damage: 10,
 // 				},
 // 				&Weapon{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Weapon 3",
 // 					},
 // 					Damage: 50,
@@ -1458,7 +1458,7 @@ package entities
 // 			useWeaponIdx:     2,
 // 			wantPlayer: Player{
 // 				Character: Character{
-// 					Shape:     primitive.Box{},
+// 					Shape:     primitives.Box{},
 // 					Health:    float64(AttributeRateAverage),
 // 					MaxHealth: float64(AttributeRateAverage),
 // 					Strength:  uint(AttributeRateAverage),
@@ -1475,7 +1475,7 @@ package entities
 
 // 	for _, tt := range tests {
 // 		t.Run(tt.name, func(t *testing.T) {
-// 			p := NewPlayer(primitive.Box{})
+// 			p := NewPlayer(primitives.Box{})
 
 // 			for idx := range tt.weapons {
 // 				_ = p.Backpack.AddItem(tt.weapons[idx])
@@ -1515,11 +1515,11 @@ package entities
 // 			items: []ItemLike{
 // 				&Elixir{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Elixir",
 // 					},
 // 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitive.Attributes{
+// 					AffectedAttribute: primitives.Attributes{
 // 						MaxHealth: 1,
 // 						Agility:   0,
 // 						Strength:  0,
@@ -1529,7 +1529,7 @@ package entities
 // 			},
 // 			wantPlayer: Player{
 // 				Character: Character{
-// 					Shape:     primitive.Box{},
+// 					Shape:     primitives.Box{},
 // 					Health:    float64(AttributeRateAverage),
 // 					MaxHealth: float64(AttributeRateAverage) + float64(10),
 // 					Strength:  uint(AttributeRateAverage),
@@ -1547,10 +1547,10 @@ package entities
 // 			items: []ItemLike{
 // 				&Scroll{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Scroll",
 // 					},
-// 					AffectedAttribute: primitive.Attributes{
+// 					AffectedAttribute: primitives.Attributes{
 // 						MaxHealth: 0,
 // 						Agility:   1,
 // 						Strength:  0,
@@ -1560,7 +1560,7 @@ package entities
 // 			},
 // 			wantPlayer: Player{
 // 				Character: Character{
-// 					Shape:     primitive.Box{},
+// 					Shape:     primitives.Box{},
 // 					Health:    float64(AttributeRateAverage),
 // 					MaxHealth: float64(AttributeRateAverage),
 // 					Strength:  uint(AttributeRateAverage),
@@ -1578,7 +1578,7 @@ package entities
 // 			items: []ItemLike{
 // 				&Food{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Food",
 // 					},
 // 					HealthRegeneration: 15,
@@ -1586,7 +1586,7 @@ package entities
 // 			},
 // 			wantPlayer: Player{
 // 				Character: Character{
-// 					Shape:     primitive.Box{},
+// 					Shape:     primitives.Box{},
 // 					Health:    float64(AttributeRateAverage) + float64(15),
 // 					MaxHealth: float64(AttributeRateAverage),
 // 					Strength:  uint(AttributeRateAverage),
@@ -1603,7 +1603,7 @@ package entities
 
 // 	for _, tt := range tests {
 // 		t.Run(tt.name, func(t *testing.T) {
-// 			p := NewPlayer(primitive.Box{})
+// 			p := NewPlayer(primitives.Box{})
 
 // 			for idx := range tt.items {
 // 				_ = p.Backpack.AddItem(tt.items[idx])
@@ -1638,11 +1638,11 @@ package entities
 // 			items: []ItemLike{
 // 				&Elixir{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Elixir",
 // 					},
 // 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitive.Attributes{
+// 					AffectedAttribute: primitives.Attributes{
 // 						MaxHealth: 1,
 // 						Agility:   0,
 // 						Strength:  0,
@@ -1652,7 +1652,7 @@ package entities
 // 			},
 // 			wantPlayer: Player{
 // 				Character: Character{
-// 					Shape:     primitive.Box{},
+// 					Shape:     primitives.Box{},
 // 					Health:    float64(AttributeRateAverage),
 // 					MaxHealth: float64(AttributeRateAverage),
 // 					Strength:  uint(AttributeRateAverage),
@@ -1670,10 +1670,10 @@ package entities
 // 			items: []ItemLike{
 // 				&Scroll{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Scroll",
 // 					},
-// 					AffectedAttribute: primitive.Attributes{
+// 					AffectedAttribute: primitives.Attributes{
 // 						MaxHealth: 0,
 // 						Agility:   1,
 // 						Strength:  0,
@@ -1683,7 +1683,7 @@ package entities
 // 			},
 // 			wantPlayer: Player{
 // 				Character: Character{
-// 					Shape:     primitive.Box{},
+// 					Shape:     primitives.Box{},
 // 					Health:    float64(AttributeRateAverage),
 // 					MaxHealth: float64(AttributeRateAverage),
 // 					Strength:  uint(AttributeRateAverage),
@@ -1701,7 +1701,7 @@ package entities
 // 			items: []ItemLike{
 // 				&Food{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Food",
 // 					},
 // 					HealthRegeneration: 15,
@@ -1709,7 +1709,7 @@ package entities
 // 			},
 // 			wantPlayer: Player{
 // 				Character: Character{
-// 					Shape:     primitive.Box{},
+// 					Shape:     primitives.Box{},
 // 					Health:    float64(AttributeRateAverage),
 // 					MaxHealth: float64(AttributeRateAverage),
 // 					Strength:  uint(AttributeRateAverage),
@@ -1727,7 +1727,7 @@ package entities
 // 			items: []ItemLike{
 // 				&Weapon{
 // 					Item: Item{
-// 						Shape: primitive.Box{},
+// 						Shape: primitives.Box{},
 // 						Name:  "Awkward Weapon",
 // 					},
 // 					Damage: 10,
@@ -1735,7 +1735,7 @@ package entities
 // 			},
 // 			wantPlayer: Player{
 // 				Character: Character{
-// 					Shape:     primitive.Box{},
+// 					Shape:     primitives.Box{},
 // 					Health:    float64(AttributeRateAverage),
 // 					MaxHealth: float64(AttributeRateAverage),
 // 					Strength:  uint(AttributeRateAverage),
@@ -1752,7 +1752,7 @@ package entities
 
 // 	for _, tt := range tests {
 // 		t.Run(tt.name, func(t *testing.T) {
-// 			p := NewPlayer(primitive.Box{})
+// 			p := NewPlayer(primitives.Box{})
 
 // 			for idx := range tt.items {
 // 				_ = p.Backpack.AddItem(tt.items[idx])
@@ -1776,15 +1776,15 @@ package entities
 // func TestNewPlayer(t *testing.T) {
 // 	tests := []struct {
 // 		name string
-// 		box  primitive.Box
+// 		box  primitives.Box
 // 		want *Player
 // 	}{
 // 		{
 // 			name: "player constructor",
-// 			box:  primitive.Box{Point: primitive.Point2D[int]{X: 1, Y: 2}, Size: primitive.Size2D[uint]{Height: 1, Width: 2}},
+// 			box:  primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 2}},
 // 			want: &Player{
 // 				Character: Character{
-// 					Shape:     primitive.Box{Point: primitive.Point2D[int]{X: 1, Y: 2}, Size: primitive.Size2D[uint]{Height: 1, Width: 2}},
+// 					Shape:     primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 2}},
 // 					Health:    float64(AttributeRateAverage),
 // 					MaxHealth: float64(AttributeRateAverage),
 // 					Strength:  uint(AttributeRateAverage),

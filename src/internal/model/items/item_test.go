@@ -65,11 +65,11 @@ package items
 // func TestGetRandomAttribute(t *testing.T) {
 // 	tests := []struct {
 // 		name                       string
-// 		wantAffectedAttributesList []primitive.Attributes
+// 		wantAffectedAttributesList []primitives.Attributes
 // 	}{
 // 		{
 // 			name: "get random attribute",
-// 			wantAffectedAttributesList: []primitive.Attributes{
+// 			wantAffectedAttributesList: []primitives.Attributes{
 // 				{
 // 					MaxHealth: 1,
 // 					Agility:   0,
@@ -102,20 +102,20 @@ package items
 // func TestItem_Taken(t *testing.T) {
 // 	tests := []struct {
 // 		name string
-// 		want primitive.Box
+// 		want primitives.Box
 // 	}{
 // 		{
 // 			name: "item is taken",
-// 			want: primitive.Box{},
+// 			want: primitives.Box{},
 // 		},
 // 	}
 
 // 	for _, tt := range tests {
 // 		t.Run(tt.name, func(t *testing.T) {
 // 			item := &Item{
-// 				Shape: primitive.Box{
-// 					Point: primitive.Point2D[int]{X: 1, Y: 2},
-// 					Size:  primitive.Size2D[uint]{Height: 1, Width: 1},
+// 				Shape: primitives.Box{
+// 					Point: primitives.Point2D[int]{X: 1, Y: 2},
+// 					Size:  primitives.Size2D[uint]{Height: 1, Width: 1},
 // 				},
 // 			}
 // 			items.Take()
@@ -129,20 +129,20 @@ package items
 // func TestItem_Dropped(t *testing.T) {
 // 	tests := []struct {
 // 		name string
-// 		box  primitive.Box
-// 		want primitive.Box
+// 		box  primitives.Box
+// 		want primitives.Box
 // 	}{
 // 		{
 // 			name: "item is dropped",
-// 			box:  primitive.Box{Point: primitive.Point2D[int]{X: 1, Y: 2}, Size: primitive.Size2D[uint]{Height: 1, Width: 1}},
-// 			want: primitive.Box{Point: primitive.Point2D[int]{X: 1, Y: 2}, Size: primitive.Size2D[uint]{Height: 1, Width: 1}},
+// 			box:  primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 1}},
+// 			want: primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 1}},
 // 		},
 // 	}
 
 // 	for _, tt := range tests {
 // 		t.Run(tt.name, func(t *testing.T) {
 // 			item := &Item{
-// 				Shape: primitive.Box{},
+// 				Shape: primitives.Box{},
 // 			}
 // 			items.Drop(tt.box)
 // 			if items.Shape != tt.want {
@@ -155,12 +155,12 @@ package items
 // func TestAttribute_GetAffectedAttributeName(t *testing.T) {
 // 	tests := []struct {
 // 		name       string
-// 		attributes primitive.Attributes
+// 		attributes primitives.Attributes
 // 		want       string
 // 	}{
 // 		{
 // 			name: "get MaxHealth",
-// 			attributes: primitive.Attributes{
+// 			attributes: primitives.Attributes{
 // 				MaxHealth: 1,
 // 				Agility:   0,
 // 				Strength:  0,
@@ -169,7 +169,7 @@ package items
 // 		},
 // 		{
 // 			name: "get Agility",
-// 			attributes: primitive.Attributes{
+// 			attributes: primitives.Attributes{
 // 				MaxHealth: 0,
 // 				Agility:   1,
 // 				Strength:  0,
@@ -178,7 +178,7 @@ package items
 // 		},
 // 		{
 // 			name: "get Strength",
-// 			attributes: primitive.Attributes{
+// 			attributes: primitives.Attributes{
 // 				MaxHealth: 0,
 // 				Agility:   0,
 // 				Strength:  1,
@@ -187,7 +187,7 @@ package items
 // 		},
 // 		{
 // 			name: "no affected attributes",
-// 			attributes: primitive.Attributes{
+// 			attributes: primitives.Attributes{
 // 				MaxHealth: 0,
 // 				Agility:   0,
 // 				Strength:  0,
@@ -196,7 +196,7 @@ package items
 // 		},
 // 		{
 // 			name: "multiple affected attributes",
-// 			attributes: primitive.Attributes{
+// 			attributes: primitives.Attributes{
 // 				MaxHealth: 1,
 // 				Agility:   1,
 // 				Strength:  0,

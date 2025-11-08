@@ -1,20 +1,20 @@
 package entities
 
 import (
-	"gogue/internal/model/primitive"
+	"gogue/internal/model/primitives"
 	"math/rand"
 )
 
 type Character struct {
-	Shape      primitive.Box
-	Attributes primitive.Attributes
+	Shape      primitives.Box
+	Attributes primitives.Attributes
 }
 
 func (c *Character) IsAlive() bool {
 	return c.Attributes.Health > 0
 }
 
-func (c *Character) Move(delta primitive.Point2D[int]) {
+func (c *Character) Move(delta primitives.Point2D[int]) {
 	c.Shape.Move(delta)
 }
 

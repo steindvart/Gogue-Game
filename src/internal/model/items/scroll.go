@@ -1,15 +1,13 @@
 package items
 
-import (
-	"gogue/internal/model/primitive"
-)
+import "gogue/internal/model/primitives"
 
 type Scroll struct {
 	Item              Item
-	AffectedAttribute primitive.Attributes
+	AffectedAttribute primitives.Attributes
 }
 
-func NewScroll(box primitive.Box) *Scroll {
+func NewScroll(box primitives.Box) *Scroll {
 	scrollNames := []string{
 		"Scroll of Shadowstep",
 		"Parchment of Eternal Flame",
@@ -35,11 +33,11 @@ func (s *Scroll) Take() {
 	s.Item.Take()
 }
 
-func (s *Scroll) Drop(box primitive.Box) {
+func (s *Scroll) Drop(box primitives.Box) {
 	s.Item.Drop(box)
 }
 
-func (s *Scroll) Use() primitive.Attributes {
+func (s *Scroll) Use() primitives.Attributes {
 	return s.AffectedAttribute
 }
 

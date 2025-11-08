@@ -40,32 +40,32 @@ package entities
 // func TestCharacter_Move(t *testing.T) {
 // 	tests := []struct {
 // 		name  string
-// 		start primitive.Point2D[int]
-// 		delta primitive.Point2D[int]
-// 		want  primitive.Point2D[int]
+// 		start primitives.Point2D[int]
+// 		delta primitives.Point2D[int]
+// 		want  primitives.Point2D[int]
 // 	}{
 // 		{
 // 			name:  "move positive",
-// 			start: primitive.Point2D[int]{X: 0, Y: 0},
-// 			delta: primitive.Point2D[int]{X: 2, Y: 3},
-// 			want:  primitive.Point2D[int]{X: 2, Y: 3},
+// 			start: primitives.Point2D[int]{X: 0, Y: 0},
+// 			delta: primitives.Point2D[int]{X: 2, Y: 3},
+// 			want:  primitives.Point2D[int]{X: 2, Y: 3},
 // 		},
 // 		{
 // 			name:  "move negative",
-// 			start: primitive.Point2D[int]{X: 5, Y: 5},
-// 			delta: primitive.Point2D[int]{X: -2, Y: -3},
-// 			want:  primitive.Point2D[int]{X: 3, Y: 2},
+// 			start: primitives.Point2D[int]{X: 5, Y: 5},
+// 			delta: primitives.Point2D[int]{X: -2, Y: -3},
+// 			want:  primitives.Point2D[int]{X: 3, Y: 2},
 // 		},
 // 		{
 // 			name:  "move zero",
-// 			start: primitive.Point2D[int]{X: 1, Y: 1},
-// 			delta: primitive.Point2D[int]{X: 0, Y: 0},
-// 			want:  primitive.Point2D[int]{X: 1, Y: 1},
+// 			start: primitives.Point2D[int]{X: 1, Y: 1},
+// 			delta: primitives.Point2D[int]{X: 0, Y: 0},
+// 			want:  primitives.Point2D[int]{X: 1, Y: 1},
 // 		},
 // 	}
 // 	for _, tt := range tests {
 // 		t.Run(tt.name, func(t *testing.T) {
-// 			c := &Character{Shape: primitive.Box{Point: tt.start}}
+// 			c := &Character{Shape: primitives.Box{Point: tt.start}}
 // 			c.Move(tt.delta)
 // 			if c.Shape.Point != tt.want {
 // 				t.Errorf("Move() = (%v), want (%v)", c.Shape.Point, tt.want)

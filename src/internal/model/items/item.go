@@ -1,7 +1,7 @@
 package items
 
 import (
-	"gogue/internal/model/primitive"
+	"gogue/internal/model/primitives"
 	"math/rand"
 )
 
@@ -24,15 +24,15 @@ type Type interface {
 }
 
 type Item struct {
-	Shape primitive.Box
+	Shape primitives.Box
 	Name  string
 }
 
 func (i *Item) Take() {
-	i.Shape = primitive.Box{}
+	i.Shape = primitives.Box{}
 }
 
-func (i *Item) Drop(box primitive.Box) {
+func (i *Item) Drop(box primitives.Box) {
 	i.Shape = box
 }
 
@@ -44,9 +44,9 @@ func getAttributeRandomName(names []string) string {
 	return names[rand.Intn(len(names))]
 }
 
-func getRandomAttribute() primitive.Attributes {
+func getRandomAttribute() primitives.Attributes {
 	attribute := rand.Intn(AttributesNum)
-	attributes := primitive.Attributes{}
+	attributes := primitives.Attributes{}
 
 	switch attribute {
 	case int(AttributeTypeMaxHealth):

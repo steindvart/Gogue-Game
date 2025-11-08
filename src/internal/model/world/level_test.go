@@ -1,7 +1,7 @@
 package world
 
 import (
-	"gogue/internal/model/primitive"
+	"gogue/internal/model/primitives"
 	"strings"
 	"testing"
 )
@@ -9,24 +9,24 @@ import (
 func TestLevel_GenerateRoomsOnLevel(t *testing.T) {
 	tests := []struct {
 		name      string
-		sizeMap   primitive.Size2D[uint]
+		sizeMap   primitives.Size2D[uint]
 		wantErr   bool
 		errorText string
 	}{
 		{
 			name:    "Valid map size 15x15",
-			sizeMap: primitive.Size2D[uint]{Height: 30, Width: 90},
+			sizeMap: primitives.Size2D[uint]{Height: 30, Width: 90},
 			wantErr: false,
 		},
 		{
 			name:      "Map too small width",
-			sizeMap:   primitive.Size2D[uint]{Height: 6, Width: 8},
+			sizeMap:   primitives.Size2D[uint]{Height: 6, Width: 8},
 			wantErr:   true,
 			errorText: "map size is too small",
 		},
 		{
 			name:      "Map too small height",
-			sizeMap:   primitive.Size2D[uint]{Height: 6, Width: 8},
+			sizeMap:   primitives.Size2D[uint]{Height: 6, Width: 8},
 			wantErr:   true,
 			errorText: "map size is too small",
 		},

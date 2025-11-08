@@ -2,7 +2,7 @@ package state
 
 import (
 	"gogue/internal/model/entities"
-	"gogue/internal/model/primitive"
+	"gogue/internal/model/primitives"
 	"gogue/internal/model/signal"
 	"gogue/internal/model/world"
 	"gogue/internal/presentation/action"
@@ -22,11 +22,11 @@ type Game struct {
 func NewGame() (*Game, error) {
 	player := entities.Player{
 		Character: entities.Character{
-			Shape: primitive.Box{
-				Point: primitive.Point2D[int]{X: 5, Y: 5},
-				Size:  primitive.Size2D[uint]{Height: 1, Width: 1},
+			Shape: primitives.Box{
+				Point: primitives.Point2D[int]{X: 5, Y: 5},
+				Size:  primitives.Size2D[uint]{Height: 1, Width: 1},
 			},
-			Attributes: primitive.Attributes{
+			Attributes: primitives.Attributes{
 				Health:    100,
 				MaxHealth: 100,
 				Strength:  10,
@@ -42,7 +42,7 @@ func NewGame() (*Game, error) {
 
 	level := world.Level{}
 	// @todo - обработать ошибку
-	err := level.GenerateNineRooms(primitive.Size2D[uint]{Height: 30, Width: 90})
+	err := level.GenerateNineRooms(primitives.Size2D[uint]{Height: 30, Width: 90})
 	if err != nil {
 		return nil, err
 	}
@@ -63,28 +63,28 @@ func NewGame() (*Game, error) {
 	game.view.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch game.eventToAction(event) {
 		case action.MoveUp:
-			game.player.Character.Shape.Move(primitive.Point2D[int]{X: 0, Y: -1})
+			game.player.Character.Shape.Move(primitives.Point2D[int]{X: 0, Y: -1})
 			return nil
 		case action.MoveDown:
-			game.player.Character.Shape.Move(primitive.Point2D[int]{X: 0, Y: 1})
+			game.player.Character.Shape.Move(primitives.Point2D[int]{X: 0, Y: 1})
 			return nil
 		case action.MoveLeft:
-			game.player.Character.Shape.Move(primitive.Point2D[int]{X: -1, Y: 0})
+			game.player.Character.Shape.Move(primitives.Point2D[int]{X: -1, Y: 0})
 			return nil
 		case action.MoveRight:
-			game.player.Character.Shape.Move(primitive.Point2D[int]{X: 1, Y: 0})
+			game.player.Character.Shape.Move(primitives.Point2D[int]{X: 1, Y: 0})
 			return nil
 		case action.MoveLeftUpperCorner:
-			game.player.Character.Shape.Move(primitive.Point2D[int]{X: -1, Y: -1})
+			game.player.Character.Shape.Move(primitives.Point2D[int]{X: -1, Y: -1})
 			return nil
 		case action.MoveRightUpperCorner:
-			game.player.Character.Shape.Move(primitive.Point2D[int]{X: 1, Y: -1})
+			game.player.Character.Shape.Move(primitives.Point2D[int]{X: 1, Y: -1})
 			return nil
 		case action.MoveLefLowerCorner:
-			game.player.Character.Shape.Move(primitive.Point2D[int]{X: -1, Y: 1})
+			game.player.Character.Shape.Move(primitives.Point2D[int]{X: -1, Y: 1})
 			return nil
 		case action.MoveRightLowerCorner:
-			game.player.Character.Shape.Move(primitive.Point2D[int]{X: 1, Y: 1})
+			game.player.Character.Shape.Move(primitives.Point2D[int]{X: 1, Y: 1})
 			return nil
 		case action.Exit:
 			game.signal = signal.Stop

@@ -10,16 +10,16 @@ package items
 // func TestNewScroll(t *testing.T) {
 // 	tests := []struct {
 // 		name                       string
-// 		box                        primitive.Box
-// 		wantShape                  primitive.Box
+// 		box                        primitives.Box
+// 		wantShape                  primitives.Box
 // 		wantNames                  []string
 // 		wantIncrementLessThan      uint
-// 		wantAffectedAttributesList []primitive.Attributes
+// 		wantAffectedAttributesList []primitives.Attributes
 // 	}{
 // 		{
 // 			name:      "scroll constructor",
-// 			box:       primitive.Box{Point: primitive.Point2D[int]{X: 1, Y: 2}, Size: primitive.Size2D[uint]{Height: 1, Width: 1}},
-// 			wantShape: primitive.Box{Point: primitive.Point2D[int]{X: 1, Y: 2}, Size: primitive.Size2D[uint]{Height: 1, Width: 1}},
+// 			box:       primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 1}},
+// 			wantShape: primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 1}},
 // 			wantNames: []string{
 // 				"Scroll of Shadowstep",
 // 				"Parchment of Eternal Flame",
@@ -32,7 +32,7 @@ package items
 // 				"Parchment of Thunderous Roar",
 // 			},
 // 			wantIncrementLessThan: uint(IncreaseAttributeBaseParcentage + IncreaseAttributeMaxPercentage + 1),
-// 			wantAffectedAttributesList: []primitive.Attributes{
+// 			wantAffectedAttributesList: []primitives.Attributes{
 // 				{
 // 					MaxHealth: 1,
 // 					Agility:   0,
@@ -74,11 +74,11 @@ package items
 // func TestScroll_Take(t *testing.T) {
 // 	tests := []struct {
 // 		name string
-// 		want primitive.Box
+// 		want primitives.Box
 // 	}{
 // 		{
 // 			name: "scroll is taken",
-// 			want: primitive.Box{},
+// 			want: primitives.Box{},
 // 		},
 // 	}
 
@@ -86,13 +86,13 @@ package items
 // 		t.Run(tt.name, func(t *testing.T) {
 // 			scroll := &Scroll{
 // 				Item: Item{
-// 					Shape: primitive.Box{
-// 						Point: primitive.Point2D[int]{X: 1, Y: 2},
-// 						Size:  primitive.Size2D[uint]{Height: 1, Width: 1},
+// 					Shape: primitives.Box{
+// 						Point: primitives.Point2D[int]{X: 1, Y: 2},
+// 						Size:  primitives.Size2D[uint]{Height: 1, Width: 1},
 // 					},
 // 					Name: "Awkward Scroll",
 // 				},
-// 				AffectedAttribute: primitive.Attributes{MaxHealth: 1, Agility: 0, Strength: 0},
+// 				AffectedAttribute: primitives.Attributes{MaxHealth: 1, Agility: 0, Strength: 0},
 // 				Increment:         1,
 // 			}
 // 			scroll.Take()
@@ -106,13 +106,13 @@ package items
 // func TestScroll_Drop(t *testing.T) {
 // 	tests := []struct {
 // 		name string
-// 		box  primitive.Box
-// 		want primitive.Box
+// 		box  primitives.Box
+// 		want primitives.Box
 // 	}{
 // 		{
 // 			name: "scroll is dropped",
-// 			box:  primitive.Box{Point: primitive.Point2D[int]{X: 1, Y: 2}, Size: primitive.Size2D[uint]{Height: 1, Width: 1}},
-// 			want: primitive.Box{Point: primitive.Point2D[int]{X: 1, Y: 2}, Size: primitive.Size2D[uint]{Height: 1, Width: 1}},
+// 			box:  primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 1}},
+// 			want: primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 1}},
 // 		},
 // 	}
 
@@ -120,10 +120,10 @@ package items
 // 		t.Run(tt.name, func(t *testing.T) {
 // 			scroll := &Scroll{
 // 				Item: Item{
-// 					Shape: primitive.Box{},
+// 					Shape: primitives.Box{},
 // 					Name:  "Awkward Scroll",
 // 				},
-// 				AffectedAttribute: primitive.Attributes{MaxHealth: 1, Agility: 0, Strength: 0},
+// 				AffectedAttribute: primitives.Attributes{MaxHealth: 1, Agility: 0, Strength: 0},
 // 				Increment:         1,
 // 			}
 
@@ -145,10 +145,10 @@ package items
 // 			name: "use scroll",
 // 			scroll: &Scroll{
 // 				Item: Item{
-// 					Shape: primitive.Box{},
+// 					Shape: primitives.Box{},
 // 					Name:  "Awkward Scroll",
 // 				},
-// 				AffectedAttribute: primitive.Attributes{MaxHealth: 1, Agility: 0, Strength: 0},
+// 				AffectedAttribute: primitives.Attributes{MaxHealth: 1, Agility: 0, Strength: 0},
 // 				Increment:         5,
 // 			},
 // 		},
@@ -156,7 +156,7 @@ package items
 
 // 	for _, tt := range tests {
 // 		t.Run(tt.name, func(t *testing.T) {
-// 			player := entities.NewPlayer(primitive.Box{})
+// 			player := entities.NewPlayer(primitives.Box{})
 // 			tt.scroll.Use(player)
 
 // 			if player.Character.MaxHealth == float64(entities.AttributeRateAverage) {

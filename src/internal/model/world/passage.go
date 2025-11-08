@@ -1,7 +1,7 @@
 package world
 
-import "gogue/internal/model/primitive"
+import "gogue/internal/model/primitives"
 
 type Passage struct {
-	Shapes []primitive.Box
+	Shapes []primitives.Box
 }
