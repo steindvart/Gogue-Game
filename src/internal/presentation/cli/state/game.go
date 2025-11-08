@@ -3,7 +3,7 @@ package state
 import (
 	"gogue/internal/model/entities"
 	"gogue/internal/model/primitives"
-	"gogue/internal/model/signal"
+	"gogue/internal/model/signals"
 	"gogue/internal/model/world"
 	"gogue/internal/presentation/action"
 	"unicode"
@@ -16,7 +16,7 @@ type Game struct {
 	player entities.Player
 	level  world.Level
 	view   *tview.Box
-	signal signal.Type
+	signal signals.Type
 }
 
 func NewGame() (*Game, error) {
@@ -87,7 +87,7 @@ func NewGame() (*Game, error) {
 			game.player.Character.Shape.Move(primitives.Point2D[int]{X: 1, Y: 1})
 			return nil
 		case action.Exit:
-			game.signal = signal.Stop
+			game.signal = signals.Stop
 			return nil
 		default:
 			return event
@@ -134,10 +134,10 @@ func (g *Game) eventToAction(event *tcell.EventKey) action.Type {
 	return action.NoAction
 }
 
-func (g *Game) Update(float64) signal.Type {
+func (g *Game) Update(float64) signals.Type {
 	// Нет lastField, всё строится на лету
 	sig := g.signal
-	g.signal = signal.NoSignal
+	g.signal = signals.NoSignal
 	return sig
 }
 

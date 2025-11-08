@@ -1,7 +1,7 @@
 package cli
 
 import (
-	"gogue/internal/model/signal"
+	"gogue/internal/model/signals"
 	"testing"
 
 	"github.com/rivo/tview"
@@ -11,9 +11,9 @@ type mockState struct {
 	updateCalled bool
 }
 
-func (m *mockState) Update(dt float64) signal.Type {
+func (m *mockState) Update(dt float64) signals.Type {
 	m.updateCalled = true
-	return signal.NoSignal
+	return signals.NoSignal
 }
 
 func (m *mockState) Primitive() tview.Primitive {

@@ -1,7 +1,7 @@
 package cli
 
 import (
-	"gogue/internal/model/signal"
+	"gogue/internal/model/signals"
 	"gogue/internal/presentation/cli/state"
 	"time"
 
@@ -72,7 +72,7 @@ func (g *Game) runUpdateLoop(fpsLimit int) {
 
 			sig := state.Update(dt)
 
-			if sig != signal.NoSignal {
+			if sig != signals.NoSignal {
 				g.App.QueueUpdateDraw(func() {
 					g.handleSignal(sig)
 					if s := g.CurrentState(); s != nil {
@@ -89,19 +89,19 @@ func (g *Game) runUpdateLoop(fpsLimit int) {
 	}()
 }
 
-func (g *Game) handleSignal(s signal.Type) {
+func (g *Game) handleSignal(s signals.Type) {
 	switch s {
-	case signal.Stop:
+	case signals.Stop:
 		g.PopState()
-	case signal.NewGame:
+	case signals.NewGame:
 		game, err := state.NewGame()
 		if err != nil {
 			panic(err)
 		}
 		g.PushState(game)
-	case signal.LoadGame:
+	case signals.LoadGame:
 		// @todo push load game state
-	case signal.ShowScoreboard:
+	case signals.ShowScoreboard:
 		// @todo push scoreboard state
 	}
 }

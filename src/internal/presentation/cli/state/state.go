@@ -1,12 +1,12 @@
 package state
 
 import (
-	"gogue/internal/model/signal"
+	"gogue/internal/model/signals"
 
 	"github.com/rivo/tview"
 )
 
 type State interface {
-	Update(dt float64) signal.Type
+	Update(dt float64) signals.Type
 	Primitive() tview.Primitive
 }

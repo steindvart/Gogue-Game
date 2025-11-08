@@ -1,4 +1,4 @@
-package signal
+package signals
 
 type Type int
 
