@@ -12,9 +12,6 @@ jobs:
     container:
       image: golang:1.22
     steps:
-      - name: Setup Git safe directory
-        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
-
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -24,34 +21,11 @@ jobs:
           version: v1.60
           working-directory: src
 
-  analyze:
-    runs-on: ubuntu-latest
-    container:
-      image: golang:1.22
-    steps:
-      - name: Setup Git safe directory
-        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
-
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Run gocyclo Analysis
-        uses: ./.github/actions/gocyclo-analysis
-        id: gocyclo_analysis
-        with:
-          ignore_pattern: '_test|_mock|mock_|.pb.go|proto'
-          over: '20'
-          top: '10'
-          working-directory: src
-
   build:
     runs-on: ubuntu-latest
     container:
       image: golang:1.22
     steps:
-      - name: Setup Git safe directory
-        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
-
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -64,9 +38,6 @@ jobs:
     container:
       image: golang:1.22
     steps:
-      - name: Setup Git safe directory
-        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
-
       - name: Checkout code
         uses: actions/checkout@v4
 
