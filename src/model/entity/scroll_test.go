@@ -69,7 +69,7 @@ func TestNewScroll(t *testing.T) {
 	}
 }
 
-func TestScroll_Taken(t *testing.T) {
+func TestScroll_Take(t *testing.T) {
 	tests := []struct {
 		name string
 		want Box
@@ -93,7 +93,7 @@ func TestScroll_Taken(t *testing.T) {
 				AffectedAttribute: Attributes{MaxHealth: 1, Agility: 0, Strength: 0},
 				Increment:         1,
 			}
-			scroll.Taken()
+			scroll.Take()
 			if scroll.Item.Shape != tt.want {
 				t.Errorf("Taken() = (%v), want (%v)", scroll.Item.Shape, tt.want)
 			}
@@ -101,7 +101,7 @@ func TestScroll_Taken(t *testing.T) {
 	}
 }
 
-func TestScroll_Dropped(t *testing.T) {
+func TestScroll_Drop(t *testing.T) {
 	tests := []struct {
 		name string
 		box  Box
@@ -125,7 +125,7 @@ func TestScroll_Dropped(t *testing.T) {
 				Increment:         1,
 			}
 
-			scroll.Dropped(tt.box)
+			scroll.Drop(tt.box)
 
 			if scroll.Item.Shape != tt.want {
 				t.Errorf("Dropped(): Shape %v, want %v", scroll.Item.Shape, tt.want)

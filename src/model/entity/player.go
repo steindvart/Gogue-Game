@@ -40,18 +40,32 @@ func (p *Player) TakeTreasure(t *Treasure) {
 	p.Backpack.AddTreasure(t)
 }
 
-func (p *Player) TakeItem(i ItemLike) error {
-	return p.Backpack.AddItem(i)
+func (p *Player) TakeItem(item ItemLike) error {
+	return p.Backpack.AddItem(item)
 }
 
-func (p *Player) DropItem(i ItemLike) error {
-	return p.Backpack.RemoveItem(i, p.Character.Shape)
+func (p *Player) DropItem(item ItemLike) error {
+	return p.Backpack.RemoveItem(item, p.Character.Shape)
 }
 
-func (p *Player) UseItem(i ItemLike) error {
-	err := p.Backpack.RemoveItem(i, p.Character.Shape)
+func (p *Player) UseItem(item ItemLike) error {
+	if w := IsWeapon(item); w != nil {
+		err := p.Backpack.weaponIsInBackpack(w)
+		if err != nil {
+			return err
+		}
+
+		if p.Weapon != nil && p.Weapon != w {
+			_ = p.Backpack.RemoveItem(p.Weapon, p.Character.Shape)
+		}
+
+		item.Use(p)
+		return nil
+	}
+
+	err := p.Backpack.RemoveItem(item, p.Character.Shape)
 	if err == nil {
-		i.Use(p)
+		item.Use(p)
 		return nil
 	}
 

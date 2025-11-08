@@ -7,6 +7,35 @@ import (
 	"time"
 )
 
+func TestNewBackpack(t *testing.T) {
+	tests := []struct {
+		name string
+		want *Backpack
+	}{
+		{
+			name: "backpack constructor",
+			want: &Backpack{
+				Capacity:  BackpackDefaultCapacity,
+				ItemsNum:  0,
+				Elixirs:   map[string][]Elixir{},
+				Scrolls:   map[string][]Scroll{},
+				Foods:     map[string][]Food{},
+				Weapons:   map[string][]Weapon{},
+				Treasures: 0,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := NewBackpack()
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewBackpack() = %#v, want %#v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestIsElixir(t *testing.T) {
 	tests := []struct {
 		name string
@@ -232,7 +261,7 @@ func TestBackpack_AddTreasure(t *testing.T) {
 		want     Backpack
 	}{
 		{
-			name: "treasure size 10",
+			name: "treasure value 10",
 			treasure: &Treasure{
 				Shape: Box{},
 				Name:  "Awkward Treasure",
@@ -249,7 +278,7 @@ func TestBackpack_AddTreasure(t *testing.T) {
 			},
 		},
 		{
-			name: "treasure size 0",
+			name: "treasure value 0",
 			treasure: &Treasure{
 				Shape: Box{},
 				Name:  "Awkward Treasure",
@@ -1881,12 +1910,12 @@ func TestBackpack_GetElixirsList(t *testing.T) {
 	tests := []struct {
 		name  string
 		items []ItemLike
-		want  ElementsList
+		want  ItemsList
 	}{
 		{
 			name:  "zero elixirs",
 			items: []ItemLike{},
-			want:  ElementsList{},
+			want:  ItemsList{},
 		},
 		{
 			name: "multiple elixirs of same type",
@@ -1931,7 +1960,7 @@ func TestBackpack_GetElixirsList(t *testing.T) {
 					Increment: 10,
 				},
 			},
-			want: ElementsList{
+			want: ItemsList{
 				{
 					Name: "Awkward Elixir",
 					Num:  3,
@@ -1994,7 +2023,7 @@ func TestBackpack_GetElixirsList(t *testing.T) {
 					Increment: 10,
 				},
 			},
-			want: ElementsList{
+			want: ItemsList{
 				{
 					Name: "Awkward Elixir 1",
 					Num:  1,
@@ -2036,12 +2065,12 @@ func TestBackpack_GetScrollsList(t *testing.T) {
 	tests := []struct {
 		name  string
 		items []ItemLike
-		want  ElementsList
+		want  ItemsList
 	}{
 		{
 			name:  "zero scrolls",
 			items: []ItemLike{},
-			want:  ElementsList{},
+			want:  ItemsList{},
 		},
 		{
 			name: "multiple scrolls of same type",
@@ -2083,7 +2112,7 @@ func TestBackpack_GetScrollsList(t *testing.T) {
 					Increment: 10,
 				},
 			},
-			want: ElementsList{
+			want: ItemsList{
 				{
 					Name: "Awkward Scroll",
 					Num:  3,
@@ -2142,7 +2171,7 @@ func TestBackpack_GetScrollsList(t *testing.T) {
 					Increment: 10,
 				},
 			},
-			want: ElementsList{
+			want: ItemsList{
 				{
 					Name: "Awkward Scroll 1",
 					Num:  1,
@@ -2184,12 +2213,12 @@ func TestBackpack_GetFoodsList(t *testing.T) {
 	tests := []struct {
 		name  string
 		items []ItemLike
-		want  ElementsList
+		want  ItemsList
 	}{
 		{
 			name:  "zero foods",
 			items: []ItemLike{},
-			want:  ElementsList{},
+			want:  ItemsList{},
 		},
 		{
 			name: "multiple foods of same type",
@@ -2216,7 +2245,7 @@ func TestBackpack_GetFoodsList(t *testing.T) {
 					HealthRegeneration: 15,
 				},
 			},
-			want: ElementsList{
+			want: ItemsList{
 				{
 					Name: "Awkward Food",
 					Num:  3,
@@ -2255,7 +2284,7 @@ func TestBackpack_GetFoodsList(t *testing.T) {
 					HealthRegeneration: 15,
 				},
 			},
-			want: ElementsList{
+			want: ItemsList{
 				{
 					Name: "Awkward Food 1",
 					Num:  1,
@@ -2297,12 +2326,12 @@ func TestBackpack_GetWeaponsList(t *testing.T) {
 	tests := []struct {
 		name  string
 		items []ItemLike
-		want  ElementsList
+		want  ItemsList
 	}{
 		{
 			name:  "zero weapons",
 			items: []ItemLike{},
-			want:  ElementsList{},
+			want:  ItemsList{},
 		},
 		{
 			name: "multiple weapons of same type",
@@ -2329,7 +2358,7 @@ func TestBackpack_GetWeaponsList(t *testing.T) {
 					Damage: 10,
 				},
 			},
-			want: ElementsList{
+			want: ItemsList{
 				{
 					Name: "Awkward Weapon",
 					Num:  3,
@@ -2368,7 +2397,7 @@ func TestBackpack_GetWeaponsList(t *testing.T) {
 					Damage: 10,
 				},
 			},
-			want: ElementsList{
+			want: ItemsList{
 				{
 					Name: "Awkward Weapon 1",
 					Num:  1,
@@ -2410,7 +2439,7 @@ func TestBackpack_GetItemsList(t *testing.T) {
 	tests := []struct {
 		name  string
 		items []ItemLike
-		want  ElementsList
+		want  ItemsList
 	}{
 		{
 			name: "elixir, scroll, food, weapon",
@@ -2455,7 +2484,7 @@ func TestBackpack_GetItemsList(t *testing.T) {
 					Damage: 10,
 				},
 			},
-			want: ElementsList{
+			want: ItemsList{
 				{
 					Name: "Awkward Elixir",
 					Num:  1,
@@ -2560,7 +2589,7 @@ func TestBackpack_GetItemsList(t *testing.T) {
 					Damage: 10,
 				},
 			},
-			want: ElementsList{
+			want: ItemsList{
 				{
 					Name: "Awkward Elixir 1",
 					Num:  1,
@@ -2647,15 +2676,15 @@ func TestBackpack_GetItemsList(t *testing.T) {
 	}
 }
 
-func TestElementsList_Sort(t *testing.T) {
+func TestItemsList_Sort(t *testing.T) {
 	tests := []struct {
 		name     string
-		elements []Element
-		want     ElementsList
+		elements []element
+		want     ItemsList
 	}{
 		{
 			name: "random order",
-			elements: []Element{
+			elements: []element{
 				{
 					Name: "F",
 					Num:  1,
@@ -2677,7 +2706,7 @@ func TestElementsList_Sort(t *testing.T) {
 					Item: nil,
 				},
 			},
-			want: ElementsList{
+			want: ItemsList{
 				{
 					Name: "B",
 					Num:  2,
@@ -2702,7 +2731,7 @@ func TestElementsList_Sort(t *testing.T) {
 		},
 		{
 			name: "ascending order",
-			elements: []Element{
+			elements: []element{
 				{
 					Name: "B",
 					Num:  2,
@@ -2724,7 +2753,7 @@ func TestElementsList_Sort(t *testing.T) {
 					Item: nil,
 				},
 			},
-			want: ElementsList{
+			want: ItemsList{
 				{
 					Name: "B",
 					Num:  2,
@@ -2749,7 +2778,7 @@ func TestElementsList_Sort(t *testing.T) {
 		},
 		{
 			name: "descending order",
-			elements: []Element{
+			elements: []element{
 				{
 					Name: "X",
 					Num:  1,
@@ -2771,7 +2800,7 @@ func TestElementsList_Sort(t *testing.T) {
 					Item: nil,
 				},
 			},
-			want: ElementsList{
+			want: ItemsList{
 				{
 					Name: "B",
 					Num:  2,
@@ -2796,48 +2825,19 @@ func TestElementsList_Sort(t *testing.T) {
 		},
 		{
 			name:     "zero elements",
-			elements: []Element{},
-			want:     ElementsList{},
+			elements: []element{},
+			want:     ItemsList{},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := ElementsList{}
+			got := ItemsList{}
 			got = append(got, tt.elements...)
 			got.Sort()
 
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Sort(): ElementsList got %#v, want %#v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestNewBackpack(t *testing.T) {
-	tests := []struct {
-		name string
-		want *Backpack
-	}{
-		{
-			name: "backpack constructor",
-			want: &Backpack{
-				Capacity:  BackpackDefaultCapacity,
-				ItemsNum:  0,
-				Elixirs:   map[string][]Elixir{},
-				Scrolls:   map[string][]Scroll{},
-				Foods:     map[string][]Food{},
-				Weapons:   map[string][]Weapon{},
-				Treasures: 0,
-			},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := NewBackpack()
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewBackpack() = %#v, want %#v", got, tt.want)
+				t.Errorf("Sort(): ItemsList got %#v, want %#v", got, tt.want)
 			}
 		})
 	}

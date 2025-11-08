@@ -190,33 +190,51 @@ func TestPlayer_Attack(t *testing.T) {
 
 func TestPlayer_AttackWithWeapon(t *testing.T) {
 	tests := []struct {
-		name     string
-		strength uint
-		want     uint
+		name   string
+		weapon *Weapon
+		want   uint
 	}{
 		{
-			name:     "normal attack",
-			strength: 7,
-			want:     7,
+			name: "damage 0",
+			weapon: &Weapon{
+				Item: Item{
+					Shape: Box{},
+					Name:  "Awkward Weapon",
+				},
+				Damage: 0,
+			},
+			want: uint(AttributeRateAverage),
 		},
 		{
-			name:     "zero strength",
-			strength: 0,
-			want:     0,
+			name: "damage 10",
+			weapon: &Weapon{
+				Item: Item{
+					Shape: Box{},
+					Name:  "Awkward Weapon",
+				},
+				Damage: 10,
+			},
+			want: uint(AttributeRateAverage) + 10,
 		},
 		{
-			name:     "high strength",
-			strength: 100,
-			want:     100,
+			name: "damage 50",
+			weapon: &Weapon{
+				Item: Item{
+					Shape: Box{},
+					Name:  "Awkward Weapon",
+				},
+				Damage: 50,
+			},
+			want: uint(AttributeRateAverage) + 50,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := &Player{Character: Character{Strength: tt.strength}}
-			p.Weapon = NewWeapon(Box{})
+			p := NewPlayer(Box{})
+			p.Weapon = tt.weapon
 
 			got := p.Attack()
-			if got != tt.want+p.Weapon.Damage {
+			if got != tt.want {
 				t.Errorf("Attack() = %v, want %v", got, tt.want)
 			}
 		})
@@ -1208,45 +1226,6 @@ func TestPlayer_UseItem(t *testing.T) {
 			},
 			wantError: nil,
 		},
-		{
-			name: "use weapon",
-			items: []ItemLike{
-				&Weapon{
-					Item: Item{
-						Shape: Box{},
-						Name:  "Awkward Weapon",
-					},
-					Damage: 10,
-				},
-			},
-			item: &Weapon{
-				Item: Item{
-					Shape: Box{},
-					Name:  "Awkward Weapon",
-				},
-				Damage: 10,
-			},
-			wantPlayer: Player{
-				Character: Character{
-					Shape:     Box{},
-					Health:    float64(AttributeRateAverage),
-					MaxHealth: float64(AttributeRateAverage),
-					Strength:  uint(AttributeRateAverage),
-					Agility:   uint(AttributeRateAverage),
-				},
-				Experience:     0,
-				CharacterLevel: 1,
-				Backpack:       NewBackpack(),
-				Weapon: &Weapon{
-					Item: Item{
-						Shape: Box{},
-						Name:  "Awkward Weapon",
-					},
-					Damage: 10,
-				},
-			},
-			wantError: nil,
-		},
 	}
 
 	for _, tt := range tests {
@@ -1264,6 +1243,247 @@ func TestPlayer_UseItem(t *testing.T) {
 			if !errors.Is(gotErr, tt.wantError) {
 				t.Errorf("UseItem(): error got %#v, want %#v", gotErr, tt.wantError)
 			}
+
+			if !reflect.DeepEqual(*p, tt.wantPlayer) {
+				t.Errorf("UseItem(): Player got %#v, want %#v", *p, tt.wantPlayer)
+			}
+		})
+	}
+}
+
+func TestPlayer_UseWeapon(t *testing.T) {
+	tests := []struct {
+		name             string
+		weapons          []ItemLike
+		currentWeaponIdx int
+		useWeaponIdx     int
+		wantPlayer       Player
+	}{
+		{
+			name: "use first weapon with current weapon nil",
+			weapons: []ItemLike{
+				&Weapon{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Weapon 1",
+					},
+					Damage: 1,
+				},
+				&Weapon{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Weapon 2",
+					},
+					Damage: 10,
+				},
+				&Weapon{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Weapon 3",
+					},
+					Damage: 50,
+				},
+			},
+			currentWeaponIdx: -1,
+			useWeaponIdx:     0,
+			wantPlayer: Player{
+				Character: Character{
+					Shape:     Box{},
+					Health:    float64(AttributeRateAverage),
+					MaxHealth: float64(AttributeRateAverage),
+					Strength:  uint(AttributeRateAverage),
+					Agility:   uint(AttributeRateAverage),
+				},
+				Experience:     0,
+				CharacterLevel: 1,
+				Backpack:       NewBackpack(),
+				Weapon:         nil,
+			},
+		},
+		{
+			name: "use second weapon with current weapon nil",
+			weapons: []ItemLike{
+				&Weapon{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Weapon 1",
+					},
+					Damage: 1,
+				},
+				&Weapon{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Weapon 2",
+					},
+					Damage: 10,
+				},
+				&Weapon{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Weapon 3",
+					},
+					Damage: 50,
+				},
+			},
+			currentWeaponIdx: -1,
+			useWeaponIdx:     1,
+			wantPlayer: Player{
+				Character: Character{
+					Shape:     Box{},
+					Health:    float64(AttributeRateAverage),
+					MaxHealth: float64(AttributeRateAverage),
+					Strength:  uint(AttributeRateAverage),
+					Agility:   uint(AttributeRateAverage),
+				},
+				Experience:     0,
+				CharacterLevel: 1,
+				Backpack:       NewBackpack(),
+				Weapon:         nil,
+			},
+		},
+		{
+			name: "use first weapon with current weapon third",
+			weapons: []ItemLike{
+				&Weapon{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Weapon 1",
+					},
+					Damage: 1,
+				},
+				&Weapon{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Weapon 2",
+					},
+					Damage: 10,
+				},
+				&Weapon{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Weapon 3",
+					},
+					Damage: 50,
+				},
+			},
+			currentWeaponIdx: 2,
+			useWeaponIdx:     0,
+			wantPlayer: Player{
+				Character: Character{
+					Shape:     Box{},
+					Health:    float64(AttributeRateAverage),
+					MaxHealth: float64(AttributeRateAverage),
+					Strength:  uint(AttributeRateAverage),
+					Agility:   uint(AttributeRateAverage),
+				},
+				Experience:     0,
+				CharacterLevel: 1,
+				Backpack:       NewBackpack(),
+				Weapon:         nil,
+			},
+		},
+		{
+			name: "use second weapon with current weapon third",
+			weapons: []ItemLike{
+				&Weapon{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Weapon 1",
+					},
+					Damage: 1,
+				},
+				&Weapon{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Weapon 2",
+					},
+					Damage: 10,
+				},
+				&Weapon{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Weapon 3",
+					},
+					Damage: 50,
+				},
+			},
+			currentWeaponIdx: 2,
+			useWeaponIdx:     1,
+			wantPlayer: Player{
+				Character: Character{
+					Shape:     Box{},
+					Health:    float64(AttributeRateAverage),
+					MaxHealth: float64(AttributeRateAverage),
+					Strength:  uint(AttributeRateAverage),
+					Agility:   uint(AttributeRateAverage),
+				},
+				Experience:     0,
+				CharacterLevel: 1,
+				Backpack:       NewBackpack(),
+				Weapon:         nil,
+			},
+		},
+		{
+			name: "use third weapon with current weapon third",
+			weapons: []ItemLike{
+				&Weapon{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Weapon 1",
+					},
+					Damage: 1,
+				},
+				&Weapon{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Weapon 2",
+					},
+					Damage: 10,
+				},
+				&Weapon{
+					Item: Item{
+						Shape: Box{},
+						Name:  "Awkward Weapon 3",
+					},
+					Damage: 50,
+				},
+			},
+			currentWeaponIdx: 2,
+			useWeaponIdx:     2,
+			wantPlayer: Player{
+				Character: Character{
+					Shape:     Box{},
+					Health:    float64(AttributeRateAverage),
+					MaxHealth: float64(AttributeRateAverage),
+					Strength:  uint(AttributeRateAverage),
+					Agility:   uint(AttributeRateAverage),
+				},
+				Experience:     0,
+				CharacterLevel: 1,
+				Backpack:       NewBackpack(),
+				Weapon:         nil,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := NewPlayer(Box{})
+
+			for idx := range tt.weapons {
+				_ = p.Backpack.AddItem(tt.weapons[idx])
+
+				if tt.useWeaponIdx != tt.currentWeaponIdx && idx != tt.currentWeaponIdx || tt.useWeaponIdx == tt.currentWeaponIdx {
+					_ = tt.wantPlayer.Backpack.AddItem(tt.weapons[idx])
+				}
+			}
+
+			if tt.currentWeaponIdx != -1 {
+				p.Weapon = &p.Backpack.Weapons[tt.weapons[tt.currentWeaponIdx].(*Weapon).Item.Name][0]
+			}
+			tt.wantPlayer.Weapon = &tt.wantPlayer.Backpack.Weapons[tt.weapons[tt.useWeaponIdx].(*Weapon).Item.Name][0]
+
+			p.UseItem(&p.Backpack.Weapons[tt.weapons[tt.useWeaponIdx].(*Weapon).Item.Name][0])
 
 			if !reflect.DeepEqual(*p, tt.wantPlayer) {
 				t.Errorf("UseItem(): Player got %#v, want %#v", *p, tt.wantPlayer)
@@ -1365,38 +1585,6 @@ func TestPlayer_GetItemsListAndUseItem(t *testing.T) {
 				CharacterLevel: 1,
 				Backpack:       NewBackpack(),
 				Weapon:         nil,
-			},
-			wantError: nil,
-		},
-		{
-			name: "get and use weapon",
-			items: []ItemLike{
-				&Weapon{
-					Item: Item{
-						Shape: Box{},
-						Name:  "Awkward Weapon",
-					},
-					Damage: 10,
-				},
-			},
-			wantPlayer: Player{
-				Character: Character{
-					Shape:     Box{},
-					Health:    float64(AttributeRateAverage),
-					MaxHealth: float64(AttributeRateAverage),
-					Strength:  uint(AttributeRateAverage),
-					Agility:   uint(AttributeRateAverage),
-				},
-				Experience:     0,
-				CharacterLevel: 1,
-				Backpack:       NewBackpack(),
-				Weapon: &Weapon{
-					Item: Item{
-						Shape: Box{},
-						Name:  "Awkward Weapon",
-					},
-					Damage: 10,
-				},
 			},
 			wantError: nil,
 		},

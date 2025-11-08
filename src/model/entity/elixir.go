@@ -41,12 +41,12 @@ func NewElixir(box Box) *Elixir {
 	}
 }
 
-func (e *Elixir) Taken() {
-	e.Item.Taken()
+func (e *Elixir) Take() {
+	e.Item.Take()
 }
 
-func (e *Elixir) Dropped(box Box) {
-	e.Item.Dropped(box)
+func (e *Elixir) Drop(box Box) {
+	e.Item.Drop(box)
 }
 
 func (e *Elixir) Use(p *Player) {

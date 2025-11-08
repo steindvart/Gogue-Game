@@ -7,11 +7,32 @@ import (
 const (
 	IncreaseAttributeBaseParcentage int = 5
 	IncreaseAttributeMaxPercentage  int = 20
+	AttributesNum                   int = 3
+)
+
+type AttributeType int
+
+const (
+	AttributeTypeMaxHealth AttributeType = iota
+	AttributeTypeAgility
+	AttributeTypeStrength
 )
 
 type ItemLike interface {
-	Taken()
-	Dropped(box Box)
+	Takeable
+	Droppable
+	Usable
+}
+
+type Takeable interface {
+	Take()
+}
+
+type Droppable interface {
+	Drop(box Box)
+}
+
+type Usable interface {
 	Use(p *Player)
 }
 
@@ -20,15 +41,11 @@ type Item struct {
 	Name  string
 }
 
-type Attributes struct {
-	MaxHealth, Agility, Strength uint
-}
-
-func (i *Item) Taken() {
+func (i *Item) Take() {
 	i.Shape = Box{}
 }
 
-func (i *Item) Dropped(box Box) {
+func (i *Item) Drop(box Box) {
 	i.Shape = box
 }
 
@@ -53,17 +70,15 @@ func getAttributeRandomName(names []string) string {
 }
 
 func getRandomAttribute() Attributes {
-	attributesNum := 3
-	attribute := rand.Intn(attributesNum)
-
+	attribute := rand.Intn(AttributesNum)
 	attributes := Attributes{}
 
 	switch attribute {
-	case 0:
+	case int(AttributeTypeMaxHealth):
 		attributes.MaxHealth = 1
-	case 1:
+	case int(AttributeTypeAgility):
 		attributes.Agility = 1
-	case 2:
+	case int(AttributeTypeStrength):
 		attributes.Strength = 1
 	}
 

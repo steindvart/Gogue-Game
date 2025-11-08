@@ -75,7 +75,7 @@ func TestNewElixir(t *testing.T) {
 	}
 }
 
-func TestElixir_Taken(t *testing.T) {
+func TestElixir_Take(t *testing.T) {
 	tests := []struct {
 		name string
 		want Box
@@ -100,7 +100,7 @@ func TestElixir_Taken(t *testing.T) {
 				Increment:         1,
 				EffectDuration:    time.Minute,
 			}
-			elixir.Taken()
+			elixir.Take()
 			if elixir.Item.Shape != tt.want {
 				t.Errorf("Taken() = (%v), want (%v)", elixir.Item.Shape, tt.want)
 			}
@@ -108,7 +108,7 @@ func TestElixir_Taken(t *testing.T) {
 	}
 }
 
-func TestElixir_Dropped(t *testing.T) {
+func TestElixir_Drop(t *testing.T) {
 	tests := []struct {
 		name string
 		box  Box
@@ -133,7 +133,7 @@ func TestElixir_Dropped(t *testing.T) {
 				EffectDuration:    time.Minute,
 			}
 
-			elixir.Dropped(tt.box)
+			elixir.Drop(tt.box)
 
 			if elixir.Item.Shape != tt.want {
 				t.Errorf("Dropped(): Shape %v, want %v", elixir.Item.Shape, tt.want)

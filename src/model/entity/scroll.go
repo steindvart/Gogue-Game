@@ -29,12 +29,12 @@ func NewScroll(box Box) *Scroll {
 	}
 }
 
-func (s *Scroll) Taken() {
-	s.Item.Taken()
+func (s *Scroll) Take() {
+	s.Item.Take()
 }
 
-func (s *Scroll) Dropped(box Box) {
-	s.Item.Dropped(box)
+func (s *Scroll) Drop(box Box) {
+	s.Item.Drop(box)
 }
 
 func (s *Scroll) Use(p *Player) {

@@ -117,7 +117,7 @@ func TestItem_Taken(t *testing.T) {
 					Size:  Size2D[uint]{Height: 1, Width: 1},
 				},
 			}
-			item.Taken()
+			item.Take()
 			if item.Shape != tt.want {
 				t.Errorf("Taken() = (%v), want (%v)", item.Shape, tt.want)
 			}
@@ -143,7 +143,7 @@ func TestItem_Dropped(t *testing.T) {
 			item := &Item{
 				Shape: Box{},
 			}
-			item.Dropped(tt.box)
+			item.Drop(tt.box)
 			if item.Shape != tt.want {
 				t.Errorf("Dropped() = (%v), want (%v)", item.Shape, tt.want)
 			}

@@ -27,12 +27,12 @@ func NewFood(box Box) *Food {
 	}
 }
 
-func (f *Food) Taken() {
-	f.Item.Taken()
+func (f *Food) Take() {
+	f.Item.Take()
 }
 
-func (f *Food) Dropped(box Box) {
-	f.Item.Dropped(box)
+func (f *Food) Drop(box Box) {
+	f.Item.Drop(box)
 }
 
 func (f *Food) Use(p *Player) {

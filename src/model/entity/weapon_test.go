@@ -48,7 +48,7 @@ func TestNewWeapon(t *testing.T) {
 	}
 }
 
-func TestWeapon_Taken(t *testing.T) {
+func TestWeapon_Take(t *testing.T) {
 	tests := []struct {
 		name string
 		want Box
@@ -71,7 +71,7 @@ func TestWeapon_Taken(t *testing.T) {
 				},
 				Damage: 5,
 			}
-			weapon.Taken()
+			weapon.Take()
 			if weapon.Item.Shape != tt.want {
 				t.Errorf("Taken() = (%v), want (%v)", weapon.Item.Shape, tt.want)
 			}
@@ -79,7 +79,7 @@ func TestWeapon_Taken(t *testing.T) {
 	}
 }
 
-func TestWeapon_Dropped(t *testing.T) {
+func TestWeapon_Drop(t *testing.T) {
 	tests := []struct {
 		name string
 		box  Box
@@ -102,7 +102,7 @@ func TestWeapon_Dropped(t *testing.T) {
 				Damage: 5,
 			}
 
-			weapon.Dropped(tt.box)
+			weapon.Drop(tt.box)
 
 			if weapon.Item.Shape != tt.want {
 				t.Errorf("Dropped(): Shape %v, want %v", weapon.Item.Shape, tt.want)

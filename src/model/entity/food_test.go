@@ -48,7 +48,7 @@ func TestNewFood(t *testing.T) {
 	}
 }
 
-func TestFood_Taken(t *testing.T) {
+func TestFood_Take(t *testing.T) {
 	tests := []struct {
 		name string
 		want Box
@@ -71,7 +71,7 @@ func TestFood_Taken(t *testing.T) {
 				},
 				HealthRegeneration: 5,
 			}
-			food.Taken()
+			food.Take()
 			if food.Item.Shape != tt.want {
 				t.Errorf("Taken() = (%v), want (%v)", food.Item.Shape, tt.want)
 			}
@@ -79,7 +79,7 @@ func TestFood_Taken(t *testing.T) {
 	}
 }
 
-func TestFood_Dropped(t *testing.T) {
+func TestFood_Drop(t *testing.T) {
 	tests := []struct {
 		name string
 		box  Box
@@ -102,7 +102,7 @@ func TestFood_Dropped(t *testing.T) {
 				HealthRegeneration: 5,
 			}
 
-			food.Dropped(tt.box)
+			food.Drop(tt.box)
 
 			if food.Item.Shape != tt.want {
 				t.Errorf("Dropped(): Shape %v, want %v", food.Item.Shape, tt.want)

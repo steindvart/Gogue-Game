@@ -27,18 +27,18 @@ func NewWeapon(box Box) *Weapon {
 	}
 }
 
-func (w *Weapon) Taken() {
-	w.Item.Taken()
+func (w *Weapon) Take() {
+	w.Item.Take()
 }
 
-func (w *Weapon) Dropped(box Box) {
-	w.Item.Dropped(box)
+func (w *Weapon) Drop(box Box) {
+	w.Item.Drop(box)
 }
 
 func (w *Weapon) Use(p *Player) {
 	if p.Weapon != nil {
 		currentWeapon := p.Weapon
-		currentWeapon.Dropped(p.Character.Shape)
+		currentWeapon.Drop(p.Character.Shape)
 	}
 	p.Weapon = w
 }
