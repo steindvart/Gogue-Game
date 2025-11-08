@@ -16,12 +16,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Go
-        uses: actions/setup-go@v4
-        with:
-          go-version-file: src/go.mod
-          cache: true
-
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
@@ -36,12 +30,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Setup Go
-        uses: actions/setup-go@v4
-        with:
-          go-version-file: src/go.mod
-          cache: true
 
       - name: Run gocyclo Analysis
         uses: snkrheadz/gocyclo-analysis-reports@v0.1.1
@@ -68,12 +56,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Go
-        uses: actions/setup-go@v4
-        with:
-          go-version-file: src/go.mod
-          cache: true
-
       - name: Build project
         run: make build
         working-directory: src
@@ -86,12 +68,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Setup Go
-        uses: actions/setup-go@v4
-        with:
-          go-version-file: src/go.mod
-          cache: true
 
       - name: Run tests
         run: make test
