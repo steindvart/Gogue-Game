@@ -8,46 +8,41 @@ on:
 
 jobs:
   lint:
-    name: Lint
     runs-on: ubuntu-latest
+    container:
+      image: golang:1.22
+      env:
+        GOFLAGS: "-buildvcs=false" # fix issue with golangci-lint and vcs
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Set up Go
-        uses: actions/setup-go@v5
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v6
         with:
-          go-version: '1.22'
-      - name: Install golangci-lint
-        run: |
-          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.55.2
-      - name: Run lint
-        run: make lint
-        working-directory: src
+          version: v1.60
+          working-directory: src
 
   build:
-    name: Build
     runs-on: ubuntu-latest
+    container:
+      image: golang:1.22
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.22'
+
       - name: Build project
         run: make build
         working-directory: src
 
   test:
-    name: Test
     runs-on: ubuntu-latest
+    container:
+      image: golang:1.22
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.22'
+
       - name: Run tests
         run: make test
         working-directory: src
