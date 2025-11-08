@@ -11,7 +11,6 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: golang:1.22
-      options: --user root
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -26,7 +25,6 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: golang:1.22
-      options: --user root
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -64,7 +62,6 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: golang:1.22
-      options: --user root
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
