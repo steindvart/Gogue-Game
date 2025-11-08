@@ -1,7 +1,7 @@
 package state
 
 import (
-	"gogue/internal/model/entity"
+	"gogue/internal/model/entities"
 	"gogue/internal/model/primitive"
 	"gogue/internal/model/signal"
 	"gogue/internal/model/world"
@@ -13,15 +13,15 @@ import (
 )
 
 type Game struct {
-	player entity.Player
+	player entities.Player
 	level  world.Level
 	view   *tview.Box
 	signal signal.Type
 }
 
 func NewGame() (*Game, error) {
-	player := entity.Player{
-		Character: entity.Character{
+	player := entities.Player{
+		Character: entities.Character{
 			Shape: primitive.Box{
 				Point: primitive.Point2D[int]{X: 5, Y: 5},
 				Size:  primitive.Size2D[uint]{Height: 1, Width: 1},

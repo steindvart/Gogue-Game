@@ -132,11 +132,11 @@ package items
 
 // 	for _, tt := range tests {
 // 		t.Run(tt.name, func(t *testing.T) {
-// 			player := entity.NewPlayer(primitive.Box{})
+// 			player := entities.NewPlayer(primitive.Box{})
 // 			tt.food.Use(player)
 
-// 			if player.Character.Health == float64(entity.AttributeRateAverage) {
-// 				t.Errorf("Use(): got %#v, want %#v", player.Character.MaxHealth, float64(entity.AttributeRateAverage)+float64(tt.food.HealthRegeneration))
+// 			if player.Character.Health == float64(entities.AttributeRateAverage) {
+// 				t.Errorf("Use(): got %#v, want %#v", player.Character.MaxHealth, float64(entities.AttributeRateAverage)+float64(tt.food.HealthRegeneration))
 // 			}
 // 		})
 // 	}

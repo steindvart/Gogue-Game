@@ -1,4 +1,4 @@
-package entity
+package entities
 
 // import (
 // 	"gogue/internal/model/entity/primitive"

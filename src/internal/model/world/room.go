@@ -1,7 +1,7 @@
 package world
 
 import (
-	"gogue/internal/model/entity"
+	"gogue/internal/model/entities"
 	"gogue/internal/model/items"
 	"gogue/internal/model/primitive"
 )
@@ -21,7 +21,7 @@ type Room struct {
 	Elixirs []items.Elixir
 	Scrolls []items.Scroll
 	Weapons []items.Weapon
-	Enemies []entity.Enemy
+	Enemies []entities.Enemy
 }
 
 func NewRoom(roomType RoomType, shape primitive.Box) *Room {
@@ -32,6 +32,6 @@ func NewRoom(roomType RoomType, shape primitive.Box) *Room {
 		Elixirs: []items.Elixir{},
 		Scrolls: []items.Scroll{},
 		Weapons: []items.Weapon{},
-		Enemies: []entity.Enemy{},
+		Enemies: []entities.Enemy{},
 	}
 }

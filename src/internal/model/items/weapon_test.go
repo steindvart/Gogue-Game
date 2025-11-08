@@ -153,7 +153,7 @@ package items
 
 // 	for _, tt := range tests {
 // 		t.Run(tt.name, func(t *testing.T) {
-// 			player := entity.NewPlayer(primitive.Box{Point: primitive.Point2D[int]{X: 1, Y: 2}, Size: primitive.Size2D[uint]{Height: 1, Width: 1}})
+// 			player := entities.NewPlayer(primitive.Box{Point: primitive.Point2D[int]{X: 1, Y: 2}, Size: primitive.Size2D[uint]{Height: 1, Width: 1}})
 
 // 			for idx := range tt.weapons {
 // 				_ = player.TakeItem(tt.weapons[idx])
