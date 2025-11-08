@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: golang:1.22
+      env:
+        GOFLAGS: "-buildvcs=false"
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
