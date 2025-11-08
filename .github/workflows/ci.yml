@@ -12,6 +12,9 @@ jobs:
     container:
       image: golang:1.22
     steps:
+      - name: Setup Git safe directory
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -26,6 +29,9 @@ jobs:
     container:
       image: golang:1.22
     steps:
+      - name: Setup Git safe directory
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -51,6 +57,9 @@ jobs:
     container:
       image: golang:1.22
     steps:
+      - name: Setup Git safe directory
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -63,6 +72,9 @@ jobs:
     container:
       image: golang:1.22
     steps:
+      - name: Setup Git safe directory
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
       - name: Checkout code
         uses: actions/checkout@v4
 
