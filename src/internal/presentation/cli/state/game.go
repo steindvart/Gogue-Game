@@ -6,6 +6,8 @@ import (
 	"gogue/internal/model/signals"
 	"gogue/internal/model/world"
 	"gogue/internal/presentation/action"
+	"math/rand"
+	"time"
 	"unicode"
 
 	"github.com/gdamore/tcell/v2"
@@ -14,7 +16,7 @@ import (
 
 type Game struct {
 	player entities.Player
-	level  world.Level
+	level  *world.Level
 	view   *tview.Box
 	signal signals.Type
 }
@@ -40,9 +42,14 @@ func NewGame() (*Game, error) {
 	// @todo - выделить отрисовку в отдельный файл в view/cli
 	box := tview.NewBox().SetBorder(true).SetTitle("Game")
 
-	level := world.Level{}
-	// @todo - обработать ошибку
+	source := rand.New(rand.NewSource(time.Now().UnixNano()))
+	level := world.NewLevel(source)
 	err := level.GenerateNineRooms(primitives.Size2D[uint]{Height: 30, Width: 90})
+	if err != nil {
+		return nil, err
+	}
+
+	err = level.GeneratePassages()
 	if err != nil {
 		return nil, err
 	}
@@ -158,6 +165,12 @@ func (g *Game) drawField(screen tcell.Screen, ox, oy, w, h int) {
 				ch = '|'
 			} else if field[y][x] == 4 {
 				ch = 'O'
+			} else if field[y][x] == 5 {
+				ch = '*'
+			} else if field[y][x] == 6 {
+				ch = '['
+			} else if field[y][x] == 7 {
+				ch = ']'
 			}
 			screen.SetContent(ox+x, oy+y, ch, nil, tcell.StyleDefault.Background(tcell.ColorBlack))
 		}
@@ -171,7 +184,11 @@ func (g *Game) makeField(w, h int) [][]int {
 	}
 
 	for _, room := range g.level.Rooms {
-		g.drawRoom(room, g.level, field)
+		g.drawRoom(room, g.level.FinishPortal, field)
+	}
+
+	for _, passages := range g.level.Passages {
+		g.drawPassage(passages, field)
 	}
 
 	px := g.player.Character.Shape.Point.X
@@ -183,7 +200,8 @@ func (g *Game) makeField(w, h int) [][]int {
 	return field
 }
 
-func (g *Game) drawRoom(room world.Room, level world.Level, field [][]int) {
+// Тут можно класть только lvl, так как room я получаю из него же шагом выше, а могу и тут
+func (g *Game) drawRoom(room world.Room, finishPortal primitives.Box, field [][]int) {
 	for column := room.Shape.Point.X; column < room.Shape.Point.X+int(room.Shape.Size.Width); column++ {
 		field[room.Shape.Point.Y][column] = 2
 		field[room.Shape.Point.Y+int(room.Shape.Size.Height)][column] = 2
@@ -194,5 +212,13 @@ func (g *Game) drawRoom(room world.Room, level world.Level, field [][]int) {
 		field[row][room.Shape.Point.X+int(room.Shape.Size.Width)] = 3
 	}
 
-	field[level.End.Point.Y][level.End.Point.X] = 4
+	field[finishPortal.Point.Y][finishPortal.Point.X] = 4
+}
+
+func (g *Game) drawPassage(passage world.Passage, field [][]int) {
+	for i := 0; i < len(passage.Passage); i++ {
+		field[passage.Passage[i].Y][passage.Passage[i].X] = 5
+	}
+	field[passage.DoorOne.Y][passage.DoorOne.X] = 6
+	field[passage.DoorTwo.Y][passage.DoorTwo.X] = 7
 }
