@@ -10,7 +10,6 @@ func TestNewRoom(t *testing.T) {
 		name     string
 		roomType RoomType
 		shape    Box
-		portal   *Box
 		want     Room
 	}{
 		{
