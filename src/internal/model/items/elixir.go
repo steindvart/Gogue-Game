@@ -2,41 +2,68 @@ package items
 
 import (
 	"gogue/internal/model/primitives"
-	"math/rand"
-	"time"
+	"gogue/internal/utils"
 )
 
 const (
-	ElixirDurationBase      uint32 = 1
-	ElixirMaxDurationFactor uint32 = 3
+	ElixirDurationMin    int = 5
+	ElixirMaxDurationMax int = 30
+)
+
+type ElixirType string
+
+const (
+	ElixirTypeStrength      = "Elixir of Strength" // +Strength
+	ElixirTypeAgility       = "Elixir of Agility"  // +Agility
+	ElixirTypePhantomBreath = "Phantom's Breath"   // +Agility -Strength
+	ElixirTypeFrozenStar    = "Frozen Star"        // +Strength -Agility
+	ElixirTypeMystery       = "Elixir of Mystery"  // All random
 )
 
 type Elixir struct {
-	Item              Item
-	EffectDuration    time.Duration
-	AffectedAttribute primitives.Attributes
+	*Item
+	EffectDuration     uint32 // in steps
+	AffectedAttributes primitives.Attributes
 }
 
-func NewElixir(box primitives.Box) *Elixir {
-	elixirNames := []string{
-		"Elixir of the Jade Serpent",
-		"Potion of the Phantom's Breath",
-		"Vial of Crimson Vitality",
-		"Draught of the Frozen Star",
-		"Elixir of the Shattered Mind",
-		"Potion of the Wandering Soul",
-		"Vial of Ember Essence",
-		"Elixir of the Obsidian Veil",
-		"Potion of the Howling Wind",
+func NewElixir(rnd utils.RandomGenerator, box primitives.Box, t ElixirType) *Elixir {
+	switch t {
+	case ElixirTypeStrength:
+		return createElixirWithAttribute(box, t, primitives.Attributes{
+			Strength: float64(utils.RandomRoundedFloatInRange(&rnd, 5, 20)),
+		}, uint32(utils.RandomIntInRange(&rnd, ElixirDurationMin, ElixirMaxDurationMax)))
+	case ElixirTypeAgility:
+		return createElixirWithAttribute(box, t, primitives.Attributes{
+			Agility: float64(utils.RandomRoundedFloatInRange(&rnd, 5, 20)),
+		}, uint32(utils.RandomIntInRange(&rnd, ElixirDurationMin, ElixirMaxDurationMax)))
+	case ElixirTypePhantomBreath:
+		return createElixirWithAttribute(box, t, primitives.Attributes{
+			Agility:  float64(utils.RandomRoundedFloatInRange(&rnd, 10, 30)),
+			Strength: float64(utils.RandomRoundedFloatInRange(&rnd, -10, -2)),
+		}, uint32(utils.RandomIntInRange(&rnd, ElixirDurationMin, ElixirMaxDurationMax)))
+	case ElixirTypeFrozenStar:
+		return createElixirWithAttribute(box, t, primitives.Attributes{
+			Agility:  float64(utils.RandomRoundedFloatInRange(&rnd, -10, -2)),
+			Strength: float64(utils.RandomRoundedFloatInRange(&rnd, 10, 30)),
+		}, uint32(utils.RandomIntInRange(&rnd, ElixirDurationMin, ElixirMaxDurationMax)))
+	case ElixirTypeMystery:
+		fallthrough
+	default:
+		return createElixirWithAttribute(box, ElixirTypeMystery, primitives.Attributes{
+			Agility:  float64(utils.RandomRoundedFloatInRange(&rnd, -20, 30)),
+			Strength: float64(utils.RandomRoundedFloatInRange(&rnd, -20, 30)),
+		}, uint32(utils.RandomIntInRange(&rnd, ElixirDurationMin, ElixirMaxDurationMax)))
 	}
+}
 
+func createElixirWithAttribute(box primitives.Box, t ElixirType, attr primitives.Attributes, dur uint32) *Elixir {
 	return &Elixir{
-		Item: Item{
+		Item: &Item{
 			Shape: box,
-			Name:  getAttributeRandomName(elixirNames),
+			Name:  string(t),
 		},
-		AffectedAttribute: getRandomAttribute(),
-		EffectDuration:    getRandomElixirDuration(),
+		AffectedAttributes: attr,
+		EffectDuration:     dur,
 	}
 }
 
@@ -49,7 +76,7 @@ func (e *Elixir) Drop(box primitives.Box) {
 }
 
 func (e *Elixir) Use() primitives.Attributes {
-	return e.AffectedAttribute
+	return e.AffectedAttributes
 }
 
 func AsElixir(item any) *Elixir {
@@ -58,8 +85,4 @@ func AsElixir(item any) *Elixir {
 		return e
 	}
 	return nil
-}
-
-func getRandomElixirDuration() time.Duration {
-	return time.Duration(time.Duration(ElixirDurationBase+rand.Uint32()%ElixirMaxDurationFactor) * time.Minute)
 }
