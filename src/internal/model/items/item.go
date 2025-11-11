@@ -8,7 +8,6 @@ import (
 const (
 	IncreaseAttributeBaseParcentage int = 5
 	IncreaseAttributeMaxPercentage  int = 20
-	AttributesNum                   int = 3
 )
 
 type AttributeType int
@@ -39,20 +38,4 @@ func getAttributeRandomPercentIncrease() float64 {
 
 func getAttributeRandomName(names []string) string {
 	return names[rand.Intn(len(names))]
-}
-
-func getRandomAttribute() primitives.Attributes {
-	attribute := rand.Intn(AttributesNum)
-	attributes := primitives.Attributes{}
-
-	switch attribute {
-	case int(AttributeTypeMaxHealth):
-		attributes.MaxHealth = 1
-	case int(AttributeTypeAgility):
-		attributes.Agility = 1
-	case int(AttributeTypeStrength):
-		attributes.Strength = 1
-	}
-
-	return attributes
 }
