@@ -29,41 +29,41 @@ type Elixir struct {
 func NewElixir(rnd utils.RandomGenerator, box primitives.Box, t ElixirType) *Elixir {
 	switch t {
 	case ElixirTypeStrength:
-		return createElixirWithAttribute(box, t, primitives.Attributes{
+		return createElixir(box, t, primitives.Attributes{
 			Strength: float64(utils.RandomRoundedFloatInRange(&rnd, 5, 20)),
 		}, uint32(utils.RandomIntInRange(&rnd, ElixirDurationMin, ElixirMaxDurationMax)))
 	case ElixirTypeAgility:
-		return createElixirWithAttribute(box, t, primitives.Attributes{
+		return createElixir(box, t, primitives.Attributes{
 			Agility: float64(utils.RandomRoundedFloatInRange(&rnd, 5, 20)),
 		}, uint32(utils.RandomIntInRange(&rnd, ElixirDurationMin, ElixirMaxDurationMax)))
 	case ElixirTypePhantomBreath:
-		return createElixirWithAttribute(box, t, primitives.Attributes{
+		return createElixir(box, t, primitives.Attributes{
 			Agility:  float64(utils.RandomRoundedFloatInRange(&rnd, 10, 30)),
 			Strength: float64(utils.RandomRoundedFloatInRange(&rnd, -10, -2)),
 		}, uint32(utils.RandomIntInRange(&rnd, ElixirDurationMin, ElixirMaxDurationMax)))
 	case ElixirTypeFrozenStar:
-		return createElixirWithAttribute(box, t, primitives.Attributes{
+		return createElixir(box, t, primitives.Attributes{
 			Agility:  float64(utils.RandomRoundedFloatInRange(&rnd, -10, -2)),
 			Strength: float64(utils.RandomRoundedFloatInRange(&rnd, 10, 30)),
 		}, uint32(utils.RandomIntInRange(&rnd, ElixirDurationMin, ElixirMaxDurationMax)))
 	case ElixirTypeMystery:
 		fallthrough
 	default:
-		return createElixirWithAttribute(box, ElixirTypeMystery, primitives.Attributes{
+		return createElixir(box, ElixirTypeMystery, primitives.Attributes{
 			Agility:  float64(utils.RandomRoundedFloatInRange(&rnd, -20, 30)),
 			Strength: float64(utils.RandomRoundedFloatInRange(&rnd, -20, 30)),
 		}, uint32(utils.RandomIntInRange(&rnd, ElixirDurationMin, ElixirMaxDurationMax)))
 	}
 }
 
-func createElixirWithAttribute(box primitives.Box, t ElixirType, attr primitives.Attributes, dur uint32) *Elixir {
+func createElixir(box primitives.Box, t ElixirType, affected primitives.Attributes, duration uint32) *Elixir {
 	return &Elixir{
 		Item: &Item{
 			Shape: box,
 			Name:  string(t),
 		},
-		AffectedAttributes: attr,
-		EffectDuration:     dur,
+		AffectedAttributes: affected,
+		EffectDuration:     duration,
 	}
 }
 
