@@ -15,44 +15,32 @@ import (
 )
 
 type Game struct {
-	player entities.Player
+	player *entities.Player
 	level  *world.Level
 	view   *tview.Box
 	signal signals.Type
 }
 
 func NewGame() (*Game, error) {
-	player := entities.Player{
-		Character: entities.Character{
-			Shape: primitives.Box{
-				Point: primitives.Point2D[int]{X: 5, Y: 5},
-				Size:  primitives.Size2D[uint]{Height: 1, Width: 1},
-			},
-			Attributes: primitives.Attributes{
-				Health:    100,
-				MaxHealth: 100,
-				Strength:  10,
-				Agility:   5,
-			},
-		},
-		Backpack: nil,
-		Weapon:   nil,
-	}
-
 	// @todo - выделить отрисовку в отдельный файл в view/cli
-	box := tview.NewBox().SetBorder(true).SetTitle("Game")
-
 	source := rand.New(rand.NewSource(time.Now().UnixNano()))
 	level := world.NewLevel(source)
-	err := level.GenerateNineRooms(primitives.Size2D[uint]{Height: 30, Width: 90})
+
+	err := level.GenerateLevel(primitives.Size2D[uint]{Height: 30, Width: 90})
 	if err != nil {
 		return nil, err
 	}
 
-	err = level.GeneratePassages()
+	playerStartPoint, err := level.GetStartPositionForPlayer()
 	if err != nil {
 		return nil, err
 	}
+	player := entities.NewPlayer(primitives.Box{
+		Point: playerStartPoint,
+		Size:  primitives.Size2D[uint]{Height: 1, Width: 1},
+	})
+
+	box := tview.NewBox().SetBorder(true).SetTitle("Game")
 
 	game := Game{
 		player: player,
@@ -200,7 +188,6 @@ func (g *Game) makeField(w, h int) [][]int {
 	return field
 }
 
-// Тут можно класть только lvl, так как room я получаю из него же шагом выше, а могу и тут
 func (g *Game) drawRoom(room world.Room, finishPortal primitives.Box, field [][]int) {
 	for column := room.Shape.Point.X; column < room.Shape.Point.X+int(room.Shape.Size.Width); column++ {
 		field[room.Shape.Point.Y][column] = 2

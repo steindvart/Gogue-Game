@@ -69,14 +69,28 @@ func NewLevel(random RandomSource) *Level {
 	}
 }
 
-func (l *Level) GenerateNineRooms(sizeMap primitives.Size2D[uint]) error {
+func (l *Level) GenerateLevel(sizeMap primitives.Size2D[uint]) error {
+	err := l.generateNineRooms(sizeMap)
+	if err != nil {
+		return err
+	}
+
+	err = l.generatePassages()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (l *Level) generateNineRooms(sizeMap primitives.Size2D[uint]) error {
 	sectionSize, err := calculateRoomSectionSize(sizeMap)
 	if err != nil {
 		return err
 	}
 
 	l.Rooms = make([]Room, roomsCount)
-	// rand.Perm(9) возвращает массив перемешанных чисел от 0 до 8, чтобы далее не было повторений indexprimitives.primitives. для Start и Finish
+	// rand.Perm(9) возвращает массив перемешанных чисел от 0 до 8
 	indexes := l.random.Perm(roomsCount)
 	startRoomIndex := indexes[0]
 	finishRoomIndex := indexes[1]
@@ -157,7 +171,7 @@ func calculateRoomSectionSize(sizeMap primitives.Size2D[uint]) (primitives.Size2
 	return sectionSize, nil
 }
 
-func (l *Level) GeneratePassages() error {
+func (l *Level) generatePassages() error {
 	if len(l.Rooms) < 9 {
 		return fmt.Errorf("number of rooms is less than expected. expected %d, got %d", roomsCount, len(l.Rooms))
 	}
@@ -195,6 +209,30 @@ func (l *Level) GeneratePassages() error {
 	return nil
 }
 
+func (l *Level) GetStartPositionForPlayer() (primitives.Point2D[int], error) {
+	pointNil := primitives.Point2D[int]{X: 0, Y: 0}
+	if len(l.Rooms) != roomsCount {
+		return pointNil, fmt.Errorf("should be %d rooms", roomsCount)
+	}
+
+	for _, room := range l.Rooms {
+		if room.Type == RoomTypeStart {
+			roomWall := 1
+			xRoomPoint := room.Shape.Point.X
+			yRoomPoint := room.Shape.Point.Y
+			roomWidth := int(room.Shape.Size.Width)
+			roomHeight := int(room.Shape.Size.Height)
+
+			return primitives.Point2D[int]{
+				X: xRoomPoint + roomWall + l.random.Intn(roomWidth-(roomWall*2)),
+				Y: yRoomPoint + roomWall + l.random.Intn(roomHeight-(roomWall*2)),
+			}, nil
+		}
+	}
+
+	return pointNil, fmt.Errorf("starting room was not found")
+}
+
 func generateSpanningTree(startRoom int, random RandomSource) ([][2]int, error) {
 	if startRoom < 0 || startRoom > roomsCount {
 		return nil, fmt.Errorf("start room must be between 0 and %d", roomsCount)
@@ -216,6 +254,7 @@ func generateSpanningTree(startRoom int, random RandomSource) ([][2]int, error) 
 				unvisitNeighborsRooms = append(unvisitNeighborsRooms, neighborRoom)
 			}
 		}
+
 		// rand.Shuffle перемешивает значения в существующем слайсе unvisitNeighborsRooms
 		random.Shuffle(len(unvisitNeighborsRooms), func(i, j int) {
 			unvisitNeighborsRooms[i], unvisitNeighborsRooms[j] = unvisitNeighborsRooms[j], unvisitNeighborsRooms[i]

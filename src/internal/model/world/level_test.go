@@ -41,7 +41,7 @@ func TestLevel_GenerateNineRooms(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			level := NewLevel(source)
 
-			err := level.GenerateNineRooms(tt.sizeMap)
+			err := level.generateNineRooms(tt.sizeMap)
 
 			if tt.wantErr {
 				if err == nil {
