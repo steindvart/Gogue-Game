@@ -11,7 +11,7 @@ type Elixir struct {
 	AffectedAttributes primitives.Attributes
 }
 
-func NewElixir(rnd utils.RandomGenerator, box primitives.Box, t ElixirType) *Elixir {
+func NewElixir(rnd *utils.RandomGenerator, box primitives.Box, t ElixirType) *Elixir {
 	config := GetElixirConfig(t)
 
 	return &Elixir{
@@ -19,12 +19,12 @@ func NewElixir(rnd utils.RandomGenerator, box primitives.Box, t ElixirType) *Eli
 			Shape: box,
 			Name:  string(config.Type),
 		},
-		AffectedAttributes: config.GenerateAttributes(&rnd),
-		EffectDuration:     config.GenerateDuration(&rnd),
+		AffectedAttributes: config.GenerateAttributes(rnd),
+		EffectDuration:     config.GenerateDuration(rnd),
 	}
 }
 
-func NewElixirByConfig(rnd utils.RandomGenerator, box primitives.Box, config ElixirConfig) (*Elixir, error) {
+func NewElixirByConfig(rnd *utils.RandomGenerator, box primitives.Box, config ElixirConfig) (*Elixir, error) {
 	if err := config.Validate(); err != nil {
 		return nil, err
 	}
@@ -34,8 +34,8 @@ func NewElixirByConfig(rnd utils.RandomGenerator, box primitives.Box, config Eli
 			Shape: box,
 			Name:  string(config.Type),
 		},
-		AffectedAttributes: config.GenerateAttributes(&rnd),
-		EffectDuration:     config.GenerateDuration(&rnd),
+		AffectedAttributes: config.GenerateAttributes(rnd),
+		EffectDuration:     config.GenerateDuration(rnd),
 	}, nil
 }
 
