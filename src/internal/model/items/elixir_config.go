@@ -106,8 +106,6 @@ func (cfg *ElixirConfig) Validate() error {
 	if cfg.DurationStepsRange.Min > cfg.DurationStepsRange.Max {
 		return fmt.Errorf("invalid duration range: min=%d > max=%d", cfg.DurationStepsRange.Min, cfg.DurationStepsRange.Max)
 	}
-	if cfg.DurationStepsRange.Min < 0 {
-		return fmt.Errorf("negative duration is not allowed: %d", cfg.DurationStepsRange.Min)
-	}
+
 	return nil
 }
