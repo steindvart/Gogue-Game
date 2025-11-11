@@ -28,12 +28,9 @@ type Item struct {
 	Name  string
 }
 
-func (i *Item) Take() {
-	i.Shape = primitives.Box{}
-}
-
-func (i *Item) Drop(box primitives.Box) {
-	i.Shape = box
+func (i *Item) Drop(position primitives.Point2D[int]) primitives.Box {
+	i.Shape.Point = position
+	return i.Shape
 }
 
 func getAttributeRandomPercentIncrease() float64 {

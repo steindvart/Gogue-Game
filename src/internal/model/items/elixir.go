@@ -67,14 +67,6 @@ func createElixir(box primitives.Box, t ElixirType, affected primitives.Attribut
 	}
 }
 
-func (e *Elixir) Take() {
-	e.Item.Take()
-}
-
-func (e *Elixir) Drop(box primitives.Box) {
-	e.Item.Drop(box)
-}
-
 func (e *Elixir) Use() primitives.Attributes {
 	return e.AffectedAttributes
 }
