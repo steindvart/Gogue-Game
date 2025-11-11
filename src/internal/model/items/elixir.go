@@ -24,7 +24,7 @@ func NewElixir(rnd utils.RandomGenerator, box primitives.Box, t ElixirType) *Eli
 	}
 }
 
-func NewElixirWithConfig(rnd utils.RandomGenerator, box primitives.Box, config ElixirConfig) (*Elixir, error) {
+func NewElixirByConfig(rnd utils.RandomGenerator, box primitives.Box, config ElixirConfig) (*Elixir, error) {
 	if err := config.Validate(); err != nil {
 		return nil, err
 	}

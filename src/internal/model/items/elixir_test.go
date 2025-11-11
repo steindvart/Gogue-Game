@@ -8,141 +8,188 @@ import (
 
 const defaultTestSeed int64 = 42
 
-func TestElixir_NewElixir(t *testing.T) {
+func TestElixir_NewElixir_BuiltinConfig(t *testing.T) {
 	tests := []struct {
-		name               string
-		seed               int64
-		elixirType         ElixirType
-		box                primitives.Box
-		wantStrengthMin    float64
-		wantStrengthMax    float64
-		wantAgilityMin     float64
-		wantAgilityMax     float64
-		wantDurationMin    uint32
-		wantDurationMax    uint32
-		checkName          bool
-		expectedNamePrefix string
+		name         string
+		elixirType   ElixirType
+		expectedName string
 	}{
 		{
-			name:               "Elixir of Strength - positive strength only",
-			seed:               1,
-			elixirType:         ElixirTypeStrength,
-			box:                primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
-			wantStrengthMin:    5,
-			wantStrengthMax:    20,
-			wantAgilityMin:     0,
-			wantAgilityMax:     0,
-			wantDurationMin:    ElixirDurationMin,
-			wantDurationMax:    ElixirMaxDurationMax,
-			checkName:          true,
-			expectedNamePrefix: string(ElixirTypeStrength),
+			name:         "Strength type uses Strength elixir config",
+			elixirType:   ElixirTypeStrength,
+			expectedName: string(ElixirTypeStrength),
 		},
 		{
-			name:               "Elixir of Agility - positive agility only",
-			seed:               2,
-			elixirType:         ElixirTypeAgility,
-			box:                primitives.Box{Point: primitives.Point2D[int]{X: 10, Y: 10}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
-			wantStrengthMin:    0,
-			wantStrengthMax:    0,
-			wantAgilityMin:     5,
-			wantAgilityMax:     20,
-			wantDurationMin:    ElixirDurationMin,
-			wantDurationMax:    ElixirMaxDurationMax,
-			checkName:          true,
-			expectedNamePrefix: string(ElixirTypeAgility),
+			name:         "Agility type uses Agility elixir config",
+			elixirType:   ElixirTypeAgility,
+			expectedName: string(ElixirTypeAgility),
 		},
 		{
-			name:               "Phantom's Breath - positive agility, negative strength",
-			seed:               3,
-			elixirType:         ElixirTypePhantomBreath,
-			box:                primitives.Box{Point: primitives.Point2D[int]{X: 3, Y: 7}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
-			wantStrengthMin:    -10,
-			wantStrengthMax:    -2,
-			wantAgilityMin:     10,
-			wantAgilityMax:     30,
-			wantDurationMin:    ElixirDurationMin,
-			wantDurationMax:    ElixirMaxDurationMax,
-			checkName:          true,
-			expectedNamePrefix: string(ElixirTypePhantomBreath),
+			name:         "PhantomBreath type uses PhantomBreath elixir config",
+			elixirType:   ElixirTypePhantomBreath,
+			expectedName: string(ElixirTypePhantomBreath),
 		},
 		{
-			name:               "Frozen Star - positive strength, negative agility",
-			seed:               4,
-			elixirType:         ElixirTypeFrozenStar,
-			box:                primitives.Box{Point: primitives.Point2D[int]{X: 15, Y: 20}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
-			wantStrengthMin:    10,
-			wantStrengthMax:    30,
-			wantAgilityMin:     -10,
-			wantAgilityMax:     -2,
-			wantDurationMin:    ElixirDurationMin,
-			wantDurationMax:    ElixirMaxDurationMax,
-			checkName:          true,
-			expectedNamePrefix: string(ElixirTypeFrozenStar),
+			name:         "FrozenStar type uses FrozenStar elixir config",
+			elixirType:   ElixirTypeFrozenStar,
+			expectedName: string(ElixirTypeFrozenStar),
 		},
 		{
-			name:               "Elixir of Mystery - random attributes",
-			seed:               5,
-			elixirType:         ElixirTypeMystery,
-			box:                primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
-			wantStrengthMin:    -20,
-			wantStrengthMax:    30,
-			wantAgilityMin:     -20,
-			wantAgilityMax:     30,
-			wantDurationMin:    ElixirDurationMin,
-			wantDurationMax:    ElixirMaxDurationMax,
-			checkName:          true,
-			expectedNamePrefix: string(ElixirTypeMystery),
+			name:         "Mystery type uses Mystery elixir config",
+			elixirType:   ElixirTypeMystery,
+			expectedName: string(ElixirTypeMystery),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rng := utils.NewRandomGeneratorWithSeed(defaultTestSeed)
+			box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
+
+			elixir := NewElixir(*rng, box, tt.elixirType)
+
+			if elixir == nil {
+				t.Fatal("Expected valid elixir, got nil")
+			}
+
+			if elixir.Name != tt.expectedName {
+				t.Errorf("Expected name %q, got %q", tt.expectedName, elixir.Name)
+			}
+
+			// Verify attributes match the config's ranges
+			config := GetElixirConfig(tt.elixirType)
+			if elixir.AffectedAttributes.Strength < config.StrengthRange.Min ||
+				elixir.AffectedAttributes.Strength > config.StrengthRange.Max {
+				t.Errorf("Strength out of config range: got %.2f, want [%.2f, %.2f]",
+					elixir.AffectedAttributes.Strength, config.StrengthRange.Min, config.StrengthRange.Max)
+			}
+
+			if elixir.AffectedAttributes.Agility < config.AgilityRange.Min ||
+				elixir.AffectedAttributes.Agility > config.AgilityRange.Max {
+				t.Errorf("Agility out of config range: got %.2f, want [%.2f, %.2f]",
+					elixir.AffectedAttributes.Agility, config.AgilityRange.Min, config.AgilityRange.Max)
+			}
+
+			if elixir.EffectDuration < config.DurationStepsRange.Min ||
+				elixir.EffectDuration > config.DurationStepsRange.Max {
+				t.Errorf("Duration out of config range: got %d, want [%d, %d]",
+					elixir.EffectDuration, config.DurationStepsRange.Min, config.DurationStepsRange.Max)
+			}
+
+			if elixir.Name != string(config.Type) {
+				t.Errorf("Expected name %q, got %q", string(config.Type), elixir.Name)
+			}
+		})
+	}
+}
+
+func TestElixir_NewElixir_CustomConfig(t *testing.T) {
+	tests := []struct {
+		name      string
+		seed      int64
+		config    ElixirConfig
+		box       primitives.Box
+		wantError bool
+	}{
+		{
+			name: "Valid custom config",
+			seed: defaultTestSeed,
+			config: ElixirConfig{
+				Type:               "Custom Elixir",
+				StrengthRange:      ElixirAttributeRange{Min: 10, Max: 50},
+				AgilityRange:       ElixirAttributeRange{Min: -5, Max: 15},
+				DurationStepsRange: ElixirDurationStepsRange{Min: 10, Max: 20},
+				Description:        "A custom test elixir",
+			},
+			box:       primitives.Box{Point: primitives.Point2D[int]{X: 3, Y: 3}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
+			wantError: false,
 		},
 		{
-			name:               "Unknown type - defaults to Mystery",
-			seed:               6,
-			elixirType:         "Unknown Type",
-			box:                primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 1}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
-			wantStrengthMin:    -20,
-			wantStrengthMax:    30,
-			wantAgilityMin:     -20,
-			wantAgilityMax:     30,
-			wantDurationMin:    ElixirDurationMin,
-			wantDurationMax:    ElixirMaxDurationMax,
-			checkName:          true,
-			expectedNamePrefix: string(ElixirTypeMystery),
+			name: "Invalid strength range returns error",
+			seed: defaultTestSeed,
+			config: ElixirConfig{
+				Type:               "Invalid Elixir",
+				StrengthRange:      ElixirAttributeRange{Min: 50, Max: 10}, // Min > Max
+				AgilityRange:       ElixirAttributeRange{Min: 0, Max: 10},
+				DurationStepsRange: defaultDurationRange,
+				Description:        "Invalid config",
+			},
+			box:       primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
+			wantError: true,
+		},
+		{
+			name: "Invalid agility range returns error",
+			seed: defaultTestSeed,
+			config: ElixirConfig{
+				Type:               "Invalid Elixir",
+				StrengthRange:      ElixirAttributeRange{Min: 0, Max: 10},
+				AgilityRange:       ElixirAttributeRange{Min: 20, Max: 5}, // Min > Max
+				DurationStepsRange: defaultDurationRange,
+				Description:        "Invalid config",
+			},
+			box:       primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
+			wantError: true,
+		},
+		{
+			name: "Invalid duration range returns error",
+			seed: defaultTestSeed,
+			config: ElixirConfig{
+				Type:               "Invalid Elixir",
+				StrengthRange:      ElixirAttributeRange{Min: 0, Max: 10},
+				AgilityRange:       ElixirAttributeRange{Min: 0, Max: 10},
+				DurationStepsRange: ElixirDurationStepsRange{Min: 50, Max: 10}, // Min > Max
+				Description:        "Invalid config",
+			},
+			box:       primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
+			wantError: true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			rng := utils.NewRandomGeneratorWithSeed(tt.seed)
-			elixir := NewElixir(*rng, tt.box, tt.elixirType)
+			elixir, err := NewElixirByConfig(*rng, tt.box, tt.config)
+
+			if tt.wantError {
+				if err == nil {
+					t.Error("Expected error, got nil")
+				}
+				if elixir != nil {
+					t.Error("Expected nil elixir on error")
+				}
+				return
+			}
+
+			if err != nil {
+				t.Fatalf("Expected no error, got: %v", err)
+			}
 
 			if elixir == nil {
-				t.Fatal("Expected a valid Elixir, got nil")
+				t.Fatal("Expected valid elixir, got nil")
 			}
 
-			// Check attributes are within expected ranges
-			if elixir.AffectedAttributes.Strength < tt.wantStrengthMin || elixir.AffectedAttributes.Strength > tt.wantStrengthMax {
+			// Verify attributes are within config ranges
+			if elixir.AffectedAttributes.Strength < tt.config.StrengthRange.Min ||
+				elixir.AffectedAttributes.Strength > tt.config.StrengthRange.Max {
 				t.Errorf("Strength out of range: got %.2f, want [%.2f, %.2f]",
-					elixir.AffectedAttributes.Strength, tt.wantStrengthMin, tt.wantStrengthMax)
+					elixir.AffectedAttributes.Strength, tt.config.StrengthRange.Min, tt.config.StrengthRange.Max)
 			}
 
-			if elixir.AffectedAttributes.Agility < tt.wantAgilityMin || elixir.AffectedAttributes.Agility > tt.wantAgilityMax {
+			if elixir.AffectedAttributes.Agility < tt.config.AgilityRange.Min ||
+				elixir.AffectedAttributes.Agility > tt.config.AgilityRange.Max {
 				t.Errorf("Agility out of range: got %.2f, want [%.2f, %.2f]",
-					elixir.AffectedAttributes.Agility, tt.wantAgilityMin, tt.wantAgilityMax)
+					elixir.AffectedAttributes.Agility, tt.config.AgilityRange.Min, tt.config.AgilityRange.Max)
 			}
 
-			// Check duration is within expected range
-			if elixir.EffectDuration < tt.wantDurationMin || elixir.EffectDuration > tt.wantDurationMax {
-				t.Errorf("EffectDuration out of range: got %d, want [%d, %d]",
-					elixir.EffectDuration, tt.wantDurationMin, tt.wantDurationMax)
+			if elixir.EffectDuration < tt.config.DurationStepsRange.Min ||
+				elixir.EffectDuration > tt.config.DurationStepsRange.Max {
+				t.Errorf("Duration out of range: got %d, want [%d, %d]",
+					elixir.EffectDuration, tt.config.DurationStepsRange.Min, tt.config.DurationStepsRange.Max)
 			}
 
-			// Check name
-			if tt.checkName && elixir.Name != tt.expectedNamePrefix {
-				t.Errorf("Expected name %q, got %q", tt.expectedNamePrefix, elixir.Name)
-			}
-
-			// Check box is correctly set
-			if elixir.Shape != tt.box {
-				t.Errorf("Expected box %v, got %v", tt.box, elixir.Shape)
+			// Verify name matches config type
+			if elixir.Name != string(tt.config.Type) {
+				t.Errorf("Expected name %q, got %q", tt.config.Type, elixir.Name)
 			}
 		})
 	}
@@ -405,189 +452,6 @@ func TestElixir_AsElixir_DifferentStructTypeIsNil(t *testing.T) {
 
 	if result != nil {
 		t.Errorf("Expected nil for Item type, got %v", result)
-	}
-}
-
-func TestElixir_NewElixirWithConfig(t *testing.T) {
-	tests := []struct {
-		name      string
-		seed      int64
-		config    ElixirConfig
-		box       primitives.Box
-		wantError bool
-	}{
-		{
-			name: "Valid custom config",
-			seed: defaultTestSeed,
-			config: ElixirConfig{
-				Type:               "Custom Elixir",
-				StrengthRange:      ElixirAttributeRange{Min: 10, Max: 50},
-				AgilityRange:       ElixirAttributeRange{Min: -5, Max: 15},
-				DurationStepsRange: ElixirDurationStepsRange{Min: 10, Max: 20},
-				Description:        "A custom test elixir",
-			},
-			box:       primitives.Box{Point: primitives.Point2D[int]{X: 3, Y: 3}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
-			wantError: false,
-		},
-		{
-			name: "Invalid strength range returns error",
-			seed: defaultTestSeed,
-			config: ElixirConfig{
-				Type:               "Invalid Elixir",
-				StrengthRange:      ElixirAttributeRange{Min: 50, Max: 10}, // Min > Max
-				AgilityRange:       ElixirAttributeRange{Min: 0, Max: 10},
-				DurationStepsRange: defaultDurationRange,
-				Description:        "Invalid config",
-			},
-			box:       primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
-			wantError: true,
-		},
-		{
-			name: "Invalid agility range returns error",
-			seed: defaultTestSeed,
-			config: ElixirConfig{
-				Type:               "Invalid Elixir",
-				StrengthRange:      ElixirAttributeRange{Min: 0, Max: 10},
-				AgilityRange:       ElixirAttributeRange{Min: 20, Max: 5}, // Min > Max
-				DurationStepsRange: defaultDurationRange,
-				Description:        "Invalid config",
-			},
-			box:       primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
-			wantError: true,
-		},
-		{
-			name: "Invalid duration range returns error",
-			seed: defaultTestSeed,
-			config: ElixirConfig{
-				Type:               "Invalid Elixir",
-				StrengthRange:      ElixirAttributeRange{Min: 0, Max: 10},
-				AgilityRange:       ElixirAttributeRange{Min: 0, Max: 10},
-				DurationStepsRange: ElixirDurationStepsRange{Min: 50, Max: 10}, // Min > Max
-				Description:        "Invalid config",
-			},
-			box:       primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
-			wantError: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			rng := utils.NewRandomGeneratorWithSeed(tt.seed)
-			elixir, err := NewElixirWithConfig(*rng, tt.box, tt.config)
-
-			if tt.wantError {
-				if err == nil {
-					t.Error("Expected error, got nil")
-				}
-				if elixir != nil {
-					t.Error("Expected nil elixir on error")
-				}
-				return
-			}
-
-			if err != nil {
-				t.Fatalf("Expected no error, got: %v", err)
-			}
-
-			if elixir == nil {
-				t.Fatal("Expected valid elixir, got nil")
-			}
-
-			// Verify attributes are within config ranges
-			if elixir.AffectedAttributes.Strength < tt.config.StrengthRange.Min ||
-				elixir.AffectedAttributes.Strength > tt.config.StrengthRange.Max {
-				t.Errorf("Strength out of range: got %.2f, want [%.2f, %.2f]",
-					elixir.AffectedAttributes.Strength, tt.config.StrengthRange.Min, tt.config.StrengthRange.Max)
-			}
-
-			if elixir.AffectedAttributes.Agility < tt.config.AgilityRange.Min ||
-				elixir.AffectedAttributes.Agility > tt.config.AgilityRange.Max {
-				t.Errorf("Agility out of range: got %.2f, want [%.2f, %.2f]",
-					elixir.AffectedAttributes.Agility, tt.config.AgilityRange.Min, tt.config.AgilityRange.Max)
-			}
-
-			if elixir.EffectDuration < tt.config.DurationStepsRange.Min ||
-				elixir.EffectDuration > tt.config.DurationStepsRange.Max {
-				t.Errorf("Duration out of range: got %d, want [%d, %d]",
-					elixir.EffectDuration, tt.config.DurationStepsRange.Min, tt.config.DurationStepsRange.Max)
-			}
-
-			// Verify name matches config type
-			if elixir.Name != string(tt.config.Type) {
-				t.Errorf("Expected name %q, got %q", tt.config.Type, elixir.Name)
-			}
-		})
-	}
-}
-
-func TestElixir_NewElixir_UsesBuildInConfig(t *testing.T) {
-	tests := []struct {
-		name         string
-		elixirType   ElixirType
-		expectedName string
-	}{
-		{
-			name:         "Strength type uses Strength elixir config",
-			elixirType:   ElixirTypeStrength,
-			expectedName: string(ElixirTypeStrength),
-		},
-		{
-			name:         "Agility type uses Agility elixir config",
-			elixirType:   ElixirTypeAgility,
-			expectedName: string(ElixirTypeAgility),
-		},
-		{
-			name:         "PhantomBreath type uses PhantomBreath elixir config",
-			elixirType:   ElixirTypePhantomBreath,
-			expectedName: string(ElixirTypePhantomBreath),
-		},
-		{
-			name:         "FrozenStar type uses FrozenStar elixir config",
-			elixirType:   ElixirTypeFrozenStar,
-			expectedName: string(ElixirTypeFrozenStar),
-		},
-		{
-			name:         "Mystery type uses Mystery elixir config",
-			elixirType:   ElixirTypeMystery,
-			expectedName: string(ElixirTypeMystery),
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			rng := utils.NewRandomGeneratorWithSeed(defaultTestSeed)
-			box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
-
-			elixir := NewElixir(*rng, box, tt.elixirType)
-
-			if elixir == nil {
-				t.Fatal("Expected valid elixir, got nil")
-			}
-
-			if elixir.Name != tt.expectedName {
-				t.Errorf("Expected name %q, got %q", tt.expectedName, elixir.Name)
-			}
-
-			// Verify attributes match the config's ranges
-			config := GetElixirConfig(tt.elixirType)
-			if elixir.AffectedAttributes.Strength < config.StrengthRange.Min ||
-				elixir.AffectedAttributes.Strength > config.StrengthRange.Max {
-				t.Errorf("Strength out of config range: got %.2f, want [%.2f, %.2f]",
-					elixir.AffectedAttributes.Strength, config.StrengthRange.Min, config.StrengthRange.Max)
-			}
-
-			if elixir.AffectedAttributes.Agility < config.AgilityRange.Min ||
-				elixir.AffectedAttributes.Agility > config.AgilityRange.Max {
-				t.Errorf("Agility out of config range: got %.2f, want [%.2f, %.2f]",
-					elixir.AffectedAttributes.Agility, config.AgilityRange.Min, config.AgilityRange.Max)
-			}
-
-			if elixir.EffectDuration < config.DurationStepsRange.Min ||
-				elixir.EffectDuration > config.DurationStepsRange.Max {
-				t.Errorf("Duration out of config range: got %d, want [%d, %d]",
-					elixir.EffectDuration, config.DurationStepsRange.Min, config.DurationStepsRange.Max)
-			}
-		})
 	}
 }
 
