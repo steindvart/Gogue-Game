@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	ElixirDurationMin    int = 5
-	ElixirMaxDurationMax int = 30
+	ElixirDurationMin    uint32 = 5
+	ElixirMaxDurationMax uint32 = 30
 )
 
 type Range[T any] struct {
@@ -17,7 +17,7 @@ type Range[T any] struct {
 }
 
 type ElixirAttributeRange = Range[float64]
-type ElixirDurationStepsRange = Range[int]
+type ElixirDurationStepsRange = Range[uint32]
 
 var durationDefaultRange = ElixirDurationStepsRange{Min: ElixirDurationMin, Max: ElixirMaxDurationMax}
 
@@ -93,7 +93,7 @@ func (cfg *ElixirConfig) GenerateAttributes(rng *utils.RandomGenerator) primitiv
 }
 
 func (cfg *ElixirConfig) GenerateDuration(rng *utils.RandomGenerator) uint32 {
-	return uint32(utils.RandomIntInRange(rng, cfg.DurationStepsRange.Min, cfg.DurationStepsRange.Max))
+	return uint32(utils.RandomIntInRange(rng, int(cfg.DurationStepsRange.Min), int(cfg.DurationStepsRange.Max)))
 }
 
 func (cfg *ElixirConfig) Validate() error {

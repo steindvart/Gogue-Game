@@ -50,26 +50,6 @@ func TestElixirConfig_Validate(t *testing.T) {
 			},
 			wantError: true,
 		},
-		{
-			name: "Negative min duration is error",
-			config: ElixirConfig{
-				Type:               ElixirTypeMystery,
-				StrengthRange:      ElixirAttributeRange{Min: -10, Max: 10},
-				AgilityRange:       ElixirAttributeRange{Min: -10, Max: 10},
-				DurationStepsRange: ElixirDurationStepsRange{Min: -5, Max: 30}, // Negative Min
-			},
-			wantError: true,
-		},
-		{
-			name: "Negative max duration is error",
-			config: ElixirConfig{
-				Type:               ElixirTypeMystery,
-				StrengthRange:      ElixirAttributeRange{Min: -10, Max: 10},
-				AgilityRange:       ElixirAttributeRange{Min: -10, Max: 10},
-				DurationStepsRange: ElixirDurationStepsRange{Min: 5, Max: -30}, // Negative Max
-			},
-			wantError: true,
-		},
 	}
 
 	for _, tt := range tests {
