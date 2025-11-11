@@ -258,21 +258,17 @@ func TestElixir_NewElixir_Randomness(t *testing.T) {
 	}
 }
 
-func TestElixir_Take(t *testing.T) {
+func TestElixir_NewElixir_ZeroSizedBoxIsOk(t *testing.T) {
 	rng := utils.NewRandomGeneratorWithSeed(defaultTestSeed)
-	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
+	box := primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 0, Height: 0}}
 	elixir := NewElixir(*rng, box, ElixirTypeStrength)
 
-	if elixir.Shape != box {
-		t.Errorf("Expected initial box %v, got %v", box, elixir.Shape)
+	if elixir == nil {
+		t.Fatal("Expected valid elixir with zero-sized box")
 	}
 
-	elixir.Take()
-
-	// After Take(), Shape should be empty (zero value)
-	emptyBox := primitives.Box{}
-	if elixir.Shape != emptyBox {
-		t.Errorf("Expected empty box %v after Take(), got %v", emptyBox, elixir.Shape)
+	if elixir.Shape != box {
+		t.Errorf("Expected box %v, got %v", box, elixir.Shape)
 	}
 }
 
@@ -281,17 +277,19 @@ func TestElixir_Drop(t *testing.T) {
 	initialBox := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 	elixir := NewElixir(*rng, initialBox, ElixirTypeStrength)
 
-	elixir.Take()
-	emptyBox := primitives.Box{}
-	if elixir.Shape != emptyBox {
-		t.Errorf("Expected empty box after Take(), got %v", elixir.Shape)
+	if elixir.Shape != initialBox {
+		t.Errorf("Expected initial box %v, got %v", initialBox, elixir.Shape)
 	}
 
-	newBox := primitives.Box{Point: primitives.Point2D[int]{X: 10, Y: 10}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
-	elixir.Drop(newBox)
+	newPosition := primitives.Point2D[int]{X: 10, Y: 10}
+	resultBox := elixir.Drop(newPosition)
 
-	if elixir.Shape != newBox {
-		t.Errorf("Expected box to be updated to %v after Drop(), got %v", newBox, elixir.Shape)
+	if elixir.Shape.Point != newPosition {
+		t.Errorf("Expected position to be updated to %v, got %v", newPosition, elixir.Shape.Point)
+	}
+
+	if resultBox.Point != newPosition {
+		t.Errorf("Expected returned box to have position %v, got %v", newPosition, resultBox.Point)
 	}
 }
 
@@ -338,149 +336,75 @@ func TestElixir_Use(t *testing.T) {
 	}
 }
 
-func TestElixir_AsElixir(t *testing.T) {
-	tests := []struct {
-		name     string
-		input    any
-		wantNil  bool
-		testFunc func(t *testing.T, result *Elixir)
-	}{
-		{
-			name: "Valid Elixir pointer returns same pointer",
-			input: &Elixir{
-				Item: &Item{
-					Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
-					Name:  "Test Elixir",
-				},
-				AffectedAttributes: primitives.Attributes{Strength: 10},
-				EffectDuration:     20,
-			},
-			wantNil: false,
-			testFunc: func(t *testing.T, result *Elixir) {
-				if result.AffectedAttributes.Strength != 10 {
-					t.Errorf("Expected Strength 10, got %f", result.AffectedAttributes.Strength)
-				}
-				if result.EffectDuration != 20 {
-					t.Errorf("Expected Duration 20, got %d", result.EffectDuration)
-				}
-			},
-		},
-		{
-			name:    "Non-Elixir type returns nil",
-			input:   "not an elixir",
-			wantNil: true,
-		},
-		{
-			name:    "Nil input returns nil",
-			input:   nil,
-			wantNil: true,
-		},
-		{
-			name: "Different struct type returns nil",
-			input: &Item{
-				Shape: primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 1}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
-				Name:  "Just an item",
-			},
-			wantNil: true,
-		},
+func TestElixir_UseMultipleTimesIsOk(t *testing.T) {
+	rng := utils.NewRandomGeneratorWithSeed(defaultTestSeed)
+	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
+	elixir := NewElixir(*rng, box, ElixirTypeStrength)
+
+	attrs1 := elixir.Use()
+	attrs2 := elixir.Use()
+
+	if attrs1.Strength != attrs2.Strength {
+		t.Error("Use() should return consistent attributes on multiple calls")
 	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			result := AsElixir(tt.input)
-
-			if tt.wantNil && result != nil {
-				t.Errorf("Expected nil, got %v", result)
-			}
-
-			if !tt.wantNil && result == nil {
-				t.Error("Expected non-nil result, got nil")
-			}
-
-			if !tt.wantNil && tt.testFunc != nil {
-				tt.testFunc(t, result)
-			}
-		})
+	if attrs1.Agility != attrs2.Agility {
+		t.Error("Use() should return consistent attributes on multiple calls")
 	}
 }
 
-func TestElixir_EdgeCases(t *testing.T) {
-	tests := []struct {
-		name string
-		test func(t *testing.T)
-	}{
-		{
-			name: "Multiple Take calls keep item taken",
-			test: func(t *testing.T) {
-				rng := utils.NewRandomGeneratorWithSeed(defaultTestSeed)
-				box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
-				elixir := NewElixir(*rng, box, ElixirTypeStrength)
-
-				elixir.Take()
-				elixir.Take()
-				elixir.Take()
-
-				emptyBox := primitives.Box{}
-				if elixir.Shape != emptyBox {
-					t.Errorf("Expected elixir to have empty box after multiple Take() calls, got %v", elixir.Shape)
-				}
-			},
+func TestElixir_AsElixir_ValidPointerIsElixir(t *testing.T) {
+	input := &Elixir{
+		Item: &Item{
+			Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
+			Name:  "Test Elixir",
 		},
-		{
-			name: "Multiple Drop calls update position",
-			test: func(t *testing.T) {
-				rng := utils.NewRandomGeneratorWithSeed(defaultTestSeed)
-				initialBox := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
-				elixir := NewElixir(*rng, initialBox, ElixirTypeStrength)
-
-				box1 := primitives.Box{Point: primitives.Point2D[int]{X: 10, Y: 10}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
-				box2 := primitives.Box{Point: primitives.Point2D[int]{X: 20, Y: 20}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
-
-				elixir.Drop(box1)
-				elixir.Drop(box2)
-
-				if elixir.Shape != box2 {
-					t.Errorf("Expected final box %v, got %v", box2, elixir.Shape)
-				}
-			},
-		},
-		{
-			name: "Use can be called multiple times",
-			test: func(t *testing.T) {
-				rng := utils.NewRandomGeneratorWithSeed(defaultTestSeed)
-				box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
-				elixir := NewElixir(*rng, box, ElixirTypeStrength)
-
-				attrs1 := elixir.Use()
-				attrs2 := elixir.Use()
-
-				if attrs1.Strength != attrs2.Strength {
-					t.Error("Use() should return consistent attributes")
-				}
-			},
-		},
-		{
-			name: "Zero-sized box is valid",
-			test: func(t *testing.T) {
-				rng := utils.NewRandomGeneratorWithSeed(defaultTestSeed)
-				box := primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 0, Height: 0}}
-				elixir := NewElixir(*rng, box, ElixirTypeStrength)
-
-				if elixir == nil {
-					t.Error("Expected valid elixir with zero-sized box")
-				}
-
-				if elixir.Shape != box {
-					t.Errorf("Expected box %v, got %v", box, elixir.Shape)
-				}
-			},
-		},
+		AffectedAttributes: primitives.Attributes{Strength: 10},
+		EffectDuration:     20,
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.test(t)
-		})
+	result := AsElixir(input)
+
+	if result == nil {
+		t.Fatal("Expected non-nil result, got nil")
+	}
+
+	if result.AffectedAttributes.Strength != 10 {
+		t.Errorf("Expected Strength 10, got %f", result.AffectedAttributes.Strength)
+	}
+	if result.EffectDuration != 20 {
+		t.Errorf("Expected Duration 20, got %d", result.EffectDuration)
+	}
+	if result != input {
+		t.Error("Expected same pointer to be returned")
+	}
+}
+
+func TestElixir_AsElixir_NonElixirTypeIsNil(t *testing.T) {
+	result := AsElixir("not an elixir")
+
+	if result != nil {
+		t.Errorf("Expected nil for non-Elixir type, got %v", result)
+	}
+}
+
+func TestElixir_AsElixir_NilInputIsNil(t *testing.T) {
+	result := AsElixir(nil)
+
+	if result != nil {
+		t.Errorf("Expected nil for nil input, got %v", result)
+	}
+}
+
+func TestElixir_AsElixir_DifferentStructTypeIsNil(t *testing.T) {
+	input := &Item{
+		Shape: primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 1}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
+		Name:  "Just an item",
+	}
+
+	result := AsElixir(input)
+
+	if result != nil {
+		t.Errorf("Expected nil for Item type, got %v", result)
 	}
 }
 
