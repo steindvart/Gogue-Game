@@ -16,7 +16,7 @@ func TestElixirConfig_Validate(t *testing.T) {
 				Type:               ElixirTypeStrength,
 				StrengthRange:      ElixirAttributeRange{Min: 5, Max: 20},
 				AgilityRange:       ElixirAttributeRange{Min: 0, Max: 0},
-				DurationStepsRange: durationDefaultRange,
+				DurationStepsRange: defaultDurationRange,
 			},
 			wantError: false,
 		},
@@ -26,7 +26,7 @@ func TestElixirConfig_Validate(t *testing.T) {
 				Type:               ElixirTypeStrength,
 				StrengthRange:      ElixirAttributeRange{Min: 20, Max: 5}, // Min > Max
 				AgilityRange:       ElixirAttributeRange{Min: 0, Max: 0},
-				DurationStepsRange: durationDefaultRange,
+				DurationStepsRange: defaultDurationRange,
 			},
 			wantError: true,
 		},
@@ -36,7 +36,7 @@ func TestElixirConfig_Validate(t *testing.T) {
 				Type:               ElixirTypeAgility,
 				StrengthRange:      ElixirAttributeRange{Min: 0, Max: 0},
 				AgilityRange:       ElixirAttributeRange{Min: 15, Max: 5}, // Min > Max
-				DurationStepsRange: durationDefaultRange,
+				DurationStepsRange: defaultDurationRange,
 			},
 			wantError: true,
 		},
