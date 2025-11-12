@@ -1,38 +1,39 @@
 package items
 
-import "gogue/internal/model/primitives"
+import (
+	"gogue/internal/model/primitives"
+	"gogue/internal/utils"
+)
 
 type Food struct {
-	Item               Item
-	HealthRegeneration float64
+	*Item
+	AffectedAttributes primitives.Attributes
 }
 
-func NewFood(box primitives.Box) *Food {
-	foodNames := []string{
-		"Ration of the Ironclad",
-		"Crimson Berry Cluster",
-		"Loaf of the Forgotten Baker",
-		"Smoked Wyrm Jerky",
-		"Golden Apple of Vitality",
-		"Hardtack of the Endless March",
-		"Spiced Venison Strips",
-		"Honeyed Nectar Bread",
-		"Dried Mushrooms of the Deep",
+func NewFood(rnd *utils.RandomGenerator, box primitives.Box, t FoodType) *Food {
+	cfg := GetFoodConfig(t)
+
+	return &Food{
+		Item: &Item{
+			Shape: box,
+			Name:  string(cfg.Type),
+		},
+		AffectedAttributes: cfg.GenerateAttributes(rnd),
+	}
+}
+
+func NewFoodByConfig(rnd *utils.RandomGenerator, box primitives.Box, cfg FoodConfig) (*Food, error) {
+	if err := cfg.Validate(); err != nil {
+		return nil, err
 	}
 
 	return &Food{
-		Item: Item{
+		Item: &Item{
 			Shape: box,
-			Name:  getAttributeRandomName(foodNames),
+			Name:  string(cfg.Type),
 		},
-		HealthRegeneration: getAttributeRandomPercentIncrease(),
-	}
-}
-
-func (e *Food) Use() primitives.Attributes {
-	return primitives.Attributes{
-		Health: float64(e.HealthRegeneration),
-	}
+		AffectedAttributes: cfg.GenerateAttributes(rnd),
+	}, nil
 }
 
 func AsFood(item any) *Food {

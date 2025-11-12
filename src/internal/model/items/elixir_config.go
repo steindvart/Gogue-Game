@@ -11,13 +11,7 @@ const (
 	ElixirMaxDurationMax uint32 = 30
 )
 
-type Range[T any] struct {
-	Min T
-	Max T
-}
-
-type ElixirAttributeRange = Range[float64]
-type ElixirDurationStepsRange = Range[uint32]
+type ElixirDurationStepsRange = primitives.Range[uint32]
 
 var defaultDurationRange = ElixirDurationStepsRange{Min: ElixirDurationMin, Max: ElixirMaxDurationMax}
 
@@ -33,8 +27,8 @@ const (
 
 type ElixirConfig struct {
 	Type               ElixirType
-	StrengthRange      ElixirAttributeRange
-	AgilityRange       ElixirAttributeRange
+	StrengthRange      primitives.AttributeRange
+	AgilityRange       primitives.AttributeRange
 	DurationStepsRange ElixirDurationStepsRange
 	Description        string
 }
@@ -42,44 +36,44 @@ type ElixirConfig struct {
 var ElixirRegistry = map[ElixirType]ElixirConfig{
 	ElixirTypeStrength: {
 		Type:               ElixirTypeStrength,
-		StrengthRange:      ElixirAttributeRange{Min: 5, Max: 20},
-		AgilityRange:       ElixirAttributeRange{Min: 0, Max: 0},
+		StrengthRange:      primitives.AttributeRange{Min: 5, Max: 20},
+		AgilityRange:       primitives.AttributeRange{Min: 0, Max: 0},
 		DurationStepsRange: defaultDurationRange,
 		Description:        "Increases strength for a short time",
 	},
 	ElixirTypeAgility: {
 		Type:               ElixirTypeAgility,
-		StrengthRange:      ElixirAttributeRange{Min: 0, Max: 0},
-		AgilityRange:       ElixirAttributeRange{Min: 5, Max: 20},
+		StrengthRange:      primitives.AttributeRange{Min: 0, Max: 0},
+		AgilityRange:       primitives.AttributeRange{Min: 5, Max: 20},
 		DurationStepsRange: defaultDurationRange,
 		Description:        "Increases agility for a short time",
 	},
 	ElixirTypePhantomBreath: {
 		Type:               ElixirTypePhantomBreath,
-		StrengthRange:      ElixirAttributeRange{Min: -10, Max: -2},
-		AgilityRange:       ElixirAttributeRange{Min: 10, Max: 30},
+		StrengthRange:      primitives.AttributeRange{Min: -10, Max: -2},
+		AgilityRange:       primitives.AttributeRange{Min: 10, Max: 30},
 		DurationStepsRange: defaultDurationRange,
 		Description:        "Greatly increases agility but weakens strength",
 	},
 	ElixirTypeFrozenStar: {
 		Type:               ElixirTypeFrozenStar,
-		StrengthRange:      ElixirAttributeRange{Min: 10, Max: 30},
-		AgilityRange:       ElixirAttributeRange{Min: -10, Max: -2},
+		StrengthRange:      primitives.AttributeRange{Min: 10, Max: 30},
+		AgilityRange:       primitives.AttributeRange{Min: -10, Max: -2},
 		DurationStepsRange: defaultDurationRange,
 		Description:        "Greatly increases strength but reduces agility",
 	},
 	ElixirTypeMystery: {
 		Type:               ElixirTypeMystery,
-		StrengthRange:      ElixirAttributeRange{Min: -20, Max: 30},
-		AgilityRange:       ElixirAttributeRange{Min: -20, Max: 30},
+		StrengthRange:      primitives.AttributeRange{Min: -20, Max: 30},
+		AgilityRange:       primitives.AttributeRange{Min: -20, Max: 30},
 		DurationStepsRange: defaultDurationRange,
 		Description:        "Random effects on both strength and agility",
 	},
 }
 
 func GetElixirConfig(t ElixirType) ElixirConfig {
-	if config, exists := ElixirRegistry[t]; exists {
-		return config
+	if cfg, exists := ElixirRegistry[t]; exists {
+		return cfg
 	}
 
 	return ElixirRegistry[ElixirTypeMystery]

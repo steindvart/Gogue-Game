@@ -96,8 +96,8 @@ func TestElixir_NewElixir_CustomConfig(t *testing.T) {
 			seed: defaultTestSeed,
 			config: ElixirConfig{
 				Type:               "Custom Elixir",
-				StrengthRange:      ElixirAttributeRange{Min: 10, Max: 50},
-				AgilityRange:       ElixirAttributeRange{Min: -5, Max: 15},
+				StrengthRange:      primitives.AttributeRange{Min: 10, Max: 50},
+				AgilityRange:       primitives.AttributeRange{Min: -5, Max: 15},
 				DurationStepsRange: ElixirDurationStepsRange{Min: 10, Max: 20},
 				Description:        "A custom test elixir",
 			},
@@ -109,8 +109,8 @@ func TestElixir_NewElixir_CustomConfig(t *testing.T) {
 			seed: defaultTestSeed,
 			config: ElixirConfig{
 				Type:               "Invalid Elixir",
-				StrengthRange:      ElixirAttributeRange{Min: 50, Max: 10}, // Min > Max
-				AgilityRange:       ElixirAttributeRange{Min: 0, Max: 10},
+				StrengthRange:      primitives.AttributeRange{Min: 50, Max: 10}, // Min > Max
+				AgilityRange:       primitives.AttributeRange{Min: 0, Max: 10},
 				DurationStepsRange: defaultDurationRange,
 				Description:        "Invalid config",
 			},
@@ -122,8 +122,8 @@ func TestElixir_NewElixir_CustomConfig(t *testing.T) {
 			seed: defaultTestSeed,
 			config: ElixirConfig{
 				Type:               "Invalid Elixir",
-				StrengthRange:      ElixirAttributeRange{Min: 0, Max: 10},
-				AgilityRange:       ElixirAttributeRange{Min: 20, Max: 5}, // Min > Max
+				StrengthRange:      primitives.AttributeRange{Min: 0, Max: 10},
+				AgilityRange:       primitives.AttributeRange{Min: 20, Max: 5}, // Min > Max
 				DurationStepsRange: defaultDurationRange,
 				Description:        "Invalid config",
 			},
@@ -135,8 +135,8 @@ func TestElixir_NewElixir_CustomConfig(t *testing.T) {
 			seed: defaultTestSeed,
 			config: ElixirConfig{
 				Type:               "Invalid Elixir",
-				StrengthRange:      ElixirAttributeRange{Min: 0, Max: 10},
-				AgilityRange:       ElixirAttributeRange{Min: 0, Max: 10},
+				StrengthRange:      primitives.AttributeRange{Min: 0, Max: 10},
+				AgilityRange:       primitives.AttributeRange{Min: 0, Max: 10},
 				DurationStepsRange: ElixirDurationStepsRange{Min: 50, Max: 10}, // Min > Max
 				Description:        "Invalid config",
 			},

@@ -1,5 +1,12 @@
 package primitives
 
+type Range[T any] struct {
+	Min T
+	Max T
+}
+
+type AttributeRange = Range[float64]
+
 type Attributes struct {
 	MaxHealth, Health, Agility, Strength float64
 }
