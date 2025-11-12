@@ -29,14 +29,6 @@ func NewFood(box primitives.Box) *Food {
 	}
 }
 
-func (f *Food) Take() {
-	f.Item.Take()
-}
-
-func (f *Food) Drop(box primitives.Box) {
-	f.Item.Drop(box)
-}
-
 func (e *Food) Use() primitives.Attributes {
 	return primitives.Attributes{
 		Health: float64(e.HealthRegeneration),

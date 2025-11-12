@@ -1,184 +1,486 @@
 package items
 
-// import (
-// 	"gogue/internal/model/entity"
-// 	"gogue/internal/model/primitive"
-// 	"slices"
-// 	"testing"
-// 	"time"
-// )
+import (
+	"gogue/internal/model/primitives"
+	"gogue/internal/utils"
+	"testing"
+)
 
-// func TestNewElixir(t *testing.T) {
-// 	tests := []struct {
-// 		name                       string
-// 		box                        primitives.Box
-// 		wantShape                  primitives.Box
-// 		wantNames                  []string
-// 		wantEffectDurationLessThan time.Duration
-// 		wantIncrementLessThan      uint
-// 		wantAffectedAttributesList []primitives.Attributes
-// 	}{
-// 		{
-// 			name:      "elixir constructor",
-// 			box:       primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 1}},
-// 			wantShape: primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 1}},
-// 			wantNames: []string{
-// 				"Elixir of the Jade Serpent",
-// 				"Potion of the Phantom's Breath",
-// 				"Vial of Crimson Vitality",
-// 				"Draught of the Frozen Star",
-// 				"Elixir of the Shattered Mind",
-// 				"Potion of the Wandering Soul",
-// 				"Vial of Ember Essence",
-// 				"Elixir of the Obsidian Veil",
-// 				"Potion of the Howling Wind",
-// 			},
-// 			wantEffectDurationLessThan: time.Duration(ElixirDurationBase+ElixirMaxDurationFactor) * time.Minute,
-// 			wantIncrementLessThan:      uint(IncreaseAttributeBaseParcentage + IncreaseAttributeMaxPercentage + 1),
-// 			wantAffectedAttributesList: []primitives.Attributes{
-// 				{
-// 					MaxHealth: 1,
-// 					Agility:   0,
-// 					Strength:  0,
-// 				},
-// 				{
-// 					MaxHealth: 0,
-// 					Agility:   1,
-// 					Strength:  0,
-// 				},
-// 				{
-// 					MaxHealth: 0,
-// 					Agility:   0,
-// 					Strength:  1,
-// 				},
-// 			},
-// 		},
-// 	}
+const defaultTestSeed int64 = 42
 
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			got := NewElixir(tt.box)
-// 			if !(got.Item.Shape == tt.wantShape) {
-// 				t.Errorf("NewElixir(): got Shape %v, want %v", got.Item.Shape, tt.wantShape)
-// 			}
-// 			if !(slices.Contains(tt.wantNames, got.Item.Name)) {
-// 				t.Errorf("NewElixir(): got Name %v, want in %v", got.Item.Name, tt.wantNames)
-// 			}
-// 			if !(got.EffectDuration < tt.wantEffectDurationLessThan) {
-// 				t.Errorf("NewElixir(): got EffectDuration %v, want less than %v", got.EffectDuration, tt.wantEffectDurationLessThan)
-// 			}
-// 			if !(got.Increment < tt.wantIncrementLessThan) {
-// 				t.Errorf("NewElixir(): got Increment %v, want less than %v", got.Increment, tt.wantIncrementLessThan)
-// 			}
-// 			if !(slices.Contains(tt.wantAffectedAttributesList, got.AffectedAttribute)) {
-// 				t.Errorf("NewElixir(): got AffectedAttribute %#v, want in %#v", got.AffectedAttribute, tt.wantAffectedAttributesList)
-// 			}
-// 		})
-// 	}
-// }
+func TestElixir_NewElixir_BuiltinConfig(t *testing.T) {
+	tests := []struct {
+		name         string
+		elixirType   ElixirType
+		expectedName string
+	}{
+		{
+			name:         "Strength type uses Strength elixir config",
+			elixirType:   ElixirTypeStrength,
+			expectedName: string(ElixirTypeStrength),
+		},
+		{
+			name:         "Agility type uses Agility elixir config",
+			elixirType:   ElixirTypeAgility,
+			expectedName: string(ElixirTypeAgility),
+		},
+		{
+			name:         "PhantomBreath type uses PhantomBreath elixir config",
+			elixirType:   ElixirTypePhantomBreath,
+			expectedName: string(ElixirTypePhantomBreath),
+		},
+		{
+			name:         "FrozenStar type uses FrozenStar elixir config",
+			elixirType:   ElixirTypeFrozenStar,
+			expectedName: string(ElixirTypeFrozenStar),
+		},
+		{
+			name:         "Mystery type uses Mystery elixir config",
+			elixirType:   ElixirTypeMystery,
+			expectedName: string(ElixirTypeMystery),
+		},
+	}
 
-// func TestElixir_Take(t *testing.T) {
-// 	tests := []struct {
-// 		name string
-// 		want primitives.Box
-// 	}{
-// 		{
-// 			name: "elixir is taken",
-// 			want: primitives.Box{},
-// 		},
-// 	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rng := utils.NewRandomGeneratorWithSeed(defaultTestSeed)
+			box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			elixir := &Elixir{
-// 				Item: Item{
-// 					Shape: primitives.Box{
-// 						Point: primitives.Point2D[int]{X: 1, Y: 2},
-// 						Size:  primitives.Size2D[uint]{Height: 1, Width: 1},
-// 					},
-// 					Name: "Awkward Elixir",
-// 				},
-// 				AffectedAttribute: primitives.Attributes{MaxHealth: 1, Agility: 0, Strength: 0},
-// 				Increment:         1,
-// 				EffectDuration:    time.Minute,
-// 			}
-// 			elixir.Take()
-// 			if elixir.Item.Shape != tt.want {
-// 				t.Errorf("Taken() = (%v), want (%v)", elixir.Item.Shape, tt.want)
-// 			}
-// 		})
-// 	}
-// }
+			elixir := NewElixir(rng, box, tt.elixirType)
 
-// func TestElixir_Drop(t *testing.T) {
-// 	tests := []struct {
-// 		name string
-// 		box  primitives.Box
-// 		want primitives.Box
-// 	}{
-// 		{
-// 			name: "elixir is dropped",
-// 			box:  primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 1}},
-// 			want: primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 1}},
-// 		},
-// 	}
+			if elixir == nil {
+				t.Fatal("Expected valid elixir, got nil")
+			}
 
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			elixir := &Elixir{
-// 				Item: Item{
-// 					Shape: primitives.Box{},
-// 					Name:  "Awkward Elixir",
-// 				},
-// 				AffectedAttribute: primitives.Attributes{MaxHealth: 1, Agility: 0, Strength: 0},
-// 				Increment:         1,
-// 				EffectDuration:    time.Minute,
-// 			}
+			if elixir.Name != tt.expectedName {
+				t.Errorf("Expected name %q, got %q", tt.expectedName, elixir.Name)
+			}
 
-// 			elixir.Drop(tt.box)
+			// Verify attributes match the config's ranges
+			config := GetElixirConfig(tt.elixirType)
+			if elixir.AffectedAttributes.Strength < config.StrengthRange.Min ||
+				elixir.AffectedAttributes.Strength > config.StrengthRange.Max {
+				t.Errorf("Strength out of config range: got %.2f, want [%.2f, %.2f]",
+					elixir.AffectedAttributes.Strength, config.StrengthRange.Min, config.StrengthRange.Max)
+			}
 
-// 			if elixir.Item.Shape != tt.want {
-// 				t.Errorf("Dropped(): Shape %v, want %v", elixir.Item.Shape, tt.want)
-// 			}
-// 		})
-// 	}
-// }
+			if elixir.AffectedAttributes.Agility < config.AgilityRange.Min ||
+				elixir.AffectedAttributes.Agility > config.AgilityRange.Max {
+				t.Errorf("Agility out of config range: got %.2f, want [%.2f, %.2f]",
+					elixir.AffectedAttributes.Agility, config.AgilityRange.Min, config.AgilityRange.Max)
+			}
 
-// func TestElixir_Use(t *testing.T) {
-// 	tests := []struct {
-// 		name   string
-// 		elixir *Elixir
-// 	}{
-// 		{
-// 			name: "use elixir",
-// 			elixir: &Elixir{
-// 				Item: Item{
-// 					Shape: primitives.Box{},
-// 					Name:  "Awkward Elixir",
-// 				},
-// 				AffectedAttribute: primitives.Attributes{MaxHealth: 1, Agility: 0, Strength: 0},
-// 				Increment:         5,
-// 				EffectDuration:    20 * time.Millisecond,
-// 			},
-// 		},
-// 	}
+			if elixir.EffectDuration < config.DurationStepsRange.Min ||
+				elixir.EffectDuration > config.DurationStepsRange.Max {
+				t.Errorf("Duration out of config range: got %d, want [%d, %d]",
+					elixir.EffectDuration, config.DurationStepsRange.Min, config.DurationStepsRange.Max)
+			}
 
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			player := entities.NewPlayer(primitives.Box{})
-// 			tt.elixir.Use(player)
+			if elixir.Name != string(config.Type) {
+				t.Errorf("Expected name %q, got %q", string(config.Type), elixir.Name)
+			}
+		})
+	}
+}
 
-// 			time.Sleep(2 * time.Millisecond)
+func TestElixir_NewElixir_CustomConfig(t *testing.T) {
+	tests := []struct {
+		name      string
+		seed      int64
+		config    ElixirConfig
+		box       primitives.Box
+		wantError bool
+	}{
+		{
+			name: "Valid custom config",
+			seed: defaultTestSeed,
+			config: ElixirConfig{
+				Type:               "Custom Elixir",
+				StrengthRange:      ElixirAttributeRange{Min: 10, Max: 50},
+				AgilityRange:       ElixirAttributeRange{Min: -5, Max: 15},
+				DurationStepsRange: ElixirDurationStepsRange{Min: 10, Max: 20},
+				Description:        "A custom test elixir",
+			},
+			box:       primitives.Box{Point: primitives.Point2D[int]{X: 3, Y: 3}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
+			wantError: false,
+		},
+		{
+			name: "Invalid strength range returns error",
+			seed: defaultTestSeed,
+			config: ElixirConfig{
+				Type:               "Invalid Elixir",
+				StrengthRange:      ElixirAttributeRange{Min: 50, Max: 10}, // Min > Max
+				AgilityRange:       ElixirAttributeRange{Min: 0, Max: 10},
+				DurationStepsRange: defaultDurationRange,
+				Description:        "Invalid config",
+			},
+			box:       primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
+			wantError: true,
+		},
+		{
+			name: "Invalid agility range returns error",
+			seed: defaultTestSeed,
+			config: ElixirConfig{
+				Type:               "Invalid Elixir",
+				StrengthRange:      ElixirAttributeRange{Min: 0, Max: 10},
+				AgilityRange:       ElixirAttributeRange{Min: 20, Max: 5}, // Min > Max
+				DurationStepsRange: defaultDurationRange,
+				Description:        "Invalid config",
+			},
+			box:       primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
+			wantError: true,
+		},
+		{
+			name: "Invalid duration range returns error",
+			seed: defaultTestSeed,
+			config: ElixirConfig{
+				Type:               "Invalid Elixir",
+				StrengthRange:      ElixirAttributeRange{Min: 0, Max: 10},
+				AgilityRange:       ElixirAttributeRange{Min: 0, Max: 10},
+				DurationStepsRange: ElixirDurationStepsRange{Min: 50, Max: 10}, // Min > Max
+				Description:        "Invalid config",
+			},
+			box:       primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
+			wantError: true,
+		},
+	}
 
-// 			if player.Character.MaxHealth == float64(entities.AttributeRateAverage) {
-// 				t.Errorf("Use(): got %#v, want %#v", player.Character.MaxHealth, float64(entities.AttributeRateAverage)+float64(tt.elixir.Increment))
-// 			}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rng := utils.NewRandomGeneratorWithSeed(tt.seed)
+			elixir, err := NewElixirByConfig(rng, tt.box, tt.config)
 
-// 			time.Sleep(30 * time.Millisecond)
+			if tt.wantError {
+				if err == nil {
+					t.Error("Expected error, got nil")
+				}
+				if elixir != nil {
+					t.Error("Expected nil elixir on error")
+				}
+				return
+			}
 
-// 			if player.Character.MaxHealth != float64(entities.AttributeRateAverage) {
-// 				t.Errorf("Use(): got %#v, want %#v", player.Character.MaxHealth, float64(entities.AttributeRateAverage))
-// 			}
-// 		})
-// 	}
-// }
+			if err != nil {
+				t.Fatalf("Expected no error, got: %v", err)
+			}
+
+			if elixir == nil {
+				t.Fatal("Expected valid elixir, got nil")
+			}
+
+			// Verify attributes are within config ranges
+			if elixir.AffectedAttributes.Strength < tt.config.StrengthRange.Min ||
+				elixir.AffectedAttributes.Strength > tt.config.StrengthRange.Max {
+				t.Errorf("Strength out of range: got %.2f, want [%.2f, %.2f]",
+					elixir.AffectedAttributes.Strength, tt.config.StrengthRange.Min, tt.config.StrengthRange.Max)
+			}
+
+			if elixir.AffectedAttributes.Agility < tt.config.AgilityRange.Min ||
+				elixir.AffectedAttributes.Agility > tt.config.AgilityRange.Max {
+				t.Errorf("Agility out of range: got %.2f, want [%.2f, %.2f]",
+					elixir.AffectedAttributes.Agility, tt.config.AgilityRange.Min, tt.config.AgilityRange.Max)
+			}
+
+			if elixir.EffectDuration < tt.config.DurationStepsRange.Min ||
+				elixir.EffectDuration > tt.config.DurationStepsRange.Max {
+				t.Errorf("Duration out of range: got %d, want [%d, %d]",
+					elixir.EffectDuration, tt.config.DurationStepsRange.Min, tt.config.DurationStepsRange.Max)
+			}
+
+			// Verify name matches config type
+			if elixir.Name != string(tt.config.Type) {
+				t.Errorf("Expected name %q, got %q", tt.config.Type, elixir.Name)
+			}
+		})
+	}
+}
+
+func TestElixir_NewElixir_NoRandom(t *testing.T) {
+	tests := []struct {
+		name       string
+		seed       int64
+		elixirType ElixirType
+	}{
+		{
+			name:       "Same seed produces same Strength elixir",
+			seed:       defaultTestSeed,
+			elixirType: ElixirTypeStrength,
+		},
+		{
+			name:       "Same seed produces same Agility elixir",
+			seed:       defaultTestSeed,
+			elixirType: ElixirTypeAgility,
+		},
+		{
+			name:       "Same seed produces same Mystery elixir",
+			seed:       defaultTestSeed,
+			elixirType: ElixirTypeMystery,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
+
+			// Create first elixir
+			rng1 := utils.NewRandomGeneratorWithSeed(tt.seed)
+			elixir1 := NewElixir(rng1, box, tt.elixirType)
+
+			// Create second elixir with same seed
+			rng2 := utils.NewRandomGeneratorWithSeed(tt.seed)
+			elixir2 := NewElixir(rng2, box, tt.elixirType)
+
+			// Verify they are identical
+			if elixir1.AffectedAttributes.Strength != elixir2.AffectedAttributes.Strength {
+				t.Errorf("Strength mismatch: %f != %f", elixir1.AffectedAttributes.Strength, elixir2.AffectedAttributes.Strength)
+			}
+
+			if elixir1.AffectedAttributes.Agility != elixir2.AffectedAttributes.Agility {
+				t.Errorf("Agility mismatch: %f != %f", elixir1.AffectedAttributes.Agility, elixir2.AffectedAttributes.Agility)
+			}
+
+			if elixir1.EffectDuration != elixir2.EffectDuration {
+				t.Errorf("Duration mismatch: %d != %d", elixir1.EffectDuration, elixir2.EffectDuration)
+			}
+		})
+	}
+}
+
+func TestElixir_NewElixir_Randomness(t *testing.T) {
+	tests := []struct {
+		name       string
+		elixirType ElixirType
+		iterations int
+	}{
+		{
+			name:       "Strength elixir produces varied values",
+			elixirType: ElixirTypeStrength,
+			iterations: 50,
+		},
+		{
+			name:       "Mystery elixir produces varied values",
+			elixirType: ElixirTypeMystery,
+			iterations: 50,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
+			strengthValues := make(map[float64]bool)
+			agilityValues := make(map[float64]bool)
+			durationValues := make(map[uint32]bool)
+
+			// Generate multiple elixirs with different seeds
+			for i := 0; i < tt.iterations; i++ {
+				rng := utils.NewRandomGeneratorWithSeed(int64(i))
+				elixir := NewElixir(rng, box, tt.elixirType)
+
+				strengthValues[elixir.AffectedAttributes.Strength] = true
+				agilityValues[elixir.AffectedAttributes.Agility] = true
+				durationValues[elixir.EffectDuration] = true
+			}
+
+			// Check that we got varied values (at least 5 different values)
+			minUniqueValues := 5
+			if len(durationValues) < minUniqueValues {
+				t.Errorf("Expected at least %d unique duration values, got %d", minUniqueValues, len(durationValues))
+			}
+
+			// For attributes, check based on type
+			switch tt.elixirType {
+			case ElixirTypeStrength:
+				if len(strengthValues) < minUniqueValues {
+					t.Errorf("Expected at least %d unique strength values, got %d", minUniqueValues, len(strengthValues))
+				}
+			case ElixirTypeMystery:
+				if len(strengthValues) < minUniqueValues {
+					t.Errorf("Expected at least %d unique strength values, got %d", minUniqueValues, len(strengthValues))
+				}
+				if len(agilityValues) < minUniqueValues {
+					t.Errorf("Expected at least %d unique agility values, got %d", minUniqueValues, len(agilityValues))
+				}
+			}
+		})
+	}
+}
+
+func TestElixir_NewElixir_ZeroSizedBoxIsOk(t *testing.T) {
+	rng := utils.NewRandomGeneratorWithSeed(defaultTestSeed)
+	box := primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 0, Height: 0}}
+	elixir := NewElixir(rng, box, ElixirTypeStrength)
+
+	if elixir == nil {
+		t.Fatal("Expected valid elixir with zero-sized box")
+	}
+
+	if elixir.Shape != box {
+		t.Errorf("Expected box %v, got %v", box, elixir.Shape)
+	}
+}
+
+func TestElixir_Drop(t *testing.T) {
+	rng := utils.NewRandomGeneratorWithSeed(defaultTestSeed)
+	initialBox := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
+	elixir := NewElixir(rng, initialBox, ElixirTypeStrength)
+
+	if elixir.Shape != initialBox {
+		t.Errorf("Expected initial box %v, got %v", initialBox, elixir.Shape)
+	}
+
+	newPosition := primitives.Point2D[int]{X: 10, Y: 10}
+	resultBox := elixir.Drop(newPosition)
+
+	if elixir.Shape.Point != newPosition {
+		t.Errorf("Expected position to be updated to %v, got %v", newPosition, elixir.Shape.Point)
+	}
+
+	if resultBox.Point != newPosition {
+		t.Errorf("Expected returned box to have position %v, got %v", newPosition, resultBox.Point)
+	}
+}
+
+func TestElixir_Use(t *testing.T) {
+	tests := []struct {
+		name       string
+		seed       int64
+		elixirType ElixirType
+	}{
+		{
+			name:       "Use Strength elixir returns correct attributes",
+			seed:       defaultTestSeed,
+			elixirType: ElixirTypeStrength,
+		},
+		{
+			name:       "Use Agility elixir returns correct attributes",
+			seed:       1,
+			elixirType: ElixirTypeAgility,
+		},
+		{
+			name:       "Use Mystery elixir returns correct attributes",
+			seed:       2,
+			elixirType: ElixirTypeMystery,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rng := utils.NewRandomGeneratorWithSeed(tt.seed)
+			box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
+			elixir := NewElixir(rng, box, tt.elixirType)
+
+			attrs := elixir.Use()
+
+			// Verify returned attributes match stored attributes
+			if attrs.Strength != elixir.AffectedAttributes.Strength {
+				t.Errorf("Strength mismatch: got %f, want %f", attrs.Strength, elixir.AffectedAttributes.Strength)
+			}
+
+			if attrs.Agility != elixir.AffectedAttributes.Agility {
+				t.Errorf("Agility mismatch: got %f, want %f", attrs.Agility, elixir.AffectedAttributes.Agility)
+			}
+		})
+	}
+}
+
+func TestElixir_UseMultipleTimesIsOk(t *testing.T) {
+	rng := utils.NewRandomGeneratorWithSeed(defaultTestSeed)
+	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
+	elixir := NewElixir(rng, box, ElixirTypeStrength)
+
+	attrs1 := elixir.Use()
+	attrs2 := elixir.Use()
+
+	if attrs1.Strength != attrs2.Strength {
+		t.Error("Use() should return consistent attributes on multiple calls")
+	}
+	if attrs1.Agility != attrs2.Agility {
+		t.Error("Use() should return consistent attributes on multiple calls")
+	}
+}
+
+func TestElixir_AsElixir_ValidPointerIsElixir(t *testing.T) {
+	input := &Elixir{
+		Item: &Item{
+			Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
+			Name:  "Test Elixir",
+		},
+		AffectedAttributes: primitives.Attributes{Strength: 10},
+		EffectDuration:     20,
+	}
+
+	result := AsElixir(input)
+
+	if result == nil {
+		t.Fatal("Expected non-nil result, got nil")
+	}
+
+	if result.AffectedAttributes.Strength != 10 {
+		t.Errorf("Expected Strength 10, got %f", result.AffectedAttributes.Strength)
+	}
+	if result.EffectDuration != 20 {
+		t.Errorf("Expected Duration 20, got %d", result.EffectDuration)
+	}
+	if result != input {
+		t.Error("Expected same pointer to be returned")
+	}
+}
+
+func TestElixir_AsElixir_NonElixirTypeIsNil(t *testing.T) {
+	result := AsElixir("not an elixir")
+
+	if result != nil {
+		t.Errorf("Expected nil for non-Elixir type, got %v", result)
+	}
+}
+
+func TestElixir_AsElixir_NilInputIsNil(t *testing.T) {
+	result := AsElixir(nil)
+
+	if result != nil {
+		t.Errorf("Expected nil for nil input, got %v", result)
+	}
+}
+
+func TestElixir_AsElixir_DifferentStructTypeIsNil(t *testing.T) {
+	input := &Item{
+		Shape: primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 1}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
+		Name:  "Just an item",
+	}
+
+	result := AsElixir(input)
+
+	if result != nil {
+		t.Errorf("Expected nil for Item type, got %v", result)
+	}
+}
+
+// Benchmarks
+func BenchmarkElixir_NewElixir(b *testing.B) {
+	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
+
+	b.Run("Strength", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			rng := utils.NewRandomGeneratorWithSeed(int64(i))
+			_ = NewElixir(rng, box, ElixirTypeStrength)
+		}
+	})
+
+	b.Run("Mystery", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			rng := utils.NewRandomGeneratorWithSeed(int64(i))
+			_ = NewElixir(rng, box, ElixirTypeMystery)
+		}
+	})
+}
+
+func BenchmarkElixir_Use(b *testing.B) {
+	rng := utils.NewRandomGeneratorWithSeed(defaultTestSeed)
+	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
+	elixir := NewElixir(rng, box, ElixirTypeStrength)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = elixir.Use()
+	}
+}

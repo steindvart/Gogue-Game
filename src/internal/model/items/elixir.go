@@ -2,54 +2,45 @@ package items
 
 import (
 	"gogue/internal/model/primitives"
-	"math/rand"
-	"time"
-)
-
-const (
-	ElixirDurationBase      uint32 = 1
-	ElixirMaxDurationFactor uint32 = 3
+	"gogue/internal/utils"
 )
 
 type Elixir struct {
-	Item              Item
-	EffectDuration    time.Duration
-	AffectedAttribute primitives.Attributes
+	*Item
+	EffectDuration     uint32 // in steps
+	AffectedAttributes primitives.Attributes
 }
 
-func NewElixir(box primitives.Box) *Elixir {
-	elixirNames := []string{
-		"Elixir of the Jade Serpent",
-		"Potion of the Phantom's Breath",
-		"Vial of Crimson Vitality",
-		"Draught of the Frozen Star",
-		"Elixir of the Shattered Mind",
-		"Potion of the Wandering Soul",
-		"Vial of Ember Essence",
-		"Elixir of the Obsidian Veil",
-		"Potion of the Howling Wind",
+func NewElixir(rnd *utils.RandomGenerator, box primitives.Box, t ElixirType) *Elixir {
+	config := GetElixirConfig(t)
+
+	return &Elixir{
+		Item: &Item{
+			Shape: box,
+			Name:  string(config.Type),
+		},
+		AffectedAttributes: config.GenerateAttributes(rnd),
+		EffectDuration:     config.GenerateDuration(rnd),
+	}
+}
+
+func NewElixirByConfig(rnd *utils.RandomGenerator, box primitives.Box, config ElixirConfig) (*Elixir, error) {
+	if err := config.Validate(); err != nil {
+		return nil, err
 	}
 
 	return &Elixir{
-		Item: Item{
+		Item: &Item{
 			Shape: box,
-			Name:  getAttributeRandomName(elixirNames),
+			Name:  string(config.Type),
 		},
-		AffectedAttribute: getRandomAttribute(),
-		EffectDuration:    getRandomElixirDuration(),
-	}
-}
-
-func (e *Elixir) Take() {
-	e.Item.Take()
-}
-
-func (e *Elixir) Drop(box primitives.Box) {
-	e.Item.Drop(box)
+		AffectedAttributes: config.GenerateAttributes(rnd),
+		EffectDuration:     config.GenerateDuration(rnd),
+	}, nil
 }
 
 func (e *Elixir) Use() primitives.Attributes {
-	return e.AffectedAttribute
+	return e.AffectedAttributes
 }
 
 func AsElixir(item any) *Elixir {
@@ -58,8 +49,4 @@ func AsElixir(item any) *Elixir {
 		return e
 	}
 	return nil
-}
-
-func getRandomElixirDuration() time.Duration {
-	return time.Duration(time.Duration(ElixirDurationBase+rand.Uint32()%ElixirMaxDurationFactor) * time.Minute)
 }

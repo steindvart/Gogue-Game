@@ -15,3 +15,10 @@ func (a *Attributes) GetAffectedAttributeName() string {
 		return "None"
 	}
 }
+
+func (a *Attributes) Affect(delta *Attributes) {
+	a.MaxHealth += delta.MaxHealth
+	a.Health += delta.Health
+	a.Agility += delta.Agility
+	a.Strength += delta.Strength
+}
