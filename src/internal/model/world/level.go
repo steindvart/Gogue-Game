@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"gogue/internal/model/primitives"
+	"gogue/internal/utils"
 	"math"
 	"sort"
 )
@@ -49,21 +50,15 @@ var verticalNeighborRoomsSet = map[[2]int]struct{}{
 	{5, 8}: {},
 }
 
-type RandomSource interface {
-	Intn(n int) int
-	Perm(n int) []int
-	Shuffle(n int, swap func(i, j int))
-}
-
 type Level struct {
 	Rooms        []Room
 	Passages     []Passage
 	Number       uint
 	FinishPortal primitives.Box
-	random       RandomSource
+	random       utils.RandomSource
 }
 
-func NewLevel(random RandomSource) *Level {
+func NewLevel(random utils.RandomSource) *Level {
 	return &Level{
 		random: random,
 	}
@@ -233,7 +228,7 @@ func (l *Level) GetStartPositionForPlayer() (primitives.Point2D[int], error) {
 	return pointNil, fmt.Errorf("starting room was not found")
 }
 
-func generateSpanningTree(startRoom int, random RandomSource) ([][2]int, error) {
+func generateSpanningTree(startRoom int, random utils.RandomSource) ([][2]int, error) {
 	if startRoom < 0 || startRoom > roomsCount {
 		return nil, fmt.Errorf("start room must be between 0 and %d", roomsCount)
 	}
@@ -271,7 +266,7 @@ func generateSpanningTree(startRoom int, random RandomSource) ([][2]int, error) 
 	return edges, nil
 }
 
-func addRandomEdges(sourceEdges [][2]int, extraEdgesCount int, random RandomSource) [][2]int {
+func addRandomEdges(sourceEdges [][2]int, extraEdgesCount int, random utils.RandomSource) [][2]int {
 	const minExtraPassageCount = 1
 	if extraEdgesCount < minExtraPassageCount {
 		extraEdgesCount = minExtraPassageCount
@@ -342,28 +337,28 @@ func sortByOrderAsc(first, second int) (int, int) {
 	return minIndex, maxIndex
 }
 
-func getDoorLeftWall(room Room, random RandomSource) primitives.Point2D[int] {
+func getDoorLeftWall(room Room, random utils.RandomSource) primitives.Point2D[int] {
 	const wall = 1
 	doorYFrom := room.Shape.Point.Y + wall
 	doorYTo := room.Shape.Point.Y + int(room.Shape.Size.Height) - wall
 	return primitives.Point2D[int]{X: room.Shape.Point.X, Y: random.Intn(doorYTo-doorYFrom) + doorYFrom}
 }
 
-func getDoorRightWall(room Room, random RandomSource) primitives.Point2D[int] {
+func getDoorRightWall(room Room, random utils.RandomSource) primitives.Point2D[int] {
 	const wall = 1
 	doorYFrom := room.Shape.Point.Y + wall
 	doorYTo := room.Shape.Point.Y + int(room.Shape.Size.Height) - wall
 	return primitives.Point2D[int]{X: room.Shape.Point.X + int(room.Shape.Size.Width), Y: random.Intn(doorYTo-doorYFrom) + doorYFrom}
 }
 
-func getDoorTopWall(room Room, random RandomSource) primitives.Point2D[int] {
+func getDoorTopWall(room Room, random utils.RandomSource) primitives.Point2D[int] {
 	const wall = 1
 	doorXFrom := room.Shape.Point.X + wall
 	doorXTo := room.Shape.Point.X + int(room.Shape.Size.Width) - wall
 	return primitives.Point2D[int]{X: random.Intn(doorXTo-doorXFrom) + doorXFrom, Y: room.Shape.Point.Y}
 }
 
-func getDoorDownWall(room Room, random RandomSource) primitives.Point2D[int] {
+func getDoorDownWall(room Room, random utils.RandomSource) primitives.Point2D[int] {
 	const wall = 1
 	doorXFrom := room.Shape.Point.X + wall
 	doorXTo := room.Shape.Point.X + int(room.Shape.Size.Width)
