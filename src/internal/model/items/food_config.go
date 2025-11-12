@@ -57,8 +57,8 @@ var FoodRegistry = map[FoodType]FoodConfig{
 }
 
 func GetFoodConfig(t FoodType) FoodConfig {
-	if config, exists := FoodRegistry[t]; exists {
-		return config
+	if cfg, exists := FoodRegistry[t]; exists {
+		return cfg
 	}
 
 	return FoodRegistry[FoodTypeMistery]

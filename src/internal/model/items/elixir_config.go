@@ -72,8 +72,8 @@ var ElixirRegistry = map[ElixirType]ElixirConfig{
 }
 
 func GetElixirConfig(t ElixirType) ElixirConfig {
-	if config, exists := ElixirRegistry[t]; exists {
-		return config
+	if cfg, exists := ElixirRegistry[t]; exists {
+		return cfg
 	}
 
 	return ElixirRegistry[ElixirTypeMystery]
