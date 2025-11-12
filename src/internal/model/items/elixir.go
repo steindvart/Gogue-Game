@@ -12,30 +12,30 @@ type Elixir struct {
 }
 
 func NewElixir(rnd *utils.RandomGenerator, box primitives.Box, t ElixirType) *Elixir {
-	config := GetElixirConfig(t)
+	cfg := GetElixirConfig(t)
 
 	return &Elixir{
 		Item: &Item{
 			Shape: box,
-			Name:  string(config.Type),
+			Name:  string(cfg.Type),
 		},
-		AffectedAttributes: config.GenerateAttributes(rnd),
-		EffectDuration:     config.GenerateDuration(rnd),
+		AffectedAttributes: cfg.GenerateAttributes(rnd),
+		EffectDuration:     cfg.GenerateDuration(rnd),
 	}
 }
 
-func NewElixirByConfig(rnd *utils.RandomGenerator, box primitives.Box, config ElixirConfig) (*Elixir, error) {
-	if err := config.Validate(); err != nil {
+func NewElixirByConfig(rnd *utils.RandomGenerator, box primitives.Box, cfg ElixirConfig) (*Elixir, error) {
+	if err := cfg.Validate(); err != nil {
 		return nil, err
 	}
 
 	return &Elixir{
 		Item: &Item{
 			Shape: box,
-			Name:  string(config.Type),
+			Name:  string(cfg.Type),
 		},
-		AffectedAttributes: config.GenerateAttributes(rnd),
-		EffectDuration:     config.GenerateDuration(rnd),
+		AffectedAttributes: cfg.GenerateAttributes(rnd),
+		EffectDuration:     cfg.GenerateDuration(rnd),
 	}, nil
 }
 
