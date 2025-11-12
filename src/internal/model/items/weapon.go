@@ -29,14 +29,6 @@ func NewWeapon(box primitives.Box) *Weapon {
 	}
 }
 
-func (w *Weapon) Take() {
-	w.Item.Take()
-}
-
-func (w *Weapon) Drop(box primitives.Box) {
-	w.Item.Drop(box)
-}
-
 func (w *Weapon) Use() primitives.Attributes {
 	return primitives.Attributes{
 		Strength: float64(w.Damage),

@@ -8,7 +8,7 @@ import (
 )
 
 func TestPassage_NewPassageOnX(t *testing.T) {
-	cases := []struct {
+	tests := []struct {
 		name      string
 		doorOne   primitives.Point2D[int]
 		doorTwo   primitives.Point2D[int]
@@ -42,7 +42,7 @@ func TestPassage_NewPassageOnX(t *testing.T) {
 		},
 	}
 
-	for _, tt := range cases {
+	for _, tt := range tests {
 		source := rand.New(rand.NewSource(42))
 		t.Run(tt.name, func(t *testing.T) {
 			passage, err := NewPassageOnX(tt.doorOne, tt.doorTwo, source)
@@ -80,7 +80,7 @@ func TestPassage_NewPassageOnX(t *testing.T) {
 }
 
 func TestPassage_NewPassageOnY(t *testing.T) {
-	cases := []struct {
+	tests := []struct {
 		name      string
 		doorOne   primitives.Point2D[int]
 		doorTwo   primitives.Point2D[int]
@@ -114,7 +114,7 @@ func TestPassage_NewPassageOnY(t *testing.T) {
 		},
 	}
 
-	for _, tt := range cases {
+	for _, tt := range tests {
 		source := rand.New(rand.NewSource(42))
 		t.Run(tt.name, func(t *testing.T) {
 			passage, err := NewPassageOnY(tt.doorOne, tt.doorTwo, source)
