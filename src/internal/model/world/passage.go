@@ -53,7 +53,7 @@ func NewPassageOnX(doorOne primitives.Point2D[int], doorTwo primitives.Point2D[i
 
 	// иду по прямой до финишной двери
 	lastElement = passage[len(passage)-1]
-	for x := lastElement.X; x < doorTwo.X; x++ {
+	for x := lastElement.X; x < doorTwo.X-1; x++ {
 		lastElement = passage[len(passage)-1]
 		passage = append(passage, primitives.Point2D[int]{X: lastElement.X + 1, Y: lastElement.Y})
 	}
@@ -102,7 +102,7 @@ func NewPassageOnY(doorOne primitives.Point2D[int], doorTwo primitives.Point2D[i
 
 	// иду по прямой до финишной двери
 	lastElement = passage[len(passage)-1]
-	for y := lastElement.Y; y < doorTwo.Y; y++ {
+	for y := lastElement.Y; y < doorTwo.Y-1; y++ {
 		lastElement = passage[len(passage)-1]
 		passage = append(passage, primitives.Point2D[int]{X: lastElement.X, Y: lastElement.Y + 1})
 	}
