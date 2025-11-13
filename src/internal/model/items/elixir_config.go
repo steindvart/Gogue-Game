@@ -18,11 +18,11 @@ var defaultDurationRange = ElixirDurationStepsRange{Min: ElixirDurationMin, Max:
 type ElixirType string
 
 const (
-	ElixirTypeStrength      ElixirType = "Elixir of Strength" // +Strength
-	ElixirTypeAgility       ElixirType = "Elixir of Agility"  // +Agility
-	ElixirTypePhantomBreath ElixirType = "Phantom's Breath"   // +Agility -Strength
-	ElixirTypeFrozenStar    ElixirType = "Frozen Star"        // +Strength -Agility
-	ElixirTypeMystery       ElixirType = "Elixir of Mystery"  // All random
+	ElixirTypeStrength ElixirType = "Strength" // +Strength
+	ElixirTypeAgility  ElixirType = "Agility"  // +Agility
+	ElixirTypeDwarfism ElixirType = "Dwarfism" // +Agility -Strength
+	ElixirTypeGiantism ElixirType = "Giantism" // +Strength -Agility
+	ElixirTypeMystery  ElixirType = "Mystery"  // All random
 )
 
 type ElixirConfig struct {
@@ -48,15 +48,15 @@ var ElixirRegistry = map[ElixirType]ElixirConfig{
 		DurationStepsRange: defaultDurationRange,
 		Description:        "Increases agility for a short time",
 	},
-	ElixirTypePhantomBreath: {
-		Type:               ElixirTypePhantomBreath,
+	ElixirTypeDwarfism: {
+		Type:               ElixirTypeDwarfism,
 		StrengthRange:      primitives.AttributeRange{Min: -10, Max: -2},
 		AgilityRange:       primitives.AttributeRange{Min: 10, Max: 30},
 		DurationStepsRange: defaultDurationRange,
 		Description:        "Greatly increases agility but weakens strength",
 	},
-	ElixirTypeFrozenStar: {
-		Type:               ElixirTypeFrozenStar,
+	ElixirTypeGiantism: {
+		Type:               ElixirTypeGiantism,
 		StrengthRange:      primitives.AttributeRange{Min: 10, Max: 30},
 		AgilityRange:       primitives.AttributeRange{Min: -10, Max: -2},
 		DurationStepsRange: defaultDurationRange,

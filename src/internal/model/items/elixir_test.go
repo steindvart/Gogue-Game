@@ -26,13 +26,13 @@ func TestElixir_NewElixir_BuiltinConfig(t *testing.T) {
 		},
 		{
 			name:         "PhantomBreath type uses PhantomBreath elixir config",
-			elixirType:   ElixirTypePhantomBreath,
-			expectedName: string(ElixirTypePhantomBreath),
+			elixirType:   ElixirTypeDwarfism,
+			expectedName: string(ElixirTypeDwarfism),
 		},
 		{
 			name:         "FrozenStar type uses FrozenStar elixir config",
-			elixirType:   ElixirTypeFrozenStar,
-			expectedName: string(ElixirTypeFrozenStar),
+			elixirType:   ElixirTypeGiantism,
+			expectedName: string(ElixirTypeGiantism),
 		},
 		{
 			name:         "Mystery type uses Mystery elixir config",
