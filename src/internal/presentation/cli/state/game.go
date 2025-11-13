@@ -14,6 +14,23 @@ import (
 	"github.com/rivo/tview"
 )
 
+type EntityType int
+
+const (
+	EntityTypePlayer EntityType = iota + 1
+	EntityTypeHorizontalWall
+	EntityTypeVerticalWall
+	EntityTypePortal
+	EntityTypePassage
+	EntityTypeDoorOne
+	EntityTypeDoorTwo
+	EntityTypeZombie
+	EntityTypeVampire
+	EntityTypeGhost
+	EntityTypeOgre
+	EntityTypeSnakeMage
+)
+
 type Game struct {
 	player entities.Player
 	level  *world.Level
@@ -157,34 +174,89 @@ func (g *Game) drawField(screen tcell.Screen, ox, oy, w, h int) {
 	for y := 0; y < h; y++ {
 		for x := 0; x < w; x++ {
 			ch := ' '
-			if field[y][x] == 1 {
+			if field[y][x] == EntityTypePlayer {
 				ch = '🦸'
-			} else if field[y][x] == 2 {
+			} else if field[y][x] == EntityTypeHorizontalWall {
 				ch = '—'
-			} else if field[y][x] == 3 {
+			} else if field[y][x] == EntityTypeVerticalWall {
 				ch = '|'
-			} else if field[y][x] == 4 {
+			} else if field[y][x] == EntityTypePortal {
 				ch = 'O'
-			} else if field[y][x] == 5 {
+			} else if field[y][x] == EntityTypePassage {
 				ch = '*'
-			} else if field[y][x] == 6 {
+			} else if field[y][x] == EntityTypeDoorOne {
 				ch = '['
-			} else if field[y][x] == 7 {
+			} else if field[y][x] == EntityTypeDoorTwo {
 				ch = ']'
+			} else if field[y][x] == EntityTypeZombie {
+				ch = '🧟'
+			} else if field[y][x] == EntityTypeVampire {
+				ch = '🧛'
+			} else if field[y][x] == EntityTypeGhost {
+				ch = '👻'
+			} else if field[y][x] == EntityTypeOgre {
+				ch = '👹'
+			} else if field[y][x] == EntityTypeSnakeMage {
+				ch = '🐍'
 			}
 			screen.SetContent(ox+x, oy+y, ch, nil, tcell.StyleDefault.Background(tcell.ColorBlack))
 		}
 	}
 }
 
-func (g *Game) makeField(w, h int) [][]int {
-	field := make([][]int, h)
+func (g *Game) makeField(w, h int) [][]EntityType {
+	field := make([][]EntityType, h)
 	for y := range field {
-		field[y] = make([]int, w)
+		field[y] = make([]EntityType, w)
+	}
+
+	// Добавлено в качестве примера, потом надо будет убрать
+	g.level.Rooms[0].Enemies = []entities.Enemy{
+		{
+			Type: entities.EnemyType(entities.EnemyTypeZombie),
+			Character: entities.Character{
+				Shape: primitives.Box{
+					Point: primitives.Point2D[int]{X: 6, Y: 6},
+				},
+			},
+		},
+		{
+			Type: entities.EnemyType(entities.EnemyTypeVampire),
+			Character: entities.Character{
+				Shape: primitives.Box{
+					Point: primitives.Point2D[int]{X: 6, Y: 7},
+				},
+			},
+		},
+		{
+			Type: entities.EnemyType(entities.EnemyTypeGhost),
+			Character: entities.Character{
+				Shape: primitives.Box{
+					Point: primitives.Point2D[int]{X: 6, Y: 8},
+				},
+			},
+		},
+		{
+			Type: entities.EnemyType(entities.EnemyTypeOgre),
+			Character: entities.Character{
+				Shape: primitives.Box{
+					Point: primitives.Point2D[int]{X: 6, Y: 9},
+				},
+			},
+		},
+		{
+			Type: entities.EnemyType(entities.EnemyTypeSnakeMage),
+			Character: entities.Character{
+				Shape: primitives.Box{
+					Point: primitives.Point2D[int]{X: 6, Y: 10},
+				},
+			},
+		},
 	}
 
 	for _, room := range g.level.Rooms {
 		g.drawRoom(room, g.level.FinishPortal, field)
+		g.drawEnemies(room, field)
 	}
 
 	for _, passages := range g.level.Passages {
@@ -194,31 +266,59 @@ func (g *Game) makeField(w, h int) [][]int {
 	px := g.player.Character.Shape.Point.X
 	py := g.player.Character.Shape.Point.Y
 	if py >= 0 && py < h && px >= 0 && px < w {
-		field[py][px] = 1
+		field[py][px] = EntityTypePlayer
 	}
 
 	return field
 }
 
+func (g *Game) drawEnemies(room world.Room, field [][]EntityType) {
+	var et EntityType
+
+	for _, e := range room.Enemies {
+		switch e.Type {
+		case entities.EnemyTypeZombie:
+			et = EntityTypeZombie
+		case entities.EnemyTypeVampire:
+			et = EntityTypeVampire
+		case entities.EnemyTypeGhost:
+			et = EntityTypeGhost
+		case entities.EnemyTypeOgre:
+			et = EntityTypeOgre
+		case entities.EnemyTypeSnakeMage:
+			et = EntityTypeSnakeMage
+		}
+
+		ex := e.Character.Shape.Point.X
+		ey := e.Character.Shape.Point.Y
+
+		h := len(field)
+		w := len(field[0])
+		if ey >= 0 && ey < h && ex >= 0 && ex < w {
+			field[ey][ex] = et
+		}
+	}
+}
+
 // Тут можно класть только lvl, так как room я получаю из него же шагом выше, а могу и тут
-func (g *Game) drawRoom(room world.Room, finishPortal primitives.Box, field [][]int) {
+func (g *Game) drawRoom(room world.Room, finishPortal primitives.Box, field [][]EntityType) {
 	for column := room.Shape.Point.X; column < room.Shape.Point.X+int(room.Shape.Size.Width); column++ {
-		field[room.Shape.Point.Y][column] = 2
-		field[room.Shape.Point.Y+int(room.Shape.Size.Height)][column] = 2
+		field[room.Shape.Point.Y][column] = EntityTypeHorizontalWall
+		field[room.Shape.Point.Y+int(room.Shape.Size.Height)][column] = EntityTypeHorizontalWall
 	}
 
 	for row := room.Shape.Point.Y; row < room.Shape.Point.Y+int(room.Shape.Size.Height); row++ {
-		field[row][room.Shape.Point.X] = 3
-		field[row][room.Shape.Point.X+int(room.Shape.Size.Width)] = 3
+		field[row][room.Shape.Point.X] = EntityTypeVerticalWall
+		field[row][room.Shape.Point.X+int(room.Shape.Size.Width)] = EntityTypeVerticalWall
 	}
 
-	field[finishPortal.Point.Y][finishPortal.Point.X] = 4
+	field[finishPortal.Point.Y][finishPortal.Point.X] = EntityTypePortal
 }
 
-func (g *Game) drawPassage(passage world.Passage, field [][]int) {
+func (g *Game) drawPassage(passage world.Passage, field [][]EntityType) {
 	for i := 0; i < len(passage.Passage); i++ {
-		field[passage.Passage[i].Y][passage.Passage[i].X] = 5
+		field[passage.Passage[i].Y][passage.Passage[i].X] = EntityTypePassage
 	}
-	field[passage.DoorOne.Y][passage.DoorOne.X] = 6
-	field[passage.DoorTwo.Y][passage.DoorTwo.X] = 7
+	field[passage.DoorOne.Y][passage.DoorOne.X] = EntityTypeDoorOne
+	field[passage.DoorTwo.Y][passage.DoorTwo.X] = EntityTypeDoorTwo
 }
