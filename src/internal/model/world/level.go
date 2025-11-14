@@ -204,10 +204,9 @@ func (l *Level) generatePassages() error {
 	return nil
 }
 
-func (l *Level) GetStartPositionForPlayer() (primitives.Point2D[int], error) {
-	pointNil := primitives.Point2D[int]{X: 0, Y: 0}
+func (l *Level) GetStartPositionForPlayer() (*primitives.Point2D[int], error) {
 	if len(l.Rooms) != roomsCount {
-		return pointNil, fmt.Errorf("should be %d rooms", roomsCount)
+		return nil, fmt.Errorf("should be %d rooms", roomsCount)
 	}
 
 	for _, room := range l.Rooms {
@@ -218,14 +217,14 @@ func (l *Level) GetStartPositionForPlayer() (primitives.Point2D[int], error) {
 			roomWidth := int(room.Shape.Size.Width)
 			roomHeight := int(room.Shape.Size.Height)
 
-			return primitives.Point2D[int]{
+			return &primitives.Point2D[int]{
 				X: xRoomPoint + roomWall + l.random.Intn(roomWidth-(roomWall*2)),
 				Y: yRoomPoint + roomWall + l.random.Intn(roomHeight-(roomWall*2)),
 			}, nil
 		}
 	}
 
-	return pointNil, fmt.Errorf("starting room was not found")
+	return nil, fmt.Errorf("starting room was not found")
 }
 
 func generateSpanningTree(startRoom int, random utils.RandomSource) ([][2]int, error) {

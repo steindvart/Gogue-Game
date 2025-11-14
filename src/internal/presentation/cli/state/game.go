@@ -36,7 +36,7 @@ func NewGame() (*Game, error) {
 		return nil, err
 	}
 	player := entities.NewPlayer(primitives.Box{
-		Point: playerStartPoint,
+		Point: *playerStartPoint,
 		Size:  primitives.Size2D[uint]{Height: 1, Width: 1},
 	})
 

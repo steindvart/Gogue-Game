@@ -615,7 +615,7 @@ func TestLevel_GetStartPositionForPlayer(t *testing.T) {
 			t.Fatalf("GetStartPositionForPlayer returned unexpected error: %v", err)
 		}
 
-		if wantPlayerStartPoint != playerStartPoint {
+		if wantPlayerStartPoint != *playerStartPoint {
 			t.Errorf("Position mismatch: expected %+v, got %+v", wantPlayerStartPoint, playerStartPoint)
 		}
 	})
