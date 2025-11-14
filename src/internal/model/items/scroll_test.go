@@ -1,167 +1,772 @@
 package items
 
-// import (
-// 	"gogue/internal/model/entity"
-// 	"gogue/internal/model/primitive"
-// 	"slices"
-// 	"testing"
-// )
+import (
+	"gogue/internal/model/primitives"
+	"gogue/internal/utils"
+	"testing"
+)
 
-// func TestNewScroll(t *testing.T) {
-// 	tests := []struct {
-// 		name                       string
-// 		box                        primitives.Box
-// 		wantShape                  primitives.Box
-// 		wantNames                  []string
-// 		wantIncrementLessThan      uint
-// 		wantAffectedAttributesList []primitives.Attributes
-// 	}{
-// 		{
-// 			name:      "scroll constructor",
-// 			box:       primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 1}},
-// 			wantShape: primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 1}},
-// 			wantNames: []string{
-// 				"Scroll of Shadowstep",
-// 				"Parchment of Eternal Flame",
-// 				"Manuscript of Forgotten Truths",
-// 				"Scroll of Iron Will",
-// 				"Vellum of the Void",
-// 				"Scroll of Whispers",
-// 				"Tome of the Lost King",
-// 				"Scroll of Unseen Paths",
-// 				"Parchment of Thunderous Roar",
-// 			},
-// 			wantIncrementLessThan: uint(IncreaseAttributeBaseParcentage + IncreaseAttributeMaxPercentage + 1),
-// 			wantAffectedAttributesList: []primitives.Attributes{
-// 				{
-// 					MaxHealth: 1,
-// 					Agility:   0,
-// 					Strength:  0,
-// 				},
-// 				{
-// 					MaxHealth: 0,
-// 					Agility:   1,
-// 					Strength:  0,
-// 				},
-// 				{
-// 					MaxHealth: 0,
-// 					Agility:   0,
-// 					Strength:  1,
-// 				},
-// 			},
-// 		},
-// 	}
+func TestScroll_NewScroll_BuiltinConfig(t *testing.T) {
+	tests := []struct {
+		name         string
+		scrollType   ScrollType
+		expectedName string
+	}{
+		{
+			name:         "Strength type uses Strength scroll config",
+			scrollType:   ScrollTypeStrength,
+			expectedName: string(ScrollTypeStrength),
+		},
+		{
+			name:         "Agility type uses Agility scroll config",
+			scrollType:   ScrollTypeAgility,
+			expectedName: string(ScrollTypeAgility),
+		},
+		{
+			name:         "MaxHealth type uses MaxHealth scroll config",
+			scrollType:   ScrollTypeMaxHealth,
+			expectedName: string(ScrollTypeMaxHealth),
+		},
+		{
+			name:         "Mystery type uses Mystery scroll config",
+			scrollType:   ScrollTypeMystery,
+			expectedName: string(ScrollTypeMystery),
+		},
+	}
 
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			got := NewScroll(tt.box)
-// 			if !(got.Item.Shape == tt.wantShape) {
-// 				t.Errorf("NewScroll(): got Shape %v, want %v", got.Item.Shape, tt.wantShape)
-// 			}
-// 			if !(slices.Contains(tt.wantNames, got.Item.Name)) {
-// 				t.Errorf("NewScroll(): got Name %v, want in %v", got.Item.Name, tt.wantNames)
-// 			}
-// 			if !(got.Increment < tt.wantIncrementLessThan) {
-// 				t.Errorf("NewScroll(): got Increment %v, want less than %v", got.Increment, tt.wantIncrementLessThan)
-// 			}
-// 			if !(slices.Contains(tt.wantAffectedAttributesList, got.AffectedAttribute)) {
-// 				t.Errorf("NewScroll(): got AffectedAttribute %v, want in %v", got.AffectedAttribute, tt.wantAffectedAttributesList)
-// 			}
-// 		})
-// 	}
-// }
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rng := utils.NewRandomGeneratorWithSeed(defaultItemsTestSeed)
+			box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 
-// func TestScroll_Take(t *testing.T) {
-// 	tests := []struct {
-// 		name string
-// 		want primitives.Box
-// 	}{
-// 		{
-// 			name: "scroll is taken",
-// 			want: primitives.Box{},
-// 		},
-// 	}
+			scroll := NewScroll(rng, box, tt.scrollType)
 
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			scroll := &Scroll{
-// 				Item: Item{
-// 					Shape: primitives.Box{
-// 						Point: primitives.Point2D[int]{X: 1, Y: 2},
-// 						Size:  primitives.Size2D[uint]{Height: 1, Width: 1},
-// 					},
-// 					Name: "Awkward Scroll",
-// 				},
-// 				AffectedAttribute: primitives.Attributes{MaxHealth: 1, Agility: 0, Strength: 0},
-// 				Increment:         1,
-// 			}
-// 			scroll.Take()
-// 			if scroll.Item.Shape != tt.want {
-// 				t.Errorf("Taken() = (%v), want (%v)", scroll.Item.Shape, tt.want)
-// 			}
-// 		})
-// 	}
-// }
+			if scroll == nil {
+				t.Fatal("Expected valid scroll, got nil")
+			}
 
-// func TestScroll_Drop(t *testing.T) {
-// 	tests := []struct {
-// 		name string
-// 		box  primitives.Box
-// 		want primitives.Box
-// 	}{
-// 		{
-// 			name: "scroll is dropped",
-// 			box:  primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 1}},
-// 			want: primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 1}},
-// 		},
-// 	}
+			if scroll.Name != tt.expectedName {
+				t.Errorf("Expected name %q, got %q", tt.expectedName, scroll.Name)
+			}
 
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			scroll := &Scroll{
-// 				Item: Item{
-// 					Shape: primitives.Box{},
-// 					Name:  "Awkward Scroll",
-// 				},
-// 				AffectedAttribute: primitives.Attributes{MaxHealth: 1, Agility: 0, Strength: 0},
-// 				Increment:         1,
-// 			}
+			// Verify attributes match the config's ranges
+			config := GetScrollConfig(tt.scrollType)
+			if scroll.AffectedAttributes.Strength < config.StrengthRange.Min ||
+				scroll.AffectedAttributes.Strength > config.StrengthRange.Max {
+				t.Errorf("Strength out of config range: got %.2f, want [%.2f, %.2f]",
+					scroll.AffectedAttributes.Strength, config.StrengthRange.Min, config.StrengthRange.Max)
+			}
 
-// 			scroll.Drop(tt.box)
+			if scroll.AffectedAttributes.Agility < config.AgilityRange.Min ||
+				scroll.AffectedAttributes.Agility > config.AgilityRange.Max {
+				t.Errorf("Agility out of config range: got %.2f, want [%.2f, %.2f]",
+					scroll.AffectedAttributes.Agility, config.AgilityRange.Min, config.AgilityRange.Max)
+			}
 
-// 			if scroll.Item.Shape != tt.want {
-// 				t.Errorf("Dropped(): Shape %v, want %v", scroll.Item.Shape, tt.want)
-// 			}
-// 		})
-// 	}
-// }
+			if scroll.AffectedAttributes.MaxHealth < config.MaxHealthRange.Min ||
+				scroll.AffectedAttributes.MaxHealth > config.MaxHealthRange.Max {
+				t.Errorf("MaxHealth out of config range: got %.2f, want [%.2f, %.2f]",
+					scroll.AffectedAttributes.MaxHealth, config.MaxHealthRange.Min, config.MaxHealthRange.Max)
+			}
 
-// func TestScroll_Use(t *testing.T) {
-// 	tests := []struct {
-// 		name   string
-// 		scroll *Scroll
-// 	}{
-// 		{
-// 			name: "use scroll",
-// 			scroll: &Scroll{
-// 				Item: Item{
-// 					Shape: primitives.Box{},
-// 					Name:  "Awkward Scroll",
-// 				},
-// 				AffectedAttribute: primitives.Attributes{MaxHealth: 1, Agility: 0, Strength: 0},
-// 				Increment:         5,
-// 			},
-// 		},
-// 	}
+			if scroll.Name != string(config.Type) {
+				t.Errorf("Expected name %q, got %q", string(config.Type), scroll.Name)
+			}
 
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			player := entities.NewPlayer(primitives.Box{})
-// 			tt.scroll.Use(player)
+			// Check box is correctly set
+			if scroll.Shape != box {
+				t.Errorf("Expected box %v, got %v", box, scroll.Shape)
+			}
 
-// 			if player.Character.MaxHealth == float64(entities.AttributeRateAverage) {
-// 				t.Errorf("Use(): got %#v, want %#v", player.Character.MaxHealth, float64(entities.AttributeRateAverage)+float64(tt.scroll.Increment))
-// 			}
-// 		})
-// 	}
-// }
+			// Health should always be zero for scrolls
+			if scroll.AffectedAttributes.Health != 0 {
+				t.Errorf("Expected Health=0, got %f", scroll.AffectedAttributes.Health)
+			}
+		})
+	}
+}
+
+func TestScroll_NewScrollByConfig(t *testing.T) {
+	tests := []struct {
+		name      string
+		seed      int64
+		config    ScrollConfig
+		box       primitives.Box
+		wantError bool
+	}{
+		{
+			name: "Valid custom config with all attributes",
+			seed: defaultItemsTestSeed,
+			config: ScrollConfig{
+				Type:           "Custom Scroll",
+				StrengthRange:  primitives.AttributeRange{Min: 5, Max: 15},
+				AgilityRange:   primitives.AttributeRange{Min: 3, Max: 12},
+				MaxHealthRange: primitives.AttributeRange{Min: 10, Max: 25},
+				Description:    "A custom test scroll",
+			},
+			box:       primitives.Box{Point: primitives.Point2D[int]{X: 3, Y: 3}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
+			wantError: false,
+		},
+		{
+			name: "Valid config with single attribute",
+			seed: defaultItemsTestSeed,
+			config: ScrollConfig{
+				Type:           "Single Attribute Scroll",
+				StrengthRange:  primitives.AttributeRange{Min: 10, Max: 20},
+				AgilityRange:   primitives.AttributeRange{Min: 0, Max: 0},
+				MaxHealthRange: primitives.AttributeRange{Min: 0, Max: 0},
+				Description:    "Only strength",
+			},
+			box:       primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 1}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
+			wantError: false,
+		},
+		{
+			name: "Valid config with negative values",
+			seed: defaultItemsTestSeed,
+			config: ScrollConfig{
+				Type:           "Curse Scroll",
+				StrengthRange:  primitives.AttributeRange{Min: -10, Max: -2},
+				AgilityRange:   primitives.AttributeRange{Min: -8, Max: -1},
+				MaxHealthRange: primitives.AttributeRange{Min: -15, Max: -5},
+				Description:    "Decreases all attributes",
+			},
+			box:       primitives.Box{Point: primitives.Point2D[int]{X: 2, Y: 2}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
+			wantError: false,
+		},
+		{
+			name: "Invalid strength range returns error",
+			seed: defaultItemsTestSeed,
+			config: ScrollConfig{
+				Type:           "Invalid Scroll",
+				StrengthRange:  primitives.AttributeRange{Min: 50, Max: 10}, // Min > Max
+				AgilityRange:   primitives.AttributeRange{Min: 0, Max: 10},
+				MaxHealthRange: primitives.AttributeRange{Min: 0, Max: 10},
+				Description:    "Invalid config",
+			},
+			box:       primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
+			wantError: true,
+		},
+		{
+			name: "Invalid agility range returns error",
+			seed: defaultItemsTestSeed,
+			config: ScrollConfig{
+				Type:           "Invalid Scroll",
+				StrengthRange:  primitives.AttributeRange{Min: 0, Max: 10},
+				AgilityRange:   primitives.AttributeRange{Min: 20, Max: 5}, // Min > Max
+				MaxHealthRange: primitives.AttributeRange{Min: 0, Max: 10},
+				Description:    "Invalid config",
+			},
+			box:       primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
+			wantError: true,
+		},
+		{
+			name: "Invalid MaxHealth range returns error",
+			seed: defaultItemsTestSeed,
+			config: ScrollConfig{
+				Type:           "Invalid Scroll",
+				StrengthRange:  primitives.AttributeRange{Min: 0, Max: 10},
+				AgilityRange:   primitives.AttributeRange{Min: 0, Max: 10},
+				MaxHealthRange: primitives.AttributeRange{Min: 50, Max: 10}, // Min > Max
+				Description:    "Invalid config",
+			},
+			box:       primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
+			wantError: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rng := utils.NewRandomGeneratorWithSeed(tt.seed)
+			scroll, err := NewScrollByConfig(rng, tt.box, tt.config)
+
+			if tt.wantError {
+				if err == nil {
+					t.Error("Expected error, got nil")
+				}
+				if scroll != nil {
+					t.Error("Expected nil scroll on error")
+				}
+				return
+			}
+
+			if err != nil {
+				t.Fatalf("Expected no error, got: %v", err)
+			}
+
+			if scroll == nil {
+				t.Fatal("Expected valid scroll, got nil")
+			}
+
+			// Verify attributes are within config ranges
+			if scroll.AffectedAttributes.Strength < tt.config.StrengthRange.Min ||
+				scroll.AffectedAttributes.Strength > tt.config.StrengthRange.Max {
+				t.Errorf("Strength out of range: got %.2f, want [%.2f, %.2f]",
+					scroll.AffectedAttributes.Strength, tt.config.StrengthRange.Min, tt.config.StrengthRange.Max)
+			}
+
+			if scroll.AffectedAttributes.Agility < tt.config.AgilityRange.Min ||
+				scroll.AffectedAttributes.Agility > tt.config.AgilityRange.Max {
+				t.Errorf("Agility out of range: got %.2f, want [%.2f, %.2f]",
+					scroll.AffectedAttributes.Agility, tt.config.AgilityRange.Min, tt.config.AgilityRange.Max)
+			}
+
+			if scroll.AffectedAttributes.MaxHealth < tt.config.MaxHealthRange.Min ||
+				scroll.AffectedAttributes.MaxHealth > tt.config.MaxHealthRange.Max {
+				t.Errorf("MaxHealth out of range: got %.2f, want [%.2f, %.2f]",
+					scroll.AffectedAttributes.MaxHealth, tt.config.MaxHealthRange.Min, tt.config.MaxHealthRange.Max)
+			}
+
+			// Verify name matches config type
+			if scroll.Name != string(tt.config.Type) {
+				t.Errorf("Expected name %q, got %q", tt.config.Type, scroll.Name)
+			}
+
+			// Verify box is set correctly
+			if scroll.Shape != tt.box {
+				t.Errorf("Expected box %v, got %v", tt.box, scroll.Shape)
+			}
+
+			// Health should always be zero
+			if scroll.AffectedAttributes.Health != 0 {
+				t.Errorf("Expected Health=0, got %f", scroll.AffectedAttributes.Health)
+			}
+		})
+	}
+}
+
+func TestScroll_NewScrollByConfig_FixedValues(t *testing.T) {
+	tests := []struct {
+		name      string
+		seed      int64
+		config    ScrollConfig
+		box       primitives.Box
+		wantError bool
+	}{
+		{
+			name: "Valid custom config with all fixed attributes",
+			seed: defaultItemsTestSeed,
+			config: ScrollConfig{
+				Type:           "Custom Scroll",
+				StrengthRange:  primitives.AttributeRange{Min: 5, Max: 5},
+				AgilityRange:   primitives.AttributeRange{Min: 5, Max: 5},
+				MaxHealthRange: primitives.AttributeRange{Min: 5, Max: 5},
+				Description:    "A custom test scroll",
+			},
+			box:       primitives.Box{Point: primitives.Point2D[int]{X: 3, Y: 3}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
+			wantError: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rng := utils.NewRandomGeneratorWithSeed(tt.seed)
+			scroll, err := NewScrollByConfig(rng, tt.box, tt.config)
+
+			if tt.wantError {
+				if err == nil {
+					t.Error("Expected error, got nil")
+				}
+				if scroll != nil {
+					t.Error("Expected nil scroll on error")
+				}
+				return
+			}
+
+			if err != nil {
+				t.Fatalf("Expected no error, got: %v", err)
+			}
+
+			if scroll == nil {
+				t.Fatal("Expected valid scroll, got nil")
+			}
+
+			// Verify attributes are within config ranges
+			if scroll.AffectedAttributes.Strength < tt.config.StrengthRange.Min ||
+				scroll.AffectedAttributes.Strength > tt.config.StrengthRange.Max {
+				t.Errorf("Strength out of range: got %.2f, want [%.2f, %.2f]",
+					scroll.AffectedAttributes.Strength, tt.config.StrengthRange.Min, tt.config.StrengthRange.Max)
+			}
+
+			if scroll.AffectedAttributes.Agility < tt.config.AgilityRange.Min ||
+				scroll.AffectedAttributes.Agility > tt.config.AgilityRange.Max {
+				t.Errorf("Agility out of range: got %.2f, want [%.2f, %.2f]",
+					scroll.AffectedAttributes.Agility, tt.config.AgilityRange.Min, tt.config.AgilityRange.Max)
+			}
+
+			if scroll.AffectedAttributes.MaxHealth < tt.config.MaxHealthRange.Min ||
+				scroll.AffectedAttributes.MaxHealth > tt.config.MaxHealthRange.Max {
+				t.Errorf("MaxHealth out of range: got %.2f, want [%.2f, %.2f]",
+					scroll.AffectedAttributes.MaxHealth, tt.config.MaxHealthRange.Min, tt.config.MaxHealthRange.Max)
+			}
+
+			// Verify name matches config type
+			if scroll.Name != string(tt.config.Type) {
+				t.Errorf("Expected name %q, got %q", tt.config.Type, scroll.Name)
+			}
+
+			// Verify box is set correctly
+			if scroll.Shape != tt.box {
+				t.Errorf("Expected box %v, got %v", tt.box, scroll.Shape)
+			}
+
+			// Health should always be zero
+			if scroll.AffectedAttributes.Health != 0 {
+				t.Errorf("Expected Health=0, got %f", scroll.AffectedAttributes.Health)
+			}
+		})
+	}
+}
+
+func TestScroll_NewScroll_Deterministic(t *testing.T) {
+	tests := []struct {
+		name       string
+		seed       int64
+		scrollType ScrollType
+	}{
+		{
+			name:       "Same seed produces same Strength scroll",
+			seed:       defaultItemsTestSeed,
+			scrollType: ScrollTypeStrength,
+		},
+		{
+			name:       "Same seed produces same Agility scroll",
+			seed:       defaultItemsTestSeed,
+			scrollType: ScrollTypeAgility,
+		},
+		{
+			name:       "Same seed produces same MaxHealth scroll",
+			seed:       defaultItemsTestSeed,
+			scrollType: ScrollTypeMaxHealth,
+		},
+		{
+			name:       "Same seed produces same Mystery scroll",
+			seed:       defaultItemsTestSeed,
+			scrollType: ScrollTypeMystery,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
+
+			// Create first scroll
+			rng1 := utils.NewRandomGeneratorWithSeed(tt.seed)
+			scroll1 := NewScroll(rng1, box, tt.scrollType)
+
+			// Create second scroll with same seed
+			rng2 := utils.NewRandomGeneratorWithSeed(tt.seed)
+			scroll2 := NewScroll(rng2, box, tt.scrollType)
+
+			// Verify they are identical
+			if scroll1.AffectedAttributes.Strength != scroll2.AffectedAttributes.Strength {
+				t.Errorf("Strength mismatch: %f != %f", scroll1.AffectedAttributes.Strength, scroll2.AffectedAttributes.Strength)
+			}
+
+			if scroll1.AffectedAttributes.Agility != scroll2.AffectedAttributes.Agility {
+				t.Errorf("Agility mismatch: %f != %f", scroll1.AffectedAttributes.Agility, scroll2.AffectedAttributes.Agility)
+			}
+
+			if scroll1.AffectedAttributes.MaxHealth != scroll2.AffectedAttributes.MaxHealth {
+				t.Errorf("MaxHealth mismatch: %f != %f", scroll1.AffectedAttributes.MaxHealth, scroll2.AffectedAttributes.MaxHealth)
+			}
+
+			if scroll1.Name != scroll2.Name {
+				t.Errorf("Name mismatch: %q != %q", scroll1.Name, scroll2.Name)
+			}
+		})
+	}
+}
+
+func TestScroll_NewScroll_Randomness(t *testing.T) {
+	tests := []struct {
+		name       string
+		scrollType ScrollType
+		iterations int
+	}{
+		{
+			name:       "Strength scroll produces varied values",
+			scrollType: ScrollTypeStrength,
+			iterations: 50,
+		},
+		{
+			name:       "Mystery scroll produces varied values",
+			scrollType: ScrollTypeMystery,
+			iterations: 50,
+		},
+		{
+			name:       "MaxHealth scroll produces varied values",
+			scrollType: ScrollTypeMaxHealth,
+			iterations: 50,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
+			strengthValues := make(map[float64]bool)
+			agilityValues := make(map[float64]bool)
+			maxHealthValues := make(map[float64]bool)
+
+			// Generate multiple scrolls with different seeds
+			for i := 0; i < tt.iterations; i++ {
+				rng := utils.NewRandomGeneratorWithSeed(int64(i))
+				scroll := NewScroll(rng, box, tt.scrollType)
+				strengthValues[scroll.AffectedAttributes.Strength] = true
+				agilityValues[scroll.AffectedAttributes.Agility] = true
+				maxHealthValues[scroll.AffectedAttributes.MaxHealth] = true
+			}
+
+			// Check that we got varied values (at least 5 different values)
+			minUniqueValues := 5
+			config := GetScrollConfig(tt.scrollType)
+
+			// Only check non-zero ranges
+			if config.StrengthRange.Min != 0 || config.StrengthRange.Max != 0 {
+				if len(strengthValues) < minUniqueValues {
+					t.Errorf("Expected at least %d unique strength values, got %d", minUniqueValues, len(strengthValues))
+				}
+			}
+
+			if config.AgilityRange.Min != 0 || config.AgilityRange.Max != 0 {
+				if len(agilityValues) < minUniqueValues {
+					t.Errorf("Expected at least %d unique agility values, got %d", minUniqueValues, len(agilityValues))
+				}
+			}
+
+			if config.MaxHealthRange.Min != 0 || config.MaxHealthRange.Max != 0 {
+				if len(maxHealthValues) < minUniqueValues {
+					t.Errorf("Expected at least %d unique MaxHealth values, got %d", minUniqueValues, len(maxHealthValues))
+				}
+			}
+		})
+	}
+}
+
+func TestScroll_NewScroll_UnknownTypeDefaultsToMystery(t *testing.T) {
+	rng := utils.NewRandomGeneratorWithSeed(defaultItemsTestSeed)
+	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
+
+	scroll := NewScroll(rng, box, "Unknown Scroll Type")
+
+	if scroll == nil {
+		t.Fatal("Expected valid scroll, got nil")
+	}
+
+	if scroll.Name != string(ScrollTypeMystery) {
+		t.Errorf("Expected name %q for unknown type, got %q", ScrollTypeMystery, scroll.Name)
+	}
+
+	// Should use Mystery config ranges
+	mysteryConfig := GetScrollConfig(ScrollTypeMystery)
+	if scroll.AffectedAttributes.Strength < mysteryConfig.StrengthRange.Min ||
+		scroll.AffectedAttributes.Strength > mysteryConfig.StrengthRange.Max {
+		t.Errorf("Strength out of Mystery config range: got %.2f, want [%.2f, %.2f]",
+			scroll.AffectedAttributes.Strength, mysteryConfig.StrengthRange.Min, mysteryConfig.StrengthRange.Max)
+	}
+}
+
+func TestScroll_NewScroll_ZeroSizedBoxIsOk(t *testing.T) {
+	rng := utils.NewRandomGeneratorWithSeed(defaultItemsTestSeed)
+	box := primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 0, Height: 0}}
+	scroll := NewScroll(rng, box, ScrollTypeStrength)
+
+	if scroll == nil {
+		t.Fatal("Expected valid scroll with zero-sized box")
+	}
+
+	if scroll.Shape != box {
+		t.Errorf("Expected box %v, got %v", box, scroll.Shape)
+	}
+}
+
+func TestScroll_NewScroll_VariousPositions(t *testing.T) {
+	tests := []struct {
+		name     string
+		position primitives.Point2D[int]
+		size     primitives.Size2D[uint]
+	}{
+		{
+			name:     "Origin position",
+			position: primitives.Point2D[int]{X: 0, Y: 0},
+			size:     primitives.Size2D[uint]{Width: 1, Height: 1},
+		},
+		{
+			name:     "Positive position",
+			position: primitives.Point2D[int]{X: 100, Y: 200},
+			size:     primitives.Size2D[uint]{Width: 2, Height: 2},
+		},
+		{
+			name:     "Negative position",
+			position: primitives.Point2D[int]{X: -10, Y: -20},
+			size:     primitives.Size2D[uint]{Width: 1, Height: 1},
+		},
+		{
+			name:     "Large size",
+			position: primitives.Point2D[int]{X: 5, Y: 5},
+			size:     primitives.Size2D[uint]{Width: 10, Height: 15},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rng := utils.NewRandomGeneratorWithSeed(defaultItemsTestSeed)
+			box := primitives.Box{Point: tt.position, Size: tt.size}
+			scroll := NewScroll(rng, box, ScrollTypeAgility)
+
+			if scroll == nil {
+				t.Fatal("Expected valid scroll")
+			}
+
+			if scroll.Shape.Point != tt.position {
+				t.Errorf("Expected position %v, got %v", tt.position, scroll.Shape.Point)
+			}
+
+			if scroll.Shape.Size != tt.size {
+				t.Errorf("Expected size %v, got %v", tt.size, scroll.Shape.Size)
+			}
+		})
+	}
+}
+
+func TestScroll_Use(t *testing.T) {
+	tests := []struct {
+		name       string
+		seed       int64
+		scrollType ScrollType
+	}{
+		{
+			name:       "Use Strength scroll returns correct attributes",
+			seed:       defaultItemsTestSeed,
+			scrollType: ScrollTypeStrength,
+		},
+		{
+			name:       "Use Agility scroll returns correct attributes",
+			seed:       1,
+			scrollType: ScrollTypeAgility,
+		},
+		{
+			name:       "Use MaxHealth scroll returns correct attributes",
+			seed:       2,
+			scrollType: ScrollTypeMaxHealth,
+		},
+		{
+			name:       "Use Mystery scroll returns correct attributes",
+			seed:       3,
+			scrollType: ScrollTypeMystery,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rng := utils.NewRandomGeneratorWithSeed(tt.seed)
+			box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
+			scroll := NewScroll(rng, box, tt.scrollType)
+
+			attrs := scroll.Use()
+
+			// Verify returned attributes match stored attributes
+			if attrs.Strength != scroll.AffectedAttributes.Strength {
+				t.Errorf("Strength mismatch: got %f, want %f", attrs.Strength, scroll.AffectedAttributes.Strength)
+			}
+
+			if attrs.Agility != scroll.AffectedAttributes.Agility {
+				t.Errorf("Agility mismatch: got %f, want %f", attrs.Agility, scroll.AffectedAttributes.Agility)
+			}
+
+			if attrs.MaxHealth != scroll.AffectedAttributes.MaxHealth {
+				t.Errorf("MaxHealth mismatch: got %f, want %f", attrs.MaxHealth, scroll.AffectedAttributes.MaxHealth)
+			}
+
+			// Health should always be zero
+			if attrs.Health != 0 {
+				t.Errorf("Expected Health=0, got %f", attrs.Health)
+			}
+		})
+	}
+}
+
+func TestScroll_UseMultipleTimesIsOk(t *testing.T) {
+	rng := utils.NewRandomGeneratorWithSeed(defaultItemsTestSeed)
+	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
+	scroll := NewScroll(rng, box, ScrollTypeStrength)
+
+	attrs1 := scroll.Use()
+	attrs2 := scroll.Use()
+
+	if attrs1.Strength != attrs2.Strength {
+		t.Error("Use() should return consistent Strength on multiple calls")
+	}
+	if attrs1.Agility != attrs2.Agility {
+		t.Error("Use() should return consistent Agility on multiple calls")
+	}
+	if attrs1.MaxHealth != attrs2.MaxHealth {
+		t.Error("Use() should return consistent MaxHealth on multiple calls")
+	}
+}
+
+func TestScroll_AsScroll_ValidPointer(t *testing.T) {
+	input := &Scroll{
+		Item: &Item{
+			Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
+			Name:  "Test Scroll",
+		},
+		AffectedAttributes: primitives.Attributes{Strength: 10, Agility: 5, MaxHealth: 15},
+	}
+
+	result := AsScroll(input)
+
+	if result == nil {
+		t.Fatal("Expected non-nil result, got nil")
+	}
+
+	if result.AffectedAttributes.Strength != 10 {
+		t.Errorf("Expected Strength 10, got %f", result.AffectedAttributes.Strength)
+	}
+	if result.AffectedAttributes.Agility != 5 {
+		t.Errorf("Expected Agility 5, got %f", result.AffectedAttributes.Agility)
+	}
+	if result.AffectedAttributes.MaxHealth != 15 {
+		t.Errorf("Expected MaxHealth 15, got %f", result.AffectedAttributes.MaxHealth)
+	}
+	if result != input {
+		t.Error("Expected same pointer to be returned")
+	}
+}
+
+func TestScroll_AsScroll_NonScrollTypeIsNil(t *testing.T) {
+	result := AsScroll("not a scroll")
+
+	if result != nil {
+		t.Errorf("Expected nil for non-Scroll type, got %v", result)
+	}
+}
+
+func TestScroll_AsScroll_NilInputIsNil(t *testing.T) {
+	result := AsScroll(nil)
+
+	if result != nil {
+		t.Errorf("Expected nil for nil input, got %v", result)
+	}
+}
+
+func TestScroll_AsScroll_DifferentStructTypeIsNil(t *testing.T) {
+	input := &Item{
+		Shape: primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 1}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
+		Name:  "Just an item",
+	}
+
+	result := AsScroll(input)
+
+	if result != nil {
+		t.Errorf("Expected nil for Item type, got %v", result)
+	}
+}
+
+func TestScroll_AsScroll_ElixirTypeIsNil(t *testing.T) {
+	input := &Elixir{
+		Item: &Item{
+			Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
+			Name:  "Test Elixir",
+		},
+		AffectedAttributes: primitives.Attributes{Strength: 10},
+		EffectDuration:     20,
+	}
+
+	result := AsScroll(input)
+
+	if result != nil {
+		t.Errorf("Expected nil for Elixir type, got %v", result)
+	}
+}
+
+func TestScroll_AsScroll_FoodTypeIsNil(t *testing.T) {
+	input := &Food{
+		Item: &Item{
+			Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
+			Name:  "Test Food",
+		},
+		AffectedAttributes: primitives.Attributes{Health: 25},
+	}
+
+	result := AsScroll(input)
+
+	if result != nil {
+		t.Errorf("Expected nil for Food type, got %v", result)
+	}
+}
+
+// Benchmarks
+func BenchmarkScroll_NewScroll(b *testing.B) {
+	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
+
+	b.Run("Strength", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			rng := utils.NewRandomGeneratorWithSeed(int64(i))
+			_ = NewScroll(rng, box, ScrollTypeStrength)
+		}
+	})
+
+	b.Run("Agility", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			rng := utils.NewRandomGeneratorWithSeed(int64(i))
+			_ = NewScroll(rng, box, ScrollTypeAgility)
+		}
+	})
+
+	b.Run("MaxHealth", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			rng := utils.NewRandomGeneratorWithSeed(int64(i))
+			_ = NewScroll(rng, box, ScrollTypeMaxHealth)
+		}
+	})
+
+	b.Run("Mystery", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			rng := utils.NewRandomGeneratorWithSeed(int64(i))
+			_ = NewScroll(rng, box, ScrollTypeMystery)
+		}
+	})
+}
+
+func BenchmarkScroll_NewScrollByConfig(b *testing.B) {
+	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
+	config := ScrollConfig{
+		Type:           "Benchmark Scroll",
+		StrengthRange:  primitives.AttributeRange{Min: 5, Max: 15},
+		AgilityRange:   primitives.AttributeRange{Min: 3, Max: 12},
+		MaxHealthRange: primitives.AttributeRange{Min: 10, Max: 25},
+		Description:    "Benchmark test scroll",
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		rng := utils.NewRandomGeneratorWithSeed(int64(i))
+		_, _ = NewScrollByConfig(rng, box, config)
+	}
+}
+
+func BenchmarkScroll_Use(b *testing.B) {
+	rng := utils.NewRandomGeneratorWithSeed(defaultItemsTestSeed)
+	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
+	scroll := NewScroll(rng, box, ScrollTypeStrength)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = scroll.Use()
+	}
+}
+
+func BenchmarkScroll_AsScroll(b *testing.B) {
+	scroll := &Scroll{
+		Item: &Item{
+			Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
+			Name:  "Test Scroll",
+		},
+		AffectedAttributes: primitives.Attributes{Strength: 10, Agility: 5, MaxHealth: 15},
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = AsScroll(scroll)
+	}
+}
