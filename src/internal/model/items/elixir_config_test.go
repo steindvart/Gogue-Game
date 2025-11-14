@@ -187,7 +187,7 @@ func TestElixirConfig_GenerateAttributes(t *testing.T) {
 	}{
 		{
 			name: "Strength config generates deterministic attributes",
-			seed: defaultTestSeed,
+			seed: defaultItemsTestSeed,
 			config: ElixirConfig{
 				Type:          ElixirTypeStrength,
 				StrengthRange: primitives.AttributeRange{Min: 5, Max: 20},
@@ -243,7 +243,7 @@ func TestElixirConfig_GenerateDuration(t *testing.T) {
 	}{
 		{
 			name: "Standard duration range",
-			seed: defaultTestSeed,
+			seed: defaultItemsTestSeed,
 			config: ElixirConfig{
 				Type:               ElixirTypeStrength,
 				DurationStepsRange: defaultDurationRange,
