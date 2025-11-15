@@ -23,7 +23,7 @@ type Backpack struct {
 	Scrolls   map[string][]Scroll
 	Foods     map[string][]Food
 	Weapons   map[string][]Weapon
-	Treasures uint
+	Treasures int32
 }
 
 // type element struct {
