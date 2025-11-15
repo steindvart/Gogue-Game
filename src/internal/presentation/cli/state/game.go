@@ -34,42 +34,30 @@ import (
 // )
 
 type Game struct {
-	player entities.Player
+	player *entities.Player
 	level  *world.Level
 	view   *viewcli.Game
 	signal signals.Type
 }
 
 func NewGame() (*Game, error) {
-	player := entities.Player{
-		Character: entities.Character{
-			Shape: primitives.Box{
-				Point: primitives.Point2D[int]{X: 5, Y: 5},
-				Size:  primitives.Size2D[uint]{Height: 1, Width: 1},
-			},
-			Attributes: primitives.Attributes{
-				Health:    100,
-				MaxHealth: 100,
-				Strength:  10,
-				Agility:   5,
-			},
-		},
-		Backpack: nil,
-		Weapon:   nil,
-	}
-
-	
+	// @todo - выделить отрисовку в отдельный файл в view/cli
 	source := rand.New(rand.NewSource(time.Now().UnixNano()))
 	level := world.NewLevel(source)
-	err := level.GenerateNineRooms(primitives.Size2D[uint]{Height: 30, Width: 90})
+
+	err := level.GenerateLevel(primitives.Size2D[uint]{Height: 30, Width: 90})
 	if err != nil {
 		return nil, err
 	}
-	
-	err = level.GeneratePassages()
+
+	playerStartPoint, err := level.GetStartPositionForPlayer()
 	if err != nil {
 		return nil, err
 	}
+	player := entities.NewPlayer(primitives.Box{
+		Point: *playerStartPoint,
+		Size:  primitives.Size2D[uint]{Height: 1, Width: 1},
+	})
 	
 	gameView := viewcli.NewGameBox()
 	game := Game{

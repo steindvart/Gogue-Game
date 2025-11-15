@@ -3,6 +3,7 @@ package world
 import (
 	"errors"
 	"gogue/internal/model/primitives"
+	"gogue/internal/utils"
 )
 
 type Passage struct {
@@ -11,7 +12,7 @@ type Passage struct {
 	DoorTwo primitives.Point2D[int]
 }
 
-func NewPassageOnX(doorOne primitives.Point2D[int], doorTwo primitives.Point2D[int], random RandomSource) (*Passage, error) {
+func NewPassageOnX(doorOne primitives.Point2D[int], doorTwo primitives.Point2D[int], random utils.RandomSource) (*Passage, error) {
 	if doorOne.X == doorTwo.X {
 		return nil, errors.New("doors cannot be positioned on the same x axis")
 	}
@@ -52,7 +53,7 @@ func NewPassageOnX(doorOne primitives.Point2D[int], doorTwo primitives.Point2D[i
 
 	// иду по прямой до финишной двери
 	lastElement = passage[len(passage)-1]
-	for x := lastElement.X; x < doorTwo.X; x++ {
+	for x := lastElement.X; x < doorTwo.X-1; x++ {
 		lastElement = passage[len(passage)-1]
 		passage = append(passage, primitives.Point2D[int]{X: lastElement.X + 1, Y: lastElement.Y})
 	}
@@ -60,7 +61,7 @@ func NewPassageOnX(doorOne primitives.Point2D[int], doorTwo primitives.Point2D[i
 	return &Passage{DoorOne: doorOne, Passage: passage, DoorTwo: doorTwo}, nil
 }
 
-func NewPassageOnY(doorOne primitives.Point2D[int], doorTwo primitives.Point2D[int], random RandomSource) (*Passage, error) {
+func NewPassageOnY(doorOne primitives.Point2D[int], doorTwo primitives.Point2D[int], random utils.RandomSource) (*Passage, error) {
 	if doorOne.Y == doorTwo.Y {
 		return nil, errors.New("doors cannot be positioned on the same y axis")
 	}
@@ -101,7 +102,7 @@ func NewPassageOnY(doorOne primitives.Point2D[int], doorTwo primitives.Point2D[i
 
 	// иду по прямой до финишной двери
 	lastElement = passage[len(passage)-1]
-	for y := lastElement.Y; y < doorTwo.Y; y++ {
+	for y := lastElement.Y; y < doorTwo.Y-1; y++ {
 		lastElement = passage[len(passage)-1]
 		passage = append(passage, primitives.Point2D[int]{X: lastElement.X, Y: lastElement.Y + 1})
 	}

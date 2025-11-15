@@ -82,10 +82,10 @@ func NewPlayer(box primitives.Box) *Player {
 		Character: Character{
 			Shape: box,
 			Attributes: primitives.Attributes{
-				Health:    float64(AttributeRateAverage),
-				MaxHealth: float64(AttributeRateAverage),
-				Strength:  float64(AttributeRateAverage),
-				Agility:   float64(AttributeRateAverage),
+				Health:    100,
+				MaxHealth: 100,
+				Strength:  10,
+				Agility:   5,
 			},
 		},
 		Experience:     0,

@@ -1,5 +1,7 @@
 package items
 
+const defaultItemsTestSeed int64 = 42
+
 // import (
 // 	"gogue/internal/model/primitive"
 // 	"slices"

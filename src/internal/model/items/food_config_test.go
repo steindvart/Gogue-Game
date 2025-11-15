@@ -221,7 +221,7 @@ func TestFoodConfig_GenerateAttributes(t *testing.T) {
 	}{
 		{
 			name: "Potatoes config generates deterministic health",
-			seed: defaultTestSeed,
+			seed: defaultItemsTestSeed,
 			config: FoodConfig{
 				Type:        FoodTypePotatoes,
 				HealthRange: primitives.AttributeRange{Min: 1, Max: 10},
