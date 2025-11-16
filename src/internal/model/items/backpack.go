@@ -1,7 +1,7 @@
 package items
 
 const (
-	BackpackDefaultCapacity uint = 9
+	DefaultBackpackCapacity uint = 9
 )
 
 type BackpackIsFullError struct{}
@@ -19,145 +19,179 @@ func (ItemIsNotInBackpackError) Error() string {
 type Backpack struct {
 	Capacity  uint
 	ItemsNum  uint
-	Elixirs   map[string][]Elixir
-	Scrolls   map[string][]Scroll
-	Foods     map[string][]Food
-	Weapons   map[string][]Weapon
+	Elixirs   map[ElixirType][]*Elixir
+	Scrolls   map[ScrollType][]*Scroll
+	Foods     map[FoodType][]*Food
+	Weapons   map[WeaponType][]*Weapon
 	Treasures int32
 }
 
-// type element struct {
-// 	Name string
-// 	Num  int
-// 	Item Type
-// }
-
-// type ItemsList []element
-
 func NewBackpack() *Backpack {
 	return &Backpack{
-		Capacity:  BackpackDefaultCapacity,
+		Capacity:  DefaultBackpackCapacity,
 		ItemsNum:  0,
-		Elixirs:   map[string][]Elixir{},
-		Scrolls:   map[string][]Scroll{},
-		Foods:     map[string][]Food{},
-		Weapons:   map[string][]Weapon{},
+		Elixirs:   make(map[ElixirType][]*Elixir),
+		Scrolls:   make(map[ScrollType][]*Scroll),
+		Foods:     make(map[FoodType][]*Food),
+		Weapons:   make(map[WeaponType][]*Weapon),
 		Treasures: 0,
 	}
 }
+
+func (b *Backpack) AddItem(item any) error {
+	switch v := item.(type) {
+	case *Elixir:
+		return b.AddElixir(v)
+	case *Scroll:
+		return b.AddScroll(v)
+	case *Food:
+		return b.AddFood(v)
+	case *Weapon:
+		return b.AddWeapon(v)
+	case *Treasure:
+		b.AddTreasure(v)
+		return nil
+	default:
+		return ItemIsNotInBackpackError{}
+	}
+}
+
+func (b *Backpack) RemoveItem(item any) error {
+	switch v := item.(type) {
+	case *Elixir:
+		return b.RemoveElixir(v.Type)
+	case *Scroll:
+		return b.RemoveScroll(v.Type)
+	case *Food:
+		return b.RemoveFood(v.Type)
+	case *Weapon:
+		return b.RemoveWeapon(v.Type)
+	default:
+		return ItemIsNotInBackpackError{}
+	}
+}
+
+func (b *Backpack) IsFull() bool {
+	return b.ItemsNum >= b.Capacity
+}
+
+func (b *Backpack) IsEmpty() bool {
+	return b.ItemsNum == 0
+}
+
+// Treasures
 
 func (b *Backpack) AddTreasure(t *Treasure) {
 	b.Treasures += t.Value
 }
 
-func (b *Backpack) AddItem(item any) error {
+// Elixirs
+
+func (b *Backpack) AddElixir(e *Elixir) error {
 	if b.ItemsNum >= b.Capacity {
 		return BackpackIsFullError{}
 	}
 
-	if e := AsElixir(item); e != nil {
-		b.Elixirs[e.Item.Name] = append(b.Elixirs[e.Item.Name], *e)
-	}
-
-	if s := AsScroll(item); s != nil {
-		b.Scrolls[s.Item.Name] = append(b.Scrolls[s.Item.Name], *s)
-	}
-
-	if f := AsFood(item); f != nil {
-		b.Foods[f.Item.Name] = append(b.Foods[f.Item.Name], *f)
-	}
-
-	if w := AsWeapon(item); w != nil {
-		b.Weapons[w.Item.Name] = append(b.Weapons[w.Item.Name], *w)
-	}
-
+	b.Elixirs[e.Type] = append(b.Elixirs[e.Type], e)
 	b.ItemsNum++
-
 	return nil
 }
 
-func (b *Backpack) RemoveItem(item any) error {
-	if e := AsElixir(item); e != nil {
-		removeItemFromMap(e.Item.Name, b.Elixirs)
-	} else if s := AsScroll(item); s != nil {
-		removeItemFromMap(s.Item.Name, b.Scrolls)
-	} else if f := AsFood(item); f != nil {
-		removeItemFromMap(f.Item.Name, b.Foods)
-	} else if w := AsWeapon(item); w != nil {
-		removeItemFromMap(w.Item.Name, b.Weapons)
-	} else {
+func (b *Backpack) RemoveElixir(t ElixirType) error {
+	if items, ok := b.Elixirs[t]; !ok || len(items) == 0 {
 		return ItemIsNotInBackpackError{}
+	}
+
+	if len(b.Elixirs[t]) > 1 {
+		b.Elixirs[t] = b.Elixirs[t][1:]
+	} else {
+		delete(b.Elixirs, t)
 	}
 
 	b.ItemsNum--
 	return nil
 }
 
-func removeItemFromMap[V Type](key string, itemsMap map[string][]V) bool {
-	if _, ok := itemsMap[key]; !ok {
-		return false
+// Scrolls
+
+func (b *Backpack) AddScroll(s *Scroll) error {
+	if b.ItemsNum >= b.Capacity {
+		return BackpackIsFullError{}
 	}
 
-	if len(itemsMap[key]) > 1 {
-		itemsMap[key] = itemsMap[key][1:]
-	} else {
-		delete(itemsMap, key)
-	}
-
-	return true
+	t := s.Type
+	b.Scrolls[t] = append(b.Scrolls[t], s)
+	b.ItemsNum++
+	return nil
 }
 
-// func (b *Backpack) GetItemsList() ItemsList {
-// 	list := ItemsList{}
+func (b *Backpack) RemoveScroll(t ScrollType) error {
+	if items, ok := b.Scrolls[t]; !ok || len(items) == 0 {
+		return ItemIsNotInBackpackError{}
+	}
 
-// 	list = append(list, b.GetElixirsList()...)
-// 	list = append(list, b.GetScrollsList()...)
-// 	list = append(list, b.GetFoodsList()...)
-// 	list = append(list, b.GetWeaponsList()...)
+	if len(b.Scrolls[t]) > 1 {
+		b.Scrolls[t] = b.Scrolls[t][1:]
+	} else {
+		delete(b.Scrolls, t)
+	}
 
-// 	return list
-// }
+	b.ItemsNum--
+	return nil
+}
 
-// func (b *Backpack) GetElixirsList() ItemsList {
-// 	return appendItemsList(b.Elixirs)
-// }
+// Foods
 
-// func (b *Backpack) GetScrollsList() ItemsList {
-// 	return appendItemsList(b.Scrolls)
-// }
+func (b *Backpack) AddFood(f *Food) error {
+	if b.ItemsNum >= b.Capacity {
+		return BackpackIsFullError{}
+	}
 
-// func (b *Backpack) GetFoodsList() ItemsList {
-// 	return appendItemsList(b.Foods)
-// }
+	t := f.Type
+	b.Foods[t] = append(b.Foods[t], f)
+	b.ItemsNum++
+	return nil
+}
 
-// func (b *Backpack) GetWeaponsList() ItemsList {
-// 	return appendItemsList(b.Weapons)
-// }
+func (b *Backpack) RemoveFood(t FoodType) error {
+	if items, ok := b.Foods[t]; !ok || len(items) == 0 {
+		return ItemIsNotInBackpackError{}
+	}
 
-// func appendItemsList[V Elixir | Scroll | Food | Weapon](itemsMap map[string][]V) ItemsList {
-// 	list := ItemsList{}
+	if len(b.Foods[t]) > 1 {
+		b.Foods[t] = b.Foods[t][1:]
+	} else {
+		delete(b.Foods, t)
+	}
 
-// 	for key := range itemsMap {
-// 		item := itemsMap[key][0]
-// 		ptr := any(&item).(ItemLike)
-// 		list = append(list, element{Name: key, Num: len(itemsMap[key]), Item: ptr})
-// 	}
+	b.ItemsNum--
+	return nil
+}
 
-// 	list.Sort()
+// Weapons
 
-// 	return list
-// }
+func (b *Backpack) AddWeapon(w *Weapon) error {
+	if b.ItemsNum >= b.Capacity {
+		return BackpackIsFullError{}
+	}
 
-// func (l *ItemsList) Sort() {
-// 	sort.Slice(*l, func(i int, j int) bool {
-// 		return (*l)[i].Name < (*l)[j].Name
-// 	})
-// }
+	t := w.Type
+	b.Weapons[t] = append(b.Weapons[t], w)
+	b.ItemsNum++
+	return nil
+}
 
-// func (b *Backpack) weaponIsInBackpack(w *Weapon) error {
-// 	if _, ok := b.Weapons[w.Item.Name]; !ok {
-// 		return ItemIsNotInBackpackError{}
-// 	}
+func (b *Backpack) RemoveWeapon(t WeaponType) error {
+	if items, ok := b.Weapons[t]; !ok || len(items) == 0 {
+		return ItemIsNotInBackpackError{}
+	}
 
-// 	return nil
-// }
+	if len(b.Weapons[t]) > 1 {
+		b.Weapons[t] = b.Weapons[t][1:]
+	} else {
+		delete(b.Weapons, t)
+	}
+
+	b.ItemsNum--
+	return nil
+}
