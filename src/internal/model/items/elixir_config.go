@@ -23,6 +23,7 @@ const (
 	ElixirTypeDwarfism ElixirType = "Dwarfism" // +Agility -Strength
 	ElixirTypeGiantism ElixirType = "Giantism" // +Strength -Agility
 	ElixirTypeMystery  ElixirType = "Mystery"  // All random
+	ElixirTypeCustom   ElixirType = "Custom"   // For custom elixirs - dynamicly or from external data created
 )
 
 type ElixirConfig struct {
