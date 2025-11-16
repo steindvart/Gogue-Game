@@ -43,13 +43,13 @@ func (p *Player) CheckEvasion() bool {
 	return p.Character.CheckEvasion()
 }
 
-func (p *Player) TakeTreasure(t *items.Treasure) {
-	p.Backpack.AddTreasure(t)
-}
+// func (p *Player) TakeTreasure(t *items.Treasure) {
+// 	p.Backpack.AddTreasure(t)
+// }
 
-func (p *Player) TakeItemToBackpack(item any) error {
-	return p.Backpack.AddItem(item)
-}
+// func (p *Player) TakeItemToBackpack(item any) error {
+// 	return p.Backpack.AddItem(item)
+// }
 
 // func (p *Player) DropItemFromBackpack(item any) error {
 // 	return p.Backpack.RemoveItem(item, p.Character.Shape)
