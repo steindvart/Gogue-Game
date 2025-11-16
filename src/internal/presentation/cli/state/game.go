@@ -1,11 +1,13 @@
 package state
 
 import (
+	"gogue/internal/common"
 	"gogue/internal/model/entities"
 	"gogue/internal/model/primitives"
 	"gogue/internal/model/signals"
 	"gogue/internal/model/world"
 	"gogue/internal/presentation/action"
+	viewcli "gogue/internal/view/cli"
 	"math/rand"
 	"time"
 	"unicode"
@@ -19,20 +21,10 @@ const (
 	WidthLevel  = 90
 )
 
-type Symbol int
-
-const (
-	symPlayer Symbol = iota + 1
-	symWall
-	symPortal
-	symPassage
-	symDoor
-)
-
 type Game struct {
 	player *entities.Player
 	level  *world.Level
-	view   *tview.Box
+	view   *viewcli.Game
 	signal signals.Type
 }
 
@@ -55,18 +47,19 @@ func NewGame() (*Game, error) {
 		Size:  primitives.Size2D[uint]{Height: 1, Width: 1},
 	})
 
-	box := tview.NewBox().SetBorder(true).SetTitle("Game")
+	gameView := viewcli.NewGame()
 
 	game := Game{
 		player: player,
 		level:  level,
-		view:   box,
+		view:   gameView,
 	}
 
 	game.view.SetDrawFunc(func(screen tcell.Screen, x, y, width, height int) (int, int, int, int) {
 		// -2: учёт рамки
 		fw, fh := width-2, height-2
-		game.drawField(screen, x+1, y+1, fw, fh)
+		field := game.makeField(fw, fh)
+		game.view.SetFieldToScreen(screen, field, x+1, y+1)
 		return x, y, width, height
 	})
 
@@ -96,6 +89,7 @@ func NewGame() (*Game, error) {
 			}
 		case action.Exit:
 			game.signal = signals.Stop
+			return nil
 		default:
 			return event
 		}
@@ -114,13 +108,11 @@ func (g *Game) moveAndGetOldPosition(changingPosition primitives.Point2D[int]) p
 func (g *Game) checkCollision() bool {
 	playerPosition := g.player.Character.Shape.Point
 
-	// Простая проверка границ
 	if playerPosition.X < 0 || playerPosition.Y < 0 ||
-		playerPosition.X >= int(WidthLevel) || playerPosition.Y >= int(HeightLevel) {
+		playerPosition.X >= WidthLevel || playerPosition.Y >= HeightLevel {
 		return true
 	}
 
-	// Проверка стен на карте
 	for _, room := range g.level.Rooms {
 		if g.isPlayerInWall(playerPosition, room) {
 			return true
@@ -142,11 +134,9 @@ func (g *Game) isPlayerInWall(pos primitives.Point2D[int], room world.Room) bool
 		}
 	}
 
-	// Верхняя или нижняя стена
 	if pos.Y == roomY || pos.Y == roomY+roomHeight {
 		return pos.X >= roomX && pos.X <= roomX+roomWidth
 	}
-	// Левая или правая стена
 	if pos.X == roomX || pos.X == roomX+roomWidth {
 		return pos.Y >= roomY && pos.Y <= roomY+roomHeight
 	}
@@ -202,69 +192,124 @@ func (g *Game) Primitive() tview.Primitive {
 	return g.view
 }
 
-func (g *Game) drawField(screen tcell.Screen, ox, oy, w, h int) {
-	field := g.makeField(w, h) // WidthLevel, HeightLevel
-	for y := 0; y < h; y++ {
-		for x := 0; x < w; x++ {
-			ch := ' '
-			if field[y][x] == int(symPlayer) {
-				ch = '8' // '🦸'
-			} else if field[y][x] == int(symWall) {
-				ch = '⚀'
-			} else if field[y][x] == int(symPortal) {
-				ch = '0'
-			} else if field[y][x] == int(symPassage) {
-				ch = '*'
-			} else if field[y][x] == int(symDoor) {
-				ch = 'П'
-			}
-
-			screen.SetContent(ox+x, oy+y, ch, nil, tcell.StyleDefault.Background(tcell.ColorBlack))
-		}
-	}
-}
-
-func (g *Game) makeField(w, h int) [][]int {
-	field := make([][]int, h)
+func (g *Game) makeField(w, h int) [][]common.EntityType {
+	field := make([][]common.EntityType, h)
 	for y := range field {
-		field[y] = make([]int, w)
+		field[y] = make([]common.EntityType, w)
+	}
+
+	// Добавлено в качестве примера, потом надо будет убрать
+	g.level.Rooms[0].Enemies = []entities.Enemy{
+		{
+			Type: entities.EnemyType(entities.EnemyTypeZombie),
+			Character: entities.Character{
+				Shape: primitives.Box{
+					Point: primitives.Point2D[int]{X: 6, Y: 6},
+				},
+			},
+		},
+		{
+			Type: entities.EnemyType(entities.EnemyTypeVampire),
+			Character: entities.Character{
+				Shape: primitives.Box{
+					Point: primitives.Point2D[int]{X: 6, Y: 7},
+				},
+			},
+		},
+		{
+			Type: entities.EnemyType(entities.EnemyTypeGhost),
+			Character: entities.Character{
+				Shape: primitives.Box{
+					Point: primitives.Point2D[int]{X: 6, Y: 8},
+				},
+			},
+		},
+		{
+			Type: entities.EnemyType(entities.EnemyTypeOgre),
+			Character: entities.Character{
+				Shape: primitives.Box{
+					Point: primitives.Point2D[int]{X: 6, Y: 9},
+				},
+			},
+		},
+		{
+			Type: entities.EnemyType(entities.EnemyTypeSnakeMage),
+			Character: entities.Character{
+				Shape: primitives.Box{
+					Point: primitives.Point2D[int]{X: 6, Y: 10},
+				},
+			},
+		},
 	}
 
 	for _, room := range g.level.Rooms {
-		g.drawRoom(room, g.level.FinishPortal, field)
+		g.putRoom(room, g.level.FinishPortal, field)
 	}
 
 	for _, passages := range g.level.Passages {
-		g.drawPassage(passages, field)
+		g.putPassage(passages, field)
+	}
+
+	for _, room := range g.level.Rooms {
+		g.putEnemies(room, field)
 	}
 
 	px := g.player.Character.Shape.Point.X
 	py := g.player.Character.Shape.Point.Y
 	if py >= 0 && py < h && px >= 0 && px < w {
-		field[py][px] = 1
+		field[py][px] = common.EntityTypePlayer
 	}
 
 	return field
 }
 
-func (g *Game) drawRoom(room world.Room, finishPortal primitives.Box, field [][]int) {
-	for column := room.Shape.Point.X; column < room.Shape.Point.X+int(room.Shape.Size.Width); column++ {
-		field[room.Shape.Point.Y][column] = int(symWall)
-		field[room.Shape.Point.Y+int(room.Shape.Size.Height)][column] = int(symWall)
-	}
+func (g *Game) putEnemies(room world.Room, field [][]common.EntityType) {
+	var et common.EntityType
 
-	for row := room.Shape.Point.Y; row <= room.Shape.Point.Y+int(room.Shape.Size.Height); row++ {
-		field[row][room.Shape.Point.X] = int(symWall)
-		field[row][room.Shape.Point.X+int(room.Shape.Size.Width)] = int(symWall)
-	}
+	for _, e := range room.Enemies {
+		switch e.Type {
+		case entities.EnemyTypeZombie:
+			et = common.EntityTypeZombie
+		case entities.EnemyTypeVampire:
+			et = common.EntityTypeVampire
+		case entities.EnemyTypeGhost:
+			et = common.EntityTypeGhost
+		case entities.EnemyTypeOgre:
+			et = common.EntityTypeOgre
+		case entities.EnemyTypeSnakeMage:
+			et = common.EntityTypeSnakeMage
+		}
 
-	field[finishPortal.Point.Y][finishPortal.Point.X] = int(symPortal)
+		ex := e.Character.Shape.Point.X
+		ey := e.Character.Shape.Point.Y
+
+		h := len(field)
+		w := len(field[0])
+		if ey >= 0 && ey < h && ex >= 0 && ex < w {
+			field[ey][ex] = et
+		}
+	}
 }
 
-func (g *Game) drawPassage(passage world.Passage, field [][]int) {
-	for i := 0; i < len(passage.Passage); i++ {
-		field[passage.Passage[i].Y][passage.Passage[i].X] = int(symPassage)
+// Тут можно класть только lvl, так как room я получаю из него же шагом выше, а могу и тут
+func (g *Game) putRoom(room world.Room, finishPortal primitives.Box, field [][]common.EntityType) {
+	for column := room.Shape.Point.X; column <= room.Shape.Point.X+int(room.Shape.Size.Width); column++ {
+		field[room.Shape.Point.Y][column] = common.EntityTypeHorizontalWall
+		field[room.Shape.Point.Y+int(room.Shape.Size.Height)][column] = common.EntityTypeHorizontalWall
 	}
-	field[passage.DoorOne.Y][passage.DoorOne.X] = int(symDoor)
-	field[passage.DoorTwo.Y][passage.DoorTwo.X] = int(symDoor)
+
+	for row := room.Shape.Point.Y; row < room.Shape.Point.Y+int(room.Shape.Size.Height); row++ {
+		field[row][room.Shape.Point.X] = common.EntityTypeVerticalWall
+		field[row][room.Shape.Point.X+int(room.Shape.Size.Width)] = common.EntityTypeVerticalWall
+	}
+
+	field[finishPortal.Point.Y][finishPortal.Point.X] = common.EntityTypePortal
+}
+
+func (g *Game) putPassage(passage world.Passage, field [][]common.EntityType) {
+	for i := 0; i < len(passage.Passage); i++ {
+		field[passage.Passage[i].Y][passage.Passage[i].X] = common.EntityTypePassage
+	}
+	field[passage.DoorOne.Y][passage.DoorOne.X] = common.EntityTypeDoor
+	field[passage.DoorTwo.Y][passage.DoorTwo.X] = common.EntityTypeDoor
 }

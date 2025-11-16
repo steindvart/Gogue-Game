@@ -2,28 +2,48 @@ package items
 
 import (
 	"gogue/internal/model/primitives"
-	"math/rand"
-)
-
-const (
-	TreasureBaseValue uint32 = 5
-	TreasureMaxValue  uint32 = 100
+	"gogue/internal/utils"
 )
 
 type Treasure struct {
-	Shape primitives.Box
-	Name  string
-	Value uint
+	*Item
+	Value int32
 }
 
-func NewTreasure(box primitives.Box) *Treasure {
+func NewTreasure(rnd *utils.RandomGenerator, box primitives.Box, t TreasureType) *Treasure {
+	cfg := GetTreasureConfig(t)
+
 	return &Treasure{
-		Shape: box,
-		Name:  "Gold",
-		Value: getTreasureRandomValue(),
+		Item: &Item{
+			Shape: box,
+			Name:  string(cfg.Type),
+		},
+		Value: cfg.GenerateValue(rnd),
 	}
 }
 
-func getTreasureRandomValue() uint {
-	return uint(TreasureBaseValue + rand.Uint32()%TreasureMaxValue)
+func NewTreasureByConfig(rnd *utils.RandomGenerator, box primitives.Box, cfg TreasureConfig) (*Treasure, error) {
+	if err := cfg.Validate(); err != nil {
+		return nil, err
+	}
+
+	return &Treasure{
+		Item: &Item{
+			Shape: box,
+			Name:  string(cfg.Type),
+		},
+		Value: cfg.GenerateValue(rnd),
+	}, nil
+}
+
+func (tr *Treasure) Take() int32 {
+	return tr.Value
+}
+
+func AsTreasure(item any) *Treasure {
+	s, ok := item.(*Treasure)
+	if ok {
+		return s
+	}
+	return nil
 }

@@ -6,8 +6,6 @@ import (
 	"testing"
 )
 
-const defaultTestSeed int64 = 42
-
 func TestElixir_NewElixir_BuiltinConfig(t *testing.T) {
 	tests := []struct {
 		name         string
@@ -26,13 +24,13 @@ func TestElixir_NewElixir_BuiltinConfig(t *testing.T) {
 		},
 		{
 			name:         "PhantomBreath type uses PhantomBreath elixir config",
-			elixirType:   ElixirTypePhantomBreath,
-			expectedName: string(ElixirTypePhantomBreath),
+			elixirType:   ElixirTypeDwarfism,
+			expectedName: string(ElixirTypeDwarfism),
 		},
 		{
 			name:         "FrozenStar type uses FrozenStar elixir config",
-			elixirType:   ElixirTypeFrozenStar,
-			expectedName: string(ElixirTypeFrozenStar),
+			elixirType:   ElixirTypeGiantism,
+			expectedName: string(ElixirTypeGiantism),
 		},
 		{
 			name:         "Mystery type uses Mystery elixir config",
@@ -43,7 +41,7 @@ func TestElixir_NewElixir_BuiltinConfig(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			rng := utils.NewRandomGeneratorWithSeed(defaultTestSeed)
+			rng := utils.NewRandomGeneratorWithSeed(defaultItemsTestSeed)
 			box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 
 			elixir := NewElixir(rng, box, tt.elixirType)
@@ -93,11 +91,11 @@ func TestElixir_NewElixir_CustomConfig(t *testing.T) {
 	}{
 		{
 			name: "Valid custom config",
-			seed: defaultTestSeed,
+			seed: defaultItemsTestSeed,
 			config: ElixirConfig{
 				Type:               "Custom Elixir",
-				StrengthRange:      ElixirAttributeRange{Min: 10, Max: 50},
-				AgilityRange:       ElixirAttributeRange{Min: -5, Max: 15},
+				StrengthRange:      primitives.AttributeRange{Min: 10, Max: 50},
+				AgilityRange:       primitives.AttributeRange{Min: -5, Max: 15},
 				DurationStepsRange: ElixirDurationStepsRange{Min: 10, Max: 20},
 				Description:        "A custom test elixir",
 			},
@@ -106,11 +104,11 @@ func TestElixir_NewElixir_CustomConfig(t *testing.T) {
 		},
 		{
 			name: "Invalid strength range returns error",
-			seed: defaultTestSeed,
+			seed: defaultItemsTestSeed,
 			config: ElixirConfig{
 				Type:               "Invalid Elixir",
-				StrengthRange:      ElixirAttributeRange{Min: 50, Max: 10}, // Min > Max
-				AgilityRange:       ElixirAttributeRange{Min: 0, Max: 10},
+				StrengthRange:      primitives.AttributeRange{Min: 50, Max: 10}, // Min > Max
+				AgilityRange:       primitives.AttributeRange{Min: 0, Max: 10},
 				DurationStepsRange: defaultDurationRange,
 				Description:        "Invalid config",
 			},
@@ -119,11 +117,11 @@ func TestElixir_NewElixir_CustomConfig(t *testing.T) {
 		},
 		{
 			name: "Invalid agility range returns error",
-			seed: defaultTestSeed,
+			seed: defaultItemsTestSeed,
 			config: ElixirConfig{
 				Type:               "Invalid Elixir",
-				StrengthRange:      ElixirAttributeRange{Min: 0, Max: 10},
-				AgilityRange:       ElixirAttributeRange{Min: 20, Max: 5}, // Min > Max
+				StrengthRange:      primitives.AttributeRange{Min: 0, Max: 10},
+				AgilityRange:       primitives.AttributeRange{Min: 20, Max: 5}, // Min > Max
 				DurationStepsRange: defaultDurationRange,
 				Description:        "Invalid config",
 			},
@@ -132,11 +130,11 @@ func TestElixir_NewElixir_CustomConfig(t *testing.T) {
 		},
 		{
 			name: "Invalid duration range returns error",
-			seed: defaultTestSeed,
+			seed: defaultItemsTestSeed,
 			config: ElixirConfig{
 				Type:               "Invalid Elixir",
-				StrengthRange:      ElixirAttributeRange{Min: 0, Max: 10},
-				AgilityRange:       ElixirAttributeRange{Min: 0, Max: 10},
+				StrengthRange:      primitives.AttributeRange{Min: 0, Max: 10},
+				AgilityRange:       primitives.AttributeRange{Min: 0, Max: 10},
 				DurationStepsRange: ElixirDurationStepsRange{Min: 50, Max: 10}, // Min > Max
 				Description:        "Invalid config",
 			},
@@ -203,17 +201,17 @@ func TestElixir_NewElixir_NoRandom(t *testing.T) {
 	}{
 		{
 			name:       "Same seed produces same Strength elixir",
-			seed:       defaultTestSeed,
+			seed:       defaultItemsTestSeed,
 			elixirType: ElixirTypeStrength,
 		},
 		{
 			name:       "Same seed produces same Agility elixir",
-			seed:       defaultTestSeed,
+			seed:       defaultItemsTestSeed,
 			elixirType: ElixirTypeAgility,
 		},
 		{
 			name:       "Same seed produces same Mystery elixir",
-			seed:       defaultTestSeed,
+			seed:       defaultItemsTestSeed,
 			elixirType: ElixirTypeMystery,
 		},
 	}
@@ -306,7 +304,7 @@ func TestElixir_NewElixir_Randomness(t *testing.T) {
 }
 
 func TestElixir_NewElixir_ZeroSizedBoxIsOk(t *testing.T) {
-	rng := utils.NewRandomGeneratorWithSeed(defaultTestSeed)
+	rng := utils.NewRandomGeneratorWithSeed(defaultItemsTestSeed)
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 0, Height: 0}}
 	elixir := NewElixir(rng, box, ElixirTypeStrength)
 
@@ -320,7 +318,7 @@ func TestElixir_NewElixir_ZeroSizedBoxIsOk(t *testing.T) {
 }
 
 func TestElixir_Drop(t *testing.T) {
-	rng := utils.NewRandomGeneratorWithSeed(defaultTestSeed)
+	rng := utils.NewRandomGeneratorWithSeed(defaultItemsTestSeed)
 	initialBox := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 	elixir := NewElixir(rng, initialBox, ElixirTypeStrength)
 
@@ -348,7 +346,7 @@ func TestElixir_Use(t *testing.T) {
 	}{
 		{
 			name:       "Use Strength elixir returns correct attributes",
-			seed:       defaultTestSeed,
+			seed:       defaultItemsTestSeed,
 			elixirType: ElixirTypeStrength,
 		},
 		{
@@ -384,7 +382,7 @@ func TestElixir_Use(t *testing.T) {
 }
 
 func TestElixir_UseMultipleTimesIsOk(t *testing.T) {
-	rng := utils.NewRandomGeneratorWithSeed(defaultTestSeed)
+	rng := utils.NewRandomGeneratorWithSeed(defaultItemsTestSeed)
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 	elixir := NewElixir(rng, box, ElixirTypeStrength)
 
@@ -399,7 +397,7 @@ func TestElixir_UseMultipleTimesIsOk(t *testing.T) {
 	}
 }
 
-func TestElixir_AsElixir_ValidPointerIsElixir(t *testing.T) {
+func TestElixir_AsElixir_ValidPointer(t *testing.T) {
 	input := &Elixir{
 		Item: &Item{
 			Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
@@ -475,7 +473,7 @@ func BenchmarkElixir_NewElixir(b *testing.B) {
 }
 
 func BenchmarkElixir_Use(b *testing.B) {
-	rng := utils.NewRandomGeneratorWithSeed(defaultTestSeed)
+	rng := utils.NewRandomGeneratorWithSeed(defaultItemsTestSeed)
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 	elixir := NewElixir(rng, box, ElixirTypeStrength)
 

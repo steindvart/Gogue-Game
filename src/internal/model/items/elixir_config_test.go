@@ -1,38 +1,67 @@
 package items
 
 import (
+	"gogue/internal/model/primitives"
 	"gogue/internal/utils"
 	"testing"
 )
 
 func TestGetElixirConfig(t *testing.T) {
 	tests := []struct {
-		name          string
-		elixirType    ElixirType
-		wantType      ElixirType
-		checkStrength bool
-		checkAgility  bool
+		name              string
+		elixirType        ElixirType
+		wantType          ElixirType
+		wantStrengthRange primitives.AttributeRange
+		wantAgilityRange  primitives.AttributeRange
+		wantDurationRange ElixirDurationStepsRange
 	}{
 		{
-			name:          "Get Strength config",
-			elixirType:    ElixirTypeStrength,
-			wantType:      ElixirTypeStrength,
-			checkStrength: true,
-			checkAgility:  false,
+			name:              "Get Strength config",
+			elixirType:        ElixirTypeStrength,
+			wantType:          ElixirTypeStrength,
+			wantStrengthRange: primitives.AttributeRange{Min: 5, Max: 20},
+			wantAgilityRange:  primitives.AttributeRange{Min: 0, Max: 0},
+			wantDurationRange: defaultDurationRange,
 		},
 		{
-			name:          "Get Agility config",
-			elixirType:    ElixirTypeAgility,
-			wantType:      ElixirTypeAgility,
-			checkStrength: false,
-			checkAgility:  true,
+			name:              "Get Agility config",
+			elixirType:        ElixirTypeAgility,
+			wantType:          ElixirTypeAgility,
+			wantStrengthRange: primitives.AttributeRange{Min: 0, Max: 0},
+			wantAgilityRange:  primitives.AttributeRange{Min: 5, Max: 20},
+			wantDurationRange: defaultDurationRange,
 		},
 		{
-			name:          "Unknown type returns Mystery",
-			elixirType:    "Unknown Elixir",
-			wantType:      ElixirTypeMystery,
-			checkStrength: true,
-			checkAgility:  true,
+			name:              "Get Dwarfism config - negative strength",
+			elixirType:        ElixirTypeDwarfism,
+			wantType:          ElixirTypeDwarfism,
+			wantStrengthRange: primitives.AttributeRange{Min: -10, Max: -2},
+			wantAgilityRange:  primitives.AttributeRange{Min: 10, Max: 30},
+			wantDurationRange: defaultDurationRange,
+		},
+		{
+			name:              "Get Giantism config - negative agility",
+			elixirType:        ElixirTypeGiantism,
+			wantType:          ElixirTypeGiantism,
+			wantStrengthRange: primitives.AttributeRange{Min: 10, Max: 30},
+			wantAgilityRange:  primitives.AttributeRange{Min: -10, Max: -2},
+			wantDurationRange: defaultDurationRange,
+		},
+		{
+			name:              "Get Mystery config - all attributes",
+			elixirType:        ElixirTypeMystery,
+			wantType:          ElixirTypeMystery,
+			wantStrengthRange: primitives.AttributeRange{Min: -20, Max: 30},
+			wantAgilityRange:  primitives.AttributeRange{Min: -20, Max: 30},
+			wantDurationRange: defaultDurationRange,
+		},
+		{
+			name:              "Unknown type returns Mystery",
+			elixirType:        "Unknown Elixir",
+			wantType:          ElixirTypeMystery,
+			wantStrengthRange: primitives.AttributeRange{Min: -20, Max: 30},
+			wantAgilityRange:  primitives.AttributeRange{Min: -20, Max: 30},
+			wantDurationRange: defaultDurationRange,
 		},
 	}
 
@@ -44,18 +73,26 @@ func TestGetElixirConfig(t *testing.T) {
 				t.Errorf("Expected type %q, got %q", tt.wantType, config.Type)
 			}
 
-			// Check that config has proper ranges
-			if tt.checkStrength && config.StrengthRange.Min == 0 && config.StrengthRange.Max == 0 {
-				t.Error("Expected non-zero strength range")
+			if config.StrengthRange != tt.wantStrengthRange {
+				t.Errorf("Expected StrengthRange %v, got %v", tt.wantStrengthRange, config.StrengthRange)
 			}
 
-			if tt.checkAgility && config.AgilityRange.Min == 0 && config.AgilityRange.Max == 0 {
-				t.Error("Expected non-zero agility range")
+			if config.AgilityRange != tt.wantAgilityRange {
+				t.Errorf("Expected AgilityRange %v, got %v", tt.wantAgilityRange, config.AgilityRange)
+			}
+
+			if config.DurationStepsRange != tt.wantDurationRange {
+				t.Errorf("Expected DurationStepsRange %v, got %v", tt.wantDurationRange, config.DurationStepsRange)
 			}
 
 			// Validate the config
 			if err := config.Validate(); err != nil {
 				t.Errorf("Config validation failed: %v", err)
+			}
+
+			// Check description is not empty
+			if config.Description == "" {
+				t.Errorf("Config for %q has empty description", tt.elixirType)
 			}
 		})
 	}
@@ -71,8 +108,8 @@ func TestElixirConfig_Validate(t *testing.T) {
 			name: "Valid config",
 			config: ElixirConfig{
 				Type:               ElixirTypeStrength,
-				StrengthRange:      ElixirAttributeRange{Min: 5, Max: 20},
-				AgilityRange:       ElixirAttributeRange{Min: 0, Max: 0},
+				StrengthRange:      primitives.AttributeRange{Min: 5, Max: 20},
+				AgilityRange:       primitives.AttributeRange{Min: 0, Max: 0},
 				DurationStepsRange: defaultDurationRange,
 			},
 			wantError: false,
@@ -81,8 +118,8 @@ func TestElixirConfig_Validate(t *testing.T) {
 			name: "Invalid strength range is error",
 			config: ElixirConfig{
 				Type:               ElixirTypeStrength,
-				StrengthRange:      ElixirAttributeRange{Min: 20, Max: 5}, // Min > Max
-				AgilityRange:       ElixirAttributeRange{Min: 0, Max: 0},
+				StrengthRange:      primitives.AttributeRange{Min: 20, Max: 5}, // Min > Max
+				AgilityRange:       primitives.AttributeRange{Min: 0, Max: 0},
 				DurationStepsRange: defaultDurationRange,
 			},
 			wantError: true,
@@ -91,8 +128,8 @@ func TestElixirConfig_Validate(t *testing.T) {
 			name: "Invalid agility range is error",
 			config: ElixirConfig{
 				Type:               ElixirTypeAgility,
-				StrengthRange:      ElixirAttributeRange{Min: 0, Max: 0},
-				AgilityRange:       ElixirAttributeRange{Min: 15, Max: 5}, // Min > Max
+				StrengthRange:      primitives.AttributeRange{Min: 0, Max: 0},
+				AgilityRange:       primitives.AttributeRange{Min: 15, Max: 5}, // Min > Max
 				DurationStepsRange: defaultDurationRange,
 			},
 			wantError: true,
@@ -101,8 +138,8 @@ func TestElixirConfig_Validate(t *testing.T) {
 			name: "Invalid duration range is error",
 			config: ElixirConfig{
 				Type:               ElixirTypeMystery,
-				StrengthRange:      ElixirAttributeRange{Min: -10, Max: 10},
-				AgilityRange:       ElixirAttributeRange{Min: -10, Max: 10},
+				StrengthRange:      primitives.AttributeRange{Min: -10, Max: 10},
+				AgilityRange:       primitives.AttributeRange{Min: -10, Max: 10},
 				DurationStepsRange: ElixirDurationStepsRange{Min: 30, Max: 5}, // Min > Max
 			},
 			wantError: true,
@@ -150,11 +187,11 @@ func TestElixirConfig_GenerateAttributes(t *testing.T) {
 	}{
 		{
 			name: "Strength config generates deterministic attributes",
-			seed: defaultTestSeed,
+			seed: defaultItemsTestSeed,
 			config: ElixirConfig{
 				Type:          ElixirTypeStrength,
-				StrengthRange: ElixirAttributeRange{Min: 5, Max: 20},
-				AgilityRange:  ElixirAttributeRange{Min: 0, Max: 0},
+				StrengthRange: primitives.AttributeRange{Min: 5, Max: 20},
+				AgilityRange:  primitives.AttributeRange{Min: 0, Max: 0},
 			},
 		},
 		{
@@ -162,8 +199,8 @@ func TestElixirConfig_GenerateAttributes(t *testing.T) {
 			seed: 100,
 			config: ElixirConfig{
 				Type:          ElixirTypeMystery,
-				StrengthRange: ElixirAttributeRange{Min: -20, Max: 30},
-				AgilityRange:  ElixirAttributeRange{Min: -20, Max: 30},
+				StrengthRange: primitives.AttributeRange{Min: -20, Max: 30},
+				AgilityRange:  primitives.AttributeRange{Min: -20, Max: 30},
 			},
 		},
 	}
@@ -206,7 +243,7 @@ func TestElixirConfig_GenerateDuration(t *testing.T) {
 	}{
 		{
 			name: "Standard duration range",
-			seed: defaultTestSeed,
+			seed: defaultItemsTestSeed,
 			config: ElixirConfig{
 				Type:               ElixirTypeStrength,
 				DurationStepsRange: defaultDurationRange,
@@ -256,8 +293,8 @@ func TestElixirConfig_GenerateDuration(t *testing.T) {
 func TestElixirConfig_GenerateAttributes_Randomness(t *testing.T) {
 	config := ElixirConfig{
 		Type:          ElixirTypeMystery,
-		StrengthRange: ElixirAttributeRange{Min: -20, Max: 30},
-		AgilityRange:  ElixirAttributeRange{Min: -20, Max: 30},
+		StrengthRange: primitives.AttributeRange{Min: -20, Max: 30},
+		AgilityRange:  primitives.AttributeRange{Min: -20, Max: 30},
 	}
 
 	strengthValues := make(map[float64]bool)

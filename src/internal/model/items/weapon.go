@@ -1,38 +1,43 @@
 package items
 
-import "gogue/internal/model/primitives"
+import (
+	"gogue/internal/model/primitives"
+	"gogue/internal/utils"
+)
 
 type Weapon struct {
-	Item   Item
-	Damage float64
+	*Item
+	AffectedAttributes primitives.Attributes
 }
 
-func NewWeapon(box primitives.Box) *Weapon {
-	weaponNames := []string{
-		"Blade of the Forgotten Dawn",
-		"Obsidian Reaver",
-		"Fang of the Shadow Wolf",
-		"Ironclad Cleaver",
-		"Crimson Talon",
-		"Thunderstrike Maul",
-		"Serpent's Kiss Dagger",
-		"Voidrend Sword",
-		"Ebonheart Spear",
+func NewWeapon(rnd *utils.RandomGenerator, box primitives.Box, t WeaponType) *Weapon {
+	cfg := GetWeaponConfig(t)
+
+	return &Weapon{
+		Item: &Item{
+			Shape: box,
+			Name:  string(cfg.Type),
+		},
+		AffectedAttributes: cfg.GenerateAttributes(rnd),
+	}
+}
+
+func NewWeaponByConfig(rnd *utils.RandomGenerator, box primitives.Box, cfg WeaponConfig) (*Weapon, error) {
+	if err := cfg.Validate(); err != nil {
+		return nil, err
 	}
 
 	return &Weapon{
-		Item: Item{
+		Item: &Item{
 			Shape: box,
-			Name:  getAttributeRandomName(weaponNames),
+			Name:  string(cfg.Type),
 		},
-		Damage: getAttributeRandomPercentIncrease(),
-	}
+		AffectedAttributes: cfg.GenerateAttributes(rnd),
+	}, nil
 }
 
 func (w *Weapon) Use() primitives.Attributes {
-	return primitives.Attributes{
-		Strength: float64(w.Damage),
-	}
+	return w.AffectedAttributes
 }
 
 func AsWeapon(item any) *Weapon {

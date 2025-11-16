@@ -1,45 +1,44 @@
 package items
 
-import "gogue/internal/model/primitives"
+import (
+	"gogue/internal/model/primitives"
+	"gogue/internal/utils"
+)
 
 type Scroll struct {
-	Item              Item
-	AffectedAttribute primitives.Attributes
+	*Item
+	AffectedAttributes primitives.Attributes
 }
 
-// func NewScroll(box primitives.Box) *Scroll {
-// 	scrollNames := []string{
-// 		"Scroll of Shadowstep",
-// 		"Parchment of Eternal Flame",
-// 		"Manuscript of Forgotten Truths",
-// 		"Scroll of Iron Will",
-// 		"Vellum of the Void",
-// 		"Scroll of Whispers",
-// 		"Tome of the Lost King",
-// 		"Scroll of Unseen Paths",
-// 		"Parchment of Thunderous Roar",
-// 	}
+func NewScroll(rnd *utils.RandomGenerator, box primitives.Box, t ScrollType) *Scroll {
+	cfg := GetScrollConfig(t)
 
-// 	return &Scroll{
-// 		Item: Item{
-// 			Shape: box,
-// 			Name:  getAttributeRandomName(scrollNames),
-// 		},
-// 		AffectedAttribute: getRandomAttribute(),
-// 	}
-// }
+	return &Scroll{
+		Item: &Item{
+			Shape: box,
+			Name:  string(cfg.Type),
+		},
+		AffectedAttributes: cfg.GenerateAttributes(rnd),
+	}
+}
 
-// func (s *Scroll) Take() {
-// 	s.Item.Take()
-// }
+func NewScrollByConfig(rnd *utils.RandomGenerator, box primitives.Box, cfg ScrollConfig) (*Scroll, error) {
+	if err := cfg.Validate(); err != nil {
+		return nil, err
+	}
 
-// func (s *Scroll) Drop(box primitives.Box) {
-// 	s.Item.Drop(box)
-// }
+	return &Scroll{
+		Item: &Item{
+			Shape: box,
+			Name:  string(cfg.Type),
+		},
+		AffectedAttributes: cfg.GenerateAttributes(rnd),
+	}, nil
+}
 
-// func (s *Scroll) Use() primitives.Attributes {
-// 	return s.AffectedAttribute
-// }
+func (e *Scroll) Use() primitives.Attributes {
+	return e.AffectedAttributes
+}
 
 func AsScroll(item any) *Scroll {
 	s, ok := item.(*Scroll)
