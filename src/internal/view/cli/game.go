@@ -1,51 +1,50 @@
 package cli
 
 import (
-	"gogue/internal/utils"
+	"gogue/internal/common"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 
 type Game struct {
-	Box *tview.Box
+	*tview.Box
 }
 
-func NewGameBox() *Game {
-	return &Game {
+func NewGame() *Game {
+	return &Game{
 		Box: tview.NewBox().SetBorder(true).SetTitle("Game"),
 	}
 }
 
-func (g *Game) SetFieldToScreen(screen tcell.Screen, field [][]utils.EntityType, ox, oy int) {
-	// field := g.makeField(w, h)
+func (*Game) SetFieldToScreen(screen tcell.Screen, field [][]common.EntityType, ox, oy int) {
 	for y := range len(field) {
 		for x := range len(field[0]) {
 			ch := ' '
 			switch field[y][x] {
-			case utils.EntityTypePlayer:
+			case common.EntityTypePlayer:
 				ch = '🦸'
-			case utils.EntityTypeHorizontalWall:
+			case common.EntityTypeHorizontalWall:
 				ch = '—'
-			case utils.EntityTypeVerticalWall:
+			case common.EntityTypeVerticalWall:
 				ch = '|'
-			case utils.EntityTypePortal:
+			case common.EntityTypePortal:
 				ch = 'O'
-			case utils.EntityTypePassage:
+			case common.EntityTypePassage:
 				ch = '*'
-			case utils.EntityTypeDoorOne:
+			case common.EntityTypeDoorOne:
 				ch = '['
-			case utils.EntityTypeDoorTwo:
+			case common.EntityTypeDoorTwo:
 				ch = ']'
-			case utils.EntityTypeZombie:
+			case common.EntityTypeZombie:
 				ch = '🧟'
-			case utils.EntityTypeVampire:
+			case common.EntityTypeVampire:
 				ch = '🧛'
-			case utils.EntityTypeGhost:
+			case common.EntityTypeGhost:
 				ch = '👻'
-			case utils.EntityTypeOgre:
+			case common.EntityTypeOgre:
 				ch = '👹'
-			case utils.EntityTypeSnakeMage:
+			case common.EntityTypeSnakeMage:
 				ch = '🐍'
 			}
 			screen.SetContent(ox+x, oy+y, ch, nil, tcell.StyleDefault.Background(tcell.ColorBlack))
