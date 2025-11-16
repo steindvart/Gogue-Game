@@ -190,6 +190,7 @@ func (l *Level) generatePassages() error {
 				return err
 			}
 			l.Passages = append(l.Passages, *passage)
+			l.addDoorsAtRoom(key, doorOne, doorTwo)
 		}
 		if _, exists := verticalNeighborRoomsSet[key]; exists {
 			doorOne := getDoorDownWall(l.Rooms[minIndex], l.random)
@@ -199,9 +200,17 @@ func (l *Level) generatePassages() error {
 				return err
 			}
 			l.Passages = append(l.Passages, *passage)
+			l.addDoorsAtRoom(key, doorOne, doorTwo)
 		}
 	}
 	return nil
+}
+
+func (l *Level) addDoorsAtRoom(twoRoomsIndexes [2]int, doorOne, doorTwo primitives.Point2D[int]) {
+	roomOneIndex := twoRoomsIndexes[0]
+	l.Rooms[roomOneIndex].Doors = append(l.Rooms[roomOneIndex].Doors, doorOne)
+	roomTwoIndex := twoRoomsIndexes[1]
+	l.Rooms[roomTwoIndex].Doors = append(l.Rooms[roomTwoIndex].Doors, doorTwo)
 }
 
 func (l *Level) GetStartPositionForPlayer() (*primitives.Point2D[int], error) {

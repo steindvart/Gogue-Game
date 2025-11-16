@@ -17,6 +17,7 @@ const (
 type Room struct {
 	Shape   primitives.Box
 	Type    RoomType
+	Doors   []primitives.Point2D[int]
 	Foods   []items.Food
 	Elixirs []items.Elixir
 	Scrolls []items.Scroll

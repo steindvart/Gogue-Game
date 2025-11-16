@@ -14,6 +14,21 @@ import (
 	"github.com/rivo/tview"
 )
 
+const (
+	HeightLevel = 30
+	WidthLevel  = 90
+)
+
+type Symbol int
+
+const (
+	symPlayer Symbol = iota + 1
+	symWall
+	symPortal
+	symPassage
+	symDoor
+)
+
 type Game struct {
 	player *entities.Player
 	level  *world.Level
@@ -26,7 +41,7 @@ func NewGame() (*Game, error) {
 	source := rand.New(rand.NewSource(time.Now().UnixNano()))
 	level := world.NewLevel(source)
 
-	err := level.GenerateLevel(primitives.Size2D[uint]{Height: 30, Width: 90})
+	err := level.GenerateLevel(primitives.Size2D[uint]{Height: HeightLevel, Width: WidthLevel})
 	if err != nil {
 		return nil, err
 	}
@@ -55,41 +70,88 @@ func NewGame() (*Game, error) {
 		return x, y, width, height
 	})
 
+	movement := map[action.Type]primitives.Point2D[int]{
+		action.MoveUp:               {X: 0, Y: -1},
+		action.MoveDown:             {X: 0, Y: 1},
+		action.MoveLeft:             {X: -1, Y: 0},
+		action.MoveRight:            {X: 1, Y: 0},
+		action.MoveLeftUpperCorner:  {X: -1, Y: -1},
+		action.MoveRightUpperCorner: {X: 1, Y: -1},
+		action.MoveLefLowerCorner:   {X: -1, Y: 1},
+		action.MoveRightLowerCorner: {X: 1, Y: 1},
+	}
 	game.view.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch game.eventToAction(event) {
-		case action.MoveUp:
-			game.player.Character.Shape.Move(primitives.Point2D[int]{X: 0, Y: -1})
-			return nil
-		case action.MoveDown:
-			game.player.Character.Shape.Move(primitives.Point2D[int]{X: 0, Y: 1})
-			return nil
-		case action.MoveLeft:
-			game.player.Character.Shape.Move(primitives.Point2D[int]{X: -1, Y: 0})
-			return nil
-		case action.MoveRight:
-			game.player.Character.Shape.Move(primitives.Point2D[int]{X: 1, Y: 0})
-			return nil
-		case action.MoveLeftUpperCorner:
-			game.player.Character.Shape.Move(primitives.Point2D[int]{X: -1, Y: -1})
-			return nil
-		case action.MoveRightUpperCorner:
-			game.player.Character.Shape.Move(primitives.Point2D[int]{X: 1, Y: -1})
-			return nil
-		case action.MoveLefLowerCorner:
-			game.player.Character.Shape.Move(primitives.Point2D[int]{X: -1, Y: 1})
-			return nil
-		case action.MoveRightLowerCorner:
-			game.player.Character.Shape.Move(primitives.Point2D[int]{X: 1, Y: 1})
-			return nil
+		case action.MoveUp,
+			action.MoveDown,
+			action.MoveLeft,
+			action.MoveRight,
+			action.MoveLeftUpperCorner,
+			action.MoveRightUpperCorner,
+			action.MoveLefLowerCorner,
+			action.MoveRightLowerCorner:
+			oldPosition := game.moveAndGetOldPosition(movement[game.eventToAction(event)])
+			if game.checkCollision() {
+				game.player.Character.Shape.Point = oldPosition
+			}
 		case action.Exit:
 			game.signal = signals.Stop
-			return nil
 		default:
 			return event
 		}
+		return nil
 	})
 
 	return &game, nil
+}
+
+func (g *Game) moveAndGetOldPosition(changingPosition primitives.Point2D[int]) primitives.Point2D[int] {
+	oldPosition := g.player.Character.Shape.Point
+	g.player.Character.Shape.Move(changingPosition)
+	return oldPosition
+}
+
+func (g *Game) checkCollision() bool {
+	playerPosition := g.player.Character.Shape.Point
+
+	// Простая проверка границ
+	if playerPosition.X < 0 || playerPosition.Y < 0 ||
+		playerPosition.X >= int(WidthLevel) || playerPosition.Y >= int(HeightLevel) {
+		return true
+	}
+
+	// Проверка стен на карте
+	for _, room := range g.level.Rooms {
+		if g.isPlayerInWall(playerPosition, room) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (g *Game) isPlayerInWall(pos primitives.Point2D[int], room world.Room) bool {
+	roomX := room.Shape.Point.X
+	roomY := room.Shape.Point.Y
+	roomWidth := int(room.Shape.Size.Width)
+	roomHeight := int(room.Shape.Size.Height)
+
+	for _, door := range room.Doors {
+		if pos == door {
+			return false
+		}
+	}
+
+	// Верхняя или нижняя стена
+	if pos.Y == roomY || pos.Y == roomY+roomHeight {
+		return pos.X >= roomX && pos.X <= roomX+roomWidth
+	}
+	// Левая или правая стена
+	if pos.X == roomX || pos.X == roomX+roomWidth {
+		return pos.Y >= roomY && pos.Y <= roomY+roomHeight
+	}
+
+	return false
 }
 
 func (g *Game) eventToAction(event *tcell.EventKey) action.Type {
@@ -141,25 +203,22 @@ func (g *Game) Primitive() tview.Primitive {
 }
 
 func (g *Game) drawField(screen tcell.Screen, ox, oy, w, h int) {
-	field := g.makeField(w, h)
+	field := g.makeField(w, h) // WidthLevel, HeightLevel
 	for y := 0; y < h; y++ {
 		for x := 0; x < w; x++ {
 			ch := ' '
-			if field[y][x] == 1 {
-				ch = '🦸'
-			} else if field[y][x] == 2 {
-				ch = '—'
-			} else if field[y][x] == 3 {
-				ch = '|'
-			} else if field[y][x] == 4 {
-				ch = 'O'
-			} else if field[y][x] == 5 {
+			if field[y][x] == int(symPlayer) {
+				ch = '8' // '🦸'
+			} else if field[y][x] == int(symWall) {
+				ch = '⚀'
+			} else if field[y][x] == int(symPortal) {
+				ch = '0'
+			} else if field[y][x] == int(symPassage) {
 				ch = '*'
-			} else if field[y][x] == 6 {
-				ch = '['
-			} else if field[y][x] == 7 {
-				ch = ']'
+			} else if field[y][x] == int(symDoor) {
+				ch = 'П'
 			}
+
 			screen.SetContent(ox+x, oy+y, ch, nil, tcell.StyleDefault.Background(tcell.ColorBlack))
 		}
 	}
@@ -190,22 +249,22 @@ func (g *Game) makeField(w, h int) [][]int {
 
 func (g *Game) drawRoom(room world.Room, finishPortal primitives.Box, field [][]int) {
 	for column := room.Shape.Point.X; column < room.Shape.Point.X+int(room.Shape.Size.Width); column++ {
-		field[room.Shape.Point.Y][column] = 2
-		field[room.Shape.Point.Y+int(room.Shape.Size.Height)][column] = 2
+		field[room.Shape.Point.Y][column] = int(symWall)
+		field[room.Shape.Point.Y+int(room.Shape.Size.Height)][column] = int(symWall)
 	}
 
-	for row := room.Shape.Point.Y; row < room.Shape.Point.Y+int(room.Shape.Size.Height); row++ {
-		field[row][room.Shape.Point.X] = 3
-		field[row][room.Shape.Point.X+int(room.Shape.Size.Width)] = 3
+	for row := room.Shape.Point.Y; row <= room.Shape.Point.Y+int(room.Shape.Size.Height); row++ {
+		field[row][room.Shape.Point.X] = int(symWall)
+		field[row][room.Shape.Point.X+int(room.Shape.Size.Width)] = int(symWall)
 	}
 
-	field[finishPortal.Point.Y][finishPortal.Point.X] = 4
+	field[finishPortal.Point.Y][finishPortal.Point.X] = int(symPortal)
 }
 
 func (g *Game) drawPassage(passage world.Passage, field [][]int) {
 	for i := 0; i < len(passage.Passage); i++ {
-		field[passage.Passage[i].Y][passage.Passage[i].X] = 5
+		field[passage.Passage[i].Y][passage.Passage[i].X] = int(symPassage)
 	}
-	field[passage.DoorOne.Y][passage.DoorOne.X] = 6
-	field[passage.DoorTwo.Y][passage.DoorTwo.X] = 7
+	field[passage.DoorOne.Y][passage.DoorOne.X] = int(symDoor)
+	field[passage.DoorTwo.Y][passage.DoorTwo.X] = int(symDoor)
 }
