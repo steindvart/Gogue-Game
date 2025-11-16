@@ -1,11 +1,13 @@
 package state
 
 import (
+	"gogue/internal/common"
 	"gogue/internal/model/entities"
 	"gogue/internal/model/primitives"
 	"gogue/internal/model/signals"
 	"gogue/internal/model/world"
 	"gogue/internal/presentation/action"
+	viewcli "gogue/internal/view/cli"
 	"math/rand"
 	"time"
 	"unicode"
@@ -17,12 +19,11 @@ import (
 type Game struct {
 	player *entities.Player
 	level  *world.Level
-	view   *tview.Box
+	view   *viewcli.Game
 	signal signals.Type
 }
 
 func NewGame() (*Game, error) {
-	// @todo - выделить отрисовку в отдельный файл в view/cli
 	source := rand.New(rand.NewSource(time.Now().UnixNano()))
 	level := world.NewLevel(source)
 
@@ -40,18 +41,19 @@ func NewGame() (*Game, error) {
 		Size:  primitives.Size2D[uint]{Height: 1, Width: 1},
 	})
 
-	box := tview.NewBox().SetBorder(true).SetTitle("Game")
+	gameView := viewcli.NewGame()
 
 	game := Game{
 		player: player,
 		level:  level,
-		view:   box,
+		view:   gameView,
 	}
 
 	game.view.SetDrawFunc(func(screen tcell.Screen, x, y, width, height int) (int, int, int, int) {
 		// -2: учёт рамки
 		fw, fh := width-2, height-2
-		game.drawField(screen, x+1, y+1, fw, fh)
+		field := game.makeField(fw, fh)
+		game.view.SetFieldToScreen(screen, field, x+1, y+1)
 		return x, y, width, height
 	})
 
@@ -140,72 +142,124 @@ func (g *Game) Primitive() tview.Primitive {
 	return g.view
 }
 
-func (g *Game) drawField(screen tcell.Screen, ox, oy, w, h int) {
-	field := g.makeField(w, h)
-	for y := 0; y < h; y++ {
-		for x := 0; x < w; x++ {
-			ch := ' '
-			if field[y][x] == 1 {
-				ch = '🦸'
-			} else if field[y][x] == 2 {
-				ch = '—'
-			} else if field[y][x] == 3 {
-				ch = '|'
-			} else if field[y][x] == 4 {
-				ch = 'O'
-			} else if field[y][x] == 5 {
-				ch = '*'
-			} else if field[y][x] == 6 {
-				ch = '['
-			} else if field[y][x] == 7 {
-				ch = ']'
-			}
-			screen.SetContent(ox+x, oy+y, ch, nil, tcell.StyleDefault.Background(tcell.ColorBlack))
-		}
-	}
-}
-
-func (g *Game) makeField(w, h int) [][]int {
-	field := make([][]int, h)
+func (g *Game) makeField(w, h int) [][]common.EntityType {
+	field := make([][]common.EntityType, h)
 	for y := range field {
-		field[y] = make([]int, w)
+		field[y] = make([]common.EntityType, w)
+	}
+
+	// Добавлено в качестве примера, потом надо будет убрать
+	g.level.Rooms[0].Enemies = []entities.Enemy{
+		{
+			Type: entities.EnemyType(entities.EnemyTypeZombie),
+			Character: entities.Character{
+				Shape: primitives.Box{
+					Point: primitives.Point2D[int]{X: 6, Y: 6},
+				},
+			},
+		},
+		{
+			Type: entities.EnemyType(entities.EnemyTypeVampire),
+			Character: entities.Character{
+				Shape: primitives.Box{
+					Point: primitives.Point2D[int]{X: 6, Y: 7},
+				},
+			},
+		},
+		{
+			Type: entities.EnemyType(entities.EnemyTypeGhost),
+			Character: entities.Character{
+				Shape: primitives.Box{
+					Point: primitives.Point2D[int]{X: 6, Y: 8},
+				},
+			},
+		},
+		{
+			Type: entities.EnemyType(entities.EnemyTypeOgre),
+			Character: entities.Character{
+				Shape: primitives.Box{
+					Point: primitives.Point2D[int]{X: 6, Y: 9},
+				},
+			},
+		},
+		{
+			Type: entities.EnemyType(entities.EnemyTypeSnakeMage),
+			Character: entities.Character{
+				Shape: primitives.Box{
+					Point: primitives.Point2D[int]{X: 6, Y: 10},
+				},
+			},
+		},
 	}
 
 	for _, room := range g.level.Rooms {
-		g.drawRoom(room, g.level.FinishPortal, field)
+		g.putRoom(room, g.level.FinishPortal, field)
 	}
 
 	for _, passages := range g.level.Passages {
-		g.drawPassage(passages, field)
+		g.putPassage(passages, field)
+	}
+
+	for _, room := range g.level.Rooms {
+		g.putEnemies(room, field)
 	}
 
 	px := g.player.Character.Shape.Point.X
 	py := g.player.Character.Shape.Point.Y
 	if py >= 0 && py < h && px >= 0 && px < w {
-		field[py][px] = 1
+		field[py][px] = common.EntityTypePlayer
 	}
 
 	return field
 }
 
-func (g *Game) drawRoom(room world.Room, finishPortal primitives.Box, field [][]int) {
+func (g *Game) putEnemies(room world.Room, field [][]common.EntityType) {
+	var et common.EntityType
+
+	for _, e := range room.Enemies {
+		switch e.Type {
+		case entities.EnemyTypeZombie:
+			et = common.EntityTypeZombie
+		case entities.EnemyTypeVampire:
+			et = common.EntityTypeVampire
+		case entities.EnemyTypeGhost:
+			et = common.EntityTypeGhost
+		case entities.EnemyTypeOgre:
+			et = common.EntityTypeOgre
+		case entities.EnemyTypeSnakeMage:
+			et = common.EntityTypeSnakeMage
+		}
+
+		ex := e.Character.Shape.Point.X
+		ey := e.Character.Shape.Point.Y
+
+		h := len(field)
+		w := len(field[0])
+		if ey >= 0 && ey < h && ex >= 0 && ex < w {
+			field[ey][ex] = et
+		}
+	}
+}
+
+// Тут можно класть только lvl, так как room я получаю из него же шагом выше, а могу и тут
+func (g *Game) putRoom(room world.Room, finishPortal primitives.Box, field [][]common.EntityType) {
 	for column := room.Shape.Point.X; column < room.Shape.Point.X+int(room.Shape.Size.Width); column++ {
-		field[room.Shape.Point.Y][column] = 2
-		field[room.Shape.Point.Y+int(room.Shape.Size.Height)][column] = 2
+		field[room.Shape.Point.Y][column] = common.EntityTypeHorizontalWall
+		field[room.Shape.Point.Y+int(room.Shape.Size.Height)][column] = common.EntityTypeHorizontalWall
 	}
 
 	for row := room.Shape.Point.Y; row < room.Shape.Point.Y+int(room.Shape.Size.Height); row++ {
-		field[row][room.Shape.Point.X] = 3
-		field[row][room.Shape.Point.X+int(room.Shape.Size.Width)] = 3
+		field[row][room.Shape.Point.X] = common.EntityTypeVerticalWall
+		field[row][room.Shape.Point.X+int(room.Shape.Size.Width)] = common.EntityTypeVerticalWall
 	}
 
-	field[finishPortal.Point.Y][finishPortal.Point.X] = 4
+	field[finishPortal.Point.Y][finishPortal.Point.X] = common.EntityTypePortal
 }
 
-func (g *Game) drawPassage(passage world.Passage, field [][]int) {
+func (g *Game) putPassage(passage world.Passage, field [][]common.EntityType) {
 	for i := 0; i < len(passage.Passage); i++ {
-		field[passage.Passage[i].Y][passage.Passage[i].X] = 5
+		field[passage.Passage[i].Y][passage.Passage[i].X] = common.EntityTypePassage
 	}
-	field[passage.DoorOne.Y][passage.DoorOne.X] = 6
-	field[passage.DoorTwo.Y][passage.DoorTwo.X] = 7
+	field[passage.DoorOne.Y][passage.DoorOne.X] = common.EntityTypeDoorOne
+	field[passage.DoorTwo.Y][passage.DoorTwo.X] = common.EntityTypeDoorTwo
 }
