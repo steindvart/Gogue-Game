@@ -139,7 +139,7 @@ func (g *Game) Update(float64) signals.Type {
 }
 
 func (g *Game) Primitive() tview.Primitive {
-	return g.view.Box
+	return g.view
 }
 
 func (g *Game) makeField(w, h int) [][]common.EntityType {
