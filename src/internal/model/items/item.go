@@ -2,7 +2,6 @@ package items
 
 import (
 	"gogue/internal/model/primitives"
-	"math/rand"
 )
 
 const (
@@ -30,12 +29,4 @@ type Item struct {
 func (i *Item) Drop(position primitives.Point2D[int]) primitives.Box {
 	i.Shape.Point = position
 	return i.Shape
-}
-
-func getAttributeRandomPercentIncrease() float64 {
-	return float64(IncreaseAttributeBaseParcentage + rand.Intn(IncreaseAttributeMaxPercentage+1))
-}
-
-func getAttributeRandomName(names []string) string {
-	return names[rand.Intn(len(names))]
 }

@@ -30,10 +30,12 @@ func (p *Player) Heal(amount float64) {
 }
 
 func (p *Player) Attack() float64 {
-	damage := p.Character.Attack()
+	damage := 0.0
 	if p.Weapon != nil {
-		damage += p.Weapon.Damage
+		damage += p.Weapon.AffectedAttributes.Strength
 	}
+
+	damage += p.Character.Attack()
 	return damage
 }
 
