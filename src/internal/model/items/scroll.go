@@ -7,6 +7,7 @@ import (
 
 type Scroll struct {
 	*Item
+	Type               ScrollType
 	AffectedAttributes primitives.Attributes
 }
 
@@ -18,6 +19,7 @@ func NewScroll(rnd *utils.RandomGenerator, box primitives.Box, t ScrollType) *Sc
 			Shape: box,
 			Name:  string(cfg.Type),
 		},
+		Type:               t,
 		AffectedAttributes: cfg.GenerateAttributes(rnd),
 	}
 }
@@ -32,6 +34,7 @@ func NewScrollByConfig(rnd *utils.RandomGenerator, box primitives.Box, cfg Scrol
 			Shape: box,
 			Name:  string(cfg.Type),
 		},
+		Type:               ScrollTypeCustom,
 		AffectedAttributes: cfg.GenerateAttributes(rnd),
 	}, nil
 }

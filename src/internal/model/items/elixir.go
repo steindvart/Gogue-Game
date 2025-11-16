@@ -36,7 +36,7 @@ func NewElixirByConfig(rnd *utils.RandomGenerator, box primitives.Box, cfg Elixi
 			Shape: box,
 			Name:  string(cfg.Type),
 		},
-		Type:               cfg.Type,
+		Type:               ElixirTypeCustom,
 		AffectedAttributes: cfg.GenerateAttributes(rnd),
 		EffectDuration:     cfg.GenerateDuration(rnd),
 	}, nil

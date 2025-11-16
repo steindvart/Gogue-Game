@@ -45,6 +45,10 @@ func TestScroll_NewScroll_BuiltinConfig(t *testing.T) {
 				t.Fatal("Expected valid scroll, got nil")
 			}
 
+			if scroll.Type != tt.scrollType {
+				t.Errorf("Expected type %q, got %q", tt.scrollType, scroll.Type)
+			}
+
 			if scroll.Name != tt.expectedName {
 				t.Errorf("Expected name %q, got %q", tt.expectedName, scroll.Name)
 			}
@@ -195,6 +199,10 @@ func TestScroll_NewScrollByConfig(t *testing.T) {
 
 			if scroll == nil {
 				t.Fatal("Expected valid scroll, got nil")
+			}
+
+			if scroll.Type != ScrollTypeCustom {
+				t.Errorf("Expected type %q, got %q", ScrollTypeCustom, scroll.Type)
 			}
 
 			// Verify attributes are within config ranges

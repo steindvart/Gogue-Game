@@ -7,6 +7,7 @@ import (
 
 type Weapon struct {
 	*Item
+	Type               WeaponType
 	AffectedAttributes primitives.Attributes
 }
 
@@ -18,6 +19,7 @@ func NewWeapon(rnd *utils.RandomGenerator, box primitives.Box, t WeaponType) *We
 			Shape: box,
 			Name:  string(cfg.Type),
 		},
+		Type:               t,
 		AffectedAttributes: cfg.GenerateAttributes(rnd),
 	}
 }
@@ -32,6 +34,7 @@ func NewWeaponByConfig(rnd *utils.RandomGenerator, box primitives.Box, cfg Weapo
 			Shape: box,
 			Name:  string(cfg.Type),
 		},
+		Type:               WeaponTypeCustom,
 		AffectedAttributes: cfg.GenerateAttributes(rnd),
 	}, nil
 }

@@ -7,6 +7,7 @@ import (
 
 type Treasure struct {
 	*Item
+	Type  TreasureType
 	Value int32
 }
 
@@ -18,6 +19,7 @@ func NewTreasure(rnd *utils.RandomGenerator, box primitives.Box, t TreasureType)
 			Shape: box,
 			Name:  string(cfg.Type),
 		},
+		Type:  t,
 		Value: cfg.GenerateValue(rnd),
 	}
 }
@@ -32,6 +34,7 @@ func NewTreasureByConfig(rnd *utils.RandomGenerator, box primitives.Box, cfg Tre
 			Shape: box,
 			Name:  string(cfg.Type),
 		},
+		Type:  TreasureTypeCustom,
 		Value: cfg.GenerateValue(rnd),
 	}, nil
 }

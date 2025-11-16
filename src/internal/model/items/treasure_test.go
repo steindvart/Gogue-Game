@@ -45,6 +45,10 @@ func TestTreasure_NewTreasure_BuiltinConfig(t *testing.T) {
 				t.Fatal("Expected valid treasure, got nil")
 			}
 
+			if treasure.Type != tt.treasureType {
+				t.Errorf("Expected type %q, got %q", tt.treasureType, treasure.Type)
+			}
+
 			if treasure.Name != tt.expectedName {
 				t.Errorf("Expected name %q, got %q", tt.expectedName, treasure.Name)
 			}
@@ -148,6 +152,10 @@ func TestTreasure_NewTreasureByConfig(t *testing.T) {
 
 			if treasure == nil {
 				t.Fatal("Expected valid treasure, got nil")
+			}
+
+			if treasure.Type != TreasureTypeCustom {
+				t.Errorf("Expected type %q, got %q", TreasureTypeCustom, treasure.Type)
 			}
 
 			// Verify value is within config range

@@ -97,7 +97,7 @@ func TestElixir_NewElixir_CustomConfig(t *testing.T) {
 			name: "Valid custom config",
 			seed: defaultItemsTestSeed,
 			config: ElixirConfig{
-				Type:               ElixirTypeCustom,
+				Type:               "Custom Elixir",
 				StrengthRange:      primitives.AttributeRange{Min: 10, Max: 50},
 				AgilityRange:       primitives.AttributeRange{Min: -5, Max: 15},
 				DurationStepsRange: ElixirDurationStepsRange{Min: 10, Max: 20},
@@ -110,7 +110,7 @@ func TestElixir_NewElixir_CustomConfig(t *testing.T) {
 			name: "Invalid strength range returns error",
 			seed: defaultItemsTestSeed,
 			config: ElixirConfig{
-				Type:               ElixirTypeCustom,
+				Type:               "Invalid Elixir",
 				StrengthRange:      primitives.AttributeRange{Min: 50, Max: 10}, // Min > Max
 				AgilityRange:       primitives.AttributeRange{Min: 0, Max: 10},
 				DurationStepsRange: defaultDurationRange,
@@ -123,7 +123,7 @@ func TestElixir_NewElixir_CustomConfig(t *testing.T) {
 			name: "Invalid agility range returns error",
 			seed: defaultItemsTestSeed,
 			config: ElixirConfig{
-				Type:               ElixirTypeCustom,
+				Type:               "Invalid Elixir",
 				StrengthRange:      primitives.AttributeRange{Min: 0, Max: 10},
 				AgilityRange:       primitives.AttributeRange{Min: 20, Max: 5}, // Min > Max
 				DurationStepsRange: defaultDurationRange,
@@ -136,7 +136,7 @@ func TestElixir_NewElixir_CustomConfig(t *testing.T) {
 			name: "Invalid duration range returns error",
 			seed: defaultItemsTestSeed,
 			config: ElixirConfig{
-				Type:               ElixirTypeCustom,
+				Type:               "Invalid Elixir",
 				StrengthRange:      primitives.AttributeRange{Min: 0, Max: 10},
 				AgilityRange:       primitives.AttributeRange{Min: 0, Max: 10},
 				DurationStepsRange: ElixirDurationStepsRange{Min: 50, Max: 10}, // Min > Max
@@ -170,8 +170,8 @@ func TestElixir_NewElixir_CustomConfig(t *testing.T) {
 				t.Fatal("Expected valid elixir, got nil")
 			}
 
-			if elixir.Type != tt.config.Type {
-				t.Errorf("Expected type %q, got %q", tt.config.Type, elixir.Type)
+			if elixir.Type != ElixirTypeCustom {
+				t.Errorf("Expected type %q, got %q", ElixirTypeCustom, elixir.Type)
 			}
 
 			// Verify attributes are within config ranges
