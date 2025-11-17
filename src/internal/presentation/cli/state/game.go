@@ -117,7 +117,9 @@ func (g *Game) checkCollision(oldPosition primitives.Point2D[int]) bool {
 	if g.checkCollisionInRoom() {
 		return true
 	}
-
+	if g.checkCollisionWithEnemy() {
+		return true
+	}
 	if inPassage, hasCollision := g.checkCollisionInPassage(oldPosition); inPassage {
 		if !hasCollision {
 			return true
@@ -184,6 +186,20 @@ func (g *Game) checkCollisionInPassage(oldPosition primitives.Point2D[int]) (inP
 	}
 
 	return false, false
+}
+
+func (g *Game) checkCollisionWithEnemy() bool {
+	playerPosition := g.player.Character.Shape.Point
+
+	for _, room := range g.level.Rooms {
+		for _, enemy := range room.Enemies {
+			if playerPosition == enemy.Character.Shape.Point {
+				return true
+			}
+		}
+	}
+
+	return false
 }
 
 func (g *Game) eventToAction(event *tcell.EventKey) action.Type {
