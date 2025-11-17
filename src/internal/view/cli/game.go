@@ -24,9 +24,7 @@ func (*Game) SetFieldToScreen(screen tcell.Screen, field [][]common.EntityType, 
 			switch field[y][x] {
 			case common.EntityTypePlayer:
 				ch = '☿' // 🦸
-			case common.EntityTypeHorizontalWall:
-				ch = '⚀'
-			case common.EntityTypeVerticalWall:
+			case common.EntityTypeWall:
 				ch = '⚀'
 			case common.EntityTypePortal:
 				ch = '0'

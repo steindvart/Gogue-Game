@@ -4,8 +4,7 @@ type EntityType int
 
 const (
 	EntityTypePlayer EntityType = iota + 1
-	EntityTypeHorizontalWall
-	EntityTypeVerticalWall
+	EntityTypeWall
 	EntityTypePortal
 	EntityTypePassage
 	EntityTypeDoor

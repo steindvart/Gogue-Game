@@ -354,13 +354,13 @@ func (g *Game) putRoom(room world.Room, finishPortal primitives.Box, field [][]c
 	width := int(room.Shape.Size.Width)
 	height := int(room.Shape.Size.Height)
 	for col := room.Shape.Point.X; col <= room.Shape.Point.X+width; col++ {
-		field[room.Shape.Point.Y][col] = common.EntityTypeHorizontalWall
-		field[room.Shape.Point.Y+height][col] = common.EntityTypeHorizontalWall
+		field[room.Shape.Point.Y][col] = common.EntityTypeWall
+		field[room.Shape.Point.Y+height][col] = common.EntityTypeWall
 	}
 
 	for row := room.Shape.Point.Y; row < room.Shape.Point.Y+height; row++ {
-		field[row][room.Shape.Point.X] = common.EntityTypeVerticalWall
-		field[row][room.Shape.Point.X+width] = common.EntityTypeVerticalWall
+		field[row][room.Shape.Point.X] = common.EntityTypeWall
+		field[row][room.Shape.Point.X+width] = common.EntityTypeWall
 	}
 
 	field[finishPortal.Point.Y][finishPortal.Point.X] = common.EntityTypePortal
