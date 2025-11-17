@@ -54,6 +54,10 @@ func TestFood_NewFood_BuiltinConfig(t *testing.T) {
 				t.Fatal("Expected valid food, got nil")
 			}
 
+			if food.Type != tt.foodType {
+				t.Errorf("Expected type %q, got %q", tt.foodType, food.Type)
+			}
+
 			if food.Name != tt.expectedName {
 				t.Errorf("Expected name %q, got %q", tt.expectedName, food.Name)
 			}
@@ -172,6 +176,10 @@ func TestFood_NewFoodByConfig(t *testing.T) {
 
 			if food == nil {
 				t.Fatal("Expected valid food, got nil")
+			}
+
+			if food.Type != FoodTypeCustom {
+				t.Errorf("Expected type %q, got %q", FoodTypeCustom, food.Type)
 			}
 
 			// Verify attributes are within config ranges

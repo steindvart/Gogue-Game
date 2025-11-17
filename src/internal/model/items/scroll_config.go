@@ -14,6 +14,7 @@ const (
 	ScrollTypeUltimate  ScrollType = "Ultimate"  // +Agility +Strength
 	ScrollTypeMaxHealth ScrollType = "MaxHealth" // +MaxHealth
 	ScrollTypeMystery   ScrollType = "Mystery"   // All random
+	ScrollTypeCustom    ScrollType = "Custom"    // For custom scroll - dynamicly or from external data created
 )
 
 type ScrollConfig struct {

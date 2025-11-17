@@ -55,6 +55,10 @@ func TestWeapon_NewWeapon_BuiltinConfig(t *testing.T) {
 				t.Fatal("Expected valid weapon, got nil")
 			}
 
+			if weapon.Type != tt.weaponType {
+				t.Errorf("Expected type %q, got %q", tt.weaponType, weapon.Type)
+			}
+
 			if weapon.Name != tt.expectedName {
 				t.Errorf("Expected name %q, got %q", tt.expectedName, weapon.Name)
 			}
@@ -159,6 +163,10 @@ func TestWeapon_NewWeapon_CustomConfig(t *testing.T) {
 
 			if weapon == nil {
 				t.Fatal("Expected valid weapon, got nil")
+			}
+
+			if weapon.Type != WeaponTypeCustom {
+				t.Errorf("Expected type %q, got %q", WeaponTypeCustom, weapon.Type)
 			}
 
 			// Verify attributes are within config ranges

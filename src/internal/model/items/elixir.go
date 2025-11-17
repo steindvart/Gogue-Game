@@ -7,6 +7,7 @@ import (
 
 type Elixir struct {
 	*Item
+	Type               ElixirType
 	EffectDuration     uint32 // in steps
 	AffectedAttributes primitives.Attributes
 }
@@ -19,6 +20,7 @@ func NewElixir(rnd *utils.RandomGenerator, box primitives.Box, t ElixirType) *El
 			Shape: box,
 			Name:  string(cfg.Type),
 		},
+		Type:               t,
 		AffectedAttributes: cfg.GenerateAttributes(rnd),
 		EffectDuration:     cfg.GenerateDuration(rnd),
 	}
@@ -34,6 +36,7 @@ func NewElixirByConfig(rnd *utils.RandomGenerator, box primitives.Box, cfg Elixi
 			Shape: box,
 			Name:  string(cfg.Type),
 		},
+		Type:               ElixirTypeCustom,
 		AffectedAttributes: cfg.GenerateAttributes(rnd),
 		EffectDuration:     cfg.GenerateDuration(rnd),
 	}, nil

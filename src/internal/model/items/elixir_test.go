@@ -50,6 +50,10 @@ func TestElixir_NewElixir_BuiltinConfig(t *testing.T) {
 				t.Fatal("Expected valid elixir, got nil")
 			}
 
+			if elixir.Type != tt.elixirType {
+				t.Errorf("Expected type %q, got %q", tt.expectedName, elixir.Type)
+			}
+
 			if elixir.Name != tt.expectedName {
 				t.Errorf("Expected name %q, got %q", tt.expectedName, elixir.Name)
 			}
@@ -164,6 +168,10 @@ func TestElixir_NewElixir_CustomConfig(t *testing.T) {
 
 			if elixir == nil {
 				t.Fatal("Expected valid elixir, got nil")
+			}
+
+			if elixir.Type != ElixirTypeCustom {
+				t.Errorf("Expected type %q, got %q", ElixirTypeCustom, elixir.Type)
 			}
 
 			// Verify attributes are within config ranges

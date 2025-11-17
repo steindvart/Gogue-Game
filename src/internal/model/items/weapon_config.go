@@ -15,6 +15,7 @@ const (
 	WeaponTypeAxe     WeaponType = "Axe"     // Strength: 17...35, Agility: -9...-4
 	WeaponTypeMaul    WeaponType = "Maul"    // Strength: 20...45, Agility: -15...-5
 	WeaponTypeMystery WeaponType = "Mystery" // Strength: 1...50, Agility: -20...20
+	WeaponTypeCustom  WeaponType = "Custom"  // For custom weapon - dynamicly or from external data created
 )
 
 type WeaponConfig struct {

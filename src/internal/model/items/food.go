@@ -7,6 +7,7 @@ import (
 
 type Food struct {
 	*Item
+	Type               FoodType
 	AffectedAttributes primitives.Attributes
 }
 
@@ -18,6 +19,7 @@ func NewFood(rnd *utils.RandomGenerator, box primitives.Box, t FoodType) *Food {
 			Shape: box,
 			Name:  string(cfg.Type),
 		},
+		Type:               t,
 		AffectedAttributes: cfg.GenerateAttributes(rnd),
 	}
 }
@@ -32,6 +34,7 @@ func NewFoodByConfig(rnd *utils.RandomGenerator, box primitives.Box, cfg FoodCon
 			Shape: box,
 			Name:  string(cfg.Type),
 		},
+		Type:               FoodTypeCustom,
 		AffectedAttributes: cfg.GenerateAttributes(rnd),
 	}, nil
 }
