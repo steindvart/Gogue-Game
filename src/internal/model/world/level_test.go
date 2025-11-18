@@ -2,8 +2,10 @@ package world
 
 import (
 	"errors"
+	"fmt"
 	"gogue/internal/model/primitives"
 	"math/rand"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -631,4 +633,84 @@ func TestLevel_GetStartPositionForPlayer(t *testing.T) {
 			t.Errorf("Expected error to contain %q, got %q", wantErrorText, err.Error())
 		}
 	})
+}
+
+func TestLevel_addDoorsAtRoom(t *testing.T) {
+	tests := []struct {
+		name             string
+		twoRoomsIndexes  [2]int
+		doorOne          primitives.Point2D[int]
+		doorTwo          primitives.Point2D[int]
+		wantDoorsInRooms []Room
+		wantErr          error
+	}{
+		{
+			name:            "Add doors to rooms",
+			twoRoomsIndexes: [2]int{0, 1},
+			doorOne:         primitives.Point2D[int]{X: 5, Y: 5},
+			doorTwo:         primitives.Point2D[int]{X: 6, Y: 6},
+			wantDoorsInRooms: []Room{
+				{Doors: []primitives.Point2D[int]{{X: 5, Y: 5}}},
+				{Doors: []primitives.Point2D[int]{{X: 6, Y: 6}}},
+			},
+			wantErr: nil,
+		},
+		{
+			name:            "Add doors to rooms with large indexes",
+			twoRoomsIndexes: [2]int{-3, -1},
+			doorOne:         primitives.Point2D[int]{X: 5, Y: 5},
+			doorTwo:         primitives.Point2D[int]{X: 6, Y: 6},
+			wantErr:         fmt.Errorf("rooms indexes should be in range from 0 to %d", roomsCount-1),
+		},
+		{
+			name:            "Add doors using same room index twice",
+			twoRoomsIndexes: [2]int{10, 20},
+			doorOne:         primitives.Point2D[int]{X: 5, Y: 5},
+			doorTwo:         primitives.Point2D[int]{X: 6, Y: 6},
+			wantErr:         fmt.Errorf("rooms indexes should be in range from 0 to %d", roomsCount-1),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			source := rand.New(rand.NewSource(randomSeedTest))
+			testSize := primitives.Size2D[uint]{Height: 30, Width: 90}
+			level := NewLevel(source)
+			err := level.generateNineRooms(testSize)
+			if err != nil {
+				t.Fatalf("generateNineRooms returned an error: %v", err)
+			}
+
+			err = level.addDoorsAtRoom(tt.twoRoomsIndexes, tt.doorOne, tt.doorTwo)
+
+			if tt.wantErr != nil {
+				if err == nil {
+					t.Errorf("addDoorsAtRoom() expected error %v, but got nil", tt.wantErr)
+					return
+				}
+				if err.Error() != tt.wantErr.Error() {
+					t.Errorf("addDoorsAtRoom() expected error %v, but got %v", tt.wantErr, err)
+					return
+				}
+			} else {
+				if err != nil {
+					t.Errorf("addDoorsAtRoom() expected no error, but got %v", err)
+					return
+				}
+
+				if len(level.Rooms) < 2 {
+					t.Errorf("addDoorsAtRoom() expected at least 2 rooms, but got %d", len(level.Rooms))
+					return
+				}
+
+				if !reflect.DeepEqual(level.Rooms[0].Doors, tt.wantDoorsInRooms[0].Doors) {
+					t.Errorf("addDoorsAtRoom() room 0 doors = %v, want %v", level.Rooms[0].Doors, tt.wantDoorsInRooms[0].Doors)
+				}
+
+				if !reflect.DeepEqual(level.Rooms[1].Doors, tt.wantDoorsInRooms[1].Doors) {
+					t.Errorf("addDoorsAtRoom() room 1 doors = %v, want %v", level.Rooms[1].Doors, tt.wantDoorsInRooms[1].Doors)
+				}
+			}
+		})
+	}
 }

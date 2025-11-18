@@ -182,6 +182,7 @@ func (l *Level) generatePassages() error {
 	for _, connectedRooms := range treeEdges {
 		minIndex, maxIndex := sortByOrderAsc(connectedRooms[0], connectedRooms[1])
 		key := [2]int{minIndex, maxIndex}
+
 		if _, exists := horizontalNeighborRoomsSet[key]; exists {
 			doorOne := getDoorRightWall(l.Rooms[minIndex], l.random)
 			doorTwo := getDoorLeftWall(l.Rooms[maxIndex], l.random)
@@ -190,7 +191,10 @@ func (l *Level) generatePassages() error {
 				return err
 			}
 			l.Passages = append(l.Passages, *passage)
-			l.addDoorsAtRoom(key, doorOne, doorTwo)
+			err = l.addDoorsAtRoom(key, doorOne, doorTwo)
+			if err != nil {
+				return err
+			}
 		}
 		if _, exists := verticalNeighborRoomsSet[key]; exists {
 			doorOne := getDoorDownWall(l.Rooms[minIndex], l.random)
@@ -200,17 +204,27 @@ func (l *Level) generatePassages() error {
 				return err
 			}
 			l.Passages = append(l.Passages, *passage)
-			l.addDoorsAtRoom(key, doorOne, doorTwo)
+			err = l.addDoorsAtRoom(key, doorOne, doorTwo)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
 }
 
-func (l *Level) addDoorsAtRoom(twoRoomsIndexes [2]int, doorOne, doorTwo primitives.Point2D[int]) {
+func (l *Level) addDoorsAtRoom(twoRoomsIndexes [2]int, doorOne, doorTwo primitives.Point2D[int]) error {
+	for _, roomIndex := range twoRoomsIndexes {
+		if roomIndex < 0 || roomIndex > roomsCount-1 {
+			return fmt.Errorf("rooms indexes should be in range from 0 to %d", roomsCount-1)
+		}
+	}
 	roomOneIndex := twoRoomsIndexes[0]
 	l.Rooms[roomOneIndex].Doors = append(l.Rooms[roomOneIndex].Doors, doorOne)
 	roomTwoIndex := twoRoomsIndexes[1]
 	l.Rooms[roomTwoIndex].Doors = append(l.Rooms[roomTwoIndex].Doors, doorTwo)
+
+	return nil
 }
 
 func (l *Level) GetStartPositionForPlayer() (*primitives.Point2D[int], error) {
