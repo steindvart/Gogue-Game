@@ -1,7 +1,7 @@
 package world
 
 import (
-	"gogue/internal/model/entities"
+	// "gogue/internal/model/entities"
 	"gogue/internal/model/items"
 	"gogue/internal/model/primitives"
 	"reflect"
@@ -26,7 +26,7 @@ func TestNewRoom(t *testing.T) {
 				Elixirs: []items.Elixir{},
 				Scrolls: []items.Scroll{},
 				Weapons: []items.Weapon{},
-				Enemies: []entities.Enemy{},
+				// Enemies: []entities.Enemy{},
 			},
 		},
 		{
@@ -40,7 +40,7 @@ func TestNewRoom(t *testing.T) {
 				Elixirs: []items.Elixir{},
 				Scrolls: []items.Scroll{},
 				Weapons: []items.Weapon{},
-				Enemies: []entities.Enemy{},
+				// Enemies: []entities.Enemy{},
 			},
 		},
 		{
@@ -54,7 +54,7 @@ func TestNewRoom(t *testing.T) {
 				Elixirs: []items.Elixir{},
 				Scrolls: []items.Scroll{},
 				Weapons: []items.Weapon{},
-				Enemies: []entities.Enemy{},
+				// Enemies: []entities.Enemy{},
 			},
 		},
 	}

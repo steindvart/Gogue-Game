@@ -1,7 +1,7 @@
 package entities
 
 // import (
-// 	"gogue/internal/model/entity/primitive"
+// 	"gogue/internal/model/primitives"
 // 	"reflect"
 // 	"testing"
 // )
