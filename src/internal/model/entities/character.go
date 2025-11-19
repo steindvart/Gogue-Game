@@ -82,7 +82,6 @@ func (c *Character) removeTemporaryEffectByIndex(idx int) {
 	// Если эффект временный, но воздействие на здоровье было мгновенным, то не отменяем его.
 	// Например, зелье лечения с мгновенным восстановлением здоровья, но временным увеличением силы.
 	// При снятии эффекта здоровье не должно уменьшаться.
-	// Аналогично для урона - мгновенный урон не восстанавливается при снятии эффекта.
 	if e.Duration.Type == primitives.EffectDurationTypeAllTemporaryHealPermanent {
 		e.Attributes.Health = 0
 	}
@@ -103,9 +102,6 @@ func (c *Character) CheckEvasion(rnd utils.RandomSource) bool {
 	const scale = 20.0
 	chance := 1.0 - 1.0/(1.0+c.Attributes.Agility/scale)
 
-	// @todo (Copilot):
-	// Using the global rand.Float64() makes the function non-deterministic and difficult to test.
-	// Consider accepting a *rand.Rand parameter or using a seeded random generator for better testability.
 	roll := rnd.Float64() // Случайное дробное число - [0,1)
 	return roll < chance
 }
