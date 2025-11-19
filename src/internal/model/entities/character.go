@@ -30,6 +30,20 @@ func (c *Character) Attack() float64 {
 	return c.Attributes.Strength
 }
 
+func (c *Character) ProcessTemporaryEffects(steps uint32) {
+	for i, e := range c.TemporaryEffects {
+		if e.Duration.Steps > steps {
+			e.Duration.Steps -= steps
+		} else {
+			e.Duration.Steps = 0
+		}
+
+		if e.Duration.Steps == 0 {
+			c.removeTemporaryEffectByIndex(i)
+		}
+	}
+}
+
 func (c *Character) ApplyEffect(effect *primitives.Effect) {
 	if effect.Duration.Type == primitives.EffectDurationTypeAllTemporary {
 		c.TemporaryEffects = append(c.TemporaryEffects, effect)
@@ -45,20 +59,25 @@ func (c *Character) ApplyEffect(effect *primitives.Effect) {
 func (c *Character) RemoveTemporaryEffect(effect *primitives.Effect) {
 	for i, e := range c.TemporaryEffects {
 		if e == effect {
-			c.TemporaryEffects = append(c.TemporaryEffects[:i], c.TemporaryEffects[i+1:]...)
-
-			// Если эффект временный, но воздействие на здоровье было мгновенным, то не отменяем его.
-			// Например, зелье лечения с мгновенным восстановлением здоровья, но временным увеличением силы.
-			// При снятии эффекта здоровье не должно уменьшаться.
-			// Аналогично для урона - мгновенный урон не восстанавливается при снятии эффекта.
-			if e.Duration.Type == primitives.EffectDurationTypeAllTemporaryHealPermanent {
-				e.Attributes.Health = 0
-			}
-
-			c.Attributes.Affect(e.Attributes.Inverse())
+			c.removeTemporaryEffectByIndex(i)
 			return
 		}
 	}
+}
+
+func (c *Character) removeTemporaryEffectByIndex(idx int) {
+	e := c.TemporaryEffects[idx]
+	c.TemporaryEffects = append(c.TemporaryEffects[:idx], c.TemporaryEffects[idx+1:]...)
+
+	// Если эффект временный, но воздействие на здоровье было мгновенным, то не отменяем его.
+	// Например, зелье лечения с мгновенным восстановлением здоровья, но временным увеличением силы.
+	// При снятии эффекта здоровье не должно уменьшаться.
+	// Аналогично для урона - мгновенный урон не восстанавливается при снятии эффекта.
+	if e.Duration.Type == primitives.EffectDurationTypeAllTemporaryHealPermanent {
+		e.Attributes.Health = 0
+	}
+
+	c.Attributes.Affect(e.Attributes.Inverse())
 }
 
 // Шанс уклонения = 1 - 1/(1 + Agility/scale).
