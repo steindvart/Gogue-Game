@@ -9,13 +9,11 @@ const (
 	IncreaseAttributeMaxPercentage  int = 20
 )
 
-type AttributeType int
+type NotItemError struct{}
 
-const (
-	AttributeTypeMaxHealth AttributeType = iota
-	AttributeTypeAgility
-	AttributeTypeStrength
-)
+func (NotItemError) Error() string {
+	return "the provided value is not an item"
+}
 
 type Type interface {
 	Food | Elixir | Scroll | Weapon
