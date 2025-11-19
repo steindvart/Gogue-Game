@@ -4,11 +4,6 @@ import (
 	"gogue/internal/model/primitives"
 )
 
-const (
-	IncreaseAttributeBaseParcentage int = 5
-	IncreaseAttributeMaxPercentage  int = 20
-)
-
 type NotItemError struct{}
 
 func (NotItemError) Error() string {
