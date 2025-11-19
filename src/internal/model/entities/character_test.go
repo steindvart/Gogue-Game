@@ -18,14 +18,14 @@ func TestCharacter_NewCharacter_BasicInit(t *testing.T) {
 	if c == nil {
 		t.Fatalf("NewCharacter returned nil")
 	}
-	if c.Shape == nil || c.Attributes == nil {
+	if c.Shape == nil {
 		t.Fatalf("Pointers must be initialized: Shape=%v, Attributes=%v", c.Shape, c.Attributes)
 	}
 	if *c.Shape != box {
 		t.Errorf("Shape mismatch: got %+v want %+v", *c.Shape, box)
 	}
-	if *c.Attributes != attrs {
-		t.Errorf("Attributes mismatch: got %+v want %+v", *c.Attributes, attrs)
+	if c.Attributes != attrs {
+		t.Errorf("Attributes mismatch: got %+v want %+v", c.Attributes, attrs)
 	}
 	if c.TemporaryEffects != nil {
 		// In this project we expect nil slice on init (len is 0 anyway)
@@ -140,8 +140,8 @@ func TestCharacter_ApplyEffect_AllPermanent_ClampsHealth(t *testing.T) {
 		primitives.Attributes{MaxHealth: maxHealth, Health: 50, Strength: 10, Agility: 5},
 	)
 	e := &primitives.Effect{
-		Duration:   &primitives.EffectDuration{Type: primitives.EffectDurationTypeAllPermanent, Steps: 0},
-		Attributes: &primitives.Attributes{Health: maxHealth, Strength: 5, Agility: 3},
+		Duration:   primitives.EffectDuration{Type: primitives.EffectDurationTypeAllPermanent, Steps: 0},
+		Attributes: primitives.Attributes{Health: maxHealth, Strength: 5, Agility: 3},
 	}
 
 	c.ApplyEffect(e)
@@ -172,8 +172,8 @@ func TestCharacter_ApplyEffect_AllTemporary_TracksAndMutates(t *testing.T) {
 		primitives.Attributes{MaxHealth: maxHealth, Health: 40, Strength: 2, Agility: 1},
 	)
 	e := &primitives.Effect{
-		Duration:   &primitives.EffectDuration{Type: primitives.EffectDurationTypeAllTemporary, Steps: 5},
-		Attributes: &primitives.Attributes{Health: 70, Strength: 5, Agility: 3},
+		Duration:   primitives.EffectDuration{Type: primitives.EffectDurationTypeAllTemporary, Steps: 5},
+		Attributes: primitives.Attributes{Health: 70, Strength: 5, Agility: 3},
 	}
 
 	c.ApplyEffect(e)
@@ -204,8 +204,8 @@ func TestCharacter_ProcessTemporaryEffects_ExpiresAndRollsBack(t *testing.T) {
 		primitives.Attributes{MaxHealth: 100, Health: 50, Strength: 10, Agility: 1},
 	)
 	e := &primitives.Effect{
-		Duration:   &primitives.EffectDuration{Type: primitives.EffectDurationTypeAllTemporary, Steps: 2},
-		Attributes: &primitives.Attributes{Health: 20, Strength: 5, Agility: 3},
+		Duration:   primitives.EffectDuration{Type: primitives.EffectDurationTypeAllTemporary, Steps: 2},
+		Attributes: primitives.Attributes{Health: 20, Strength: 5, Agility: 3},
 	}
 
 	c.ApplyEffect(e)
@@ -229,8 +229,8 @@ func TestCharacter_RemoveTemporaryEffect_HealPermanent_OthersRevert(t *testing.T
 		primitives.Attributes{MaxHealth: 100, Health: 40, Agility: 2, Strength: 3},
 	)
 	e := &primitives.Effect{
-		Duration:   &primitives.EffectDuration{Type: primitives.EffectDurationTypeAllTemporaryHealPermanent, Steps: 5},
-		Attributes: &primitives.Attributes{Health: 30, Strength: 7, Agility: 11},
+		Duration:   primitives.EffectDuration{Type: primitives.EffectDurationTypeAllTemporaryHealPermanent, Steps: 5},
+		Attributes: primitives.Attributes{Health: 30, Strength: 7, Agility: 11},
 	}
 
 	c.ApplyEffect(e)
@@ -259,12 +259,12 @@ func TestCharacter_ProcessTemporaryEffects_MultipleExpire(t *testing.T) {
 		primitives.Attributes{MaxHealth: 100, Health: 10, Agility: 0, Strength: 0},
 	)
 	e1 := &primitives.Effect{
-		Duration:   &primitives.EffectDuration{Type: primitives.EffectDurationTypeAllTemporary, Steps: 1},
-		Attributes: &primitives.Attributes{Health: 10, Strength: 5},
+		Duration:   primitives.EffectDuration{Type: primitives.EffectDurationTypeAllTemporary, Steps: 1},
+		Attributes: primitives.Attributes{Health: 10, Strength: 5},
 	}
 	e2 := &primitives.Effect{
-		Duration:   &primitives.EffectDuration{Type: primitives.EffectDurationTypeAllTemporary, Steps: 1},
-		Attributes: &primitives.Attributes{Health: 20, Agility: 7},
+		Duration:   primitives.EffectDuration{Type: primitives.EffectDurationTypeAllTemporary, Steps: 1},
+		Attributes: primitives.Attributes{Health: 20, Agility: 7},
 	}
 
 	c.ApplyEffect(e1)

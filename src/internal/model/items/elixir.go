@@ -14,6 +14,7 @@ type Elixir struct {
 func NewElixir(rnd *utils.RandomGenerator, box primitives.Box, t ElixirType) *Elixir {
 	cfg := GetElixirConfig(t)
 
+	// @todo - сделать общий конструктор для непосредственного создания объекта
 	return &Elixir{
 		Item: &Item{
 			Shape: box,

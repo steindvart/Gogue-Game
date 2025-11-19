@@ -7,14 +7,14 @@ import (
 
 type Character struct {
 	Shape            *primitives.Box
-	Attributes       *primitives.Attributes
+	Attributes       primitives.Attributes
 	TemporaryEffects []*primitives.Effect
 }
 
 func NewCharacter(box primitives.Box, attrs primitives.Attributes) *Character {
 	return &Character{
 		Shape:            &box,
-		Attributes:       &attrs,
+		Attributes:       attrs,
 		TemporaryEffects: nil,
 	}
 }
@@ -39,6 +39,7 @@ func (c *Character) Attack() float64 {
 }
 
 func (c *Character) ProcessTemporaryEffects(steps uint32) {
+	// Важно начинать с конца среза, чтобы при удалении не сбивался индекс.
 	for i := len(c.TemporaryEffects) - 1; i >= 0; i-- {
 		e := c.TemporaryEffects[i]
 		if e.Duration.Steps > steps {
@@ -54,11 +55,14 @@ func (c *Character) ProcessTemporaryEffects(steps uint32) {
 }
 
 func (c *Character) ApplyEffect(effect *primitives.Effect) {
+	// @todo - сделать обработку nil значений
+
 	if effect.Duration.Type == primitives.EffectDurationTypeAllTemporary ||
 		effect.Duration.Type == primitives.EffectDurationTypeAllTemporaryHealPermanent {
 		c.TemporaryEffects = append(c.TemporaryEffects, effect)
 	}
 
+	// Apply attribute changes (permanent or immediate part of temporary)
 	c.Attributes.Affect(effect.Attributes)
 
 	if c.Attributes.Health > c.Attributes.MaxHealth {
@@ -67,6 +71,8 @@ func (c *Character) ApplyEffect(effect *primitives.Effect) {
 }
 
 func (c *Character) RemoveTemporaryEffect(effect *primitives.Effect) {
+	// @todo - сделать обработку nil значений
+
 	for i, e := range c.TemporaryEffects {
 		if e == effect {
 			c.removeTemporaryEffectByIndex(i)
