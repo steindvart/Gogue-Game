@@ -7,8 +7,8 @@ import (
 
 type Weapon struct {
 	*Item
-	Type               WeaponType
-	AffectedAttributes primitives.Attributes
+	*primitives.Effect
+	Type WeaponType
 }
 
 func NewWeapon(rnd *utils.RandomGenerator, box primitives.Box, t WeaponType) *Weapon {
@@ -19,8 +19,11 @@ func NewWeapon(rnd *utils.RandomGenerator, box primitives.Box, t WeaponType) *We
 			Shape: box,
 			Name:  string(cfg.Type),
 		},
-		Type:               t,
-		AffectedAttributes: cfg.GenerateAttributes(rnd),
+		Effect: &primitives.Effect{
+			Attributes: cfg.GenerateAttributes(rnd),
+			Duration:   0,
+		},
+		Type: t,
 	}
 }
 
@@ -34,13 +37,16 @@ func NewWeaponByConfig(rnd *utils.RandomGenerator, box primitives.Box, cfg Weapo
 			Shape: box,
 			Name:  string(cfg.Type),
 		},
-		Type:               WeaponTypeCustom,
-		AffectedAttributes: cfg.GenerateAttributes(rnd),
+		Effect: &primitives.Effect{
+			Attributes: cfg.GenerateAttributes(rnd),
+			Duration:   0,
+		},
+		Type: WeaponTypeCustom,
 	}, nil
 }
 
-func (w *Weapon) Use() primitives.Attributes {
-	return w.AffectedAttributes
+func (w *Weapon) Use() *primitives.Effect {
+	return w.Effect
 }
 
 func AsWeapon(item any) *Weapon {

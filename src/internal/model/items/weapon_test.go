@@ -65,16 +65,16 @@ func TestWeapon_NewWeapon_BuiltinConfig(t *testing.T) {
 
 			// Verify attributes match the config's ranges
 			config := GetWeaponConfig(tt.weaponType)
-			if weapon.AffectedAttributes.Strength < config.StrengthRange.Min ||
-				weapon.AffectedAttributes.Strength > config.StrengthRange.Max {
+			if weapon.Effect.Attributes.Strength < config.StrengthRange.Min ||
+				weapon.Effect.Attributes.Strength > config.StrengthRange.Max {
 				t.Errorf("Strength out of config range: got %.2f, want [%.2f, %.2f]",
-					weapon.AffectedAttributes.Strength, config.StrengthRange.Min, config.StrengthRange.Max)
+					weapon.Effect.Attributes.Strength, config.StrengthRange.Min, config.StrengthRange.Max)
 			}
 
-			if weapon.AffectedAttributes.Agility < config.AgilityRange.Min ||
-				weapon.AffectedAttributes.Agility > config.AgilityRange.Max {
+			if weapon.Effect.Attributes.Agility < config.AgilityRange.Min ||
+				weapon.Effect.Attributes.Agility > config.AgilityRange.Max {
 				t.Errorf("Agility out of config range: got %.2f, want [%.2f, %.2f]",
-					weapon.AffectedAttributes.Agility, config.AgilityRange.Min, config.AgilityRange.Max)
+					weapon.Effect.Attributes.Agility, config.AgilityRange.Min, config.AgilityRange.Max)
 			}
 
 			if weapon.Name != string(config.Type) {
@@ -170,16 +170,16 @@ func TestWeapon_NewWeapon_CustomConfig(t *testing.T) {
 			}
 
 			// Verify attributes are within config ranges
-			if weapon.AffectedAttributes.Strength < tt.config.StrengthRange.Min ||
-				weapon.AffectedAttributes.Strength > tt.config.StrengthRange.Max {
+			if weapon.Effect.Attributes.Strength < tt.config.StrengthRange.Min ||
+				weapon.Effect.Attributes.Strength > tt.config.StrengthRange.Max {
 				t.Errorf("Strength out of range: got %.2f, want [%.2f, %.2f]",
-					weapon.AffectedAttributes.Strength, tt.config.StrengthRange.Min, tt.config.StrengthRange.Max)
+					weapon.Effect.Attributes.Strength, tt.config.StrengthRange.Min, tt.config.StrengthRange.Max)
 			}
 
-			if weapon.AffectedAttributes.Agility < tt.config.AgilityRange.Min ||
-				weapon.AffectedAttributes.Agility > tt.config.AgilityRange.Max {
+			if weapon.Effect.Attributes.Agility < tt.config.AgilityRange.Min ||
+				weapon.Effect.Attributes.Agility > tt.config.AgilityRange.Max {
 				t.Errorf("Agility out of range: got %.2f, want [%.2f, %.2f]",
-					weapon.AffectedAttributes.Agility, tt.config.AgilityRange.Min, tt.config.AgilityRange.Max)
+					weapon.Effect.Attributes.Agility, tt.config.AgilityRange.Min, tt.config.AgilityRange.Max)
 			}
 
 			// Verify name matches config type
@@ -226,12 +226,12 @@ func TestWeapon_NewWeapon_Determinism(t *testing.T) {
 			weapon2 := NewWeapon(rng2, box, tt.weaponType)
 
 			// Verify they are identical
-			if weapon1.AffectedAttributes.Strength != weapon2.AffectedAttributes.Strength {
-				t.Errorf("Strength mismatch: %f != %f", weapon1.AffectedAttributes.Strength, weapon2.AffectedAttributes.Strength)
+			if weapon1.Effect.Attributes.Strength != weapon2.Effect.Attributes.Strength {
+				t.Errorf("Strength mismatch: %f != %f", weapon1.Effect.Attributes.Strength, weapon2.Effect.Attributes.Strength)
 			}
 
-			if weapon1.AffectedAttributes.Agility != weapon2.AffectedAttributes.Agility {
-				t.Errorf("Agility mismatch: %f != %f", weapon1.AffectedAttributes.Agility, weapon2.AffectedAttributes.Agility)
+			if weapon1.Effect.Attributes.Agility != weapon2.Effect.Attributes.Agility {
+				t.Errorf("Agility mismatch: %f != %f", weapon1.Effect.Attributes.Agility, weapon2.Effect.Attributes.Agility)
 			}
 		})
 	}
@@ -266,8 +266,8 @@ func TestWeapon_NewWeapon_Randomness(t *testing.T) {
 				rng := utils.NewRandomGeneratorWithSeed(int64(i))
 				weapon := NewWeapon(rng, box, tt.weaponType)
 
-				strengthValues[weapon.AffectedAttributes.Strength] = true
-				agilityValues[weapon.AffectedAttributes.Agility] = true
+				strengthValues[weapon.Effect.Attributes.Strength] = true
+				agilityValues[weapon.Effect.Attributes.Agility] = true
 			}
 
 			// Check that we got varied values (at least 5 different values)
@@ -359,15 +359,15 @@ func TestWeapon_Use(t *testing.T) {
 			box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 			weapon := NewWeapon(rng, box, tt.weaponType)
 
-			attrs := weapon.Use()
+			effect := weapon.Use()
 
 			// Verify returned attributes match stored attributes
-			if attrs.Strength != weapon.AffectedAttributes.Strength {
-				t.Errorf("Expected strength %.2f, got %.2f", weapon.AffectedAttributes.Strength, attrs.Strength)
+			if effect.Attributes.Strength != weapon.Effect.Attributes.Strength {
+				t.Errorf("Expected strength %.2f, got %.2f", weapon.Effect.Attributes.Strength, effect.Attributes.Strength)
 			}
 
-			if attrs.Agility != weapon.AffectedAttributes.Agility {
-				t.Errorf("Expected agility %.2f, got %.2f", weapon.AffectedAttributes.Agility, attrs.Agility)
+			if effect.Attributes.Agility != weapon.Effect.Attributes.Agility {
+				t.Errorf("Expected agility %.2f, got %.2f", weapon.Effect.Attributes.Agility, effect.Attributes.Agility)
 			}
 		})
 	}
@@ -378,13 +378,13 @@ func TestWeapon_UseMultipleTimesIsOk(t *testing.T) {
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 	weapon := NewWeapon(rng, box, WeaponTypeSword)
 
-	attrs1 := weapon.Use()
-	attrs2 := weapon.Use()
+	effect1 := weapon.Use()
+	effect2 := weapon.Use()
 
-	if attrs1.Strength != attrs2.Strength {
+	if effect1.Attributes.Strength != effect2.Attributes.Strength {
 		t.Error("Use() should return consistent attributes on multiple calls")
 	}
-	if attrs1.Agility != attrs2.Agility {
+	if effect1.Attributes.Agility != effect2.Attributes.Agility {
 		t.Error("Use() should return consistent attributes on multiple calls")
 	}
 }
@@ -395,7 +395,9 @@ func TestWeapon_AsWeapon_ValidPointer(t *testing.T) {
 			Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
 			Name:  "Test Weapon",
 		},
-		AffectedAttributes: primitives.Attributes{Strength: 15, Agility: -3},
+		Effect: &primitives.Effect{
+			Attributes: primitives.Attributes{Strength: 15, Agility: -3},
+		},
 	}
 
 	result := AsWeapon(input)
@@ -404,11 +406,11 @@ func TestWeapon_AsWeapon_ValidPointer(t *testing.T) {
 		t.Fatal("Expected non-nil result, got nil")
 	}
 
-	if result.AffectedAttributes.Strength != 15 {
-		t.Errorf("Expected Strength 15, got %f", result.AffectedAttributes.Strength)
+	if result.Effect.Attributes.Strength != 15 {
+		t.Errorf("Expected Strength 15, got %f", result.Effect.Attributes.Strength)
 	}
-	if result.AffectedAttributes.Agility != -3 {
-		t.Errorf("Expected Agility -3, got %f", result.AffectedAttributes.Agility)
+	if result.Effect.Attributes.Agility != -3 {
+		t.Errorf("Expected Agility -3, got %f", result.Effect.Attributes.Agility)
 	}
 	if result != input {
 		t.Error("Expected same pointer to be returned")
@@ -505,7 +507,9 @@ func BenchmarkWeapon_AsWeapon(b *testing.B) {
 			Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
 			Name:  "Test",
 		},
-		AffectedAttributes: primitives.Attributes{Strength: 10},
+		Effect: &primitives.Effect{
+			Attributes: primitives.Attributes{Strength: 10},
+		},
 	}
 
 	b.ResetTimer()
