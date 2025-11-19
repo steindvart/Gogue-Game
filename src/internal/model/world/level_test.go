@@ -638,7 +638,7 @@ func TestLevel_GetStartPositionForPlayer(t *testing.T) {
 func TestLevel_addDoorsAtRoom(t *testing.T) {
 	tests := []struct {
 		name             string
-		twoRoomsIndexes  [2]int
+		twoRoomsIndexes  [2]uint
 		doorOne          primitives.Point2D[int]
 		doorTwo          primitives.Point2D[int]
 		wantDoorsInRooms []Room
@@ -646,7 +646,7 @@ func TestLevel_addDoorsAtRoom(t *testing.T) {
 	}{
 		{
 			name:            "Add doors to rooms",
-			twoRoomsIndexes: [2]int{0, 1},
+			twoRoomsIndexes: [2]uint{0, 1},
 			doorOne:         primitives.Point2D[int]{X: 5, Y: 5},
 			doorTwo:         primitives.Point2D[int]{X: 6, Y: 6},
 			wantDoorsInRooms: []Room{
@@ -656,17 +656,10 @@ func TestLevel_addDoorsAtRoom(t *testing.T) {
 			wantErr: nil,
 		},
 		{
-			name:            "Add doors to rooms with large indexes",
-			twoRoomsIndexes: [2]int{-3, -1},
-			doorOne:         primitives.Point2D[int]{X: 5, Y: 5},
-			doorTwo:         primitives.Point2D[int]{X: 6, Y: 6},
-			wantErr:         fmt.Errorf("rooms indexes should be in range from 0 to %d", roomsCount-1),
-		},
-		{
 			name:            "Add doors using same room index twice",
-			twoRoomsIndexes: [2]int{10, 20},
-			doorOne:         primitives.Point2D[int]{X: 5, Y: 5},
-			doorTwo:         primitives.Point2D[int]{X: 6, Y: 6},
+			twoRoomsIndexes: [2]uint{40, 40},
+			doorOne:         primitives.Point2D[int]{X: 0, Y: 0},
+			doorTwo:         primitives.Point2D[int]{X: 0, Y: 0},
 			wantErr:         fmt.Errorf("rooms indexes should be in range from 0 to %d", roomsCount-1),
 		},
 	}

@@ -17,8 +17,8 @@ import (
 )
 
 const (
-	HeightLevel = 30
-	WidthLevel  = 90
+	LevelHeight = 30
+	LevelWidth  = 90
 )
 
 type Game struct {
@@ -33,7 +33,7 @@ func NewGame() (*Game, error) {
 	source := rand.New(rand.NewSource(time.Now().UnixNano()))
 	level := world.NewLevel(source)
 
-	err := level.GenerateLevel(primitives.Size2D[uint]{Height: HeightLevel, Width: WidthLevel})
+	err := level.GenerateLevel(primitives.Size2D[uint]{Height: LevelHeight, Width: LevelWidth})
 	if err != nil {
 		return nil, err
 	}
@@ -106,15 +106,10 @@ func (g *Game) moveAndGetOldPosition(changingPosition primitives.Point2D[int]) p
 }
 
 func (g *Game) checkCollision(oldPosition primitives.Point2D[int]) bool {
-	playerPosition := g.player.Character.Shape.Point
-
-	if playerPosition.X < 0 || playerPosition.Y < 0 {
+	if g.checkCollisionWithFieldBorders() {
 		return true
 	}
-	if playerPosition.X >= WidthLevel || playerPosition.Y >= HeightLevel {
-		return true
-	}
-	if g.checkCollisionInRoom() {
+	if g.checkCollisionWithWall() {
 		return true
 	}
 	if g.checkCollisionWithEnemy() {
@@ -129,7 +124,18 @@ func (g *Game) checkCollision(oldPosition primitives.Point2D[int]) bool {
 	return false
 }
 
-func (g *Game) checkCollisionInRoom() bool {
+func (g *Game) checkCollisionWithFieldBorders() bool {
+	playerPosition := g.player.Character.Shape.Point
+	if playerPosition.X < 0 || playerPosition.Y < 0 {
+		return true
+	}
+	if playerPosition.X >= LevelWidth || playerPosition.Y >= LevelHeight {
+		return true
+	}
+	return false
+}
+
+func (g *Game) checkCollisionWithWall() bool {
 	playerPosition := g.player.Character.Shape.Point
 
 	for _, room := range g.level.Rooms {

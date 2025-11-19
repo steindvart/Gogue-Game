@@ -191,7 +191,8 @@ func (l *Level) generatePassages() error {
 				return err
 			}
 			l.Passages = append(l.Passages, *passage)
-			err = l.addDoorsAtRoom(key, doorOne, doorTwo)
+			keyAsUint := [2]uint{uint(key[0]), uint(key[1])}
+			err = l.addDoorsAtRoom(keyAsUint, doorOne, doorTwo)
 			if err != nil {
 				return err
 			}
@@ -204,7 +205,8 @@ func (l *Level) generatePassages() error {
 				return err
 			}
 			l.Passages = append(l.Passages, *passage)
-			err = l.addDoorsAtRoom(key, doorOne, doorTwo)
+			keyAsUint := [2]uint{uint(key[0]), uint(key[1])}
+			err = l.addDoorsAtRoom(keyAsUint, doorOne, doorTwo)
 			if err != nil {
 				return err
 			}
@@ -213,9 +215,9 @@ func (l *Level) generatePassages() error {
 	return nil
 }
 
-func (l *Level) addDoorsAtRoom(twoRoomsIndexes [2]int, doorOne, doorTwo primitives.Point2D[int]) error {
+func (l *Level) addDoorsAtRoom(twoRoomsIndexes [2]uint, doorOne, doorTwo primitives.Point2D[int]) error {
 	for _, roomIndex := range twoRoomsIndexes {
-		if roomIndex < 0 || roomIndex > roomsCount-1 {
+		if roomIndex > roomsCount-1 {
 			return fmt.Errorf("rooms indexes should be in range from 0 to %d", roomsCount-1)
 		}
 	}
