@@ -21,7 +21,6 @@ func NewScroll(rnd *utils.RandomGenerator, box primitives.Box, t ScrollType) *Sc
 		},
 		Effect: &primitives.Effect{
 			Attributes: cfg.GenerateAttributes(rnd),
-			Duration:   0,
 		},
 		Type: t,
 	}
@@ -39,7 +38,6 @@ func NewScrollByConfig(rnd *utils.RandomGenerator, box primitives.Box, cfg Scrol
 		},
 		Effect: &primitives.Effect{
 			Attributes: cfg.GenerateAttributes(rnd),
-			Duration:   0,
 		},
 		Type: ScrollTypeCustom,
 	}, nil

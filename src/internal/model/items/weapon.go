@@ -21,7 +21,6 @@ func NewWeapon(rnd *utils.RandomGenerator, box primitives.Box, t WeaponType) *We
 		},
 		Effect: &primitives.Effect{
 			Attributes: cfg.GenerateAttributes(rnd),
-			Duration:   0,
 		},
 		Type: t,
 	}
@@ -39,7 +38,6 @@ func NewWeaponByConfig(rnd *utils.RandomGenerator, box primitives.Box, cfg Weapo
 		},
 		Effect: &primitives.Effect{
 			Attributes: cfg.GenerateAttributes(rnd),
-			Duration:   0,
 		},
 		Type: WeaponTypeCustom,
 	}, nil

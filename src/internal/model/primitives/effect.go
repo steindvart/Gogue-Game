@@ -1,7 +1,18 @@
 package primitives
 
+type EffectDurationType int
+
+const (
+	EffectDurationTypePermanent EffectDurationType = iota
+	EffectDurationTypeTemporary
+)
+
+type EffectDuration struct {
+	Type  EffectDurationType
+	Steps uint32
+}
+
 type Effect struct {
-	// if duration is 0, the effect is instant
-	Duration   uint32 // in steps
+	Duration   *EffectDuration
 	Attributes *Attributes
 }

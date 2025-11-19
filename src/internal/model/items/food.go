@@ -22,7 +22,6 @@ func NewFood(rnd *utils.RandomGenerator, box primitives.Box, t FoodType) *Food {
 		Type: t,
 		Effect: &primitives.Effect{
 			Attributes: cfg.GenerateAttributes(rnd),
-			Duration:   0,
 		},
 	}
 }
@@ -39,7 +38,6 @@ func NewFoodByConfig(rnd *utils.RandomGenerator, box primitives.Box, cfg FoodCon
 		},
 		Effect: &primitives.Effect{
 			Attributes: cfg.GenerateAttributes(rnd),
-			Duration:   0,
 		},
 		Type: FoodTypeCustom,
 	}, nil

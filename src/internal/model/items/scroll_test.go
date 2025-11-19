@@ -680,7 +680,10 @@ func TestScroll_AsScroll_ElixirTypeIsNil(t *testing.T) {
 		},
 		Effect: &primitives.Effect{
 			Attributes: &primitives.Attributes{Strength: 10},
-			Duration:   20,
+			Duration: &primitives.EffectDuration{
+				Type:  primitives.EffectDurationTypeTemporary,
+				Steps: 20,
+			},
 		},
 	}
 
@@ -778,7 +781,6 @@ func BenchmarkScroll_AsScroll(b *testing.B) {
 		},
 		Effect: &primitives.Effect{
 			Attributes: &primitives.Attributes{Strength: 10, Agility: 5, MaxHealth: 15},
-			Duration:   0,
 		},
 	}
 

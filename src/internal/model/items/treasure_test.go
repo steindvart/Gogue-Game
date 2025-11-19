@@ -511,7 +511,10 @@ func TestTreasure_AsTreasure_ElixirTypeIsNil(t *testing.T) {
 		},
 		Effect: &primitives.Effect{
 			Attributes: &primitives.Attributes{Strength: 10},
-			Duration:   20,
+			Duration: &primitives.EffectDuration{
+				Type:  primitives.EffectDurationTypeTemporary,
+				Steps: 20,
+			},
 		},
 	}
 

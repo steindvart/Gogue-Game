@@ -72,10 +72,10 @@ func TestElixir_NewElixir_BuiltinConfig(t *testing.T) {
 					elixir.Effect.Attributes.Agility, config.AgilityRange.Min, config.AgilityRange.Max)
 			}
 
-			if elixir.Effect.Duration < config.DurationStepsRange.Min ||
-				elixir.Effect.Duration > config.DurationStepsRange.Max {
+			if elixir.Duration.Steps < config.DurationStepsRange.Min ||
+				elixir.Duration.Steps > config.DurationStepsRange.Max {
 				t.Errorf("Duration out of config range: got %d, want [%d, %d]",
-					elixir.Effect.Duration, config.DurationStepsRange.Min, config.DurationStepsRange.Max)
+					elixir.Duration.Steps, config.DurationStepsRange.Min, config.DurationStepsRange.Max)
 			}
 
 			if elixir.Name != string(config.Type) {
@@ -187,10 +187,10 @@ func TestElixir_NewElixir_CustomConfig(t *testing.T) {
 					elixir.Effect.Attributes.Agility, tt.config.AgilityRange.Min, tt.config.AgilityRange.Max)
 			}
 
-			if elixir.Effect.Duration < tt.config.DurationStepsRange.Min ||
-				elixir.Effect.Duration > tt.config.DurationStepsRange.Max {
+			if elixir.Duration.Steps < tt.config.DurationStepsRange.Min ||
+				elixir.Duration.Steps > tt.config.DurationStepsRange.Max {
 				t.Errorf("Duration out of range: got %d, want [%d, %d]",
-					elixir.Effect.Duration, tt.config.DurationStepsRange.Min, tt.config.DurationStepsRange.Max)
+					elixir.Duration.Steps, tt.config.DurationStepsRange.Min, tt.config.DurationStepsRange.Max)
 			}
 
 			// Verify name matches config type
@@ -245,8 +245,8 @@ func TestElixir_NewElixir_NoRandom(t *testing.T) {
 				t.Errorf("Agility mismatch: %f != %f", elixir1.Effect.Attributes.Agility, elixir2.Effect.Attributes.Agility)
 			}
 
-			if elixir1.Effect.Duration != elixir2.Effect.Duration {
-				t.Errorf("Duration mismatch: %d != %d", elixir1.Effect.Duration, elixir2.Effect.Duration)
+			if elixir1.Duration.Steps != elixir2.Duration.Steps {
+				t.Errorf("Duration mismatch: %d != %d", elixir1.Duration.Steps, elixir2.Duration.Steps)
 			}
 		})
 	}
@@ -284,7 +284,7 @@ func TestElixir_NewElixir_Randomness(t *testing.T) {
 
 				strengthValues[elixir.Effect.Attributes.Strength] = true
 				agilityValues[elixir.Effect.Attributes.Agility] = true
-				durationValues[elixir.Effect.Duration] = true
+				durationValues[elixir.Duration.Steps] = true
 			}
 
 			// Check that we got varied values (at least 5 different values)
@@ -413,7 +413,10 @@ func TestElixir_AsElixir_ValidPointer(t *testing.T) {
 		},
 		Effect: &primitives.Effect{
 			Attributes: &primitives.Attributes{Strength: 10},
-			Duration:   20,
+			Duration: &primitives.EffectDuration{
+				Type:  primitives.EffectDurationTypeTemporary,
+				Steps: 20,
+			},
 		},
 	}
 
@@ -426,8 +429,8 @@ func TestElixir_AsElixir_ValidPointer(t *testing.T) {
 	if result.Effect.Attributes.Strength != 10 {
 		t.Errorf("Expected Strength 10, got %f", result.Effect.Attributes.Strength)
 	}
-	if result.Effect.Duration != 20 {
-		t.Errorf("Expected Duration 20, got %d", result.Effect.Duration)
+	if result.Duration.Steps != 20 {
+		t.Errorf("Expected Duration 20, got %d", result.Duration.Steps)
 	}
 	if result != input {
 		t.Error("Expected same pointer to be returned")
