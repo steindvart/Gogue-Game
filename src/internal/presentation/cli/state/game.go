@@ -109,7 +109,7 @@ func (g *Game) checkCollision(oldPosition primitives.Point2D[int]) bool {
 	if g.checkCollisionWithFieldBorders() {
 		return true
 	}
-	if g.checkCollisionWithWall() {
+	if g.checkCollisionWithRoomsWall() {
 		return true
 	}
 	if g.checkCollisionWithEnemy() {
@@ -135,7 +135,7 @@ func (g *Game) checkCollisionWithFieldBorders() bool {
 	return false
 }
 
-func (g *Game) checkCollisionWithWall() bool {
+func (g *Game) checkCollisionWithRoomsWall() bool {
 	playerPosition := g.player.Character.Shape.Point
 
 	for _, room := range g.level.Rooms {
