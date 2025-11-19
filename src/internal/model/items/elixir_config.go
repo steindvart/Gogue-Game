@@ -7,13 +7,13 @@ import (
 )
 
 const (
-	ElixirDurationMin    uint32 = 5
-	ElixirMaxDurationMax uint32 = 30
+	ElixirDurationMin uint32 = 5
+	ElixirDurationMax uint32 = 30
 )
 
 type ElixirDurationStepsRange = primitives.Range[uint32]
 
-var defaultDurationRange = ElixirDurationStepsRange{Min: ElixirDurationMin, Max: ElixirMaxDurationMax}
+var defaultDurationRange = ElixirDurationStepsRange{Min: ElixirDurationMin, Max: ElixirDurationMax}
 
 type ElixirType string
 
