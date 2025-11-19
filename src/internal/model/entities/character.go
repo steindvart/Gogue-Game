@@ -2,7 +2,7 @@ package entities
 
 import (
 	"gogue/internal/model/primitives"
-	"math/rand"
+	"gogue/internal/utils"
 )
 
 type Character struct {
@@ -31,7 +31,8 @@ func (c *Character) Attack() float64 {
 }
 
 func (c *Character) ProcessTemporaryEffects(steps uint32) {
-	for i, e := range c.TemporaryEffects {
+	for i := len(c.TemporaryEffects) - 1; i >= 0; i-- {
+		e := c.TemporaryEffects[i]
 		if e.Duration.Steps > steps {
 			e.Duration.Steps -= steps
 		} else {
@@ -45,7 +46,8 @@ func (c *Character) ProcessTemporaryEffects(steps uint32) {
 }
 
 func (c *Character) ApplyEffect(effect *primitives.Effect) {
-	if effect.Duration.Type == primitives.EffectDurationTypeAllTemporary {
+	if effect.Duration.Type == primitives.EffectDurationTypeAllTemporary ||
+		effect.Duration.Type == primitives.EffectDurationTypeAllTemporaryHealPermanent {
 		c.TemporaryEffects = append(c.TemporaryEffects, effect)
 	}
 
@@ -85,7 +87,7 @@ func (c *Character) removeTemporaryEffectByIndex(idx int) {
 // scale регулирует скорость роста. Это обеспечивает баланс между ростом шанса и невозможностью абсолютного уклонения.
 // @todo 1 - сделать настраиваемым scale? Например, для регулировки сложности игры?
 // @todo 2 - сделать сравнение с учётом ловкости атакующего?
-func (c *Character) CheckEvasion() bool {
+func (c *Character) CheckEvasion(rnd utils.RandomSource) bool {
 	if c.Attributes.Agility == 0 {
 		return false
 	}
@@ -96,6 +98,6 @@ func (c *Character) CheckEvasion() bool {
 	// @todo (Copilot):
 	// Using the global rand.Float64() makes the function non-deterministic and difficult to test.
 	// Consider accepting a *rand.Rand parameter or using a seeded random generator for better testability.
-	roll := rand.Float64() // Случайное дробное число - [0,1)
+	roll := rnd.Float64() // Случайное дробное число - [0,1)
 	return roll < chance
 }
