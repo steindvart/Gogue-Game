@@ -11,6 +11,14 @@ type Character struct {
 	TemporaryEffects []*primitives.Effect
 }
 
+func NewCharacter(box primitives.Box, attrs primitives.Attributes) *Character {
+	return &Character{
+		Shape:            &box,
+		Attributes:       &attrs,
+		TemporaryEffects: nil,
+	}
+}
+
 func (c *Character) IsAlive() bool {
 	return c.Attributes.Health > 0
 }

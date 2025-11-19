@@ -9,11 +9,45 @@ import (
 
 const defaultCharacterTestSeed int64 = 42
 
-func newCharacter(box primitives.Box, attrs primitives.Attributes) *Character {
-	return &Character{
-		Shape:            &box,
-		Attributes:       &attrs,
-		TemporaryEffects: nil,
+func TestCharacter_NewCharacter_BasicInit(t *testing.T) {
+	box := primitives.Box{Point: primitives.Point2D[int]{X: 2, Y: 3}, Size: primitives.Size2D[uint]{Width: 1, Height: 2}}
+	attrs := primitives.Attributes{MaxHealth: 100, Health: 50, Strength: 7, Agility: 9}
+
+	c := NewCharacter(box, attrs)
+
+	if c == nil {
+		t.Fatalf("NewCharacter returned nil")
+	}
+	if c.Shape == nil || c.Attributes == nil {
+		t.Fatalf("Pointers must be initialized: Shape=%v, Attributes=%v", c.Shape, c.Attributes)
+	}
+	if *c.Shape != box {
+		t.Errorf("Shape mismatch: got %+v want %+v", *c.Shape, box)
+	}
+	if *c.Attributes != attrs {
+		t.Errorf("Attributes mismatch: got %+v want %+v", *c.Attributes, attrs)
+	}
+	if c.TemporaryEffects != nil {
+		// In this project we expect nil slice on init (len is 0 anyway)
+		t.Errorf("TemporaryEffects should be nil on init, got non-nil len=%d", len(c.TemporaryEffects))
+	}
+}
+
+func TestCharacter_NewCharacter_IndependenceFromArgs(t *testing.T) {
+	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 2, Height: 2}}
+	attrs := primitives.Attributes{MaxHealth: 100, Health: 80, Strength: 10, Agility: 1}
+	c := NewCharacter(box, attrs)
+
+	box.Move(primitives.Point2D[int]{X: 10, Y: 10})
+	attrs.Health = 1
+	attrs.Strength = 0
+	attrs.Agility = 0
+
+	if c.Shape.Point != (primitives.Point2D[int]{X: 5, Y: 5}) {
+		t.Errorf("Shape should be independent from original box; got point=%+v", c.Shape.Point)
+	}
+	if c.Attributes.Health != 80 || c.Attributes.Strength != 10 || c.Attributes.Agility != 1 {
+		t.Errorf("Attributes should be independent: got (H %.1f, S %.1f, A %.1f)", c.Attributes.Health, c.Attributes.Strength, c.Attributes.Agility)
 	}
 }
 
@@ -42,7 +76,7 @@ func TestCharacter_IsAlive(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := newCharacter(
+			c := NewCharacter(
 				primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
 				primitives.Attributes{MaxHealth: 100, Health: tt.health, Agility: 0, Strength: 0},
 			)
@@ -55,7 +89,7 @@ func TestCharacter_IsAlive(t *testing.T) {
 
 func TestCharacter_Move(t *testing.T) {
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Width: 2, Height: 3}}
-	c := newCharacter(box, primitives.Attributes{MaxHealth: 10, Health: 10})
+	c := NewCharacter(box, primitives.Attributes{MaxHealth: 10, Health: 10})
 
 	delta := primitives.Point2D[int]{X: 3, Y: -1}
 	c.Move(delta)
@@ -67,7 +101,7 @@ func TestCharacter_Move(t *testing.T) {
 }
 
 func TestCharacter_TakeDamage(t *testing.T) {
-	c := newCharacter(
+	c := NewCharacter(
 		primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
 		primitives.Attributes{MaxHealth: 100, Health: 10},
 	)
@@ -89,7 +123,7 @@ func TestCharacter_TakeDamage(t *testing.T) {
 }
 
 func TestCharacter_AttackEqualsStrength(t *testing.T) {
-	c := newCharacter(
+	c := NewCharacter(
 		primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
 		primitives.Attributes{MaxHealth: 100, Health: 100, Strength: 17.5},
 	)
@@ -101,7 +135,7 @@ func TestCharacter_AttackEqualsStrength(t *testing.T) {
 func TestCharacter_ApplyEffect_AllPermanent_ClampsHealth(t *testing.T) {
 	const maxHealth = 100
 
-	c := newCharacter(
+	c := NewCharacter(
 		primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
 		primitives.Attributes{MaxHealth: maxHealth, Health: 50, Strength: 10, Agility: 5},
 	)
@@ -133,7 +167,7 @@ func TestCharacter_ApplyEffect_AllPermanent_ClampsHealth(t *testing.T) {
 func TestCharacter_ApplyEffect_AllTemporary_TracksAndMutates(t *testing.T) {
 	const maxHealth = 100
 
-	c := newCharacter(
+	c := NewCharacter(
 		primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
 		primitives.Attributes{MaxHealth: maxHealth, Health: 40, Strength: 2, Agility: 1},
 	)
@@ -165,7 +199,7 @@ func TestCharacter_ApplyEffect_AllTemporary_TracksAndMutates(t *testing.T) {
 }
 
 func TestCharacter_ProcessTemporaryEffects_ExpiresAndRollsBack(t *testing.T) {
-	c := newCharacter(
+	c := NewCharacter(
 		primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
 		primitives.Attributes{MaxHealth: 100, Health: 50, Strength: 10, Agility: 1},
 	)
@@ -190,7 +224,7 @@ func TestCharacter_ProcessTemporaryEffects_ExpiresAndRollsBack(t *testing.T) {
 }
 
 func TestCharacter_RemoveTemporaryEffect_HealPermanent_OthersRevert(t *testing.T) {
-	c := newCharacter(
+	c := NewCharacter(
 		primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
 		primitives.Attributes{MaxHealth: 100, Health: 40, Agility: 2, Strength: 3},
 	)
@@ -220,7 +254,7 @@ func TestCharacter_RemoveTemporaryEffect_HealPermanent_OthersRevert(t *testing.T
 }
 
 func TestCharacter_ProcessTemporaryEffects_MultipleExpire(t *testing.T) {
-	c := newCharacter(
+	c := NewCharacter(
 		primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
 		primitives.Attributes{MaxHealth: 100, Health: 10, Agility: 0, Strength: 0},
 	)
@@ -253,7 +287,7 @@ func TestCharacter_ProcessTemporaryEffects_MultipleExpire(t *testing.T) {
 }
 
 func TestCharacter_CheckEvasion_ZeroAgilityAlwaysFalse(t *testing.T) {
-	c := newCharacter(
+	c := NewCharacter(
 		primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
 		primitives.Attributes{MaxHealth: 100, Health: 100, Agility: 0, Strength: 0},
 	)
@@ -266,7 +300,7 @@ func TestCharacter_CheckEvasion_ZeroAgilityAlwaysFalse(t *testing.T) {
 }
 
 func TestCharacter_CheckEvasion_HighAgilityMostlyTrueWithSeed(t *testing.T) {
-	c := newCharacter(
+	c := NewCharacter(
 		primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
 		primitives.Attributes{MaxHealth: 100, Health: 100, Agility: 380, Strength: 0}, // ~95% chance
 	)
@@ -285,7 +319,7 @@ func TestCharacter_CheckEvasion_HighAgilityMostlyTrueWithSeed(t *testing.T) {
 }
 
 func TestCharacter_CheckEvasion_NoRandom(t *testing.T) {
-	c := newCharacter(
+	c := NewCharacter(
 		primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
 		primitives.Attributes{MaxHealth: 100, Health: 100, Agility: 380, Strength: 0}, // ~95% chance
 	)
