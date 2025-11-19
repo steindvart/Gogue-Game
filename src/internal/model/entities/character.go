@@ -6,8 +6,8 @@ import (
 )
 
 type Character struct {
-	Shape            primitives.Box
-	Attributes       primitives.Attributes
+	Shape            *primitives.Box
+	Attributes       *primitives.Attributes
 	TemporaryEffects []*primitives.Effect
 }
 
