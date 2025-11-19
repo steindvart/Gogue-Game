@@ -26,33 +26,35 @@ func (c *Character) TakeDamage(damage float64) {
 	}
 }
 
-func (c *Character) Heal(amount float64) {
-	c.Attributes.Health += amount
-	if c.Attributes.Health > c.Attributes.MaxHealth {
-		c.Attributes.Health = c.Attributes.MaxHealth
-	}
-}
-
 func (c *Character) Attack() float64 {
 	return c.Attributes.Strength
 }
 
 func (c *Character) ApplyEffect(effect *primitives.Effect) {
-	if effect.Duration.Type == primitives.EffectDurationTypeTemporary {
+	if effect.Duration.Type == primitives.EffectDurationTypeAllTemporary {
 		c.TemporaryEffects = append(c.TemporaryEffects, effect)
 	}
 
 	c.Attributes.Affect(effect.Attributes)
+
+	if c.Attributes.Health > c.Attributes.MaxHealth {
+		c.Attributes.Health = c.Attributes.MaxHealth
+	}
 }
 
 func (c *Character) RemoveTemporaryEffect(effect *primitives.Effect) {
-	if effect.Duration.Type != primitives.EffectDurationTypeTemporary {
-		return
-	}
-
 	for i, e := range c.TemporaryEffects {
 		if e == effect {
 			c.TemporaryEffects = append(c.TemporaryEffects[:i], c.TemporaryEffects[i+1:]...)
+
+			// Если эффект временный, но воздействие на здоровье было мгновенным, то не отменяем его.
+			// Например, зелье лечения с мгновенным восстановлением здоровья, но временным увеличением силы.
+			// При снятии эффекта здоровье не должно уменьшаться.
+			// Аналогично для урона - мгновенный урон не восстанавливается при снятии эффекта.
+			if e.Duration.Type == primitives.EffectDurationTypeAllTemporaryHealPermanent {
+				e.Attributes.Health = 0
+			}
+
 			c.Attributes.Affect(e.Attributes.Inverse())
 			return
 		}
