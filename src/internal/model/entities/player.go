@@ -7,20 +7,26 @@ import (
 
 type Player struct {
 	*Character
-	Experience     uint
-	CharacterLevel uint
 	*items.Backpack
 	*items.Weapon
+	Experience     uint
+	CharacterLevel uint
 }
 
-func (p *Player) Attack() float64 {
-	damage := 0.0
-	if p.Weapon != nil {
-		damage += p.Weapon.Effect.Attributes.Strength
-	}
+func (p *Player) EquipWeapon(w *items.Weapon) {
+	p.Weapon = w
+	p.ApplyEffect(w.Effect)
+}
 
-	damage += p.Character.Attack()
-	return damage
+func (p *Player) UnequipWeapon() *items.Weapon {
+	w := p.Weapon
+	if w != nil {
+		p.ApplyEffect(&primitives.Effect{
+			Attributes: w.Effect.Attributes.Inverse(),
+		})
+		p.Weapon = nil
+	}
+	return w
 }
 
 func NewPlayer(box primitives.Box) *Player {
