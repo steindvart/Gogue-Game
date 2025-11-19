@@ -6,9 +6,9 @@ import (
 )
 
 type Character struct {
-	Shape      primitives.Box
-	Attributes primitives.Attributes
-	Effects    []*primitives.Effect
+	Shape            primitives.Box
+	Attributes       primitives.Attributes
+	TemporaryEffects []*primitives.Effect
 }
 
 func (c *Character) IsAlive() bool {
@@ -38,23 +38,21 @@ func (c *Character) Attack() float64 {
 }
 
 func (c *Character) ApplyEffect(effect *primitives.Effect) {
-	if effect.Duration.Type == primitives.EffectDurationTypePermanent {
-		c.Attributes.Affect(effect.Attributes)
-		return
+	if effect.Duration.Type == primitives.EffectDurationTypeTemporary {
+		c.TemporaryEffects = append(c.TemporaryEffects, effect)
 	}
 
-	c.Effects = append(c.Effects, effect)
 	c.Attributes.Affect(effect.Attributes)
 }
 
-func (c *Character) RemoveEffect(effect *primitives.Effect) {
-	if effect.Duration.Type == primitives.EffectDurationTypePermanent {
+func (c *Character) RemoveTemporaryEffect(effect *primitives.Effect) {
+	if effect.Duration.Type != primitives.EffectDurationTypeTemporary {
 		return
 	}
 
-	for i, e := range c.Effects {
+	for i, e := range c.TemporaryEffects {
 		if e == effect {
-			c.Effects = append(c.Effects[:i], c.Effects[i+1:]...)
+			c.TemporaryEffects = append(c.TemporaryEffects[:i], c.TemporaryEffects[i+1:]...)
 			c.Attributes.Affect(e.Attributes.Inverse())
 			return
 		}
