@@ -412,7 +412,7 @@ func TestElixir_AsElixir_ValidPointer(t *testing.T) {
 			Name:  "Test Elixir",
 		},
 		Effect: &primitives.Effect{
-			Attributes: primitives.Attributes{Strength: 10},
+			Attributes: &primitives.Attributes{Strength: 10},
 			Duration:   20,
 		},
 	}

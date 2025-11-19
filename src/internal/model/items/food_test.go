@@ -415,7 +415,7 @@ func TestFood_AsFood_ValidPointer(t *testing.T) {
 			Name:  "Test Food",
 		},
 		Effect: &primitives.Effect{
-			Attributes: primitives.Attributes{Health: 25},
+			Attributes: &primitives.Attributes{Health: 25},
 		},
 	}
 
@@ -470,7 +470,7 @@ func TestFood_AsFood_ElixirTypeIsNil(t *testing.T) {
 			Name:  "Test Elixir",
 		},
 		Effect: &primitives.Effect{
-			Attributes: primitives.Attributes{Strength: 10},
+			Attributes: &primitives.Attributes{Strength: 10},
 			Duration:   20,
 		},
 	}
@@ -537,7 +537,7 @@ func BenchmarkFood_AsFood(b *testing.B) {
 			Name:  "Test Food",
 		},
 		Effect: &primitives.Effect{
-			Attributes: primitives.Attributes{Health: 25},
+			Attributes: &primitives.Attributes{Health: 25},
 		},
 	}
 

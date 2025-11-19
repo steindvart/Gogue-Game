@@ -396,7 +396,7 @@ func TestWeapon_AsWeapon_ValidPointer(t *testing.T) {
 			Name:  "Test Weapon",
 		},
 		Effect: &primitives.Effect{
-			Attributes: primitives.Attributes{Strength: 15, Agility: -3},
+			Attributes: &primitives.Attributes{Strength: 15, Agility: -3},
 		},
 	}
 
@@ -508,7 +508,7 @@ func BenchmarkWeapon_AsWeapon(b *testing.B) {
 			Name:  "Test",
 		},
 		Effect: &primitives.Effect{
-			Attributes: primitives.Attributes{Strength: 10},
+			Attributes: &primitives.Attributes{Strength: 10},
 		},
 	}
 

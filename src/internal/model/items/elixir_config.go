@@ -80,8 +80,8 @@ func GetElixirConfig(t ElixirType) ElixirConfig {
 	return ElixirRegistry[ElixirTypeMystery]
 }
 
-func (cfg *ElixirConfig) GenerateAttributes(rng *utils.RandomGenerator) primitives.Attributes {
-	return primitives.Attributes{
+func (cfg *ElixirConfig) GenerateAttributes(rng *utils.RandomGenerator) *primitives.Attributes {
+	return &primitives.Attributes{
 		Strength: float64(utils.RandomRoundedFloatInRange(rng, cfg.StrengthRange.Min, cfg.StrengthRange.Max)),
 		Agility:  float64(utils.RandomRoundedFloatInRange(rng, cfg.AgilityRange.Min, cfg.AgilityRange.Max)),
 	}

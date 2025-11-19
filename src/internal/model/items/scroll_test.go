@@ -619,7 +619,7 @@ func TestScroll_AsScroll_ValidPointer(t *testing.T) {
 			Name:  "Test Scroll",
 		},
 		Effect: &primitives.Effect{
-			Attributes: primitives.Attributes{Strength: 10, Agility: 5, MaxHealth: 15},
+			Attributes: &primitives.Attributes{Strength: 10, Agility: 5, MaxHealth: 15},
 		},
 	}
 
@@ -679,7 +679,7 @@ func TestScroll_AsScroll_ElixirTypeIsNil(t *testing.T) {
 			Name:  "Test Elixir",
 		},
 		Effect: &primitives.Effect{
-			Attributes: primitives.Attributes{Strength: 10},
+			Attributes: &primitives.Attributes{Strength: 10},
 			Duration:   20,
 		},
 	}
@@ -698,7 +698,7 @@ func TestScroll_AsScroll_FoodTypeIsNil(t *testing.T) {
 			Name:  "Test Food",
 		},
 		Effect: &primitives.Effect{
-			Attributes: primitives.Attributes{Health: 25},
+			Attributes: &primitives.Attributes{Health: 25},
 		},
 	}
 
@@ -777,7 +777,7 @@ func BenchmarkScroll_AsScroll(b *testing.B) {
 			Name:  "Test Scroll",
 		},
 		Effect: &primitives.Effect{
-			Attributes: primitives.Attributes{Strength: 10, Agility: 5, MaxHealth: 15},
+			Attributes: &primitives.Attributes{Strength: 10, Agility: 5, MaxHealth: 15},
 			Duration:   0,
 		},
 	}
