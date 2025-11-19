@@ -38,11 +38,20 @@ func (c *Character) Attack() float64 {
 }
 
 func (c *Character) ApplyEffect(effect *primitives.Effect) {
+	if effect.Duration.Type == primitives.EffectDurationTypePermanent {
+		c.Attributes.Affect(effect.Attributes)
+		return
+	}
+
 	c.Effects = append(c.Effects, effect)
 	c.Attributes.Affect(effect.Attributes)
 }
 
 func (c *Character) RemoveEffect(effect *primitives.Effect) {
+	if effect.Duration.Type == primitives.EffectDurationTypePermanent {
+		return
+	}
+
 	for i, e := range c.Effects {
 		if e == effect {
 			c.Effects = append(c.Effects[:i], c.Effects[i+1:]...)
