@@ -8,6 +8,7 @@ import (
 type Character struct {
 	Shape      primitives.Box
 	Attributes primitives.Attributes
+	Effects    []primitives.Effect
 }
 
 func (c *Character) IsAlive() bool {
