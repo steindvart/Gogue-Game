@@ -509,8 +509,10 @@ func TestTreasure_AsTreasure_ElixirTypeIsNil(t *testing.T) {
 			Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
 			Name:  "Test Elixir",
 		},
-		AffectedAttributes: primitives.Attributes{Strength: 10},
-		EffectDuration:     20,
+		Effect: &primitives.Effect{
+			Attributes: primitives.Attributes{Strength: 10},
+			Duration:   20,
+		},
 	}
 
 	result := AsTreasure(input)
@@ -526,7 +528,9 @@ func TestTreasure_AsTreasure_FoodTypeIsNil(t *testing.T) {
 			Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
 			Name:  "Test Food",
 		},
-		AffectedAttributes: primitives.Attributes{Health: 25},
+		Effect: &primitives.Effect{
+			Attributes: primitives.Attributes{Health: 25},
+		},
 	}
 
 	result := AsTreasure(input)
@@ -542,7 +546,9 @@ func TestTreasure_AsTreasure_ScrollTypeIsNil(t *testing.T) {
 			Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
 			Name:  "Test Scroll",
 		},
-		AffectedAttributes: primitives.Attributes{Strength: 5, Agility: 5, MaxHealth: 10},
+		Effect: &primitives.Effect{
+			Attributes: primitives.Attributes{Strength: 5, Agility: 5, MaxHealth: 10},
+		},
 	}
 
 	result := AsTreasure(input)
