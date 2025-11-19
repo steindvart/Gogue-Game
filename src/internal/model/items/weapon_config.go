@@ -71,8 +71,8 @@ func GetWeaponConfig(t WeaponType) WeaponConfig {
 	return WeaponRegistry[WeaponTypeMystery]
 }
 
-func (cfg WeaponConfig) GenerateAttributes(rnd *utils.RandomGenerator) *primitives.Attributes {
-	return &primitives.Attributes{
+func (cfg WeaponConfig) GenerateAttributes(rnd *utils.RandomGenerator) primitives.Attributes {
+	return primitives.Attributes{
 		Strength: float64(utils.RandomRoundedFloatInRange(rnd, cfg.StrengthRange.Min, cfg.StrengthRange.Max)),
 		Agility:  float64(utils.RandomRoundedFloatInRange(rnd, cfg.AgilityRange.Min, cfg.AgilityRange.Max)),
 	}

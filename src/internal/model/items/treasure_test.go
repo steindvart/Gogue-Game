@@ -510,8 +510,8 @@ func TestTreasure_AsTreasure_ElixirTypeIsNil(t *testing.T) {
 			Name:  "Test Elixir",
 		},
 		Effect: &primitives.Effect{
-			Attributes: &primitives.Attributes{Strength: 10},
-			Duration: &primitives.EffectDuration{
+			Attributes: primitives.Attributes{Strength: 10},
+			Duration: primitives.EffectDuration{
 				Type:  primitives.EffectDurationTypeAllTemporary,
 				Steps: 20,
 			},
@@ -532,7 +532,7 @@ func TestTreasure_AsTreasure_FoodTypeIsNil(t *testing.T) {
 			Name:  "Test Food",
 		},
 		Effect: &primitives.Effect{
-			Attributes: &primitives.Attributes{Health: 25},
+			Attributes: primitives.Attributes{Health: 25},
 		},
 	}
 
@@ -550,7 +550,7 @@ func TestTreasure_AsTreasure_ScrollTypeIsNil(t *testing.T) {
 			Name:  "Test Scroll",
 		},
 		Effect: &primitives.Effect{
-			Attributes: &primitives.Attributes{Strength: 5, Agility: 5, MaxHealth: 10},
+			Attributes: primitives.Attributes{Strength: 5, Agility: 5, MaxHealth: 10},
 		},
 	}
 

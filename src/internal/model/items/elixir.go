@@ -20,7 +20,7 @@ func NewElixir(rnd *utils.RandomGenerator, box primitives.Box, t ElixirType) *El
 			Name:  string(cfg.Type),
 		},
 		Effect: &primitives.Effect{
-			Duration: &primitives.EffectDuration{
+			Duration: primitives.EffectDuration{
 				Type:  primitives.EffectDurationTypeAllTemporaryHealPermanent,
 				Steps: cfg.GenerateDuration(rnd),
 			},
@@ -41,7 +41,7 @@ func NewElixirByConfig(rnd *utils.RandomGenerator, box primitives.Box, cfg Elixi
 			Name:  string(cfg.Type),
 		},
 		Effect: &primitives.Effect{
-			Duration: &primitives.EffectDuration{
+			Duration: primitives.EffectDuration{
 				Type:  primitives.EffectDurationTypeAllTemporaryHealPermanent,
 				Steps: cfg.GenerateDuration(rnd),
 			},

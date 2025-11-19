@@ -11,15 +11,15 @@ type Attributes struct {
 	MaxHealth, Health, Agility, Strength float64
 }
 
-func (a *Attributes) Affect(delta *Attributes) {
+func (a *Attributes) Affect(delta Attributes) {
 	a.MaxHealth += delta.MaxHealth
 	a.Health += delta.Health
 	a.Agility += delta.Agility
 	a.Strength += delta.Strength
 }
 
-func (a *Attributes) Inverse() *Attributes {
-	return &Attributes{
+func (a *Attributes) Inverse() Attributes {
+	return Attributes{
 		MaxHealth: -a.MaxHealth,
 		Health:    -a.Health,
 		Agility:   -a.Agility,

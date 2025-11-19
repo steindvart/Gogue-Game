@@ -14,6 +14,6 @@ type EffectDuration struct {
 }
 
 type Effect struct {
-	Duration   *EffectDuration
-	Attributes *Attributes
+	Duration   EffectDuration
+	Attributes Attributes
 }
