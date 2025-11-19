@@ -29,3 +29,12 @@ func (a *Attributes) Affect(delta *Attributes) {
 	a.Agility += delta.Agility
 	a.Strength += delta.Strength
 }
+
+func (a *Attributes) Inverse() *Attributes {
+	return &Attributes{
+		MaxHealth: -a.MaxHealth,
+		Health:    -a.Health,
+		Agility:   -a.Agility,
+		Strength:  -a.Strength,
+	}
+}

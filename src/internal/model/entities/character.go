@@ -8,7 +8,7 @@ import (
 type Character struct {
 	Shape      primitives.Box
 	Attributes primitives.Attributes
-	Effects    []primitives.Effect
+	Effects    []*primitives.Effect
 }
 
 func (c *Character) IsAlive() bool {
@@ -35,6 +35,21 @@ func (c *Character) Heal(amount float64) {
 
 func (c *Character) Attack() float64 {
 	return c.Attributes.Strength
+}
+
+func (c *Character) ApplyEffect(effect *primitives.Effect) {
+	c.Effects = append(c.Effects, effect)
+	c.Attributes.Affect(effect.Attributes)
+}
+
+func (c *Character) RemoveEffect(effect *primitives.Effect) {
+	for i, e := range c.Effects {
+		if e == effect {
+			c.Effects = append(c.Effects[:i], c.Effects[i+1:]...)
+			c.Attributes.Affect(e.Attributes.Inverse())
+			return
+		}
+	}
 }
 
 // Шанс уклонения = 1 - 1/(1 + Agility/scale).
