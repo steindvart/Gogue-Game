@@ -13,7 +13,26 @@ type Player struct {
 	CharacterLevel uint
 }
 
+func NewPlayer(box *primitives.Box) *Player {
+	return &Player{
+		Character: &Character{
+			Shape: box,
+			Attributes: primitives.Attributes{
+				Health:    100,
+				MaxHealth: 100,
+				Strength:  10,
+				Agility:   5,
+			},
+		},
+		Experience:     0,
+		CharacterLevel: 1,
+		Backpack:       items.NewBackpack(),
+		Weapon:         nil,
+	}
+}
+
 func (p *Player) EquipWeapon(w *items.Weapon) {
+	// @todo - сделать обработку случая когда уже есть экипированный предмет
 	p.Weapon = w
 	p.ApplyEffect(w.Effect)
 }
@@ -27,22 +46,4 @@ func (p *Player) UnequipWeapon() *items.Weapon {
 		p.Weapon = nil
 	}
 	return w
-}
-
-func NewPlayer(box *primitives.Box) *Player {
-	return &Player{
-		Character: &Character{
-			Shape: box,
-			Attributes: &primitives.Attributes{
-				Health:    100,
-				MaxHealth: 100,
-				Strength:  10,
-				Agility:   5,
-			},
-		},
-		Experience:     0,
-		CharacterLevel: 1,
-		Backpack:       items.NewBackpack(),
-		Weapon:         nil,
-	}
 }
