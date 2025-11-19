@@ -3,8 +3,9 @@ package primitives
 type EffectDurationType int
 
 const (
-	EffectDurationTypePermanent EffectDurationType = iota
-	EffectDurationTypeTemporary
+	EffectDurationTypeAllPermanent EffectDurationType = iota
+	EffectDurationTypeAllTemporaryHealPermanent
+	EffectDurationTypeAllTemporary
 )
 
 type EffectDuration struct {
