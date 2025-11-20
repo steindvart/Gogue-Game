@@ -16,6 +16,11 @@ import (
 	"github.com/rivo/tview"
 )
 
+const (
+	LevelHeight = 30
+	LevelWidth  = 90
+)
+
 type Game struct {
 	player *entities.Player
 	level  *world.Level
@@ -24,10 +29,11 @@ type Game struct {
 }
 
 func NewGame() (*Game, error) {
+	// @todo - выделить отрисовку в отдельный файл в view/cli
 	source := rand.New(rand.NewSource(time.Now().UnixNano()))
 	level := world.NewLevel(source)
 
-	err := level.GenerateLevel(primitives.Size2D[uint]{Height: 30, Width: 90})
+	err := level.GenerateLevel(primitives.Size2D[uint]{Height: LevelHeight, Width: LevelWidth})
 	if err != nil {
 		return nil, err
 	}
@@ -57,41 +63,149 @@ func NewGame() (*Game, error) {
 		return x, y, width, height
 	})
 
+	movement := map[action.Type]primitives.Point2D[int]{
+		action.MoveUp:               {X: 0, Y: -1},
+		action.MoveDown:             {X: 0, Y: 1},
+		action.MoveLeft:             {X: -1, Y: 0},
+		action.MoveRight:            {X: 1, Y: 0},
+		action.MoveLeftUpperCorner:  {X: -1, Y: -1},
+		action.MoveRightUpperCorner: {X: 1, Y: -1},
+		action.MoveLefLowerCorner:   {X: -1, Y: 1},
+		action.MoveRightLowerCorner: {X: 1, Y: 1},
+	}
 	game.view.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch game.eventToAction(event) {
-		case action.MoveUp:
-			game.player.Character.Shape.Move(primitives.Point2D[int]{X: 0, Y: -1})
-			return nil
-		case action.MoveDown:
-			game.player.Character.Shape.Move(primitives.Point2D[int]{X: 0, Y: 1})
-			return nil
-		case action.MoveLeft:
-			game.player.Character.Shape.Move(primitives.Point2D[int]{X: -1, Y: 0})
-			return nil
-		case action.MoveRight:
-			game.player.Character.Shape.Move(primitives.Point2D[int]{X: 1, Y: 0})
-			return nil
-		case action.MoveLeftUpperCorner:
-			game.player.Character.Shape.Move(primitives.Point2D[int]{X: -1, Y: -1})
-			return nil
-		case action.MoveRightUpperCorner:
-			game.player.Character.Shape.Move(primitives.Point2D[int]{X: 1, Y: -1})
-			return nil
-		case action.MoveLefLowerCorner:
-			game.player.Character.Shape.Move(primitives.Point2D[int]{X: -1, Y: 1})
-			return nil
-		case action.MoveRightLowerCorner:
-			game.player.Character.Shape.Move(primitives.Point2D[int]{X: 1, Y: 1})
-			return nil
+		case action.MoveUp,
+			action.MoveDown,
+			action.MoveLeft,
+			action.MoveRight,
+			action.MoveLeftUpperCorner,
+			action.MoveRightUpperCorner,
+			action.MoveLefLowerCorner,
+			action.MoveRightLowerCorner:
+			oldPosition := game.moveAndGetOldPosition(movement[game.eventToAction(event)])
+			if game.checkCollision(oldPosition) {
+				game.player.Character.Shape.Point = oldPosition
+			}
 		case action.Exit:
 			game.signal = signals.Stop
 			return nil
 		default:
 			return event
 		}
+		return nil
 	})
 
 	return &game, nil
+}
+
+func (g *Game) moveAndGetOldPosition(changingPosition primitives.Point2D[int]) primitives.Point2D[int] {
+	oldPosition := g.player.Character.Shape.Point
+	g.player.Character.Shape.Move(changingPosition)
+	return oldPosition
+}
+
+func (g *Game) checkCollision(oldPosition primitives.Point2D[int]) bool {
+	if g.checkCollisionWithFieldBorders() {
+		return true
+	}
+	if g.checkCollisionWithRoomsWall() {
+		return true
+	}
+	if g.checkCollisionWithEnemy() {
+		return true
+	}
+	if inPassage, hasCollision := g.checkCollisionInPassage(oldPosition); inPassage {
+		if !hasCollision {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (g *Game) checkCollisionWithFieldBorders() bool {
+	playerPosition := g.player.Character.Shape.Point
+	if playerPosition.X < 0 || playerPosition.Y < 0 {
+		return true
+	}
+	if playerPosition.X >= LevelWidth || playerPosition.Y >= LevelHeight {
+		return true
+	}
+	return false
+}
+
+func (g *Game) checkCollisionWithRoomsWall() bool {
+	playerPosition := g.player.Character.Shape.Point
+
+	for _, room := range g.level.Rooms {
+		if isPlayerInWall(playerPosition, room) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func isPlayerInWall(pos primitives.Point2D[int], room world.Room) bool {
+	roomX := room.Shape.Point.X
+	roomY := room.Shape.Point.Y
+	roomWidth := int(room.Shape.Size.Width)
+	roomHeight := int(room.Shape.Size.Height)
+
+	for _, door := range room.Doors {
+		if pos == door {
+			return false
+		}
+	}
+
+	if pos.Y == roomY || pos.Y == roomY+roomHeight {
+		return pos.X >= roomX && pos.X <= roomX+roomWidth
+	}
+	if pos.X == roomX || pos.X == roomX+roomWidth {
+		return pos.Y >= roomY && pos.Y <= roomY+roomHeight
+	}
+
+	return false
+}
+
+func (g *Game) checkCollisionInPassage(oldPosition primitives.Point2D[int]) (inPassage bool, hasCollision bool) {
+	playerPosition := g.player.Character.Shape.Point
+
+	for _, passages := range g.level.Passages {
+		for _, passagePoint := range passages.Passage {
+			if playerPosition == passagePoint {
+				return true, true
+			}
+		}
+		if playerPosition == passages.DoorOne || playerPosition == passages.DoorTwo {
+			return true, true
+		}
+	}
+
+	for _, passages := range g.level.Passages {
+		for _, passagePoint := range passages.Passage {
+			if oldPosition == passagePoint {
+				return true, false
+			}
+		}
+	}
+
+	return false, false
+}
+
+func (g *Game) checkCollisionWithEnemy() bool {
+	playerPosition := g.player.Character.Shape.Point
+
+	for _, room := range g.level.Rooms {
+		for _, enemy := range room.Enemies {
+			if playerPosition == enemy.Character.Shape.Point {
+				return true
+			}
+		}
+	}
+
+	return false
 }
 
 func (g *Game) eventToAction(event *tcell.EventKey) action.Type {
@@ -243,14 +357,16 @@ func (g *Game) putEnemies(room world.Room, field [][]common.EntityType) {
 
 // Тут можно класть только lvl, так как room я получаю из него же шагом выше, а могу и тут
 func (g *Game) putRoom(room world.Room, finishPortal primitives.Box, field [][]common.EntityType) {
-	for column := room.Shape.Point.X; column < room.Shape.Point.X+int(room.Shape.Size.Width); column++ {
-		field[room.Shape.Point.Y][column] = common.EntityTypeHorizontalWall
-		field[room.Shape.Point.Y+int(room.Shape.Size.Height)][column] = common.EntityTypeHorizontalWall
+	width := int(room.Shape.Size.Width)
+	height := int(room.Shape.Size.Height)
+	for col := room.Shape.Point.X; col <= room.Shape.Point.X+width; col++ {
+		field[room.Shape.Point.Y][col] = common.EntityTypeWall
+		field[room.Shape.Point.Y+height][col] = common.EntityTypeWall
 	}
 
-	for row := room.Shape.Point.Y; row < room.Shape.Point.Y+int(room.Shape.Size.Height); row++ {
-		field[row][room.Shape.Point.X] = common.EntityTypeVerticalWall
-		field[row][room.Shape.Point.X+int(room.Shape.Size.Width)] = common.EntityTypeVerticalWall
+	for row := room.Shape.Point.Y; row < room.Shape.Point.Y+height; row++ {
+		field[row][room.Shape.Point.X] = common.EntityTypeWall
+		field[row][room.Shape.Point.X+width] = common.EntityTypeWall
 	}
 
 	field[finishPortal.Point.Y][finishPortal.Point.X] = common.EntityTypePortal
@@ -260,6 +376,6 @@ func (g *Game) putPassage(passage world.Passage, field [][]common.EntityType) {
 	for i := 0; i < len(passage.Passage); i++ {
 		field[passage.Passage[i].Y][passage.Passage[i].X] = common.EntityTypePassage
 	}
-	field[passage.DoorOne.Y][passage.DoorOne.X] = common.EntityTypeDoorOne
-	field[passage.DoorTwo.Y][passage.DoorTwo.X] = common.EntityTypeDoorTwo
+	field[passage.DoorOne.Y][passage.DoorOne.X] = common.EntityTypeDoor
+	field[passage.DoorTwo.Y][passage.DoorTwo.X] = common.EntityTypeDoor
 }
