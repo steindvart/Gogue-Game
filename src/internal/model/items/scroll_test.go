@@ -55,22 +55,22 @@ func TestScroll_NewScroll_BuiltinConfig(t *testing.T) {
 
 			// Verify attributes match the config's ranges
 			config := GetScrollConfig(tt.scrollType)
-			if scroll.AffectedAttributes.Strength < config.StrengthRange.Min ||
-				scroll.AffectedAttributes.Strength > config.StrengthRange.Max {
+			if scroll.Effect.Attributes.Strength < config.StrengthRange.Min ||
+				scroll.Effect.Attributes.Strength > config.StrengthRange.Max {
 				t.Errorf("Strength out of config range: got %.2f, want [%.2f, %.2f]",
-					scroll.AffectedAttributes.Strength, config.StrengthRange.Min, config.StrengthRange.Max)
+					scroll.Effect.Attributes.Strength, config.StrengthRange.Min, config.StrengthRange.Max)
 			}
 
-			if scroll.AffectedAttributes.Agility < config.AgilityRange.Min ||
-				scroll.AffectedAttributes.Agility > config.AgilityRange.Max {
+			if scroll.Effect.Attributes.Agility < config.AgilityRange.Min ||
+				scroll.Effect.Attributes.Agility > config.AgilityRange.Max {
 				t.Errorf("Agility out of config range: got %.2f, want [%.2f, %.2f]",
-					scroll.AffectedAttributes.Agility, config.AgilityRange.Min, config.AgilityRange.Max)
+					scroll.Effect.Attributes.Agility, config.AgilityRange.Min, config.AgilityRange.Max)
 			}
 
-			if scroll.AffectedAttributes.MaxHealth < config.MaxHealthRange.Min ||
-				scroll.AffectedAttributes.MaxHealth > config.MaxHealthRange.Max {
+			if scroll.Effect.Attributes.MaxHealth < config.MaxHealthRange.Min ||
+				scroll.Effect.Attributes.MaxHealth > config.MaxHealthRange.Max {
 				t.Errorf("MaxHealth out of config range: got %.2f, want [%.2f, %.2f]",
-					scroll.AffectedAttributes.MaxHealth, config.MaxHealthRange.Min, config.MaxHealthRange.Max)
+					scroll.Effect.Attributes.MaxHealth, config.MaxHealthRange.Min, config.MaxHealthRange.Max)
 			}
 
 			if scroll.Name != string(config.Type) {
@@ -83,8 +83,8 @@ func TestScroll_NewScroll_BuiltinConfig(t *testing.T) {
 			}
 
 			// Health should always be zero for scrolls
-			if scroll.AffectedAttributes.Health != 0 {
-				t.Errorf("Expected Health=0, got %f", scroll.AffectedAttributes.Health)
+			if scroll.Effect.Attributes.Health != 0 {
+				t.Errorf("Expected Health=0, got %f", scroll.Effect.Attributes.Health)
 			}
 		})
 	}
@@ -206,22 +206,22 @@ func TestScroll_NewScrollByConfig(t *testing.T) {
 			}
 
 			// Verify attributes are within config ranges
-			if scroll.AffectedAttributes.Strength < tt.config.StrengthRange.Min ||
-				scroll.AffectedAttributes.Strength > tt.config.StrengthRange.Max {
+			if scroll.Effect.Attributes.Strength < tt.config.StrengthRange.Min ||
+				scroll.Effect.Attributes.Strength > tt.config.StrengthRange.Max {
 				t.Errorf("Strength out of range: got %.2f, want [%.2f, %.2f]",
-					scroll.AffectedAttributes.Strength, tt.config.StrengthRange.Min, tt.config.StrengthRange.Max)
+					scroll.Effect.Attributes.Strength, tt.config.StrengthRange.Min, tt.config.StrengthRange.Max)
 			}
 
-			if scroll.AffectedAttributes.Agility < tt.config.AgilityRange.Min ||
-				scroll.AffectedAttributes.Agility > tt.config.AgilityRange.Max {
+			if scroll.Effect.Attributes.Agility < tt.config.AgilityRange.Min ||
+				scroll.Effect.Attributes.Agility > tt.config.AgilityRange.Max {
 				t.Errorf("Agility out of range: got %.2f, want [%.2f, %.2f]",
-					scroll.AffectedAttributes.Agility, tt.config.AgilityRange.Min, tt.config.AgilityRange.Max)
+					scroll.Effect.Attributes.Agility, tt.config.AgilityRange.Min, tt.config.AgilityRange.Max)
 			}
 
-			if scroll.AffectedAttributes.MaxHealth < tt.config.MaxHealthRange.Min ||
-				scroll.AffectedAttributes.MaxHealth > tt.config.MaxHealthRange.Max {
+			if scroll.Effect.Attributes.MaxHealth < tt.config.MaxHealthRange.Min ||
+				scroll.Effect.Attributes.MaxHealth > tt.config.MaxHealthRange.Max {
 				t.Errorf("MaxHealth out of range: got %.2f, want [%.2f, %.2f]",
-					scroll.AffectedAttributes.MaxHealth, tt.config.MaxHealthRange.Min, tt.config.MaxHealthRange.Max)
+					scroll.Effect.Attributes.MaxHealth, tt.config.MaxHealthRange.Min, tt.config.MaxHealthRange.Max)
 			}
 
 			// Verify name matches config type
@@ -235,8 +235,8 @@ func TestScroll_NewScrollByConfig(t *testing.T) {
 			}
 
 			// Health should always be zero
-			if scroll.AffectedAttributes.Health != 0 {
-				t.Errorf("Expected Health=0, got %f", scroll.AffectedAttributes.Health)
+			if scroll.Effect.Attributes.Health != 0 {
+				t.Errorf("Expected Health=0, got %f", scroll.Effect.Attributes.Health)
 			}
 		})
 	}
@@ -289,22 +289,22 @@ func TestScroll_NewScrollByConfig_FixedValues(t *testing.T) {
 			}
 
 			// Verify attributes are within config ranges
-			if scroll.AffectedAttributes.Strength < tt.config.StrengthRange.Min ||
-				scroll.AffectedAttributes.Strength > tt.config.StrengthRange.Max {
+			if scroll.Effect.Attributes.Strength < tt.config.StrengthRange.Min ||
+				scroll.Effect.Attributes.Strength > tt.config.StrengthRange.Max {
 				t.Errorf("Strength out of range: got %.2f, want [%.2f, %.2f]",
-					scroll.AffectedAttributes.Strength, tt.config.StrengthRange.Min, tt.config.StrengthRange.Max)
+					scroll.Effect.Attributes.Strength, tt.config.StrengthRange.Min, tt.config.StrengthRange.Max)
 			}
 
-			if scroll.AffectedAttributes.Agility < tt.config.AgilityRange.Min ||
-				scroll.AffectedAttributes.Agility > tt.config.AgilityRange.Max {
+			if scroll.Effect.Attributes.Agility < tt.config.AgilityRange.Min ||
+				scroll.Effect.Attributes.Agility > tt.config.AgilityRange.Max {
 				t.Errorf("Agility out of range: got %.2f, want [%.2f, %.2f]",
-					scroll.AffectedAttributes.Agility, tt.config.AgilityRange.Min, tt.config.AgilityRange.Max)
+					scroll.Effect.Attributes.Agility, tt.config.AgilityRange.Min, tt.config.AgilityRange.Max)
 			}
 
-			if scroll.AffectedAttributes.MaxHealth < tt.config.MaxHealthRange.Min ||
-				scroll.AffectedAttributes.MaxHealth > tt.config.MaxHealthRange.Max {
+			if scroll.Effect.Attributes.MaxHealth < tt.config.MaxHealthRange.Min ||
+				scroll.Effect.Attributes.MaxHealth > tt.config.MaxHealthRange.Max {
 				t.Errorf("MaxHealth out of range: got %.2f, want [%.2f, %.2f]",
-					scroll.AffectedAttributes.MaxHealth, tt.config.MaxHealthRange.Min, tt.config.MaxHealthRange.Max)
+					scroll.Effect.Attributes.MaxHealth, tt.config.MaxHealthRange.Min, tt.config.MaxHealthRange.Max)
 			}
 
 			// Verify name matches config type
@@ -318,8 +318,8 @@ func TestScroll_NewScrollByConfig_FixedValues(t *testing.T) {
 			}
 
 			// Health should always be zero
-			if scroll.AffectedAttributes.Health != 0 {
-				t.Errorf("Expected Health=0, got %f", scroll.AffectedAttributes.Health)
+			if scroll.Effect.Attributes.Health != 0 {
+				t.Errorf("Expected Health=0, got %f", scroll.Effect.Attributes.Health)
 			}
 		})
 	}
@@ -366,16 +366,16 @@ func TestScroll_NewScroll_Deterministic(t *testing.T) {
 			scroll2 := NewScroll(rng2, box, tt.scrollType)
 
 			// Verify they are identical
-			if scroll1.AffectedAttributes.Strength != scroll2.AffectedAttributes.Strength {
-				t.Errorf("Strength mismatch: %f != %f", scroll1.AffectedAttributes.Strength, scroll2.AffectedAttributes.Strength)
+			if scroll1.Effect.Attributes.Strength != scroll2.Effect.Attributes.Strength {
+				t.Errorf("Strength mismatch: %f != %f", scroll1.Effect.Attributes.Strength, scroll2.Effect.Attributes.Strength)
 			}
 
-			if scroll1.AffectedAttributes.Agility != scroll2.AffectedAttributes.Agility {
-				t.Errorf("Agility mismatch: %f != %f", scroll1.AffectedAttributes.Agility, scroll2.AffectedAttributes.Agility)
+			if scroll1.Effect.Attributes.Agility != scroll2.Effect.Attributes.Agility {
+				t.Errorf("Agility mismatch: %f != %f", scroll1.Effect.Attributes.Agility, scroll2.Effect.Attributes.Agility)
 			}
 
-			if scroll1.AffectedAttributes.MaxHealth != scroll2.AffectedAttributes.MaxHealth {
-				t.Errorf("MaxHealth mismatch: %f != %f", scroll1.AffectedAttributes.MaxHealth, scroll2.AffectedAttributes.MaxHealth)
+			if scroll1.Effect.Attributes.MaxHealth != scroll2.Effect.Attributes.MaxHealth {
+				t.Errorf("MaxHealth mismatch: %f != %f", scroll1.Effect.Attributes.MaxHealth, scroll2.Effect.Attributes.MaxHealth)
 			}
 
 			if scroll1.Name != scroll2.Name {
@@ -419,9 +419,9 @@ func TestScroll_NewScroll_Randomness(t *testing.T) {
 			for i := 0; i < tt.iterations; i++ {
 				rng := utils.NewRandomGeneratorWithSeed(int64(i))
 				scroll := NewScroll(rng, box, tt.scrollType)
-				strengthValues[scroll.AffectedAttributes.Strength] = true
-				agilityValues[scroll.AffectedAttributes.Agility] = true
-				maxHealthValues[scroll.AffectedAttributes.MaxHealth] = true
+				strengthValues[scroll.Effect.Attributes.Strength] = true
+				agilityValues[scroll.Effect.Attributes.Agility] = true
+				maxHealthValues[scroll.Effect.Attributes.MaxHealth] = true
 			}
 
 			// Check that we got varied values (at least 5 different values)
@@ -466,10 +466,10 @@ func TestScroll_NewScroll_UnknownTypeDefaultsToMystery(t *testing.T) {
 
 	// Should use Mystery config ranges
 	mysteryConfig := GetScrollConfig(ScrollTypeMystery)
-	if scroll.AffectedAttributes.Strength < mysteryConfig.StrengthRange.Min ||
-		scroll.AffectedAttributes.Strength > mysteryConfig.StrengthRange.Max {
+	if scroll.Effect.Attributes.Strength < mysteryConfig.StrengthRange.Min ||
+		scroll.Effect.Attributes.Strength > mysteryConfig.StrengthRange.Max {
 		t.Errorf("Strength out of Mystery config range: got %.2f, want [%.2f, %.2f]",
-			scroll.AffectedAttributes.Strength, mysteryConfig.StrengthRange.Min, mysteryConfig.StrengthRange.Max)
+			scroll.Effect.Attributes.Strength, mysteryConfig.StrengthRange.Min, mysteryConfig.StrengthRange.Max)
 	}
 }
 
@@ -570,24 +570,24 @@ func TestScroll_Use(t *testing.T) {
 			box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 			scroll := NewScroll(rng, box, tt.scrollType)
 
-			attrs := scroll.Use()
+			effect := scroll.Use()
 
 			// Verify returned attributes match stored attributes
-			if attrs.Strength != scroll.AffectedAttributes.Strength {
-				t.Errorf("Strength mismatch: got %f, want %f", attrs.Strength, scroll.AffectedAttributes.Strength)
+			if effect.Attributes.Strength != scroll.Effect.Attributes.Strength {
+				t.Errorf("Strength mismatch: got %f, want %f", effect.Attributes.Strength, scroll.Effect.Attributes.Strength)
 			}
 
-			if attrs.Agility != scroll.AffectedAttributes.Agility {
-				t.Errorf("Agility mismatch: got %f, want %f", attrs.Agility, scroll.AffectedAttributes.Agility)
+			if effect.Attributes.Agility != scroll.Effect.Attributes.Agility {
+				t.Errorf("Agility mismatch: got %f, want %f", effect.Attributes.Agility, scroll.Effect.Attributes.Agility)
 			}
 
-			if attrs.MaxHealth != scroll.AffectedAttributes.MaxHealth {
-				t.Errorf("MaxHealth mismatch: got %f, want %f", attrs.MaxHealth, scroll.AffectedAttributes.MaxHealth)
+			if effect.Attributes.MaxHealth != scroll.Effect.Attributes.MaxHealth {
+				t.Errorf("MaxHealth mismatch: got %f, want %f", effect.Attributes.MaxHealth, scroll.Effect.Attributes.MaxHealth)
 			}
 
 			// Health should always be zero
-			if attrs.Health != 0 {
-				t.Errorf("Expected Health=0, got %f", attrs.Health)
+			if effect.Attributes.Health != 0 {
+				t.Errorf("Expected Health=0, got %f", effect.Attributes.Health)
 			}
 		})
 	}
@@ -598,16 +598,16 @@ func TestScroll_UseMultipleTimesIsOk(t *testing.T) {
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 	scroll := NewScroll(rng, box, ScrollTypeStrength)
 
-	attrs1 := scroll.Use()
-	attrs2 := scroll.Use()
+	effect1 := scroll.Use()
+	effect2 := scroll.Use()
 
-	if attrs1.Strength != attrs2.Strength {
+	if effect1.Attributes.Strength != effect2.Attributes.Strength {
 		t.Error("Use() should return consistent Strength on multiple calls")
 	}
-	if attrs1.Agility != attrs2.Agility {
+	if effect1.Attributes.Agility != effect2.Attributes.Agility {
 		t.Error("Use() should return consistent Agility on multiple calls")
 	}
-	if attrs1.MaxHealth != attrs2.MaxHealth {
+	if effect1.Attributes.MaxHealth != effect2.Attributes.MaxHealth {
 		t.Error("Use() should return consistent MaxHealth on multiple calls")
 	}
 }
@@ -618,7 +618,9 @@ func TestScroll_AsScroll_ValidPointer(t *testing.T) {
 			Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
 			Name:  "Test Scroll",
 		},
-		AffectedAttributes: primitives.Attributes{Strength: 10, Agility: 5, MaxHealth: 15},
+		Effect: &primitives.Effect{
+			Attributes: primitives.Attributes{Strength: 10, Agility: 5, MaxHealth: 15},
+		},
 	}
 
 	result := AsScroll(input)
@@ -627,14 +629,14 @@ func TestScroll_AsScroll_ValidPointer(t *testing.T) {
 		t.Fatal("Expected non-nil result, got nil")
 	}
 
-	if result.AffectedAttributes.Strength != 10 {
-		t.Errorf("Expected Strength 10, got %f", result.AffectedAttributes.Strength)
+	if result.Effect.Attributes.Strength != 10 {
+		t.Errorf("Expected Strength 10, got %f", result.Effect.Attributes.Strength)
 	}
-	if result.AffectedAttributes.Agility != 5 {
-		t.Errorf("Expected Agility 5, got %f", result.AffectedAttributes.Agility)
+	if result.Effect.Attributes.Agility != 5 {
+		t.Errorf("Expected Agility 5, got %f", result.Effect.Attributes.Agility)
 	}
-	if result.AffectedAttributes.MaxHealth != 15 {
-		t.Errorf("Expected MaxHealth 15, got %f", result.AffectedAttributes.MaxHealth)
+	if result.Effect.Attributes.MaxHealth != 15 {
+		t.Errorf("Expected MaxHealth 15, got %f", result.Effect.Attributes.MaxHealth)
 	}
 	if result != input {
 		t.Error("Expected same pointer to be returned")
@@ -676,8 +678,13 @@ func TestScroll_AsScroll_ElixirTypeIsNil(t *testing.T) {
 			Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
 			Name:  "Test Elixir",
 		},
-		AffectedAttributes: primitives.Attributes{Strength: 10},
-		EffectDuration:     20,
+		Effect: &primitives.Effect{
+			Attributes: primitives.Attributes{Strength: 10},
+			Duration: primitives.EffectDuration{
+				Type:  primitives.EffectDurationTypeAllTemporary,
+				Steps: 20,
+			},
+		},
 	}
 
 	result := AsScroll(input)
@@ -693,7 +700,9 @@ func TestScroll_AsScroll_FoodTypeIsNil(t *testing.T) {
 			Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
 			Name:  "Test Food",
 		},
-		AffectedAttributes: primitives.Attributes{Health: 25},
+		Effect: &primitives.Effect{
+			Attributes: primitives.Attributes{Health: 25},
+		},
 	}
 
 	result := AsScroll(input)
@@ -770,7 +779,9 @@ func BenchmarkScroll_AsScroll(b *testing.B) {
 			Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
 			Name:  "Test Scroll",
 		},
-		AffectedAttributes: primitives.Attributes{Strength: 10, Agility: 5, MaxHealth: 15},
+		Effect: &primitives.Effect{
+			Attributes: primitives.Attributes{Strength: 10, Agility: 5, MaxHealth: 15},
+		},
 	}
 
 	b.ResetTimer()

@@ -236,9 +236,9 @@ func TestBackpack_AddItem(t *testing.T) {
 				if err == nil {
 					t.Error("Expected error, got nil")
 				}
-				var expectedErr ItemIsNotInBackpackError
-				if !errors.As(err, &expectedErr) {
-					t.Errorf("Expected ItemIsNotInBackpackError, got %T", err)
+				var wantErrType NotItemError
+				if !errors.As(err, &wantErrType) {
+					t.Errorf("Expected %T, got %T", wantErrType, err)
 				}
 			} else {
 				if err != nil {

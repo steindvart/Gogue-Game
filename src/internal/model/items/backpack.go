@@ -16,6 +16,7 @@ func (ItemIsNotInBackpackError) Error() string {
 	return "item is not found in the Backpack"
 }
 
+// @todo - сделать корректное хранение множества однотипных предметов. Отказаться от map
 type Backpack struct {
 	Capacity  uint
 	ItemsNum  uint
@@ -52,7 +53,7 @@ func (b *Backpack) AddItem(item any) error {
 		b.AddTreasure(v)
 		return nil
 	default:
-		return ItemIsNotInBackpackError{}
+		return NotItemError{}
 	}
 }
 
@@ -67,7 +68,7 @@ func (b *Backpack) RemoveItem(item any) error {
 	case *Weapon:
 		return b.RemoveWeapon(v.Type)
 	default:
-		return ItemIsNotInBackpackError{}
+		return NotItemError{}
 	}
 }
 

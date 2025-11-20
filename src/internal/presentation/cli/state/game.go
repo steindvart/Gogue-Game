@@ -36,7 +36,7 @@ func NewGame() (*Game, error) {
 	if err != nil {
 		return nil, err
 	}
-	player := entities.NewPlayer(primitives.Box{
+	player := entities.NewPlayer(&primitives.Box{
 		Point: *playerStartPoint,
 		Size:  primitives.Size2D[uint]{Height: 1, Width: 1},
 	})
@@ -153,7 +153,7 @@ func (g *Game) makeField(w, h int) [][]common.EntityType {
 		{
 			Type: entities.EnemyType(entities.EnemyTypeZombie),
 			Character: entities.Character{
-				Shape: primitives.Box{
+				Shape: &primitives.Box{
 					Point: primitives.Point2D[int]{X: 6, Y: 6},
 				},
 			},
@@ -161,7 +161,7 @@ func (g *Game) makeField(w, h int) [][]common.EntityType {
 		{
 			Type: entities.EnemyType(entities.EnemyTypeVampire),
 			Character: entities.Character{
-				Shape: primitives.Box{
+				Shape: &primitives.Box{
 					Point: primitives.Point2D[int]{X: 6, Y: 7},
 				},
 			},
@@ -169,7 +169,7 @@ func (g *Game) makeField(w, h int) [][]common.EntityType {
 		{
 			Type: entities.EnemyType(entities.EnemyTypeGhost),
 			Character: entities.Character{
-				Shape: primitives.Box{
+				Shape: &primitives.Box{
 					Point: primitives.Point2D[int]{X: 6, Y: 8},
 				},
 			},
@@ -177,7 +177,7 @@ func (g *Game) makeField(w, h int) [][]common.EntityType {
 		{
 			Type: entities.EnemyType(entities.EnemyTypeOgre),
 			Character: entities.Character{
-				Shape: primitives.Box{
+				Shape: &primitives.Box{
 					Point: primitives.Point2D[int]{X: 6, Y: 9},
 				},
 			},
@@ -185,7 +185,7 @@ func (g *Game) makeField(w, h int) [][]common.EntityType {
 		{
 			Type: entities.EnemyType(entities.EnemyTypeSnakeMage),
 			Character: entities.Character{
-				Shape: primitives.Box{
+				Shape: &primitives.Box{
 					Point: primitives.Point2D[int]{X: 6, Y: 10},
 				},
 			},

@@ -7,8 +7,8 @@ import (
 
 type Scroll struct {
 	*Item
-	Type               ScrollType
-	AffectedAttributes primitives.Attributes
+	*primitives.Effect
+	Type ScrollType
 }
 
 func NewScroll(rnd *utils.RandomGenerator, box primitives.Box, t ScrollType) *Scroll {
@@ -19,8 +19,10 @@ func NewScroll(rnd *utils.RandomGenerator, box primitives.Box, t ScrollType) *Sc
 			Shape: box,
 			Name:  string(cfg.Type),
 		},
-		Type:               t,
-		AffectedAttributes: cfg.GenerateAttributes(rnd),
+		Effect: &primitives.Effect{
+			Attributes: cfg.GenerateAttributes(rnd),
+		},
+		Type: t,
 	}
 }
 
@@ -34,13 +36,15 @@ func NewScrollByConfig(rnd *utils.RandomGenerator, box primitives.Box, cfg Scrol
 			Shape: box,
 			Name:  string(cfg.Type),
 		},
-		Type:               ScrollTypeCustom,
-		AffectedAttributes: cfg.GenerateAttributes(rnd),
+		Effect: &primitives.Effect{
+			Attributes: cfg.GenerateAttributes(rnd),
+		},
+		Type: ScrollTypeCustom,
 	}, nil
 }
 
-func (e *Scroll) Use() primitives.Attributes {
-	return e.AffectedAttributes
+func (e *Scroll) Use() *primitives.Effect {
+	return e.Effect
 }
 
 func AsScroll(item any) *Scroll {

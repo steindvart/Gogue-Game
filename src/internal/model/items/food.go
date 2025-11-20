@@ -7,8 +7,8 @@ import (
 
 type Food struct {
 	*Item
-	Type               FoodType
-	AffectedAttributes primitives.Attributes
+	*primitives.Effect
+	Type FoodType
 }
 
 func NewFood(rnd *utils.RandomGenerator, box primitives.Box, t FoodType) *Food {
@@ -19,8 +19,10 @@ func NewFood(rnd *utils.RandomGenerator, box primitives.Box, t FoodType) *Food {
 			Shape: box,
 			Name:  string(cfg.Type),
 		},
-		Type:               t,
-		AffectedAttributes: cfg.GenerateAttributes(rnd),
+		Type: t,
+		Effect: &primitives.Effect{
+			Attributes: cfg.GenerateAttributes(rnd),
+		},
 	}
 }
 
@@ -34,8 +36,10 @@ func NewFoodByConfig(rnd *utils.RandomGenerator, box primitives.Box, cfg FoodCon
 			Shape: box,
 			Name:  string(cfg.Type),
 		},
-		Type:               FoodTypeCustom,
-		AffectedAttributes: cfg.GenerateAttributes(rnd),
+		Effect: &primitives.Effect{
+			Attributes: cfg.GenerateAttributes(rnd),
+		},
+		Type: FoodTypeCustom,
 	}, nil
 }
 

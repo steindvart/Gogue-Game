@@ -10,6 +10,7 @@ import (
 
 const DefaultFPSLimit = 60
 
+// @todo - переименовать в StateMachine
 type Game struct {
 	States   []state.State
 	App      *tview.Application
