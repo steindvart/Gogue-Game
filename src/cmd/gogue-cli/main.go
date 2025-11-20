@@ -15,6 +15,6 @@ func main() {
 		}
 	}()
 
-	game := cli.NewGame(tview.NewApplication(), state.NewMainMenu())
-	game.Run()
+	machine := cli.NewStateMachine(tview.NewApplication(), state.NewMainMenu())
+	machine.Run()
 }
