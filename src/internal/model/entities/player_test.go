@@ -50,7 +50,7 @@ func TestPlayer_EquipWeapon_AppliesEffectAndStoresWeapon(t *testing.T) {
 	base := p.Attributes
 
 	rnd := utils.NewRandomGeneratorWithSeed(defaultPlayerTestSeed)
-	w := items.NewWeapon(rnd, primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 1}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}, items.WeaponTypeSword)
+	w := items.NewWeaponBuiltin(rnd, primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 1}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}, items.WeaponTypeSword)
 	if w == nil || w.Effect == nil {
 		t.Fatalf("Weapon or its effect/attributes should be initialized")
 	}
@@ -74,7 +74,7 @@ func TestPlayer_UnequipWeapon_RevertsEffectAndUnsetsWeapon(t *testing.T) {
 	base := p.Attributes
 
 	rnd := utils.NewRandomGeneratorWithSeed(defaultPlayerTestSeed)
-	w := items.NewWeapon(rnd, primitives.Box{Point: primitives.Point2D[int]{X: 2, Y: 2}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}, items.WeaponTypeDagger)
+	w := items.NewWeaponBuiltin(rnd, primitives.Box{Point: primitives.Point2D[int]{X: 2, Y: 2}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}, items.WeaponTypeDagger)
 	delta := w.Effect.Attributes
 
 	p.EquipWeapon(w)
@@ -118,12 +118,12 @@ func TestPlayer_EquipWeapon_Twice_StacksByDesign(t *testing.T) {
 	base := p.Attributes
 
 	rnd1 := utils.NewRandomGeneratorWithSeed(100)
-	w1 := items.NewWeapon(rnd1, primitives.Box{}, items.WeaponTypeDagger)
+	w1 := items.NewWeaponBuiltin(rnd1, primitives.Box{}, items.WeaponTypeDagger)
 	d1 := w1.Effect.Attributes
 	p.EquipWeapon(w1)
 
 	rnd2 := utils.NewRandomGeneratorWithSeed(200)
-	w2 := items.NewWeapon(rnd2, primitives.Box{}, items.WeaponTypeAxe)
+	w2 := items.NewWeaponBuiltin(rnd2, primitives.Box{}, items.WeaponTypeAxe)
 	d2 := w2.Effect.Attributes
 	p.EquipWeapon(w2)
 
