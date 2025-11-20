@@ -16,7 +16,7 @@ func createTestElixir(rng *utils.RandomGenerator, elixirType ElixirType) *Elixir
 		Point: primitives.Point2D[int]{X: 0, Y: 0},
 		Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
 	}
-	return NewElixir(rng, box, elixirType)
+	return NewElixirBuiltin(rng, box, elixirType)
 }
 
 func createTestScroll(rng *utils.RandomGenerator, scrollType ScrollType) *Scroll {
