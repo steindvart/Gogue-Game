@@ -20,8 +20,8 @@ func (m *mockState) Primitive() tview.Primitive {
 	return tview.NewBox()
 }
 
-func TestGame_PushPopState(t *testing.T) {
-	g := &Game{}
+func TestStateMachine_PushPopState(t *testing.T) {
+	g := &StateMachine{}
 	state1 := &mockState{}
 	state2 := &mockState{}
 
@@ -48,8 +48,8 @@ func TestGame_PushPopState(t *testing.T) {
 	}
 }
 
-func TestGame_CurrentState(t *testing.T) {
-	g := &Game{}
+func TestStateMachine_CurrentState(t *testing.T) {
+	g := &StateMachine{}
 	if g.CurrentState() != nil {
 		t.Errorf("CurrentState: expected nil for empty stack")
 	}
