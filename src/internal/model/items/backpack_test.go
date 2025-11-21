@@ -16,7 +16,7 @@ func createTestElixir(rng *utils.RandomGenerator, elixirType ElixirType) *Elixir
 		Point: primitives.Point2D[int]{X: 0, Y: 0},
 		Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
 	}
-	return NewElixir(rng, box, elixirType)
+	return NewElixirBuiltin(rng, box, elixirType)
 }
 
 func createTestScroll(rng *utils.RandomGenerator, scrollType ScrollType) *Scroll {
@@ -24,7 +24,7 @@ func createTestScroll(rng *utils.RandomGenerator, scrollType ScrollType) *Scroll
 		Point: primitives.Point2D[int]{X: 0, Y: 0},
 		Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
 	}
-	return NewScroll(rng, box, scrollType)
+	return NewScrollBuiltin(rng, box, scrollType)
 }
 
 func createTestFood(rng *utils.RandomGenerator, foodType FoodType) *Food {
@@ -32,7 +32,7 @@ func createTestFood(rng *utils.RandomGenerator, foodType FoodType) *Food {
 		Point: primitives.Point2D[int]{X: 0, Y: 0},
 		Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
 	}
-	return NewFood(rng, box, foodType)
+	return NewFoodBuiltin(rng, box, foodType)
 }
 
 func createTestWeapon(rng *utils.RandomGenerator, weaponType WeaponType) *Weapon {
@@ -40,7 +40,7 @@ func createTestWeapon(rng *utils.RandomGenerator, weaponType WeaponType) *Weapon
 		Point: primitives.Point2D[int]{X: 0, Y: 0},
 		Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
 	}
-	return NewWeapon(rng, box, weaponType)
+	return NewWeaponBuiltin(rng, box, weaponType)
 }
 
 func createTestTreasure(rng *utils.RandomGenerator, treasureType TreasureType) *Treasure {
@@ -48,7 +48,7 @@ func createTestTreasure(rng *utils.RandomGenerator, treasureType TreasureType) *
 		Point: primitives.Point2D[int]{X: 0, Y: 0},
 		Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
 	}
-	return NewTreasure(rng, box, treasureType)
+	return NewTreasureBuiltin(rng, box, treasureType)
 }
 
 func TestBackpack_NewBackpack(t *testing.T) {

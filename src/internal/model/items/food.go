@@ -11,19 +11,17 @@ type Food struct {
 	Type FoodType
 }
 
-func NewFood(rnd *utils.RandomGenerator, box primitives.Box, t FoodType) *Food {
-	cfg := GetFoodConfig(t)
-
+func NewFood(box primitives.Box, t FoodType, e *primitives.Effect) *Food {
 	return &Food{
-		Item: &Item{
-			Shape: box,
-			Name:  string(cfg.Type),
-		},
-		Type: t,
-		Effect: &primitives.Effect{
-			Attributes: cfg.GenerateAttributes(rnd),
-		},
+		Item:   &Item{Shape: box, Name: string(t)},
+		Effect: e,
+		Type:   t,
 	}
+}
+
+func NewFoodBuiltin(rnd *utils.RandomGenerator, box primitives.Box, t FoodType) *Food {
+	f, _ := NewFoodByConfig(rnd, box, GetFoodConfig(t))
+	return f
 }
 
 func NewFoodByConfig(rnd *utils.RandomGenerator, box primitives.Box, cfg FoodConfig) (*Food, error) {
@@ -31,16 +29,9 @@ func NewFoodByConfig(rnd *utils.RandomGenerator, box primitives.Box, cfg FoodCon
 		return nil, err
 	}
 
-	return &Food{
-		Item: &Item{
-			Shape: box,
-			Name:  string(cfg.Type),
-		},
-		Effect: &primitives.Effect{
-			Attributes: cfg.GenerateAttributes(rnd),
-		},
-		Type: FoodTypeCustom,
-	}, nil
+	return NewFood(box, cfg.Type, &primitives.Effect{
+		Attributes: cfg.GenerateAttributes(rnd),
+	}), nil
 }
 
 func AsFood(item any) *Food {

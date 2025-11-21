@@ -11,19 +11,17 @@ type Weapon struct {
 	Type WeaponType
 }
 
-func NewWeapon(rnd *utils.RandomGenerator, box primitives.Box, t WeaponType) *Weapon {
-	cfg := GetWeaponConfig(t)
-
+func NewWeapon(box primitives.Box, t WeaponType, e *primitives.Effect) *Weapon {
 	return &Weapon{
-		Item: &Item{
-			Shape: box,
-			Name:  string(cfg.Type),
-		},
-		Effect: &primitives.Effect{
-			Attributes: cfg.GenerateAttributes(rnd),
-		},
-		Type: t,
+		Item:   &Item{Shape: box, Name: string(t)},
+		Effect: e,
+		Type:   t,
 	}
+}
+
+func NewWeaponBuiltin(rnd *utils.RandomGenerator, box primitives.Box, t WeaponType) *Weapon {
+	w, _ := NewWeaponByConfig(rnd, box, GetWeaponConfig(t))
+	return w
 }
 
 func NewWeaponByConfig(rnd *utils.RandomGenerator, box primitives.Box, cfg WeaponConfig) (*Weapon, error) {
@@ -31,16 +29,7 @@ func NewWeaponByConfig(rnd *utils.RandomGenerator, box primitives.Box, cfg Weapo
 		return nil, err
 	}
 
-	return &Weapon{
-		Item: &Item{
-			Shape: box,
-			Name:  string(cfg.Type),
-		},
-		Effect: &primitives.Effect{
-			Attributes: cfg.GenerateAttributes(rnd),
-		},
-		Type: WeaponTypeCustom,
-	}, nil
+	return NewWeapon(box, cfg.Type, &primitives.Effect{Attributes: cfg.GenerateAttributes(rnd)}), nil
 }
 
 func (w *Weapon) Use() *primitives.Effect {

@@ -11,19 +11,17 @@ type Scroll struct {
 	Type ScrollType
 }
 
-func NewScroll(rnd *utils.RandomGenerator, box primitives.Box, t ScrollType) *Scroll {
-	cfg := GetScrollConfig(t)
-
+func NewScroll(box primitives.Box, t ScrollType, e *primitives.Effect) *Scroll {
 	return &Scroll{
-		Item: &Item{
-			Shape: box,
-			Name:  string(cfg.Type),
-		},
-		Effect: &primitives.Effect{
-			Attributes: cfg.GenerateAttributes(rnd),
-		},
-		Type: t,
+		Item:   &Item{Shape: box, Name: string(t)},
+		Effect: e,
+		Type:   t,
 	}
+}
+
+func NewScrollBuiltin(rnd *utils.RandomGenerator, box primitives.Box, t ScrollType) *Scroll {
+	s, _ := NewScrollByConfig(rnd, box, GetScrollConfig(t))
+	return s
 }
 
 func NewScrollByConfig(rnd *utils.RandomGenerator, box primitives.Box, cfg ScrollConfig) (*Scroll, error) {
@@ -31,16 +29,9 @@ func NewScrollByConfig(rnd *utils.RandomGenerator, box primitives.Box, cfg Scrol
 		return nil, err
 	}
 
-	return &Scroll{
-		Item: &Item{
-			Shape: box,
-			Name:  string(cfg.Type),
-		},
-		Effect: &primitives.Effect{
-			Attributes: cfg.GenerateAttributes(rnd),
-		},
-		Type: ScrollTypeCustom,
-	}, nil
+	return NewScroll(box, cfg.Type, &primitives.Effect{
+		Attributes: cfg.GenerateAttributes(rnd),
+	}), nil
 }
 
 func (e *Scroll) Use() *primitives.Effect {

@@ -11,24 +11,20 @@ type Elixir struct {
 	Type ElixirType
 }
 
-func NewElixir(rnd *utils.RandomGenerator, box primitives.Box, t ElixirType) *Elixir {
-	cfg := GetElixirConfig(t)
-
-	// @todo - сделать общий конструктор для непосредственного создания объекта
+func NewElixir(box primitives.Box, t ElixirType, e *primitives.Effect) *Elixir {
 	return &Elixir{
 		Item: &Item{
 			Shape: box,
-			Name:  string(cfg.Type),
+			Name:  string(t),
 		},
-		Effect: &primitives.Effect{
-			Duration: primitives.EffectDuration{
-				Type:  primitives.EffectDurationTypeAllTemporaryHealPermanent,
-				Steps: cfg.GenerateDuration(rnd),
-			},
-			Attributes: cfg.GenerateAttributes(rnd),
-		},
-		Type: t,
+		Effect: e,
+		Type:   t,
 	}
+}
+
+func NewElixirBuiltin(rnd *utils.RandomGenerator, box primitives.Box, t ElixirType) *Elixir {
+	e, _ := NewElixirByConfig(rnd, box, GetElixirConfig(t))
+	return e
 }
 
 func NewElixirByConfig(rnd *utils.RandomGenerator, box primitives.Box, cfg ElixirConfig) (*Elixir, error) {
@@ -36,20 +32,13 @@ func NewElixirByConfig(rnd *utils.RandomGenerator, box primitives.Box, cfg Elixi
 		return nil, err
 	}
 
-	return &Elixir{
-		Item: &Item{
-			Shape: box,
-			Name:  string(cfg.Type),
+	return NewElixir(box, cfg.Type, &primitives.Effect{
+		Duration: primitives.EffectDuration{
+			Type:  primitives.EffectDurationTypeAllTemporaryHealPermanent,
+			Steps: cfg.GenerateDuration(rnd),
 		},
-		Effect: &primitives.Effect{
-			Duration: primitives.EffectDuration{
-				Type:  primitives.EffectDurationTypeAllTemporaryHealPermanent,
-				Steps: cfg.GenerateDuration(rnd),
-			},
-			Attributes: cfg.GenerateAttributes(rnd),
-		},
-		Type: ElixirTypeCustom,
-	}, nil
+		Attributes: cfg.GenerateAttributes(rnd),
+	}), nil
 }
 
 func (e *Elixir) Use() *primitives.Effect {
