@@ -19,6 +19,14 @@ func NewCharacter(box primitives.Box, attrs primitives.Attributes) *Character {
 	}
 }
 
+func (c *Character) GetPosition() primitives.Point2D[int] {
+	return c.Shape.Point
+}
+
+func (c *Character) SetPosition(pos primitives.Point2D[int]) {
+	c.Shape.Point = pos
+}
+
 func (c *Character) IsAlive() bool {
 	return c.Attributes.Health > 0
 }
