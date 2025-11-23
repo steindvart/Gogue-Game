@@ -612,9 +612,9 @@ func TestLevel_GetStartPositionForPlayer(t *testing.T) {
 		if err != nil {
 			t.Fatalf("GenerateLevel returned unexpected error: %v", err)
 		}
-		playerStartPoint, err := level.GetStartPositionForPlayer()
+		playerStartPoint, err := level.GenerateStartPlayerPosition()
 		if err != nil {
-			t.Fatalf("GetStartPositionForPlayer returned unexpected error: %v", err)
+			t.Fatalf("GenerateStartPlayerPosition returned unexpected error: %v", err)
 		}
 
 		if wantPlayerStartPoint != *playerStartPoint {
@@ -625,9 +625,9 @@ func TestLevel_GetStartPositionForPlayer(t *testing.T) {
 		wantErrorText := "should be 9 rooms"
 		source := rand.New(rand.NewSource(randomSeedTest))
 		level := NewLevel(source)
-		_, err := level.GetStartPositionForPlayer()
+		_, err := level.GenerateStartPlayerPosition()
 		if err == nil {
-			t.Fatalf("GetStartPositionForPlayer returned nil error, expected %q", wantErrorText)
+			t.Fatalf("GenerateStartPlayerPosition returned nil error, expected %q", wantErrorText)
 		}
 		if !strings.Contains(err.Error(), wantErrorText) {
 			t.Errorf("Expected error to contain %q, got %q", wantErrorText, err.Error())

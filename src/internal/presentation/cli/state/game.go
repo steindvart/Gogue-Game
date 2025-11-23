@@ -38,12 +38,12 @@ func NewGame() (*Game, error) {
 		return nil, err
 	}
 
-	playerStartPoint, err := level.GetStartPositionForPlayer()
+	startPlayerPos, err := level.GenerateStartPlayerPosition()
 	if err != nil {
 		return nil, err
 	}
 	player := entities.NewPlayer(&primitives.Box{
-		Point: *playerStartPoint,
+		Point: *startPlayerPos,
 		Size:  primitives.Size2D[uint]{Height: 1, Width: 1},
 	})
 
@@ -63,7 +63,7 @@ func NewGame() (*Game, error) {
 		return x, y, width, height
 	})
 
-	movement := map[action.Type]primitives.Point2D[int]{
+	movementRegistry := map[action.Type]primitives.Point2D[int]{
 		action.MoveUp:               {X: 0, Y: -1},
 		action.MoveDown:             {X: 0, Y: 1},
 		action.MoveLeft:             {X: -1, Y: 0},
@@ -73,6 +73,7 @@ func NewGame() (*Game, error) {
 		action.MoveLefLowerCorner:   {X: -1, Y: 1},
 		action.MoveRightLowerCorner: {X: 1, Y: 1},
 	}
+
 	game.view.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch game.eventToAction(event) {
 		case action.MoveUp,
@@ -85,7 +86,7 @@ func NewGame() (*Game, error) {
 			action.MoveRightLowerCorner:
 
 			oldPlayerPos := game.player.GetPosition()
-			game.player.Move(movement[game.eventToAction(event)])
+			game.player.Move(movementRegistry[game.eventToAction(event)])
 
 			if game.checkCollision(oldPlayerPos, game.player.GetPosition()) {
 				game.player.SetPosition(oldPlayerPos)
@@ -148,10 +149,10 @@ func isInRoom(pos primitives.Point2D[int], room world.Room) bool {
 	leftEndX := room.Shape.Point.X
 	rightEndX := leftEndX + int(room.Shape.Size.Width)
 	topEndY := room.Shape.Point.Y
-	bottomEndY := topEndY + int(room.Shape.Size.Height)
+	downEndY := topEndY + int(room.Shape.Size.Height)
 
 	return (pos.X >= leftEndX && pos.X <= rightEndX) &&
-		(pos.Y >= topEndY && pos.Y <= bottomEndY)
+		(pos.Y >= topEndY && pos.Y <= downEndY)
 }
 
 func checkCollisionWithRoomWall(pos primitives.Point2D[int], room world.Room) bool {
@@ -163,9 +164,9 @@ func checkCollisionWithRoomWall(pos primitives.Point2D[int], room world.Room) bo
 	leftEndX := room.Shape.Point.X
 	rightEndX := leftEndX + int(room.Shape.Size.Width)
 	topEndY := room.Shape.Point.Y
-	bottomEndY := topEndY + int(room.Shape.Size.Height)
+	downEndY := topEndY + int(room.Shape.Size.Height)
 
-	if (pos.Y == topEndY || pos.Y == bottomEndY) || (pos.X == leftEndX || pos.X == rightEndX) {
+	if (pos.X == leftEndX || pos.X == rightEndX) || (pos.Y == topEndY || pos.Y == downEndY) {
 		return true
 	}
 
