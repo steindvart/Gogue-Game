@@ -52,9 +52,9 @@ func TestPassage_NewPassageOnX(t *testing.T) {
 					t.Errorf("Expected a valid Passage, got nil")
 				}
 
-				for i := 1; i < len(passage.Passage); i++ {
-					current := passage.Passage[i]
-					previous := passage.Passage[i-1]
+				for i := 1; i < len(passage.Way); i++ {
+					current := passage.Way[i]
+					previous := passage.Way[i-1]
 					dx := current.X - previous.X
 					dy := current.Y - previous.Y
 
@@ -124,9 +124,9 @@ func TestPassage_NewPassageOnY(t *testing.T) {
 					t.Errorf("Expected a valid Passage, got nil")
 				}
 
-				for i := 1; i < len(passage.Passage); i++ {
-					current := passage.Passage[i]
-					previous := passage.Passage[i-1]
+				for i := 1; i < len(passage.Way); i++ {
+					current := passage.Way[i]
+					previous := passage.Way[i-1]
 					dx := current.X - previous.X
 					dy := current.Y - previous.Y
 
