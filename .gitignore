@@ -1,6 +1,7 @@
 # Local dev
 .vscode/
 .idea/
+.memorybank/
 coverage.*
 
 # Prerequisites
