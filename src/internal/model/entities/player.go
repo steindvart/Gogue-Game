@@ -34,14 +34,14 @@ func NewPlayer(box *primitives.Box) *Player {
 func (p *Player) EquipWeapon(w *items.Weapon) {
 	// @todo - сделать обработку случая когда уже есть экипированный предмет
 	p.Weapon = w
-	p.ApplyEffect(w.Effect)
+	p.Character.Use(w)
 }
 
 func (p *Player) UnequipWeapon() *items.Weapon {
 	w := p.Weapon
 	if w != nil {
 		p.ApplyEffect(&primitives.Effect{
-			Attributes: w.Effect.Attributes.Inverse(),
+			Attributes: primitives.Inverse(w.Effect.Attributes),
 		})
 		p.Weapon = nil
 	}

@@ -38,6 +38,14 @@ func (c *Character) Attack() float64 {
 	return c.Attributes.Strength
 }
 
+type Usable interface {
+	Use() *primitives.Effect
+}
+
+func (c *Character) Use(usable Usable) {
+	c.ApplyEffect(usable.Use())
+}
+
 func (c *Character) ProcessTemporaryEffects(steps uint32) {
 	// Важно начинать с конца среза, чтобы при удалении не сбивался индекс.
 	for i := len(c.TemporaryEffects) - 1; i >= 0; i-- {
@@ -92,7 +100,7 @@ func (c *Character) removeTemporaryEffectByIndex(idx int) {
 		e.Attributes.Health = 0
 	}
 
-	c.Attributes.Affect(e.Attributes.Inverse())
+	c.Attributes.Affect(primitives.Inverse(e.Attributes))
 }
 
 // Шанс уклонения = 1 - 1/(1 + Agility/scale).
