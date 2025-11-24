@@ -88,7 +88,7 @@ func NewGame() (*Game, error) {
 			oldPlayerPos := game.player.GetPosition()
 			game.player.Move(movementRegistry[game.eventToAction(event)])
 
-			if game.checkCollision(oldPlayerPos, game.player.GetPosition()) {
+			if game.checkCollision(game.player.GetPosition()) {
 				game.player.SetPosition(oldPlayerPos)
 			}
 
@@ -104,21 +104,19 @@ func NewGame() (*Game, error) {
 	return &game, nil
 }
 
-func (g *Game) checkCollision(oldPos primitives.Point2D[int], newPos primitives.Point2D[int]) bool {
-	if g.checkCollisionWithFieldBorders(newPos) {
+func (g *Game) checkCollision(pos primitives.Point2D[int]) bool {
+	if g.checkCollisionWithFieldBorders(pos) {
 		return true
 	}
-	if g.checkCollisionWithRoomsWall(newPos) {
+	if g.checkCollisionWithRoomsWall(pos) {
 		return true
 	}
-	if g.checkCollisionWithEnemy(newPos) {
+	if g.checkCollisionWithEnemy(pos) {
 		return true
 	}
 
-	if inPassage, hasCollision := g.checkCollisionInPassage(oldPos, newPos); inPassage {
-		if !hasCollision {
-			return true
-		}
+	if !isInSomeRoom(pos, g.level.Rooms) && !g.checkCollisionWithPassages(pos) {
+		return true
 	}
 
 	return false
@@ -138,6 +136,16 @@ func (g *Game) checkCollisionWithFieldBorders(pos primitives.Point2D[int]) bool 
 func (g *Game) checkCollisionWithRoomsWall(pos primitives.Point2D[int]) bool {
 	for _, room := range g.level.Rooms {
 		if isInRoom(pos, room) && checkCollisionWithRoomWall(pos, room) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func isInSomeRoom(pos primitives.Point2D[int], rooms []world.Room) bool {
+	for _, room := range rooms {
+		if isInRoom(pos, room) {
 			return true
 		}
 	}
@@ -183,28 +191,29 @@ func checkCollisionWithDoors(pos primitives.Point2D[int], doors []primitives.Poi
 	return false
 }
 
-func (g *Game) checkCollisionInPassage(oldPos primitives.Point2D[int], newPos primitives.Point2D[int]) (inPassage bool, hasCollision bool) {
-	for _, passages := range g.level.Passages {
-		for _, passagePoint := range passages.Passage {
-			if newPos == passagePoint {
-				return true, true
-			}
-		}
-
-		if newPos == passages.DoorOne || newPos == passages.DoorTwo {
-			return true, true
+func (g *Game) checkCollisionWithPassages(newPos primitives.Point2D[int]) bool {
+	for _, passage := range g.level.Passages {
+		if isInPassage(newPos, passage) {
+			return true
 		}
 	}
 
-	for _, passages := range g.level.Passages {
-		for _, passagePoint := range passages.Passage {
-			if oldPos == passagePoint {
-				return true, false
-			}
+	return false
+}
+
+func isInPassage(pos primitives.Point2D[int], passage world.Passage) bool {
+	// Двери являются как частью комнаты, так и частью прохода
+	if pos == passage.DoorOne || pos == passage.DoorTwo {
+		return true
+	}
+
+	for _, wayPoint := range passage.Way {
+		if pos == wayPoint {
+			return true
 		}
 	}
 
-	return false, false
+	return false
 }
 
 func (g *Game) checkCollisionWithEnemy(pos primitives.Point2D[int]) bool {
@@ -384,8 +393,8 @@ func (g *Game) putRoom(room world.Room, finishPortal primitives.Box, field [][]c
 }
 
 func (g *Game) putPassage(passage world.Passage, field [][]common.EntityType) {
-	for i := 0; i < len(passage.Passage); i++ {
-		field[passage.Passage[i].Y][passage.Passage[i].X] = common.EntityTypePassage
+	for i := 0; i < len(passage.Way); i++ {
+		field[passage.Way[i].Y][passage.Way[i].X] = common.EntityTypePassage
 	}
 	field[passage.DoorOne.Y][passage.DoorOne.X] = common.EntityTypeDoor
 	field[passage.DoorTwo.Y][passage.DoorTwo.X] = common.EntityTypeDoor
