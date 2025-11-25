@@ -229,7 +229,7 @@ func (l *Level) addDoorsAtRoom(twoRoomsIndexes [2]uint, doorOne, doorTwo primiti
 	return nil
 }
 
-func (l *Level) GetStartPositionForPlayer() (*primitives.Point2D[int], error) {
+func (l *Level) GenerateStartPlayerPosition() (*primitives.Point2D[int], error) {
 	if len(l.Rooms) != roomsCount {
 		return nil, fmt.Errorf("should be %d rooms", roomsCount)
 	}
