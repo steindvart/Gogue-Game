@@ -398,8 +398,8 @@ func TestBackpack_AddElixir(t *testing.T) {
 				t.Errorf("Expected ItemsNum %d, got %d", tt.wantItemsNum, backpack.ItemsNum)
 			}
 
-			if len(backpack.Elixirs[tt.elixirType]) != tt.count {
-				t.Errorf("Expected %d elixirs in map, got %d", tt.count, len(backpack.Elixirs[tt.elixirType]))
+			if backpack.Elixirs.Len() != tt.count {
+				t.Errorf("Expected %d elixirs in map, got %d", tt.count, backpack.Elixirs.Len())
 			}
 		})
 	}
@@ -408,49 +408,59 @@ func TestBackpack_AddElixir(t *testing.T) {
 func TestBackpack_RemoveElixir(t *testing.T) {
 	tests := []struct {
 		name         string
-		setupFunc    func(*Backpack, *utils.RandomGenerator)
-		removeType   ElixirType
+		setupFunc    func(*Backpack, *utils.RandomGenerator) *Elixir
 		wantError    bool
 		wantItemsNum uint
+		wantListLen  int
 	}{
 		{
 			name: "Remove single elixir",
-			setupFunc: func(b *Backpack, rng *utils.RandomGenerator) {
+			setupFunc: func(b *Backpack, rng *utils.RandomGenerator) *Elixir {
 				elixir := createTestElixir(rng, ElixirTypeStrength)
 				_ = b.AddElixir(elixir)
+				return elixir
 			},
-			removeType:   ElixirTypeStrength,
 			wantError:    false,
 			wantItemsNum: 0,
+			wantListLen:  0,
 		},
 		{
 			name: "Remove first of multiple elixirs",
-			setupFunc: func(b *Backpack, rng *utils.RandomGenerator) {
+			setupFunc: func(b *Backpack, rng *utils.RandomGenerator) *Elixir {
+				var firstElixir *Elixir
 				for i := 0; i < 3; i++ {
 					elixir := createTestElixir(rng, ElixirTypeStrength)
+					if i == 0 {
+						firstElixir = elixir
+					}
 					_ = b.AddElixir(elixir)
 				}
+				return firstElixir
 			},
-			removeType:   ElixirTypeStrength,
 			wantError:    false,
 			wantItemsNum: 2,
+			wantListLen:  2,
 		},
 		{
-			name: "Remove non-existing type returns error",
-			setupFunc: func(b *Backpack, rng *utils.RandomGenerator) {
+			name: "Remove non-existing elixir returns error",
+			setupFunc: func(b *Backpack, rng *utils.RandomGenerator) *Elixir {
 				elixir := createTestElixir(rng, ElixirTypeStrength)
 				_ = b.AddElixir(elixir)
+				// Возвращаем другой экземпляр, которого нет в рюкзаке
+				return createTestElixir(rng, ElixirTypeAgility)
 			},
-			removeType:   ElixirTypeAgility,
 			wantError:    true,
 			wantItemsNum: 1,
+			wantListLen:  1,
 		},
 		{
-			name:         "Remove from empty backpack returns error",
-			setupFunc:    func(b *Backpack, rng *utils.RandomGenerator) {},
-			removeType:   ElixirTypeStrength,
+			name: "Remove from empty backpack returns error",
+			setupFunc: func(b *Backpack, rng *utils.RandomGenerator) *Elixir {
+				return createTestElixir(rng, ElixirTypeStrength)
+			},
 			wantError:    true,
 			wantItemsNum: 0,
+			wantListLen:  0,
 		},
 	}
 
@@ -458,9 +468,9 @@ func TestBackpack_RemoveElixir(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			backpack := NewBackpack()
 			rng := utils.NewRandomGeneratorWithSeed(testBackpackSeed)
-			tt.setupFunc(backpack, rng)
+			elixir := tt.setupFunc(backpack, rng)
 
-			err := backpack.RemoveElixir(tt.removeType)
+			err := backpack.RemoveElixir(elixir)
 
 			if tt.wantError {
 				if err == nil {
@@ -478,6 +488,10 @@ func TestBackpack_RemoveElixir(t *testing.T) {
 
 			if backpack.ItemsNum != tt.wantItemsNum {
 				t.Errorf("Expected ItemsNum %d, got %d", tt.wantItemsNum, backpack.ItemsNum)
+			}
+
+			if backpack.Elixirs.Len() != tt.wantListLen {
+				t.Errorf("Expected list length %d, got %d", tt.wantListLen, backpack.Elixirs.Len())
 			}
 		})
 	}
@@ -498,8 +512,8 @@ func TestBackpack_AddScroll(t *testing.T) {
 		t.Errorf("Expected ItemsNum 1, got %d", backpack.ItemsNum)
 	}
 
-	if len(backpack.Scrolls[ScrollTypeStrength]) != 1 {
-		t.Errorf("Expected 1 scroll in map, got %d", len(backpack.Scrolls[ScrollTypeStrength]))
+	if backpack.Scrolls.Len() != 1 {
+		t.Errorf("Expected 1 scroll in list, got %d", backpack.Scrolls.Len())
 	}
 }
 
@@ -510,7 +524,7 @@ func TestBackpack_RemoveScroll(t *testing.T) {
 	scroll := createTestScroll(rng, ScrollTypeStrength)
 	_ = backpack.AddScroll(scroll)
 
-	err := backpack.RemoveScroll(ScrollTypeStrength)
+	err := backpack.RemoveScroll(scroll)
 
 	if err != nil {
 		t.Errorf("Expected no error, got: %v", err)
@@ -520,8 +534,8 @@ func TestBackpack_RemoveScroll(t *testing.T) {
 		t.Errorf("Expected ItemsNum 0, got %d", backpack.ItemsNum)
 	}
 
-	if len(backpack.Scrolls[ScrollTypeStrength]) != 0 {
-		t.Errorf("Expected 0 scrolls in map, got %d", len(backpack.Scrolls[ScrollTypeStrength]))
+	if backpack.Scrolls.Len() != 0 {
+		t.Errorf("Expected 0 scrolls in list, got %d", backpack.Scrolls.Len())
 	}
 }
 
@@ -540,8 +554,8 @@ func TestBackpack_AddFood(t *testing.T) {
 		t.Errorf("Expected ItemsNum 1, got %d", backpack.ItemsNum)
 	}
 
-	if len(backpack.Foods[FoodTypeBread]) != 1 {
-		t.Errorf("Expected 1 food in map, got %d", len(backpack.Foods[FoodTypeBread]))
+	if backpack.Foods.Len() != 1 {
+		t.Errorf("Expected 1 food in list, got %d", backpack.Foods.Len())
 	}
 }
 
@@ -552,7 +566,7 @@ func TestBackpack_RemoveFood(t *testing.T) {
 	food := createTestFood(rng, FoodTypeBread)
 	_ = backpack.AddFood(food)
 
-	err := backpack.RemoveFood(FoodTypeBread)
+	err := backpack.RemoveFood(food)
 
 	if err != nil {
 		t.Errorf("Expected no error, got: %v", err)
@@ -560,6 +574,10 @@ func TestBackpack_RemoveFood(t *testing.T) {
 
 	if backpack.ItemsNum != 0 {
 		t.Errorf("Expected ItemsNum 0, got %d", backpack.ItemsNum)
+	}
+
+	if backpack.Foods.Len() != 0 {
+		t.Errorf("Expected 0 foods in list, got %d", backpack.Foods.Len())
 	}
 }
 
@@ -578,8 +596,8 @@ func TestBackpack_AddWeapon(t *testing.T) {
 		t.Errorf("Expected ItemsNum 1, got %d", backpack.ItemsNum)
 	}
 
-	if len(backpack.Weapons[WeaponTypeSword]) != 1 {
-		t.Errorf("Expected 1 weapon in map, got %d", len(backpack.Weapons[WeaponTypeSword]))
+	if backpack.Weapons.Len() != 1 {
+		t.Errorf("Expected 1 weapon in list, got %d", backpack.Weapons.Len())
 	}
 }
 
@@ -590,7 +608,7 @@ func TestBackpack_RemoveWeapon(t *testing.T) {
 	weapon := createTestWeapon(rng, WeaponTypeSword)
 	_ = backpack.AddWeapon(weapon)
 
-	err := backpack.RemoveWeapon(WeaponTypeSword)
+	err := backpack.RemoveWeapon(weapon)
 
 	if err != nil {
 		t.Errorf("Expected no error, got: %v", err)
@@ -598,6 +616,10 @@ func TestBackpack_RemoveWeapon(t *testing.T) {
 
 	if backpack.ItemsNum != 0 {
 		t.Errorf("Expected ItemsNum 0, got %d", backpack.ItemsNum)
+	}
+
+	if backpack.Weapons.Len() != 0 {
+		t.Errorf("Expected 0 weapons in list, got %d", backpack.Weapons.Len())
 	}
 }
 
@@ -691,20 +713,20 @@ func TestBackpack_MixedItems(t *testing.T) {
 		t.Errorf("Expected ItemsNum 4, got %d (treasure doesn't count)", backpack.ItemsNum)
 	}
 
-	if len(backpack.Elixirs) != 1 {
-		t.Errorf("Expected 1 elixir type, got %d", len(backpack.Elixirs))
+	if backpack.Elixirs.Len() != 1 {
+		t.Errorf("Expected 1 elixir in list, got %d", backpack.Elixirs.Len())
 	}
 
-	if len(backpack.Scrolls) != 1 {
-		t.Errorf("Expected 1 scroll type, got %d", len(backpack.Scrolls))
+	if backpack.Scrolls.Len() != 1 {
+		t.Errorf("Expected 1 scroll in list, got %d", backpack.Scrolls.Len())
 	}
 
-	if len(backpack.Foods) != 1 {
-		t.Errorf("Expected 1 food type, got %d", len(backpack.Foods))
+	if backpack.Foods.Len() != 1 {
+		t.Errorf("Expected 1 food in list, got %d", backpack.Foods.Len())
 	}
 
-	if len(backpack.Weapons) != 1 {
-		t.Errorf("Expected 1 weapon type, got %d", len(backpack.Weapons))
+	if backpack.Weapons.Len() != 1 {
+		t.Errorf("Expected 1 weapon in list, got %d", backpack.Weapons.Len())
 	}
 
 	if backpack.Treasures <= 0 {
@@ -716,19 +738,12 @@ func TestBackpack_FillAndEmpty(t *testing.T) {
 	backpack := NewBackpack()
 	rng := utils.NewRandomGeneratorWithSeed(testBackpackSeed)
 
-	// Заполняем рюкзак разными типами предметов
-	types := []ElixirType{
-		ElixirTypeStrength,
-		ElixirTypeAgility,
-		ElixirTypeDwarfism,
-		ElixirTypeGiantism,
-		ElixirTypeMystery,
-	}
-
+	// Заполняем рюкзак эликсирами и сохраняем ссылки
+	elixirs := make([]*Elixir, 0, DefaultBackpackCapacity)
 	itemsAdded := uint(0)
 	for i := uint(0); i < DefaultBackpackCapacity; i++ {
-		elixirType := types[i%uint(len(types))]
-		elixir := createTestElixir(rng, elixirType)
+		elixir := createTestElixir(rng, ElixirTypeStrength)
+		elixirs = append(elixirs, elixir)
 		if err := backpack.AddElixir(elixir); err != nil {
 			t.Fatalf("Failed to add item %d: %v", i, err)
 		}
@@ -743,18 +758,20 @@ func TestBackpack_FillAndEmpty(t *testing.T) {
 		t.Errorf("Expected ItemsNum %d, got %d", itemsAdded, backpack.ItemsNum)
 	}
 
-	// Опустошаем рюкзак
-	for _, elixirType := range types {
-		for {
-			err := backpack.RemoveElixir(elixirType)
-			if err != nil {
-				break
-			}
+	// Опустошаем рюкзак, удаляя конкретные экземпляры
+	for _, elixir := range elixirs {
+		err := backpack.RemoveElixir(elixir)
+		if err != nil {
+			t.Fatalf("Failed to remove elixir: %v", err)
 		}
 	}
 
 	if !backpack.IsEmpty() {
 		t.Errorf("Expected backpack to be empty, but ItemsNum=%d", backpack.ItemsNum)
+	}
+
+	if backpack.Elixirs.Len() != 0 {
+		t.Errorf("Expected empty elixirs list, got length %d", backpack.Elixirs.Len())
 	}
 }
 
@@ -762,51 +779,53 @@ func TestBackpack_MultipleItemsSameType(t *testing.T) {
 	backpack := NewBackpack()
 	rng := utils.NewRandomGeneratorWithSeed(testBackpackSeed)
 
-	// Добавляем несколько предметов одного типа
+	// Добавляем несколько предметов одного типа и сохраняем ссылки
 	count := 5
+	elixirs := make([]*Elixir, 0, count)
 	for i := 0; i < count; i++ {
 		elixir := createTestElixir(rng, ElixirTypeStrength)
+		elixirs = append(elixirs, elixir)
 		if err := backpack.AddElixir(elixir); err != nil {
 			t.Fatalf("Failed to add elixir %d: %v", i, err)
 		}
 	}
 
-	if len(backpack.Elixirs[ElixirTypeStrength]) != count {
-		t.Errorf("Expected %d elixirs, got %d", count, len(backpack.Elixirs[ElixirTypeStrength]))
+	if backpack.Elixirs.Len() != count {
+		t.Errorf("Expected %d elixirs in list, got %d", count, backpack.Elixirs.Len())
 	}
 
-	// Удаляем по одному
-	for i := count - 1; i >= 0; i-- {
-		err := backpack.RemoveElixir(ElixirTypeStrength)
+	// Удаляем по одному (удаляем конкретные экземпляры)
+	for i := 0; i < count; i++ {
+		err := backpack.RemoveElixir(elixirs[i])
 		if err != nil {
 			t.Fatalf("Failed to remove elixir at iteration %d: %v", i, err)
 		}
 
-		expectedCount := i
-		actualCount := len(backpack.Elixirs[ElixirTypeStrength])
+		expectedCount := count - i - 1
+		actualCount := backpack.Elixirs.Len()
 		if actualCount != expectedCount {
 			t.Errorf("After removal %d: expected %d elixirs, got %d",
-				count-i, expectedCount, actualCount)
+				i+1, expectedCount, actualCount)
 		}
 	}
 
-	// Проверяем, что тип удален из map
-	if _, exists := backpack.Elixirs[ElixirTypeStrength]; exists && len(backpack.Elixirs[ElixirTypeStrength]) > 0 {
-		t.Error("Expected ElixirTypeStrength to be removed from map or have empty slice")
+	// Проверяем, что список пуст
+	if backpack.Elixirs.Len() != 0 {
+		t.Errorf("Expected empty list, got length %d", backpack.Elixirs.Len())
 	}
 }
 
-func TestBackpack_RemoveAfterMapCleanup(t *testing.T) {
+func TestBackpack_RemoveAfterListCleanup(t *testing.T) {
 	backpack := NewBackpack()
 	rng := utils.NewRandomGeneratorWithSeed(testBackpackSeed)
 
 	// Добавляем и удаляем один предмет
 	elixir := createTestElixir(rng, ElixirTypeStrength)
 	_ = backpack.AddElixir(elixir)
-	_ = backpack.RemoveElixir(ElixirTypeStrength)
+	_ = backpack.RemoveElixir(elixir)
 
 	// Попытка удалить снова должна вернуть ошибку
-	err := backpack.RemoveElixir(ElixirTypeStrength)
+	err := backpack.RemoveElixir(elixir)
 
 	if err == nil {
 		t.Error("Expected error when removing non-existing item")
@@ -815,6 +834,11 @@ func TestBackpack_RemoveAfterMapCleanup(t *testing.T) {
 	var expectedErr ItemIsNotInBackpackError
 	if !errors.As(err, &expectedErr) {
 		t.Errorf("Expected ItemIsNotInBackpackError, got %T", err)
+	}
+
+	// Проверяем, что список пуст
+	if backpack.Elixirs.Len() != 0 {
+		t.Errorf("Expected empty list, got length %d", backpack.Elixirs.Len())
 	}
 }
 
