@@ -7,13 +7,13 @@ import (
 )
 
 const (
-	ElixirDurationMin    uint32 = 5
-	ElixirMaxDurationMax uint32 = 30
+	ElixirDurationMin uint32 = 5
+	ElixirDurationMax uint32 = 30
 )
 
 type ElixirDurationStepsRange = primitives.Range[uint32]
 
-var defaultDurationRange = ElixirDurationStepsRange{Min: ElixirDurationMin, Max: ElixirMaxDurationMax}
+var defaultDurationRange = ElixirDurationStepsRange{Min: ElixirDurationMin, Max: ElixirDurationMax}
 
 type ElixirType string
 
@@ -23,6 +23,7 @@ const (
 	ElixirTypeDwarfism ElixirType = "Dwarfism" // +Agility -Strength
 	ElixirTypeGiantism ElixirType = "Giantism" // +Strength -Agility
 	ElixirTypeMystery  ElixirType = "Mystery"  // All random
+	ElixirTypeCustom   ElixirType = "Custom"   // For custom elixir - dynamicly or from external data created
 )
 
 type ElixirConfig struct {

@@ -2,8 +2,10 @@ package world
 
 import (
 	"errors"
+	"fmt"
 	"gogue/internal/model/primitives"
 	"math/rand"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -177,7 +179,7 @@ func TestLevel_GeneratePassages_Deterministic(t *testing.T) {
 				{
 					DoorOne: primitives.Point2D[int]{X: 25, Y: 3},
 					DoorTwo: primitives.Point2D[int]{X: 35, Y: 4},
-					Passage: []primitives.Point2D[int]{
+					Way: []primitives.Point2D[int]{
 						{X: 26, Y: 3}, {X: 27, Y: 3}, {X: 28, Y: 3}, {X: 29, Y: 3}, {X: 30, Y: 3},
 						{X: 30, Y: 4}, {X: 31, Y: 4}, {X: 32, Y: 4}, {X: 33, Y: 4}, {X: 34, Y: 4},
 					},
@@ -185,7 +187,7 @@ func TestLevel_GeneratePassages_Deterministic(t *testing.T) {
 				{
 					DoorOne: primitives.Point2D[int]{X: 9, Y: 8},
 					DoorTwo: primitives.Point2D[int]{X: 21, Y: 10},
-					Passage: []primitives.Point2D[int]{
+					Way: []primitives.Point2D[int]{
 						{X: 9, Y: 9}, {X: 10, Y: 9}, {X: 11, Y: 9}, {X: 12, Y: 9},
 						{X: 13, Y: 9}, {X: 14, Y: 9}, {X: 15, Y: 9}, {X: 16, Y: 9},
 						{X: 17, Y: 9}, {X: 18, Y: 9}, {X: 19, Y: 9}, {X: 20, Y: 9}, {X: 21, Y: 9},
@@ -194,7 +196,7 @@ func TestLevel_GeneratePassages_Deterministic(t *testing.T) {
 				{
 					DoorOne: primitives.Point2D[int]{X: 24, Y: 12},
 					DoorTwo: primitives.Point2D[int]{X: 39, Y: 12},
-					Passage: []primitives.Point2D[int]{
+					Way: []primitives.Point2D[int]{
 						{X: 25, Y: 12}, {X: 26, Y: 12}, {X: 27, Y: 12}, {X: 28, Y: 12}, {X: 29, Y: 12},
 						{X: 30, Y: 12}, {X: 31, Y: 12}, {X: 32, Y: 12}, {X: 33, Y: 12}, {X: 34, Y: 12},
 						{X: 35, Y: 12}, {X: 36, Y: 12}, {X: 37, Y: 12}, {X: 38, Y: 12},
@@ -203,14 +205,14 @@ func TestLevel_GeneratePassages_Deterministic(t *testing.T) {
 				{
 					DoorOne: primitives.Point2D[int]{X: 13, Y: 17},
 					DoorTwo: primitives.Point2D[int]{X: 11, Y: 19},
-					Passage: []primitives.Point2D[int]{
+					Way: []primitives.Point2D[int]{
 						{X: 13, Y: 18}, {X: 12, Y: 18}, {X: 11, Y: 18},
 					},
 				},
 				{
 					DoorOne: primitives.Point2D[int]{X: 28, Y: 20},
 					DoorTwo: primitives.Point2D[int]{X: 37, Y: 24},
-					Passage: []primitives.Point2D[int]{
+					Way: []primitives.Point2D[int]{
 						{X: 29, Y: 20}, {X: 30, Y: 20}, {X: 31, Y: 20}, {X: 31, Y: 21},
 						{X: 31, Y: 22}, {X: 31, Y: 23}, {X: 31, Y: 24}, {X: 32, Y: 24},
 						{X: 33, Y: 24}, {X: 34, Y: 24}, {X: 35, Y: 24}, {X: 36, Y: 24},
@@ -219,7 +221,7 @@ func TestLevel_GeneratePassages_Deterministic(t *testing.T) {
 				{
 					DoorOne: primitives.Point2D[int]{X: 47, Y: 24},
 					DoorTwo: primitives.Point2D[int]{X: 66, Y: 23},
-					Passage: []primitives.Point2D[int]{
+					Way: []primitives.Point2D[int]{
 						{X: 48, Y: 24}, {X: 49, Y: 24}, {X: 50, Y: 24}, {X: 51, Y: 24}, {X: 52, Y: 24},
 						{X: 53, Y: 24}, {X: 54, Y: 24}, {X: 55, Y: 24}, {X: 56, Y: 24}, {X: 57, Y: 24},
 						{X: 57, Y: 23}, {X: 58, Y: 23}, {X: 59, Y: 23}, {X: 60, Y: 23}, {X: 61, Y: 23},
@@ -229,7 +231,7 @@ func TestLevel_GeneratePassages_Deterministic(t *testing.T) {
 				{
 					DoorOne: primitives.Point2D[int]{X: 66, Y: 16},
 					DoorTwo: primitives.Point2D[int]{X: 69, Y: 21},
-					Passage: []primitives.Point2D[int]{
+					Way: []primitives.Point2D[int]{
 						{X: 66, Y: 17}, {X: 67, Y: 17}, {X: 68, Y: 17},
 						{X: 69, Y: 17}, {X: 69, Y: 18}, {X: 69, Y: 19}, {X: 69, Y: 20},
 					},
@@ -237,7 +239,7 @@ func TestLevel_GeneratePassages_Deterministic(t *testing.T) {
 				{
 					DoorOne: primitives.Point2D[int]{X: 68, Y: 6},
 					DoorTwo: primitives.Point2D[int]{X: 63, Y: 11},
-					Passage: []primitives.Point2D[int]{
+					Way: []primitives.Point2D[int]{
 						{X: 68, Y: 7}, {X: 68, Y: 8}, {X: 68, Y: 9}, {X: 67, Y: 9},
 						{X: 66, Y: 9}, {X: 65, Y: 9}, {X: 64, Y: 9}, {X: 63, Y: 9}, {X: 63, Y: 10},
 					},
@@ -245,7 +247,7 @@ func TestLevel_GeneratePassages_Deterministic(t *testing.T) {
 				{
 					DoorOne: primitives.Point2D[int]{X: 39, Y: 8},
 					DoorTwo: primitives.Point2D[int]{X: 41, Y: 11},
-					Passage: []primitives.Point2D[int]{
+					Way: []primitives.Point2D[int]{
 						{X: 39, Y: 9}, {X: 40, Y: 9}, {X: 41, Y: 9}, {X: 41, Y: 10},
 					},
 				},
@@ -282,11 +284,11 @@ func TestLevel_GeneratePassages_Deterministic(t *testing.T) {
 					t.Errorf("Passage at index %d field 'DoorOne' mismatches: expected %v, got %v",
 						i, wantPassage.DoorTwo, gotPassage.DoorTwo)
 				}
-				if len(gotPassage.Passage) != len(wantPassage.Passage) {
-					t.Errorf("Passage at index %d Passage slice length mismatch: expected %d, got %d", i, len(wantPassage.Passage), len(gotPassage.Passage))
+				if len(gotPassage.Way) != len(wantPassage.Way) {
+					t.Errorf("Passage at index %d Passage slice length mismatch: expected %d, got %d", i, len(wantPassage.Way), len(gotPassage.Way))
 				} else {
-					for j, wantPoint := range wantPassage.Passage {
-						gotPoint := gotPassage.Passage[j]
+					for j, wantPoint := range wantPassage.Way {
+						gotPoint := gotPassage.Way[j]
 						if gotPoint != wantPoint {
 							t.Errorf("Passage at index %d, point in Passage at index %d mismatch: expected %+v, got %+v", i, j, wantPoint, gotPoint)
 						}
@@ -610,9 +612,9 @@ func TestLevel_GetStartPositionForPlayer(t *testing.T) {
 		if err != nil {
 			t.Fatalf("GenerateLevel returned unexpected error: %v", err)
 		}
-		playerStartPoint, err := level.GetStartPositionForPlayer()
+		playerStartPoint, err := level.GenerateStartPlayerPosition()
 		if err != nil {
-			t.Fatalf("GetStartPositionForPlayer returned unexpected error: %v", err)
+			t.Fatalf("GenerateStartPlayerPosition returned unexpected error: %v", err)
 		}
 
 		if wantPlayerStartPoint != *playerStartPoint {
@@ -623,12 +625,85 @@ func TestLevel_GetStartPositionForPlayer(t *testing.T) {
 		wantErrorText := "should be 9 rooms"
 		source := rand.New(rand.NewSource(randomSeedTest))
 		level := NewLevel(source)
-		_, err := level.GetStartPositionForPlayer()
+		_, err := level.GenerateStartPlayerPosition()
 		if err == nil {
-			t.Fatalf("GetStartPositionForPlayer returned nil error, expected %q", wantErrorText)
+			t.Fatalf("GenerateStartPlayerPosition returned nil error, expected %q", wantErrorText)
 		}
 		if !strings.Contains(err.Error(), wantErrorText) {
 			t.Errorf("Expected error to contain %q, got %q", wantErrorText, err.Error())
 		}
 	})
+}
+
+func TestLevel_addDoorsAtRoom(t *testing.T) {
+	tests := []struct {
+		name             string
+		twoRoomsIndexes  [2]uint
+		doorOne          primitives.Point2D[int]
+		doorTwo          primitives.Point2D[int]
+		wantDoorsInRooms []Room
+		wantErr          error
+	}{
+		{
+			name:            "Add doors to rooms",
+			twoRoomsIndexes: [2]uint{0, 1},
+			doorOne:         primitives.Point2D[int]{X: 5, Y: 5},
+			doorTwo:         primitives.Point2D[int]{X: 6, Y: 6},
+			wantDoorsInRooms: []Room{
+				{Doors: []primitives.Point2D[int]{{X: 5, Y: 5}}},
+				{Doors: []primitives.Point2D[int]{{X: 6, Y: 6}}},
+			},
+			wantErr: nil,
+		},
+		{
+			name:            "Add doors using same room index twice",
+			twoRoomsIndexes: [2]uint{40, 40},
+			doorOne:         primitives.Point2D[int]{X: 0, Y: 0},
+			doorTwo:         primitives.Point2D[int]{X: 0, Y: 0},
+			wantErr:         fmt.Errorf("rooms indexes should be in range from 0 to %d", roomsCount-1),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			source := rand.New(rand.NewSource(randomSeedTest))
+			testSize := primitives.Size2D[uint]{Height: 30, Width: 90}
+			level := NewLevel(source)
+			err := level.generateNineRooms(testSize)
+			if err != nil {
+				t.Fatalf("generateNineRooms returned an error: %v", err)
+			}
+
+			err = level.addDoorsAtRoom(tt.twoRoomsIndexes, tt.doorOne, tt.doorTwo)
+
+			if tt.wantErr != nil {
+				if err == nil {
+					t.Errorf("addDoorsAtRoom() expected error %v, but got nil", tt.wantErr)
+					return
+				}
+				if err.Error() != tt.wantErr.Error() {
+					t.Errorf("addDoorsAtRoom() expected error %v, but got %v", tt.wantErr, err)
+					return
+				}
+			} else {
+				if err != nil {
+					t.Errorf("addDoorsAtRoom() expected no error, but got %v", err)
+					return
+				}
+
+				if len(level.Rooms) < 2 {
+					t.Errorf("addDoorsAtRoom() expected at least 2 rooms, but got %d", len(level.Rooms))
+					return
+				}
+
+				if !reflect.DeepEqual(level.Rooms[0].Doors, tt.wantDoorsInRooms[0].Doors) {
+					t.Errorf("addDoorsAtRoom() room 0 doors = %v, want %v", level.Rooms[0].Doors, tt.wantDoorsInRooms[0].Doors)
+				}
+
+				if !reflect.DeepEqual(level.Rooms[1].Doors, tt.wantDoorsInRooms[1].Doors) {
+					t.Errorf("addDoorsAtRoom() room 1 doors = %v, want %v", level.Rooms[1].Doors, tt.wantDoorsInRooms[1].Doors)
+				}
+			}
+		})
+	}
 }

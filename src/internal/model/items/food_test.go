@@ -48,10 +48,14 @@ func TestFood_NewFood_BuiltinConfig(t *testing.T) {
 			rng := utils.NewRandomGeneratorWithSeed(defaultFoodTestSeed)
 			box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 
-			food := NewFood(rng, box, tt.foodType)
+			food := NewFoodBuiltin(rng, box, tt.foodType)
 
 			if food == nil {
 				t.Fatal("Expected valid food, got nil")
+			}
+
+			if food.Type != tt.foodType {
+				t.Errorf("Expected type %q, got %q", tt.foodType, food.Type)
 			}
 
 			if food.Name != tt.expectedName {
@@ -60,10 +64,10 @@ func TestFood_NewFood_BuiltinConfig(t *testing.T) {
 
 			// Verify attributes match the config's ranges
 			config := GetFoodConfig(tt.foodType)
-			if food.AffectedAttributes.Health < config.HealthRange.Min ||
-				food.AffectedAttributes.Health > config.HealthRange.Max {
+			if food.Effect.Attributes.Health < config.HealthRange.Min ||
+				food.Effect.Attributes.Health > config.HealthRange.Max {
 				t.Errorf("Health out of config range: got %.2f, want [%.2f, %.2f]",
-					food.AffectedAttributes.Health, config.HealthRange.Min, config.HealthRange.Max)
+					food.Effect.Attributes.Health, config.HealthRange.Min, config.HealthRange.Max)
 			}
 
 			if food.Name != string(config.Type) {
@@ -76,11 +80,11 @@ func TestFood_NewFood_BuiltinConfig(t *testing.T) {
 			}
 
 			// Other attributes should be zero
-			if food.AffectedAttributes.Strength != 0 {
-				t.Errorf("Expected Strength=0, got %f", food.AffectedAttributes.Strength)
+			if food.Effect.Attributes.Strength != 0 {
+				t.Errorf("Expected Strength=0, got %f", food.Effect.Attributes.Strength)
 			}
-			if food.AffectedAttributes.Agility != 0 {
-				t.Errorf("Expected Agility=0, got %f", food.AffectedAttributes.Agility)
+			if food.Effect.Attributes.Agility != 0 {
+				t.Errorf("Expected Agility=0, got %f", food.Effect.Attributes.Agility)
 			}
 		})
 	}
@@ -174,11 +178,15 @@ func TestFood_NewFoodByConfig(t *testing.T) {
 				t.Fatal("Expected valid food, got nil")
 			}
 
+			if food.Type != tt.config.Type {
+				t.Errorf("Expected type %q, got %q", tt.config.Type, food.Type)
+			}
+
 			// Verify attributes are within config ranges
-			if food.AffectedAttributes.Health < tt.config.HealthRange.Min ||
-				food.AffectedAttributes.Health > tt.config.HealthRange.Max {
+			if food.Effect.Attributes.Health < tt.config.HealthRange.Min ||
+				food.Effect.Attributes.Health > tt.config.HealthRange.Max {
 				t.Errorf("Health out of range: got %.2f, want [%.2f, %.2f]",
-					food.AffectedAttributes.Health, tt.config.HealthRange.Min, tt.config.HealthRange.Max)
+					food.Effect.Attributes.Health, tt.config.HealthRange.Min, tt.config.HealthRange.Max)
 			}
 
 			// Verify name matches config type
@@ -193,9 +201,9 @@ func TestFood_NewFoodByConfig(t *testing.T) {
 
 			// For fixed-value range, verify exact value
 			if tt.config.HealthRange.Min == tt.config.HealthRange.Max {
-				if food.AffectedAttributes.Health != tt.config.HealthRange.Min {
+				if food.Effect.Attributes.Health != tt.config.HealthRange.Min {
 					t.Errorf("Expected exact Health=%f for fixed range, got %f",
-						tt.config.HealthRange.Min, food.AffectedAttributes.Health)
+						tt.config.HealthRange.Min, food.Effect.Attributes.Health)
 				}
 			}
 		})
@@ -236,15 +244,15 @@ func TestFood_NewFood_Deterministic(t *testing.T) {
 
 			// Create first food
 			rng1 := utils.NewRandomGeneratorWithSeed(tt.seed)
-			food1 := NewFood(rng1, box, tt.foodType)
+			food1 := NewFoodBuiltin(rng1, box, tt.foodType)
 
 			// Create second food with same seed
 			rng2 := utils.NewRandomGeneratorWithSeed(tt.seed)
-			food2 := NewFood(rng2, box, tt.foodType)
+			food2 := NewFoodBuiltin(rng2, box, tt.foodType)
 
 			// Verify they are identical
-			if food1.AffectedAttributes.Health != food2.AffectedAttributes.Health {
-				t.Errorf("Health mismatch: %f != %f", food1.AffectedAttributes.Health, food2.AffectedAttributes.Health)
+			if food1.Effect.Attributes.Health != food2.Effect.Attributes.Health {
+				t.Errorf("Health mismatch: %f != %f", food1.Effect.Attributes.Health, food2.Effect.Attributes.Health)
 			}
 
 			if food1.Name != food2.Name {
@@ -285,8 +293,8 @@ func TestFood_NewFood_Randomness(t *testing.T) {
 			// Generate multiple foods with different seeds
 			for i := 0; i < tt.iterations; i++ {
 				rng := utils.NewRandomGeneratorWithSeed(int64(i))
-				food := NewFood(rng, box, tt.foodType)
-				healthValues[food.AffectedAttributes.Health] = true
+				food := NewFoodBuiltin(rng, box, tt.foodType)
+				healthValues[food.Effect.Attributes.Health] = true
 			}
 
 			// Check that we got varied values (at least 5 different values)
@@ -305,11 +313,11 @@ func TestFood_NewFood_BeerProducesFixedValue(t *testing.T) {
 
 	for i := 0; i < iterations; i++ {
 		rng := utils.NewRandomGeneratorWithSeed(int64(i))
-		food := NewFood(rng, box, FoodTypeBeer)
+		food := NewFoodBuiltin(rng, box, FoodTypeBeer)
 
-		if food.AffectedAttributes.Health != expectedHealth {
+		if food.Effect.Attributes.Health != expectedHealth {
 			t.Errorf("Iteration %d: Expected Health=%f, got %f",
-				i, expectedHealth, food.AffectedAttributes.Health)
+				i, expectedHealth, food.Effect.Attributes.Health)
 		}
 	}
 }
@@ -318,7 +326,7 @@ func TestFood_NewFood_UnknownTypeDefaultsToMistery(t *testing.T) {
 	rng := utils.NewRandomGeneratorWithSeed(defaultFoodTestSeed)
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 
-	food := NewFood(rng, box, "Unknown Food Type")
+	food := NewFoodBuiltin(rng, box, "Unknown Food Type")
 
 	if food == nil {
 		t.Fatal("Expected valid food, got nil")
@@ -330,17 +338,17 @@ func TestFood_NewFood_UnknownTypeDefaultsToMistery(t *testing.T) {
 
 	// Should use Mistery config ranges
 	misteryConfig := GetFoodConfig(FoodTypeMistery)
-	if food.AffectedAttributes.Health < misteryConfig.HealthRange.Min ||
-		food.AffectedAttributes.Health > misteryConfig.HealthRange.Max {
+	if food.Effect.Attributes.Health < misteryConfig.HealthRange.Min ||
+		food.Effect.Attributes.Health > misteryConfig.HealthRange.Max {
 		t.Errorf("Health out of Mistery config range: got %.2f, want [%.2f, %.2f]",
-			food.AffectedAttributes.Health, misteryConfig.HealthRange.Min, misteryConfig.HealthRange.Max)
+			food.Effect.Attributes.Health, misteryConfig.HealthRange.Min, misteryConfig.HealthRange.Max)
 	}
 }
 
 func TestFood_NewFood_ZeroSizedBoxIsOk(t *testing.T) {
 	rng := utils.NewRandomGeneratorWithSeed(defaultFoodTestSeed)
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 0, Height: 0}}
-	food := NewFood(rng, box, FoodTypeMeat)
+	food := NewFoodBuiltin(rng, box, FoodTypeMeat)
 
 	if food == nil {
 		t.Fatal("Expected valid food with zero-sized box")
@@ -383,7 +391,7 @@ func TestFood_NewFood_VariousPositions(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			rng := utils.NewRandomGeneratorWithSeed(defaultFoodTestSeed)
 			box := primitives.Box{Point: tt.position, Size: tt.size}
-			food := NewFood(rng, box, FoodTypeBread)
+			food := NewFoodBuiltin(rng, box, FoodTypeBread)
 
 			if food == nil {
 				t.Fatal("Expected valid food")
@@ -406,7 +414,9 @@ func TestFood_AsFood_ValidPointer(t *testing.T) {
 			Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
 			Name:  "Test Food",
 		},
-		AffectedAttributes: primitives.Attributes{Health: 25},
+		Effect: &primitives.Effect{
+			Attributes: primitives.Attributes{Health: 25},
+		},
 	}
 
 	result := AsFood(input)
@@ -415,8 +425,8 @@ func TestFood_AsFood_ValidPointer(t *testing.T) {
 		t.Fatal("Expected non-nil result, got nil")
 	}
 
-	if result.AffectedAttributes.Health != 25 {
-		t.Errorf("Expected Health 25, got %f", result.AffectedAttributes.Health)
+	if result.Effect.Attributes.Health != 25 {
+		t.Errorf("Expected Health 25, got %f", result.Effect.Attributes.Health)
 	}
 
 	if result != input {
@@ -459,8 +469,13 @@ func TestFood_AsFood_ElixirTypeIsNil(t *testing.T) {
 			Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
 			Name:  "Test Elixir",
 		},
-		AffectedAttributes: primitives.Attributes{Strength: 10},
-		EffectDuration:     20,
+		Effect: &primitives.Effect{
+			Attributes: primitives.Attributes{Strength: 10},
+			Duration: primitives.EffectDuration{
+				Type:  primitives.EffectDurationTypeAllTemporary,
+				Steps: 20,
+			},
+		},
 	}
 
 	result := AsFood(input)
@@ -471,34 +486,34 @@ func TestFood_AsFood_ElixirTypeIsNil(t *testing.T) {
 }
 
 // Benchmarks
-func BenchmarkFood_NewFood(b *testing.B) {
+func BenchmarkFood_NewFoodBuiltin(b *testing.B) {
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 
 	b.Run("Potatoes", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			rng := utils.NewRandomGeneratorWithSeed(int64(i))
-			_ = NewFood(rng, box, FoodTypePotatoes)
+			_ = NewFoodBuiltin(rng, box, FoodTypePotatoes)
 		}
 	})
 
 	b.Run("Meat", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			rng := utils.NewRandomGeneratorWithSeed(int64(i))
-			_ = NewFood(rng, box, FoodTypeMeat)
+			_ = NewFoodBuiltin(rng, box, FoodTypeMeat)
 		}
 	})
 
 	b.Run("Mistery", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			rng := utils.NewRandomGeneratorWithSeed(int64(i))
-			_ = NewFood(rng, box, FoodTypeMistery)
+			_ = NewFoodBuiltin(rng, box, FoodTypeMistery)
 		}
 	})
 
 	b.Run("Beer", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			rng := utils.NewRandomGeneratorWithSeed(int64(i))
-			_ = NewFood(rng, box, FoodTypeBeer)
+			_ = NewFoodBuiltin(rng, box, FoodTypeBeer)
 		}
 	})
 }
@@ -524,7 +539,9 @@ func BenchmarkFood_AsFood(b *testing.B) {
 			Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
 			Name:  "Test Food",
 		},
-		AffectedAttributes: primitives.Attributes{Health: 25},
+		Effect: &primitives.Effect{
+			Attributes: primitives.Attributes{Health: 25},
+		},
 	}
 
 	b.ResetTimer()

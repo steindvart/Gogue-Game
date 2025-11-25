@@ -7,19 +7,21 @@ import (
 
 type Treasure struct {
 	*Item
+	Type  TreasureType
 	Value int32
 }
 
-func NewTreasure(rnd *utils.RandomGenerator, box primitives.Box, t TreasureType) *Treasure {
-	cfg := GetTreasureConfig(t)
-
+func NewTreasure(box primitives.Box, t TreasureType, value int32) *Treasure {
 	return &Treasure{
-		Item: &Item{
-			Shape: box,
-			Name:  string(cfg.Type),
-		},
-		Value: cfg.GenerateValue(rnd),
+		Item:  &Item{Shape: box, Name: string(t)},
+		Type:  t,
+		Value: value,
 	}
+}
+
+func NewTreasureBuiltin(rnd *utils.RandomGenerator, box primitives.Box, t TreasureType) *Treasure {
+	treasure, _ := NewTreasureByConfig(rnd, box, GetTreasureConfig(t))
+	return treasure
 }
 
 func NewTreasureByConfig(rnd *utils.RandomGenerator, box primitives.Box, cfg TreasureConfig) (*Treasure, error) {
@@ -27,13 +29,7 @@ func NewTreasureByConfig(rnd *utils.RandomGenerator, box primitives.Box, cfg Tre
 		return nil, err
 	}
 
-	return &Treasure{
-		Item: &Item{
-			Shape: box,
-			Name:  string(cfg.Type),
-		},
-		Value: cfg.GenerateValue(rnd),
-	}, nil
+	return NewTreasure(box, cfg.Type, cfg.GenerateValue(rnd)), nil
 }
 
 func (tr *Treasure) Take() int32 {

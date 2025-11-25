@@ -17,6 +17,8 @@ const (
 
 	// No random health food
 	FoodTypeBeer FoodType = "Beer" // +Health(20-20)
+
+	FoodTypeCustom FoodType = "Custom" // For custom food - dynamicly or from external data created
 )
 
 type FoodConfig struct {

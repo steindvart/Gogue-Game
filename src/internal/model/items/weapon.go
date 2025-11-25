@@ -7,19 +7,21 @@ import (
 
 type Weapon struct {
 	*Item
-	AffectedAttributes primitives.Attributes
+	*primitives.Effect
+	Type WeaponType
 }
 
-func NewWeapon(rnd *utils.RandomGenerator, box primitives.Box, t WeaponType) *Weapon {
-	cfg := GetWeaponConfig(t)
-
+func NewWeapon(box primitives.Box, t WeaponType, e *primitives.Effect) *Weapon {
 	return &Weapon{
-		Item: &Item{
-			Shape: box,
-			Name:  string(cfg.Type),
-		},
-		AffectedAttributes: cfg.GenerateAttributes(rnd),
+		Item:   &Item{Shape: box, Name: string(t)},
+		Effect: e,
+		Type:   t,
 	}
+}
+
+func NewWeaponBuiltin(rnd *utils.RandomGenerator, box primitives.Box, t WeaponType) *Weapon {
+	w, _ := NewWeaponByConfig(rnd, box, GetWeaponConfig(t))
+	return w
 }
 
 func NewWeaponByConfig(rnd *utils.RandomGenerator, box primitives.Box, cfg WeaponConfig) (*Weapon, error) {
@@ -27,17 +29,11 @@ func NewWeaponByConfig(rnd *utils.RandomGenerator, box primitives.Box, cfg Weapo
 		return nil, err
 	}
 
-	return &Weapon{
-		Item: &Item{
-			Shape: box,
-			Name:  string(cfg.Type),
-		},
-		AffectedAttributes: cfg.GenerateAttributes(rnd),
-	}, nil
+	return NewWeapon(box, cfg.Type, &primitives.Effect{Attributes: cfg.GenerateAttributes(rnd)}), nil
 }
 
-func (w *Weapon) Use() primitives.Attributes {
-	return w.AffectedAttributes
+func (w *Weapon) Use() *primitives.Effect {
+	return w.Effect
 }
 
 func AsWeapon(item any) *Weapon {

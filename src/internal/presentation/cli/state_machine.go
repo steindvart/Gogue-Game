@@ -10,14 +10,14 @@ import (
 
 const DefaultFPSLimit = 60
 
-type Game struct {
+type StateMachine struct {
 	States   []state.State
 	App      *tview.Application
 	FPSLimit int
 }
 
-func NewGame(app *tview.Application, initialState state.State) *Game {
-	game := &Game{
+func NewStateMachine(app *tview.Application, initialState state.State) *StateMachine {
+	game := &StateMachine{
 		States:   []state.State{initialState},
 		App:      app,
 		FPSLimit: DefaultFPSLimit,
@@ -26,11 +26,11 @@ func NewGame(app *tview.Application, initialState state.State) *Game {
 	return game
 }
 
-func (g *Game) PushState(state state.State) {
+func (g *StateMachine) PushState(state state.State) {
 	g.States = append(g.States, state)
 }
 
-func (g *Game) PopState() {
+func (g *StateMachine) PopState() {
 	if len(g.States) == 0 {
 		return
 	}
@@ -38,14 +38,14 @@ func (g *Game) PopState() {
 	g.States = g.States[:len(g.States)-1]
 }
 
-func (g *Game) CurrentState() state.State {
+func (g *StateMachine) CurrentState() state.State {
 	if len(g.States) == 0 {
 		return nil
 	}
 	return g.States[len(g.States)-1]
 }
 
-func (g *Game) Run() {
+func (g *StateMachine) Run() {
 	g.runUpdateLoop(g.FPSLimit)
 
 	if err := g.App.Run(); err != nil {
@@ -54,7 +54,7 @@ func (g *Game) Run() {
 }
 
 // runUpdateLoop запускает обновление игровых состояний с опросом сигналов от них и с ограничением по FPS
-func (g *Game) runUpdateLoop(fpsLimit int) {
+func (g *StateMachine) runUpdateLoop(fpsLimit int) {
 	ticker := time.NewTicker(time.Second / time.Duration(fpsLimit))
 	var lastTime = time.Now()
 	go func() {
@@ -89,7 +89,7 @@ func (g *Game) runUpdateLoop(fpsLimit int) {
 	}()
 }
 
-func (g *Game) handleSignal(s signals.Type) {
+func (g *StateMachine) handleSignal(s signals.Type) {
 	switch s {
 	case signals.Stop:
 		g.PopState()

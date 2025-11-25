@@ -7,21 +7,24 @@ import (
 
 type Elixir struct {
 	*Item
-	EffectDuration     uint32 // in steps
-	AffectedAttributes primitives.Attributes
+	*primitives.Effect
+	Type ElixirType
 }
 
-func NewElixir(rnd *utils.RandomGenerator, box primitives.Box, t ElixirType) *Elixir {
-	cfg := GetElixirConfig(t)
-
+func NewElixir(box primitives.Box, t ElixirType, e *primitives.Effect) *Elixir {
 	return &Elixir{
 		Item: &Item{
 			Shape: box,
-			Name:  string(cfg.Type),
+			Name:  string(t),
 		},
-		AffectedAttributes: cfg.GenerateAttributes(rnd),
-		EffectDuration:     cfg.GenerateDuration(rnd),
+		Effect: e,
+		Type:   t,
 	}
+}
+
+func NewElixirBuiltin(rnd *utils.RandomGenerator, box primitives.Box, t ElixirType) *Elixir {
+	e, _ := NewElixirByConfig(rnd, box, GetElixirConfig(t))
+	return e
 }
 
 func NewElixirByConfig(rnd *utils.RandomGenerator, box primitives.Box, cfg ElixirConfig) (*Elixir, error) {
@@ -29,18 +32,17 @@ func NewElixirByConfig(rnd *utils.RandomGenerator, box primitives.Box, cfg Elixi
 		return nil, err
 	}
 
-	return &Elixir{
-		Item: &Item{
-			Shape: box,
-			Name:  string(cfg.Type),
+	return NewElixir(box, cfg.Type, &primitives.Effect{
+		Duration: primitives.EffectDuration{
+			Type:  primitives.EffectDurationTypeAllTemporaryHealPermanent,
+			Steps: cfg.GenerateDuration(rnd),
 		},
-		AffectedAttributes: cfg.GenerateAttributes(rnd),
-		EffectDuration:     cfg.GenerateDuration(rnd),
-	}, nil
+		Attributes: cfg.GenerateAttributes(rnd),
+	}), nil
 }
 
-func (e *Elixir) Use() primitives.Attributes {
-	return e.AffectedAttributes
+func (e *Elixir) Use() *primitives.Effect {
+	return e.Effect
 }
 
 func AsElixir(item any) *Elixir {

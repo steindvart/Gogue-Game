@@ -13,6 +13,7 @@ const (
 	TreasureTypeGem      TreasureType = "Gem"
 	TreasureTypeArtifact TreasureType = "Artifact"
 	TreasureTypeMystery  TreasureType = "Mystery"
+	TreasureTypeCustom   TreasureType = "Custom" // For custom treasure - dynamicly or from external data created
 )
 
 // TreasureValueRange is an integer range for treasure value

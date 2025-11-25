@@ -44,7 +44,7 @@ const (
 )
 
 type Enemy struct {
-	Character       Character
+	*Character
 	Type            EnemyType
 	HostilityRadius HostilityRadius
 	IsChasing       bool
@@ -74,10 +74,10 @@ type SnakeMage struct {
 	Enemy Enemy
 }
 
-func NewZombie(box primitives.Box) *Zombie {
+func NewZombie(box *primitives.Box) *Zombie {
 	return &Zombie{
 		Enemy: Enemy{
-			Character: Character{
+			Character: &Character{
 				Shape: box,
 				Attributes: primitives.Attributes{
 					Agility:   float64(AttributeRateLow),
@@ -93,10 +93,10 @@ func NewZombie(box primitives.Box) *Zombie {
 	}
 }
 
-func NewVampire(box primitives.Box) *Vampire {
+func NewVampire(box *primitives.Box) *Vampire {
 	return &Vampire{
 		Enemy: Enemy{
-			Character: Character{
+			Character: &Character{
 				Shape: box,
 				Attributes: primitives.Attributes{
 					Agility:   float64(AttributeRateHigh),
@@ -113,10 +113,10 @@ func NewVampire(box primitives.Box) *Vampire {
 	}
 }
 
-func NewGhost(box primitives.Box) *Ghost {
+func NewGhost(box *primitives.Box) *Ghost {
 	return &Ghost{
 		Enemy: Enemy{
-			Character: Character{
+			Character: &Character{
 				Shape: box,
 				Attributes: primitives.Attributes{
 					Agility:   float64(AttributeRateHigh),
@@ -133,10 +133,10 @@ func NewGhost(box primitives.Box) *Ghost {
 	}
 }
 
-func NewOgre(box primitives.Box) *Ogre {
+func NewOgre(box *primitives.Box) *Ogre {
 	return &Ogre{
 		Enemy: Enemy{
-			Character: Character{
+			Character: &Character{
 				Shape: box,
 				Attributes: primitives.Attributes{
 					Agility:   float64(AttributeRateLow),
@@ -153,10 +153,10 @@ func NewOgre(box primitives.Box) *Ogre {
 	}
 }
 
-func NewSnakeMage(box primitives.Box) *SnakeMage {
+func NewSnakeMage(box *primitives.Box) *SnakeMage {
 	return &SnakeMage{
 		Enemy: Enemy{
-			Character: Character{
+			Character: &Character{
 				Shape: box,
 				Attributes: primitives.Attributes{
 					Agility:   float64(AttributeRateVeryHigh),
