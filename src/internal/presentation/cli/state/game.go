@@ -164,7 +164,7 @@ func isInRoom(pos primitives.Point2D[int], room world.Room) bool {
 }
 
 func checkCollisionWithRoomWall(pos primitives.Point2D[int], room world.Room) bool {
-	// Двери явлюятся частью стен, но через них можно ходить
+	// Двери явлюятся частью комнаты и её стен, но через них можно ходить
 	if checkCollisionWithDoors(pos, room.Doors) {
 		return false
 	}
