@@ -1,16 +1,21 @@
 package common
 
-type EntityType int
+type GameEntityType int
 
 const (
-	EntityTypePlayer EntityType = iota + 1
-	EntityTypeWall
-	EntityTypePortal
-	EntityTypePassage
-	EntityTypeDoor
+	EntityTypePlayer GameEntityType = iota + 1
+	WorldTypeWall
+	WorldTypePortal
+	WorldTypePassage
+	WorldTypeDoor
 	EntityTypeZombie
 	EntityTypeVampire
 	EntityTypeGhost
 	EntityTypeOgre
 	EntityTypeSnakeMage
+	FoodTypePotatoes
+	FoodTypeBread
+	FoodTypeMeat
+	FoodTypeMistery
+	FoodTypeBeer
 )

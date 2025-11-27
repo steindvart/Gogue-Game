@@ -17,20 +17,20 @@ func NewGame() *Game {
 	}
 }
 
-func (*Game) SetFieldToScreen(screen tcell.Screen, field [][]common.EntityType, ox, oy int) {
+func (*Game) SetFieldToScreen(screen tcell.Screen, field [][]common.GameEntityType, ox, oy int) {
 	for y := range len(field) {
 		for x := range len(field[0]) {
 			ch := ' '
 			switch field[y][x] {
 			case common.EntityTypePlayer:
 				ch = '☿' // 🦸
-			case common.EntityTypeWall:
+			case common.WorldTypeWall:
 				ch = '⚀'
-			case common.EntityTypePortal:
+			case common.WorldTypePortal:
 				ch = '0'
-			case common.EntityTypePassage:
+			case common.WorldTypePassage:
 				ch = '*'
-			case common.EntityTypeDoor:
+			case common.WorldTypeDoor:
 				ch = 'П'
 			case common.EntityTypeZombie:
 				ch = '🧟'
@@ -42,6 +42,17 @@ func (*Game) SetFieldToScreen(screen tcell.Screen, field [][]common.EntityType, 
 				ch = '👹'
 			case common.EntityTypeSnakeMage:
 				ch = '🐍'
+			case common.FoodTypePotatoes:
+				ch = '🍟'
+			case common.FoodTypeBread:
+				ch = '🥖'
+			case common.FoodTypeMeat:
+				ch = '🍖'
+			case common.FoodTypeMistery:
+				ch = '🍄'
+			case common.FoodTypeBeer:
+				ch = '🍺'
+
 			}
 			screen.SetContent(ox+x, oy+y, ch, nil, tcell.StyleDefault.Background(tcell.ColorBlack))
 		}

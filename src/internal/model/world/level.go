@@ -3,6 +3,7 @@ package world
 import (
 	"errors"
 	"fmt"
+	"gogue/internal/model/items"
 	"gogue/internal/model/primitives"
 	"gogue/internal/utils"
 	"math"
@@ -120,50 +121,24 @@ func (l *Level) generateNineRooms(sizeMap primitives.Size2D[uint]) error {
 			xCell := cellXStart + l.random.Intn(maxRoomWidth-width+1)
 			yCell := cellYStart + l.random.Intn(maxRoomHeight-height+1)
 
-			if roomType == RoomTypeFinish {
-				roomWall := 1
-				l.FinishPortal = primitives.Box{
-					Point: primitives.Point2D[int]{
-						X: xCell + roomWall + l.random.Intn(width-(roomWall*2)),
-						Y: yCell + roomWall + l.random.Intn(height-(roomWall*2)),
-					},
-					Size: primitives.Size2D[uint]{Height: 1, Width: 1},
-				}
-			}
-
 			roomBox := primitives.Box{
 				Point: primitives.Point2D[int]{X: xCell, Y: yCell},
 				Size:  primitives.Size2D[uint]{Width: uint(width), Height: uint(height)},
 			}
 
 			l.Rooms[roomIndex] = *NewRoom(roomType, roomBox)
+
+			if roomType == RoomTypeFinish {
+				portalPos := l.Rooms[roomIndex].GetRandomFreePosition(l.random)
+				l.FinishPortal = primitives.Box{
+					Point: *portalPos,
+					Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
+				}
+			}
 		}
 	}
 
 	return nil
-}
-
-func calculateRoomSectionSize(sizeMap primitives.Size2D[uint]) (primitives.Size2D[uint], error) {
-	if sizeMap.Width > RoomMaxWidth || sizeMap.Height > RoomMaxHeight {
-		return primitives.Size2D[uint]{}, errors.New("game map size is too big")
-	}
-
-	totalPaddingWidth := uint(MinRoomPadding * 2)
-	totalPaddingHeight := uint(MinRoomPadding * 2)
-
-	availableWidth := sizeMap.Width - totalPaddingWidth
-	availableHeight := sizeMap.Height - totalPaddingHeight
-
-	sectionSize := primitives.Size2D[uint]{
-		Width:  availableWidth / numberXYSections,
-		Height: availableHeight / numberXYSections,
-	}
-
-	if sectionSize.Width < RoomMinWidth || sectionSize.Height < RoomMinHeight {
-		return primitives.Size2D[uint]{}, errors.New("game map size is too small")
-	}
-
-	return sectionSize, nil
 }
 
 func (l *Level) generatePassages() error {
@@ -215,6 +190,51 @@ func (l *Level) generatePassages() error {
 	return nil
 }
 
+func (l *Level) addItemsAtRooms() error {
+	l.createFoods()
+	// l.createElixirs()
+	// l.createScrolls()
+	// l.createWeapons()
+
+	return nil
+}
+
+func (l *Level) createFoods() {
+	for i := range l.Rooms {
+		// @todo - потом привязать к размеру комнаты. Чем больше комната - тем больше кол-во ништяков в ней может сгенерироваться
+		numFoods := l.random.Intn(3)
+
+		for j := 0; j < numFoods; j++ {
+			foodType := getRandomFoodType(l.random)
+			randomPos := l.Rooms[i].GetRandomFreePosition(l.random)
+
+			itemBox := primitives.Box{
+				Point: *randomPos,
+				Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
+			}
+
+			// @todo - 'l.random.(*utils.RandomGenerator)' так понимаю из сметного греха принципа инкапсуляции , но пока пусть так висит
+			food := items.NewFoodBuiltin(l.random.(*utils.RandomGenerator), itemBox, foodType)
+
+			l.Rooms[i].Foods = append(l.Rooms[i].Foods, *food)
+		}
+	}
+}
+
+func getRandomFoodType(random utils.RandomSource) items.FoodType {
+	foodTypes := items.AllFoodTypes
+	idx := random.Intn(len(foodTypes))
+	return foodTypes[idx]
+}
+
+func (l *Level) createElixirs() {
+
+}
+
+func (l *Level) createScrolls() {
+
+}
+
 func (l *Level) addDoorsAtRoom(twoRoomsIndexes [2]uint, doorOne, doorTwo primitives.Point2D[int]) error {
 	for _, roomIndex := range twoRoomsIndexes {
 		if roomIndex > roomsCount-1 {
@@ -250,6 +270,29 @@ func (l *Level) GenerateStartPlayerPosition() (*primitives.Point2D[int], error) 
 	}
 
 	return nil, fmt.Errorf("starting room was not found")
+}
+
+func calculateRoomSectionSize(sizeMap primitives.Size2D[uint]) (primitives.Size2D[uint], error) {
+	if sizeMap.Width > RoomMaxWidth || sizeMap.Height > RoomMaxHeight {
+		return primitives.Size2D[uint]{}, errors.New("game map size is too big")
+	}
+
+	totalPaddingWidth := uint(MinRoomPadding * 2)
+	totalPaddingHeight := uint(MinRoomPadding * 2)
+
+	availableWidth := sizeMap.Width - totalPaddingWidth
+	availableHeight := sizeMap.Height - totalPaddingHeight
+
+	sectionSize := primitives.Size2D[uint]{
+		Width:  availableWidth / numberXYSections,
+		Height: availableHeight / numberXYSections,
+	}
+
+	if sectionSize.Width < RoomMinWidth || sectionSize.Height < RoomMinHeight {
+		return primitives.Size2D[uint]{}, errors.New("game map size is too small")
+	}
+
+	return sectionSize, nil
 }
 
 func generateSpanningTree(startRoom int, random utils.RandomSource) ([][2]int, error) {

@@ -3,6 +3,7 @@ package state
 import (
 	"gogue/internal/common"
 	"gogue/internal/model/entities"
+	"gogue/internal/model/items"
 	"gogue/internal/model/primitives"
 	"gogue/internal/model/signals"
 	"gogue/internal/model/world"
@@ -276,10 +277,10 @@ func (g *Game) Primitive() tview.Primitive {
 	return g.view
 }
 
-func (g *Game) makeField(w, h int) [][]common.EntityType {
-	field := make([][]common.EntityType, h)
+func (g *Game) makeField(w, h int) [][]common.GameEntityType {
+	field := make([][]common.GameEntityType, h)
 	for y := range field {
-		field[y] = make([]common.EntityType, w)
+		field[y] = make([]common.GameEntityType, w)
 	}
 
 	// Добавлено в качестве примера, потом надо будет убрать
@@ -328,6 +329,7 @@ func (g *Game) makeField(w, h int) [][]common.EntityType {
 
 	for _, room := range g.level.Rooms {
 		g.putRoom(room, g.level.FinishPortal, field)
+		g.putFood(room, field)
 	}
 
 	for _, passages := range g.level.Passages {
@@ -347,8 +349,8 @@ func (g *Game) makeField(w, h int) [][]common.EntityType {
 	return field
 }
 
-func (g *Game) putEnemies(room world.Room, field [][]common.EntityType) {
-	var et common.EntityType
+func (g *Game) putEnemies(room world.Room, field [][]common.GameEntityType) {
+	var et common.GameEntityType
 
 	for _, e := range room.Enemies {
 		switch e.Type {
@@ -376,26 +378,46 @@ func (g *Game) putEnemies(room world.Room, field [][]common.EntityType) {
 }
 
 // Тут можно класть только lvl, так как room я получаю из него же шагом выше, а могу и тут
-func (g *Game) putRoom(room world.Room, finishPortal primitives.Box, field [][]common.EntityType) {
+func (g *Game) putRoom(room world.Room, finishPortal primitives.Box, field [][]common.GameEntityType) {
 	width := int(room.Shape.Size.Width)
 	height := int(room.Shape.Size.Height)
 	for col := room.Shape.Point.X; col <= room.Shape.Point.X+width; col++ {
-		field[room.Shape.Point.Y][col] = common.EntityTypeWall
-		field[room.Shape.Point.Y+height][col] = common.EntityTypeWall
+		field[room.Shape.Point.Y][col] = common.WorldTypeWall
+		field[room.Shape.Point.Y+height][col] = common.WorldTypeWall
 	}
 
 	for row := room.Shape.Point.Y; row < room.Shape.Point.Y+height; row++ {
-		field[row][room.Shape.Point.X] = common.EntityTypeWall
-		field[row][room.Shape.Point.X+width] = common.EntityTypeWall
+		field[row][room.Shape.Point.X] = common.WorldTypeWall
+		field[row][room.Shape.Point.X+width] = common.WorldTypeWall
 	}
 
-	field[finishPortal.Point.Y][finishPortal.Point.X] = common.EntityTypePortal
+	field[finishPortal.Point.Y][finishPortal.Point.X] = common.WorldTypePortal
 }
 
-func (g *Game) putPassage(passage world.Passage, field [][]common.EntityType) {
+func (g *Game) putPassage(passage world.Passage, field [][]common.GameEntityType) {
 	for i := 0; i < len(passage.Way); i++ {
-		field[passage.Way[i].Y][passage.Way[i].X] = common.EntityTypePassage
+		field[passage.Way[i].Y][passage.Way[i].X] = common.WorldTypePassage
 	}
-	field[passage.DoorOne.Y][passage.DoorOne.X] = common.EntityTypeDoor
-	field[passage.DoorTwo.Y][passage.DoorTwo.X] = common.EntityTypeDoor
+	field[passage.DoorOne.Y][passage.DoorOne.X] = common.WorldTypeDoor
+	field[passage.DoorTwo.Y][passage.DoorTwo.X] = common.WorldTypeDoor
+}
+
+// @todo - потом это будет часть PutItems
+func (g *Game) putFood(room world.Room, field [][]common.GameEntityType) {
+	var fd common.GameEntityType
+	for _, food := range room.Foods {
+		switch food.Type {
+		case items.FoodTypePotatoes:
+			fd = common.FoodTypePotatoes
+		case items.FoodTypeBread:
+			fd = common.FoodTypeBread
+		case items.FoodTypeMeat:
+			fd = common.FoodTypeMeat
+		case items.FoodTypeMistery:
+			fd = common.FoodTypeMistery
+		case items.FoodTypeBeer:
+			fd = common.FoodTypeBeer
+		}
+		field[food.Item.Shape.Point.Y][food.Item.Shape.Point.X] = fd
+	}
 }
