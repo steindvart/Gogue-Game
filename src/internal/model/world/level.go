@@ -76,7 +76,10 @@ func (l *Level) GenerateLevel(sizeMap primitives.Size2D[uint]) error {
 		return err
 	}
 
-	l.addItemsAtRooms()
+	//	// @todo - "С каждым новым уровнем снижается количество полезных предметов (и повышается количество сокровищ, которые выпадают с побежденных противников)"
+	//	// @todo - логику этого условия буду делать отдельным MR. Тут просто выведу сущности на поле в бессмысленном количестве n
+	n := 155
+	l.addItemsAtRooms(uint(n))
 
 	return nil
 }
@@ -192,19 +195,14 @@ func (l *Level) generatePassages() error {
 	return nil
 }
 
-func (l *Level) addItemsAtRooms() error {
-	// @todo - "С каждым новым уровнем снижается количество полезных предметов (и повышается количество сокровищ, которые выпадают с побежденных противников)"
-	// @todo - логику этого условия буду делать отдельным MR. Тут просто выведу сущности на поле в бессмысленном количестве штук "testMaxCount..."
+func (l *Level) addItemsAtRooms(totalCount uint) {
+	var startRoomInd int
+	for ind, room := range l.Rooms {
+		if room.Type == RoomTypeStart {
+			startRoomInd = ind
+		}
+	}
 
-	l.createFoods(3)
-	l.createElixirs(3)
-	l.createScrolls(3)
-	// l.createWeapons()
-
-	return nil
-}
-
-func (l *Level) createFoods(count uint) {
 	allFoodTypes := []items.FoodType{
 		items.FoodTypePotatoes,
 		items.FoodTypeBread,
@@ -213,32 +211,7 @@ func (l *Level) createFoods(count uint) {
 		items.FoodTypeBeer,
 	}
 
-	for roomInd := range l.Rooms {
-		if l.Rooms[roomInd].Type == RoomTypeStart {
-			continue
-		}
-		maxCountAtRoom := l.random.Intn(int(count))
-		for i := 0; i < maxCountAtRoom; i++ {
-			foodType := getRandomElement(l.random, allFoodTypes)
-			randomPos := l.Rooms[roomInd].GetRandomFreePosition(l.random)
-			if randomPos == nil {
-				continue
-			}
-
-			itemBox := primitives.Box{
-				Point: *randomPos,
-				Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
-			}
-
-			food := items.NewFoodBuiltin(l.random, itemBox, foodType)
-
-			l.Rooms[roomInd].Foods = append(l.Rooms[roomInd].Foods, *food)
-		}
-	}
-}
-
-func (l *Level) createElixirs(count uint) {
-	var allElixirTypes = []items.ElixirType{
+	allElixirTypes := []items.ElixirType{
 		items.ElixirTypeStrength,
 		items.ElixirTypeAgility,
 		items.ElixirTypeDwarfism,
@@ -247,31 +220,6 @@ func (l *Level) createElixirs(count uint) {
 		// items.ElixirTypeCustom,
 	}
 
-	for roomInd := range l.Rooms {
-		if l.Rooms[roomInd].Type == RoomTypeStart {
-			continue
-		}
-		maxCountAtRoom := l.random.Intn(int(count))
-		for i := 0; i < maxCountAtRoom; i++ {
-			elixirType := getRandomElement(l.random, allElixirTypes)
-			randomPos := l.Rooms[roomInd].GetRandomFreePosition(l.random)
-			if randomPos == nil {
-				continue
-			}
-
-			itemBox := primitives.Box{
-				Point: *randomPos,
-				Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
-			}
-
-			elixir := items.NewElixirBuiltin(l.random, itemBox, elixirType)
-
-			l.Rooms[roomInd].Elixirs = append(l.Rooms[roomInd].Elixirs, *elixir)
-		}
-	}
-}
-
-func (l *Level) createScrolls(count uint) {
 	var allScrollTypes = []items.ScrollType{
 		items.ScrollTypeStrength,
 		items.ScrollTypeAgility,
@@ -281,36 +229,87 @@ func (l *Level) createScrolls(count uint) {
 		// items.ScrollTypeCustom,
 	}
 
-	for roomInd := range l.Rooms {
-		if l.Rooms[roomInd].Type == RoomTypeStart {
+	for i := 0; i < int(totalCount); i++ {
+		roomInd := l.random.Intn(roomsCount)
+		if roomInd == startRoomInd {
+			i--
 			continue
 		}
-		maxCountAtRoom := l.random.Intn(int(count))
-		for i := 0; i < maxCountAtRoom; i++ {
-			scrollType := getRandomElement(l.random, allScrollTypes)
-			randomPos := l.Rooms[roomInd].GetRandomFreePosition(l.random)
-			if randomPos == nil {
-				continue
-			}
 
-			itemBox := primitives.Box{
-				Point: *randomPos,
-				Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
-			}
-
-			scroll := items.NewScrollBuiltin(l.random, itemBox, scrollType)
-
-			l.Rooms[roomInd].Scrolls = append(l.Rooms[roomInd].Scrolls, *scroll)
+		food := 0
+		elixir := 1
+		scroll := 2
+		itemCategory := l.random.Intn(3)
+		res := false
+		switch itemCategory {
+		case food:
+			res = l.createFood(roomInd, allFoodTypes)
+		case elixir:
+			res = l.createElixir(roomInd, allElixirTypes)
+		case scroll:
+			res = l.createScroll(roomInd, allScrollTypes)
+		}
+		if res == false {
+			i--
+			continue
 		}
 	}
 }
 
 func getRandomElement[T any](random utils.Randomizer, slice []T) T {
-	if len(slice) == 0 {
-		panic("empty slice passed to getRandomElement")
-	}
 	idx := random.Intn(len(slice))
 	return slice[idx]
+}
+
+func (l *Level) createFood(roomInd int, allFoodType []items.FoodType) bool {
+	randomPos := l.Rooms[roomInd].GetRandomFreePosition(l.random)
+	if randomPos == nil {
+		return false
+	}
+
+	foodType := getRandomElement(l.random, allFoodType)
+	itemBox := primitives.Box{
+		Point: *randomPos,
+		Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
+	}
+
+	food := items.NewFoodBuiltin(l.random, itemBox, foodType)
+	l.Rooms[roomInd].Foods = append(l.Rooms[roomInd].Foods, *food)
+	return true
+}
+
+func (l *Level) createElixir(roomInd int, allElixirType []items.ElixirType) bool {
+	randomPos := l.Rooms[roomInd].GetRandomFreePosition(l.random)
+	if randomPos == nil {
+		return false
+	}
+
+	elixirType := getRandomElement(l.random, allElixirType)
+	itemBox := primitives.Box{
+		Point: *randomPos,
+		Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
+	}
+
+	elixir := items.NewElixirBuiltin(l.random, itemBox, elixirType)
+	l.Rooms[roomInd].Elixirs = append(l.Rooms[roomInd].Elixirs, *elixir)
+	return true
+}
+
+func (l *Level) createScroll(roomInd int, allScrollType []items.ScrollType) bool {
+	randomPos := l.Rooms[roomInd].GetRandomFreePosition(l.random)
+	if randomPos == nil {
+		return false
+	}
+
+	scrollType := getRandomElement(l.random, allScrollType)
+	itemBox := primitives.Box{
+		Point: *randomPos,
+		Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
+	}
+
+	scroll := items.NewScrollBuiltin(l.random, itemBox, scrollType)
+	l.Rooms[roomInd].Scrolls = append(l.Rooms[roomInd].Scrolls, *scroll)
+	return true
 }
 
 func (l *Level) addDoorsAtRoom(twoRoomsIndexes [2]uint, doorOne, doorTwo primitives.Point2D[int]) error {
