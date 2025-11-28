@@ -217,6 +217,9 @@ func (l *Level) createFoods(count uint) {
 		for i := 0; i < maxCountAtRoom; i++ {
 			foodType := getRandomElement(l.random, allFoodTypes)
 			randomPos := l.Rooms[roomInd].GetRandomFreePosition(l.random)
+			if randomPos == nil {
+				continue
+			}
 
 			itemBox := primitives.Box{
 				Point: *randomPos,
@@ -245,6 +248,9 @@ func (l *Level) createElixirs(count uint) {
 		for j := 0; j < maxCountAtRoom; j++ {
 			elixirType := getRandomElement(l.random, allelixirTypes)
 			randomPos := l.Rooms[i].GetRandomFreePosition(l.random)
+			if randomPos == nil {
+				continue
+			}
 
 			itemBox := primitives.Box{
 				Point: *randomPos,
