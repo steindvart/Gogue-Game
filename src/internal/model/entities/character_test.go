@@ -199,6 +199,122 @@ func TestCharacter_ApplyEffect_AllTemporary_TracksAndMutates(t *testing.T) {
 	}
 }
 
+func TestCharacter_ApplyEffect_MaxHealthIncrease_AdjustsCurrentHealth(t *testing.T) {
+	c := NewCharacter(
+		primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
+		primitives.Attributes{MaxHealth: 100, Health: 50, Strength: 10, Agility: 5},
+	)
+
+	e := &primitives.Effect{
+		Duration:   primitives.EffectDuration{Type: primitives.EffectDurationTypeAllPermanent, Steps: 0},
+		Attributes: primitives.Attributes{MaxHealth: 20},
+	}
+
+	c.ApplyEffect(e)
+
+	if c.Attributes.MaxHealth != 120 {
+		t.Errorf("MaxHealth after ApplyEffect = %.1f, want 120", c.Attributes.MaxHealth)
+	}
+	if c.Attributes.Health != 70 {
+		t.Errorf("Health after ApplyEffect = %.1f, want 70", c.Attributes.Health)
+	}
+}
+
+func TestCharacter_ApplyEffect_MaxHealthDecrease_HealthClampedToOne(t *testing.T) {
+	c := NewCharacter(
+		primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
+		primitives.Attributes{MaxHealth: 100, Health: 10, Strength: 10, Agility: 5},
+	)
+
+	e := &primitives.Effect{
+		Duration:   primitives.EffectDuration{Type: primitives.EffectDurationTypeAllPermanent, Steps: 0},
+		Attributes: primitives.Attributes{MaxHealth: -20},
+	}
+
+	c.ApplyEffect(e)
+
+	if c.Attributes.MaxHealth != 80 {
+		t.Errorf("MaxHealth after decreasing effect = %.1f, want 80", c.Attributes.MaxHealth)
+	}
+	if c.Attributes.Health != 1 {
+		t.Errorf("Health should be clamped to 1 when effect reduces it <= 0; got %.1f", c.Attributes.Health)
+	}
+}
+
+func TestCharacter_ProcessTemporaryEffects_MaxHealthPermamentAffectHealth(t *testing.T) {
+	c := NewCharacter(
+		primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
+		primitives.Attributes{MaxHealth: 100, Health: 10, Strength: 10, Agility: 5},
+	)
+
+	e := &primitives.Effect{
+		Duration:   primitives.EffectDuration{Type: primitives.EffectDurationTypeAllTemporaryHealPermanent, Steps: 3},
+		Attributes: primitives.Attributes{MaxHealth: 20},
+	}
+
+	c.ApplyEffect(e)
+
+	if c.Attributes.MaxHealth != 120 {
+		t.Errorf("MaxHealth after ApplyEffect = %.1f, want 120", c.Attributes.MaxHealth)
+	}
+	if c.Attributes.Health != 30 {
+		t.Errorf("Health after ApplyEffect = %.1f, want 30", c.Attributes.Health)
+	}
+
+	c.ProcessTemporaryEffects(2)
+	if c.Attributes.MaxHealth != 120 {
+		t.Errorf("MaxHealth after ApplyEffect = %.1f, want 120", c.Attributes.MaxHealth)
+	}
+	if c.Attributes.Health != 30 {
+		t.Errorf("Health after ApplyEffect = %.1f, want 30", c.Attributes.Health)
+	}
+
+	c.ProcessTemporaryEffects(2)
+	if c.Attributes.MaxHealth != 100 {
+		t.Errorf("MaxHealth after ApplyEffect = %.1f, want 100", c.Attributes.MaxHealth)
+	}
+	if c.Attributes.Health != 30 {
+		t.Errorf("Health after ApplyEffect = %.1f, want 30", c.Attributes.Health)
+	}
+}
+
+func TestCharacter_ProcessTemporaryEffects_MaxHealthTemporaryAffectHealth(t *testing.T) {
+	c := NewCharacter(
+		primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
+		primitives.Attributes{MaxHealth: 100, Health: 10, Strength: 10, Agility: 5},
+	)
+
+	e := &primitives.Effect{
+		Duration:   primitives.EffectDuration{Type: primitives.EffectDurationTypeAllTemporary, Steps: 3},
+		Attributes: primitives.Attributes{MaxHealth: 20},
+	}
+
+	c.ApplyEffect(e)
+
+	if c.Attributes.MaxHealth != 120 {
+		t.Errorf("MaxHealth after ApplyEffect = %.1f, want 120", c.Attributes.MaxHealth)
+	}
+	if c.Attributes.Health != 30 {
+		t.Errorf("Health after ApplyEffect = %.1f, want 30", c.Attributes.Health)
+	}
+
+	c.ProcessTemporaryEffects(2)
+	if c.Attributes.MaxHealth != 120 {
+		t.Errorf("MaxHealth after ApplyEffect = %.1f, want 120", c.Attributes.MaxHealth)
+	}
+	if c.Attributes.Health != 30 {
+		t.Errorf("Health after ApplyEffect = %.1f, want 30", c.Attributes.Health)
+	}
+
+	c.ProcessTemporaryEffects(2)
+	if c.Attributes.MaxHealth != 100 {
+		t.Errorf("MaxHealth after ApplyEffect = %.1f, want 100", c.Attributes.MaxHealth)
+	}
+	if c.Attributes.Health != 10 {
+		t.Errorf("Health after ApplyEffect = %.1f, want 10", c.Attributes.Health)
+	}
+}
+
 func TestCharacter_ProcessTemporaryEffects_ExpiresAndRollsBack(t *testing.T) {
 	c := NewCharacter(
 		primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
