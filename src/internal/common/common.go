@@ -23,5 +23,9 @@ const (
 	ElixirTypeDwarfism
 	ElixirTypeGiantism
 	ElixirTypeMystery
-	// ElixirTypeCustom // а это что-то нужное?
+	ScrollTypeStrength
+	ScrollTypeAgility
+	ScrollTypeUltimate
+	ScrollTypeMaxHealth
+	ScrollTypeMystery
 )

@@ -61,8 +61,19 @@ func (*Game) SetFieldToScreen(screen tcell.Screen, field [][]common.GameEntityTy
 			case common.ElixirTypeGiantism:
 				ch = '💙'
 			case common.ElixirTypeMystery:
-				ch = '🩶'
+				ch = '🖤' // 🩶
+			case common.ScrollTypeStrength:
+				ch = '📙'
+			case common.ScrollTypeAgility:
+				ch = '📗'
+			case common.ScrollTypeUltimate:
+				ch = '📘'
+			case common.ScrollTypeMaxHealth:
+				ch = '📕'
+			case common.ScrollTypeMystery:
+				ch = '📓'
 			}
+
 			screen.SetContent(ox+x, oy+y, ch, nil, tcell.StyleDefault.Background(tcell.ColorBlack))
 		}
 	}

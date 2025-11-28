@@ -436,4 +436,20 @@ func (g *Game) putItems(room world.Room, field [][]common.GameEntityType) {
 		}
 		field[food.Item.Shape.Point.Y][food.Item.Shape.Point.X] = fd
 	}
+
+	for _, food := range room.Scrolls {
+		switch food.Type {
+		case items.ScrollTypeStrength:
+			fd = common.ScrollTypeStrength
+		case items.ScrollTypeAgility:
+			fd = common.ScrollTypeAgility
+		case items.ScrollTypeUltimate:
+			fd = common.ScrollTypeUltimate
+		case items.ScrollTypeMaxHealth:
+			fd = common.ScrollTypeMaxHealth
+		case items.ScrollTypeMystery:
+			fd = common.ScrollTypeMystery
+		}
+		field[food.Item.Shape.Point.Y][food.Item.Shape.Point.X] = fd
+	}
 }

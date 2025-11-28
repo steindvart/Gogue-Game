@@ -195,9 +195,10 @@ func (l *Level) generatePassages() error {
 func (l *Level) addItemsAtRooms() error {
 	// @todo - "С каждым новым уровнем снижается количество полезных предметов (и повышается количество сокровищ, которые выпадают с побежденных противников)"
 	// @todo - логику этого условия буду делать отдельным MR. Тут просто выведу сущности на поле в бессмысленном количестве штук "testMaxCount..."
+
 	l.createFoods(3)
 	l.createElixirs(3)
-	// l.createScrolls()
+	l.createScrolls(3)
 	// l.createWeapons()
 
 	return nil
@@ -213,6 +214,9 @@ func (l *Level) createFoods(count uint) {
 	}
 
 	for roomInd := range l.Rooms {
+		if l.Rooms[roomInd].Type == RoomTypeStart {
+			continue
+		}
 		maxCountAtRoom := l.random.Intn(int(count))
 		for i := 0; i < maxCountAtRoom; i++ {
 			foodType := getRandomElement(l.random, allFoodTypes)
@@ -228,26 +232,29 @@ func (l *Level) createFoods(count uint) {
 
 			food := items.NewFoodBuiltin(l.random, itemBox, foodType)
 
-			l.Rooms[i].Foods = append(l.Rooms[i].Foods, *food)
+			l.Rooms[roomInd].Foods = append(l.Rooms[roomInd].Foods, *food)
 		}
 	}
 }
 
 func (l *Level) createElixirs(count uint) {
-	var allelixirTypes = []items.ElixirType{
+	var allElixirTypes = []items.ElixirType{
 		items.ElixirTypeStrength,
 		items.ElixirTypeAgility,
 		items.ElixirTypeDwarfism,
 		items.ElixirTypeGiantism,
 		items.ElixirTypeMystery,
-		// items.ElixirTypeCustom, // а это что-то нужное?
+		// items.ElixirTypeCustom,
 	}
 
-	for i := range l.Rooms {
+	for roomInd := range l.Rooms {
+		if l.Rooms[roomInd].Type == RoomTypeStart {
+			continue
+		}
 		maxCountAtRoom := l.random.Intn(int(count))
-		for j := 0; j < maxCountAtRoom; j++ {
-			elixirType := getRandomElement(l.random, allelixirTypes)
-			randomPos := l.Rooms[i].GetRandomFreePosition(l.random)
+		for i := 0; i < maxCountAtRoom; i++ {
+			elixirType := getRandomElement(l.random, allElixirTypes)
+			randomPos := l.Rooms[roomInd].GetRandomFreePosition(l.random)
 			if randomPos == nil {
 				continue
 			}
@@ -259,7 +266,41 @@ func (l *Level) createElixirs(count uint) {
 
 			elixir := items.NewElixirBuiltin(l.random, itemBox, elixirType)
 
-			l.Rooms[i].Elixirs = append(l.Rooms[i].Elixirs, *elixir)
+			l.Rooms[roomInd].Elixirs = append(l.Rooms[roomInd].Elixirs, *elixir)
+		}
+	}
+}
+
+func (l *Level) createScrolls(count uint) {
+	var allScrollTypes = []items.ScrollType{
+		items.ScrollTypeStrength,
+		items.ScrollTypeAgility,
+		items.ScrollTypeUltimate,
+		items.ScrollTypeMaxHealth,
+		items.ScrollTypeMystery,
+		// items.ScrollTypeCustom,
+	}
+
+	for roomInd := range l.Rooms {
+		if l.Rooms[roomInd].Type == RoomTypeStart {
+			continue
+		}
+		maxCountAtRoom := l.random.Intn(int(count))
+		for i := 0; i < maxCountAtRoom; i++ {
+			scrollType := getRandomElement(l.random, allScrollTypes)
+			randomPos := l.Rooms[roomInd].GetRandomFreePosition(l.random)
+			if randomPos == nil {
+				continue
+			}
+
+			itemBox := primitives.Box{
+				Point: *randomPos,
+				Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
+			}
+
+			scroll := items.NewScrollBuiltin(l.random, itemBox, scrollType)
+
+			l.Rooms[roomInd].Scrolls = append(l.Rooms[roomInd].Scrolls, *scroll)
 		}
 	}
 }
@@ -270,10 +311,6 @@ func getRandomElement[T any](random utils.Randomizer, slice []T) T {
 	}
 	idx := random.Intn(len(slice))
 	return slice[idx]
-}
-
-func (l *Level) createScrolls() {
-
 }
 
 func (l *Level) addDoorsAtRoom(twoRoomsIndexes [2]uint, doorOne, doorTwo primitives.Point2D[int]) error {
