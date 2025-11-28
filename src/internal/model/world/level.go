@@ -76,6 +76,8 @@ func (l *Level) GenerateLevel(sizeMap primitives.Size2D[uint]) error {
 		return err
 	}
 
+	l.addItemsAtRooms()
+
 	return nil
 }
 
@@ -213,8 +215,7 @@ func (l *Level) createFoods() {
 				Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
 			}
 
-			// @todo - 'l.random.(*utils.RandomGenerator)' так понимаю из сметного греха принципа инкапсуляции , но пока пусть так висит
-			food := items.NewFoodBuiltin(l.random.(*utils.RandomGenerator), itemBox, foodType)
+			food := items.NewFoodBuiltin(l.random, itemBox, foodType)
 
 			l.Rooms[i].Foods = append(l.Rooms[i].Foods, *food)
 		}
