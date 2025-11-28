@@ -18,18 +18,20 @@ var defaultDurationRange = ElixirDurationStepsRange{Min: ElixirDurationMin, Max:
 type ElixirType string
 
 const (
-	ElixirTypeStrength ElixirType = "Strength" // +Strength
-	ElixirTypeAgility  ElixirType = "Agility"  // +Agility
-	ElixirTypeDwarfism ElixirType = "Dwarfism" // +Agility -Strength
-	ElixirTypeGiantism ElixirType = "Giantism" // +Strength -Agility
-	ElixirTypeMystery  ElixirType = "Mystery"  // All random
-	ElixirTypeCustom   ElixirType = "Custom"   // For custom elixir - dynamicly or from external data created
+	ElixirTypeStrength ElixirType = "Strength"   // +Strength
+	ElixirTypeAgility  ElixirType = "Agility"    // +Agility
+	ElixirTypeDwarfism ElixirType = "Dwarfism"   // +Agility -Strength
+	ElixirTypeGiantism ElixirType = "Giantism"   // +Strength -Agility
+	ElixirMaxHealth    ElixirType = "Max Health" // +MaxHealth
+	ElixirTypeMystery  ElixirType = "Mystery"    // All random
+	ElixirTypeCustom   ElixirType = "Custom"     // For custom elixir - dynamicly or from external data created
 )
 
 type ElixirConfig struct {
 	Type               ElixirType
 	StrengthRange      primitives.AttributeRange
 	AgilityRange       primitives.AttributeRange
+	MaxHealthRange     primitives.AttributeRange
 	DurationStepsRange ElixirDurationStepsRange
 	Description        string
 }
@@ -63,10 +65,19 @@ var ElixirRegistry = map[ElixirType]ElixirConfig{
 		DurationStepsRange: defaultDurationRange,
 		Description:        "Greatly increases strength but reduces agility",
 	},
+	ElixirMaxHealth: {
+		Type:               ElixirMaxHealth,
+		StrengthRange:      primitives.AttributeRange{Min: 0, Max: 0},
+		AgilityRange:       primitives.AttributeRange{Min: 0, Max: 0},
+		MaxHealthRange:     primitives.AttributeRange{Min: 20, Max: 50},
+		DurationStepsRange: defaultDurationRange,
+		Description:        "Greatly increases max health points",
+	},
 	ElixirTypeMystery: {
 		Type:               ElixirTypeMystery,
 		StrengthRange:      primitives.AttributeRange{Min: -20, Max: 30},
 		AgilityRange:       primitives.AttributeRange{Min: -20, Max: 30},
+		MaxHealthRange:     primitives.AttributeRange{Min: -30, Max: 70},
 		DurationStepsRange: defaultDurationRange,
 		Description:        "Random effects on both strength and agility",
 	},
