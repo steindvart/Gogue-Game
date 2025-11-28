@@ -45,7 +45,7 @@ func TestFood_NewFood_BuiltinConfig(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			rng := utils.NewRandomGeneratorWithSeed(defaultFoodTestSeed)
+			rng := utils.NewRandomWithSeed(defaultFoodTestSeed)
 			box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 
 			food := NewFoodBuiltin(rng, box, tt.foodType)
@@ -157,7 +157,7 @@ func TestFood_NewFoodByConfig(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			rng := utils.NewRandomGeneratorWithSeed(tt.seed)
+			rng := utils.NewRandomWithSeed(tt.seed)
 			food, err := NewFoodByConfig(rng, tt.box, tt.config)
 
 			if tt.wantError {
@@ -243,11 +243,11 @@ func TestFood_NewFood_Deterministic(t *testing.T) {
 			box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 
 			// Create first food
-			rng1 := utils.NewRandomGeneratorWithSeed(tt.seed)
+			rng1 := utils.NewRandomWithSeed(tt.seed)
 			food1 := NewFoodBuiltin(rng1, box, tt.foodType)
 
 			// Create second food with same seed
-			rng2 := utils.NewRandomGeneratorWithSeed(tt.seed)
+			rng2 := utils.NewRandomWithSeed(tt.seed)
 			food2 := NewFoodBuiltin(rng2, box, tt.foodType)
 
 			// Verify they are identical
@@ -292,7 +292,7 @@ func TestFood_NewFood_Randomness(t *testing.T) {
 
 			// Generate multiple foods with different seeds
 			for i := 0; i < tt.iterations; i++ {
-				rng := utils.NewRandomGeneratorWithSeed(int64(i))
+				rng := utils.NewRandomWithSeed(int64(i))
 				food := NewFoodBuiltin(rng, box, tt.foodType)
 				healthValues[food.Effect.Attributes.Health] = true
 			}
@@ -312,7 +312,7 @@ func TestFood_NewFood_BeerProducesFixedValue(t *testing.T) {
 	iterations := 30
 
 	for i := 0; i < iterations; i++ {
-		rng := utils.NewRandomGeneratorWithSeed(int64(i))
+		rng := utils.NewRandomWithSeed(int64(i))
 		food := NewFoodBuiltin(rng, box, FoodTypeBeer)
 
 		if food.Effect.Attributes.Health != expectedHealth {
@@ -323,7 +323,7 @@ func TestFood_NewFood_BeerProducesFixedValue(t *testing.T) {
 }
 
 func TestFood_NewFood_UnknownTypeDefaultsToMistery(t *testing.T) {
-	rng := utils.NewRandomGeneratorWithSeed(defaultFoodTestSeed)
+	rng := utils.NewRandomWithSeed(defaultFoodTestSeed)
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 
 	food := NewFoodBuiltin(rng, box, "Unknown Food Type")
@@ -346,7 +346,7 @@ func TestFood_NewFood_UnknownTypeDefaultsToMistery(t *testing.T) {
 }
 
 func TestFood_NewFood_ZeroSizedBoxIsOk(t *testing.T) {
-	rng := utils.NewRandomGeneratorWithSeed(defaultFoodTestSeed)
+	rng := utils.NewRandomWithSeed(defaultFoodTestSeed)
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 0, Height: 0}}
 	food := NewFoodBuiltin(rng, box, FoodTypeMeat)
 
@@ -389,7 +389,7 @@ func TestFood_NewFood_VariousPositions(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			rng := utils.NewRandomGeneratorWithSeed(defaultFoodTestSeed)
+			rng := utils.NewRandomWithSeed(defaultFoodTestSeed)
 			box := primitives.Box{Point: tt.position, Size: tt.size}
 			food := NewFoodBuiltin(rng, box, FoodTypeBread)
 
@@ -491,28 +491,28 @@ func BenchmarkFood_NewFoodBuiltin(b *testing.B) {
 
 	b.Run("Potatoes", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			rng := utils.NewRandomGeneratorWithSeed(int64(i))
+			rng := utils.NewRandomWithSeed(int64(i))
 			_ = NewFoodBuiltin(rng, box, FoodTypePotatoes)
 		}
 	})
 
 	b.Run("Meat", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			rng := utils.NewRandomGeneratorWithSeed(int64(i))
+			rng := utils.NewRandomWithSeed(int64(i))
 			_ = NewFoodBuiltin(rng, box, FoodTypeMeat)
 		}
 	})
 
 	b.Run("Mistery", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			rng := utils.NewRandomGeneratorWithSeed(int64(i))
+			rng := utils.NewRandomWithSeed(int64(i))
 			_ = NewFoodBuiltin(rng, box, FoodTypeMistery)
 		}
 	})
 
 	b.Run("Beer", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			rng := utils.NewRandomGeneratorWithSeed(int64(i))
+			rng := utils.NewRandomWithSeed(int64(i))
 			_ = NewFoodBuiltin(rng, box, FoodTypeBeer)
 		}
 	})
@@ -528,7 +528,7 @@ func BenchmarkFood_NewFoodByConfig(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		rng := utils.NewRandomGeneratorWithSeed(int64(i))
+		rng := utils.NewRandomWithSeed(int64(i))
 		_, _ = NewFoodByConfig(rng, box, config)
 	}
 }

@@ -244,10 +244,10 @@ func TestTreasureConfig_GenerateValue(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Generate twice with same seed
-			rng1 := utils.NewRandomGeneratorWithSeed(tt.seed)
+			rng1 := utils.NewRandomWithSeed(tt.seed)
 			value1 := tt.config.GenerateValue(rng1)
 
-			rng2 := utils.NewRandomGeneratorWithSeed(tt.seed)
+			rng2 := utils.NewRandomWithSeed(tt.seed)
 			value2 := tt.config.GenerateValue(rng2)
 
 			// Should be deterministic
@@ -279,7 +279,7 @@ func TestTreasureConfig_GenerateValue_Randomness(t *testing.T) {
 	iterations := 50
 
 	for i := 0; i < iterations; i++ {
-		rng := utils.NewRandomGeneratorWithSeed(int64(i))
+		rng := utils.NewRandomWithSeed(int64(i))
 		value := config.GenerateValue(rng)
 		values[value] = true
 	}
@@ -306,7 +306,7 @@ func TestTreasureConfig_GenerateValue_FixedRange(t *testing.T) {
 
 	iterations := 20
 	for i := 0; i < iterations; i++ {
-		rng := utils.NewRandomGeneratorWithSeed(int64(i))
+		rng := utils.NewRandomWithSeed(int64(i))
 		value := config.GenerateValue(rng)
 
 		// Fixed range should always produce same value
@@ -326,7 +326,7 @@ func TestTreasureConfig_GenerateValue_LargeRange(t *testing.T) {
 	iterations := 100
 
 	for i := 0; i < iterations; i++ {
-		rng := utils.NewRandomGeneratorWithSeed(int64(i))
+		rng := utils.NewRandomWithSeed(int64(i))
 		value := config.GenerateValue(rng)
 		values[value] = true
 
@@ -374,7 +374,7 @@ func BenchmarkTreasureConfig_Validate(b *testing.B) {
 
 func BenchmarkTreasureConfig_GenerateValue(b *testing.B) {
 	config := GetTreasureConfig(TreasureTypeMystery)
-	rng := utils.NewRandomGeneratorWithSeed(42)
+	rng := utils.NewRandomWithSeed(42)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {

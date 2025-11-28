@@ -19,12 +19,12 @@ func NewTreasure(box primitives.Box, t TreasureType, value int32) *Treasure {
 	}
 }
 
-func NewTreasureBuiltin(rnd *utils.RandomGenerator, box primitives.Box, t TreasureType) *Treasure {
+func NewTreasureBuiltin(rnd *utils.Random, box primitives.Box, t TreasureType) *Treasure {
 	treasure, _ := NewTreasureByConfig(rnd, box, GetTreasureConfig(t))
 	return treasure
 }
 
-func NewTreasureByConfig(rnd *utils.RandomGenerator, box primitives.Box, cfg TreasureConfig) (*Treasure, error) {
+func NewTreasureByConfig(rnd *utils.Random, box primitives.Box, cfg TreasureConfig) (*Treasure, error) {
 	if err := cfg.Validate(); err != nil {
 		return nil, err
 	}

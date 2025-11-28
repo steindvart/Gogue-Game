@@ -108,7 +108,7 @@ func (c *Character) removeTemporaryEffectByIndex(idx int) {
 // scale регулирует скорость роста. Это обеспечивает баланс между ростом шанса и невозможностью абсолютного уклонения.
 // @todo 1 - сделать настраиваемым scale? Например, для регулировки сложности игры?
 // @todo 2 - сделать сравнение с учётом ловкости атакующего?
-func (c *Character) CheckEvasion(rnd utils.RandomSource) bool {
+func (c *Character) CheckEvasion(rnd utils.Randomizer) bool {
 	if c.Attributes.Agility == 0 {
 		return false
 	}

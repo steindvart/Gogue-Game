@@ -41,7 +41,7 @@ func TestElixir_NewElixir_BuiltinConfig(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			rng := utils.NewRandomGeneratorWithSeed(defaultItemsTestSeed)
+			rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
 			box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 
 			elixir := NewElixirBuiltin(rng, box, tt.elixirType)
@@ -149,7 +149,7 @@ func TestElixir_NewElixir_CustomConfig(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			rng := utils.NewRandomGeneratorWithSeed(tt.seed)
+			rng := utils.NewRandomWithSeed(tt.seed)
 			elixir, err := NewElixirByConfig(rng, tt.box, tt.config)
 
 			if tt.wantError {
@@ -229,11 +229,11 @@ func TestElixir_NewElixir_NoRandom(t *testing.T) {
 			box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 
 			// Create first elixir
-			rng1 := utils.NewRandomGeneratorWithSeed(tt.seed)
+			rng1 := utils.NewRandomWithSeed(tt.seed)
 			elixir1 := NewElixirBuiltin(rng1, box, tt.elixirType)
 
 			// Create second elixir with same seed
-			rng2 := utils.NewRandomGeneratorWithSeed(tt.seed)
+			rng2 := utils.NewRandomWithSeed(tt.seed)
 			elixir2 := NewElixirBuiltin(rng2, box, tt.elixirType)
 
 			// Verify they are identical
@@ -279,7 +279,7 @@ func TestElixir_NewElixir_Randomness(t *testing.T) {
 
 			// Generate multiple elixirs with different seeds
 			for i := 0; i < tt.iterations; i++ {
-				rng := utils.NewRandomGeneratorWithSeed(int64(i))
+				rng := utils.NewRandomWithSeed(int64(i))
 				elixir := NewElixirBuiltin(rng, box, tt.elixirType)
 
 				strengthValues[elixir.Effect.Attributes.Strength] = true
@@ -312,7 +312,7 @@ func TestElixir_NewElixir_Randomness(t *testing.T) {
 }
 
 func TestElixir_NewElixir_ZeroSizedBoxIsOk(t *testing.T) {
-	rng := utils.NewRandomGeneratorWithSeed(defaultItemsTestSeed)
+	rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 0, Height: 0}}
 	elixir := NewElixirBuiltin(rng, box, ElixirTypeStrength)
 
@@ -326,7 +326,7 @@ func TestElixir_NewElixir_ZeroSizedBoxIsOk(t *testing.T) {
 }
 
 func TestElixir_Drop(t *testing.T) {
-	rng := utils.NewRandomGeneratorWithSeed(defaultItemsTestSeed)
+	rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
 	initialBox := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 	elixir := NewElixirBuiltin(rng, initialBox, ElixirTypeStrength)
 
@@ -371,7 +371,7 @@ func TestElixir_Use(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			rng := utils.NewRandomGeneratorWithSeed(tt.seed)
+			rng := utils.NewRandomWithSeed(tt.seed)
 			box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 			elixir := NewElixirBuiltin(rng, box, tt.elixirType)
 
@@ -390,7 +390,7 @@ func TestElixir_Use(t *testing.T) {
 }
 
 func TestElixir_UseMultipleTimesIsOk(t *testing.T) {
-	rng := utils.NewRandomGeneratorWithSeed(defaultItemsTestSeed)
+	rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 	elixir := NewElixirBuiltin(rng, box, ElixirTypeStrength)
 
@@ -472,21 +472,21 @@ func BenchmarkElixir_NewElixir(b *testing.B) {
 
 	b.Run("Strength", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			rng := utils.NewRandomGeneratorWithSeed(int64(i))
+			rng := utils.NewRandomWithSeed(int64(i))
 			_ = NewElixirBuiltin(rng, box, ElixirTypeStrength)
 		}
 	})
 
 	b.Run("Mystery", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			rng := utils.NewRandomGeneratorWithSeed(int64(i))
+			rng := utils.NewRandomWithSeed(int64(i))
 			_ = NewElixirBuiltin(rng, box, ElixirTypeMystery)
 		}
 	})
 }
 
 func BenchmarkElixir_Use(b *testing.B) {
-	rng := utils.NewRandomGeneratorWithSeed(defaultItemsTestSeed)
+	rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 	elixir := NewElixirBuiltin(rng, box, ElixirTypeStrength)
 

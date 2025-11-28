@@ -19,12 +19,12 @@ func NewFood(box primitives.Box, t FoodType, e *primitives.Effect) *Food {
 	}
 }
 
-func NewFoodBuiltin(rnd *utils.RandomGenerator, box primitives.Box, t FoodType) *Food {
+func NewFoodBuiltin(rnd utils.Randomizer, box primitives.Box, t FoodType) *Food {
 	f, _ := NewFoodByConfig(rnd, box, GetFoodConfig(t))
 	return f
 }
 
-func NewFoodByConfig(rnd *utils.RandomGenerator, box primitives.Box, cfg FoodConfig) (*Food, error) {
+func NewFoodByConfig(rnd utils.Randomizer, box primitives.Box, cfg FoodConfig) (*Food, error) {
 	if err := cfg.Validate(); err != nil {
 		return nil, err
 	}

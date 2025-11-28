@@ -74,7 +74,7 @@ func GetFoodConfig(t FoodType) FoodConfig {
 	return FoodRegistry[FoodTypeMistery]
 }
 
-func (cfg *FoodConfig) GenerateAttributes(rng *utils.RandomGenerator) primitives.Attributes {
+func (cfg *FoodConfig) GenerateAttributes(rng utils.Randomizer) primitives.Attributes {
 	return primitives.Attributes{
 		Health: float64(utils.RandomRoundedFloatInRange(rng, cfg.HealthRange.Min, cfg.HealthRange.Max)),
 	}

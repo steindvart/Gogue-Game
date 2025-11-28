@@ -19,12 +19,12 @@ func NewWeapon(box primitives.Box, t WeaponType, e *primitives.Effect) *Weapon {
 	}
 }
 
-func NewWeaponBuiltin(rnd *utils.RandomGenerator, box primitives.Box, t WeaponType) *Weapon {
+func NewWeaponBuiltin(rnd *utils.Random, box primitives.Box, t WeaponType) *Weapon {
 	w, _ := NewWeaponByConfig(rnd, box, GetWeaponConfig(t))
 	return w
 }
 
-func NewWeaponByConfig(rnd *utils.RandomGenerator, box primitives.Box, cfg WeaponConfig) (*Weapon, error) {
+func NewWeaponByConfig(rnd *utils.Random, box primitives.Box, cfg WeaponConfig) (*Weapon, error) {
 	if err := cfg.Validate(); err != nil {
 		return nil, err
 	}

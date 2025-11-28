@@ -292,7 +292,7 @@ func TestCharacter_CheckEvasion_ZeroAgilityAlwaysFalse(t *testing.T) {
 		primitives.Attributes{MaxHealth: 100, Health: 100, Agility: 0, Strength: 0},
 	)
 	for i := 0; i < 100; i++ {
-		randomGenerator := utils.NewRandomGeneratorWithSeed(int64(i))
+		randomGenerator := utils.NewRandomWithSeed(int64(i))
 		if c.CheckEvasion(randomGenerator) {
 			t.Fatalf("CheckEvasion must be false when Agility=0 (iter %d)", i)
 		}
@@ -307,7 +307,7 @@ func TestCharacter_CheckEvasion_HighAgilityMostlyTrueWithSeed(t *testing.T) {
 	evasionsCount := 0
 	total := 200
 	for i := 0; i < total; i++ {
-		randomGenerator := utils.NewRandomGeneratorWithSeed(int64(i))
+		randomGenerator := utils.NewRandomWithSeed(int64(i))
 		if c.CheckEvasion(randomGenerator) {
 			evasionsCount++
 		}
@@ -325,7 +325,7 @@ func TestCharacter_CheckEvasion_NoRandom(t *testing.T) {
 	)
 	evasionsCount1 := 0
 	total := 200
-	randomGenerator := utils.NewRandomGeneratorWithSeed(defaultCharacterTestSeed)
+	randomGenerator := utils.NewRandomWithSeed(defaultCharacterTestSeed)
 	for i := 0; i < total; i++ {
 		if c.CheckEvasion(randomGenerator) {
 			evasionsCount1++
@@ -334,7 +334,7 @@ func TestCharacter_CheckEvasion_NoRandom(t *testing.T) {
 
 	evasionsCount2 := 0
 	for i := 0; i < total; i++ {
-		randomGenerator := utils.NewRandomGeneratorWithSeed(int64(i))
+		randomGenerator := utils.NewRandomWithSeed(int64(i))
 		if c.CheckEvasion(randomGenerator) {
 			evasionsCount2++
 		}

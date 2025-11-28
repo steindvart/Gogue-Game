@@ -208,10 +208,10 @@ func TestElixirConfig_GenerateAttributes(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Generate twice with same seed
-			rng1 := utils.NewRandomGeneratorWithSeed(tt.seed)
+			rng1 := utils.NewRandomWithSeed(tt.seed)
 			attrs1 := tt.config.GenerateAttributes(rng1)
 
-			rng2 := utils.NewRandomGeneratorWithSeed(tt.seed)
+			rng2 := utils.NewRandomWithSeed(tt.seed)
 			attrs2 := tt.config.GenerateAttributes(rng2)
 
 			// Should be deterministic
@@ -270,10 +270,10 @@ func TestElixirConfig_GenerateDuration(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Generate twice with same seed
-			rng1 := utils.NewRandomGeneratorWithSeed(tt.seed)
+			rng1 := utils.NewRandomWithSeed(tt.seed)
 			duration1 := tt.config.GenerateDuration(rng1)
 
-			rng2 := utils.NewRandomGeneratorWithSeed(tt.seed)
+			rng2 := utils.NewRandomWithSeed(tt.seed)
 			duration2 := tt.config.GenerateDuration(rng2)
 
 			// Should be deterministic
@@ -302,7 +302,7 @@ func TestElixirConfig_GenerateAttributes_Randomness(t *testing.T) {
 	iterations := 50
 
 	for i := 0; i < iterations; i++ {
-		rng := utils.NewRandomGeneratorWithSeed(int64(i))
+		rng := utils.NewRandomWithSeed(int64(i))
 		attrs := config.GenerateAttributes(rng)
 		strengthValues[attrs.Strength] = true
 		agilityValues[attrs.Agility] = true
@@ -327,7 +327,7 @@ func TestElixirConfig_GenerateDuration_Randomness(t *testing.T) {
 	iterations := 50
 
 	for i := 0; i < iterations; i++ {
-		rng := utils.NewRandomGeneratorWithSeed(int64(i))
+		rng := utils.NewRandomWithSeed(int64(i))
 		duration := config.GenerateDuration(rng)
 		durationValues[duration] = true
 	}
