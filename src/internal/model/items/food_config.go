@@ -21,14 +21,6 @@ const (
 	FoodTypeCustom FoodType = "Custom" // For custom food - dynamicly or from external data created
 )
 
-var AllFoodTypes = []FoodType{
-	FoodTypePotatoes,
-	FoodTypeBread,
-	FoodTypeMeat,
-	FoodTypeMistery,
-	FoodTypeBeer,
-}
-
 type FoodConfig struct {
 	Type        FoodType
 	HealthRange primitives.AttributeRange

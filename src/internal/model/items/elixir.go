@@ -22,12 +22,12 @@ func NewElixir(box primitives.Box, t ElixirType, e *primitives.Effect) *Elixir {
 	}
 }
 
-func NewElixirBuiltin(rnd *utils.Random, box primitives.Box, t ElixirType) *Elixir {
+func NewElixirBuiltin(rnd utils.Randomizer, box primitives.Box, t ElixirType) *Elixir {
 	e, _ := NewElixirByConfig(rnd, box, GetElixirConfig(t))
 	return e
 }
 
-func NewElixirByConfig(rnd *utils.Random, box primitives.Box, cfg ElixirConfig) (*Elixir, error) {
+func NewElixirByConfig(rnd utils.Randomizer, box primitives.Box, cfg ElixirConfig) (*Elixir, error) {
 	if err := cfg.Validate(); err != nil {
 		return nil, err
 	}

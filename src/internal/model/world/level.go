@@ -193,22 +193,30 @@ func (l *Level) generatePassages() error {
 }
 
 func (l *Level) addItemsAtRooms() error {
-	l.createFoods()
-	// l.createElixirs()
+	// @todo - "С каждым новым уровнем снижается количество полезных предметов (и повышается количество сокровищ, которые выпадают с побежденных противников)"
+	// @todo - логику этого условия буду делать отдельным MR. Тут просто выведу сущности на поле в бессмысленном количестве штук "testMaxCount..."
+	l.createFoods(3)
+	l.createElixirs(3)
 	// l.createScrolls()
 	// l.createWeapons()
 
 	return nil
 }
 
-func (l *Level) createFoods() {
-	for i := range l.Rooms {
-		// @todo - потом привязать к размеру комнаты. Чем больше комната - тем больше кол-во ништяков в ней может сгенерироваться
-		numFoods := l.random.Intn(3)
+func (l *Level) createFoods(count uint) {
+	allFoodTypes := []items.FoodType{
+		items.FoodTypePotatoes,
+		items.FoodTypeBread,
+		items.FoodTypeMeat,
+		items.FoodTypeMistery,
+		items.FoodTypeBeer,
+	}
 
-		for j := 0; j < numFoods; j++ {
-			foodType := getRandomFoodType(l.random)
-			randomPos := l.Rooms[i].GetRandomFreePosition(l.random)
+	for roomInd := range l.Rooms {
+		maxCountAtRoom := l.random.Intn(int(count))
+		for i := 0; i < maxCountAtRoom; i++ {
+			foodType := getRandomElement(l.random, allFoodTypes)
+			randomPos := l.Rooms[roomInd].GetRandomFreePosition(l.random)
 
 			itemBox := primitives.Box{
 				Point: *randomPos,
@@ -222,14 +230,40 @@ func (l *Level) createFoods() {
 	}
 }
 
-func getRandomFoodType(random utils.Randomizer) items.FoodType {
-	foodTypes := items.AllFoodTypes
-	idx := random.Intn(len(foodTypes))
-	return foodTypes[idx]
+func (l *Level) createElixirs(count uint) {
+	var allelixirTypes = []items.ElixirType{
+		items.ElixirTypeStrength,
+		items.ElixirTypeAgility,
+		items.ElixirTypeDwarfism,
+		items.ElixirTypeGiantism,
+		items.ElixirTypeMystery,
+		// items.ElixirTypeCustom, // а это что-то нужное?
+	}
+
+	for i := range l.Rooms {
+		maxCountAtRoom := l.random.Intn(int(count))
+		for j := 0; j < maxCountAtRoom; j++ {
+			elixirType := getRandomElement(l.random, allelixirTypes)
+			randomPos := l.Rooms[i].GetRandomFreePosition(l.random)
+
+			itemBox := primitives.Box{
+				Point: *randomPos,
+				Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
+			}
+
+			elixir := items.NewElixirBuiltin(l.random, itemBox, elixirType)
+
+			l.Rooms[i].Elixirs = append(l.Rooms[i].Elixirs, *elixir)
+		}
+	}
 }
 
-func (l *Level) createElixirs() {
-
+func getRandomElement[T any](random utils.Randomizer, slice []T) T {
+	if len(slice) == 0 {
+		panic("empty slice passed to getRandomElement")
+	}
+	idx := random.Intn(len(slice))
+	return slice[idx]
 }
 
 func (l *Level) createScrolls() {

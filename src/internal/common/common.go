@@ -18,4 +18,10 @@ const (
 	FoodTypeMeat
 	FoodTypeMistery
 	FoodTypeBeer
+	ElixirTypeStrength
+	ElixirTypeAgility
+	ElixirTypeDwarfism
+	ElixirTypeGiantism
+	ElixirTypeMystery
+	// ElixirTypeCustom // а это что-то нужное?
 )

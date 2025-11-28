@@ -329,7 +329,7 @@ func (g *Game) makeField(w, h int) [][]common.GameEntityType {
 
 	for _, room := range g.level.Rooms {
 		g.putRoom(room, g.level.FinishPortal, field)
-		g.putFood(room, field)
+		g.putItems(room, field)
 	}
 
 	for _, passages := range g.level.Passages {
@@ -402,8 +402,8 @@ func (g *Game) putPassage(passage world.Passage, field [][]common.GameEntityType
 	field[passage.DoorTwo.Y][passage.DoorTwo.X] = common.WorldTypeDoor
 }
 
-// @todo - потом это будет часть PutItems
-func (g *Game) putFood(room world.Room, field [][]common.GameEntityType) {
+// @todo - оставить ли это всё кучей?
+func (g *Game) putItems(room world.Room, field [][]common.GameEntityType) {
 	var fd common.GameEntityType
 	for _, food := range room.Foods {
 		switch food.Type {
@@ -417,6 +417,22 @@ func (g *Game) putFood(room world.Room, field [][]common.GameEntityType) {
 			fd = common.FoodTypeMistery
 		case items.FoodTypeBeer:
 			fd = common.FoodTypeBeer
+		}
+		field[food.Item.Shape.Point.Y][food.Item.Shape.Point.X] = fd
+	}
+
+	for _, food := range room.Elixirs {
+		switch food.Type {
+		case items.ElixirTypeStrength:
+			fd = common.ElixirTypeStrength
+		case items.ElixirTypeAgility:
+			fd = common.ElixirTypeAgility
+		case items.ElixirTypeDwarfism:
+			fd = common.ElixirTypeDwarfism
+		case items.ElixirTypeGiantism:
+			fd = common.ElixirTypeGiantism
+		case items.ElixirTypeMystery:
+			fd = common.ElixirTypeMystery
 		}
 		field[food.Item.Shape.Point.Y][food.Item.Shape.Point.X] = fd
 	}

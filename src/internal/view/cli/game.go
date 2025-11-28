@@ -52,7 +52,16 @@ func (*Game) SetFieldToScreen(screen tcell.Screen, field [][]common.GameEntityTy
 				ch = '🍄'
 			case common.FoodTypeBeer:
 				ch = '🍺'
-
+			case common.ElixirTypeStrength:
+				ch = '🧡'
+			case common.ElixirTypeAgility:
+				ch = '💚'
+			case common.ElixirTypeDwarfism:
+				ch = '🩵'
+			case common.ElixirTypeGiantism:
+				ch = '💙'
+			case common.ElixirTypeMystery:
+				ch = '🩶'
 			}
 			screen.SetContent(ox+x, oy+y, ch, nil, tcell.StyleDefault.Background(tcell.ColorBlack))
 		}
