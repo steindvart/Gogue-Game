@@ -33,6 +33,11 @@ func TestElixir_NewElixir_BuiltinConfig(t *testing.T) {
 			expectedName: string(ElixirTypeGiantism),
 		},
 		{
+			name:         "ElixirMaxHealth type uses MaxHealth elixir config",
+			elixirType:   ElixirMaxHealth,
+			expectedName: string(ElixirMaxHealth),
+		},
+		{
 			name:         "Mystery type uses Mystery elixir config",
 			elixirType:   ElixirTypeMystery,
 			expectedName: string(ElixirTypeMystery),
