@@ -257,16 +257,7 @@ func (l *Level) GenerateStartPlayerPosition() (*primitives.Point2D[int], error) 
 
 	for _, room := range l.Rooms {
 		if room.Type == RoomTypeStart {
-			roomWall := 1
-			xRoomPoint := room.Shape.Point.X
-			yRoomPoint := room.Shape.Point.Y
-			roomWidth := int(room.Shape.Size.Width)
-			roomHeight := int(room.Shape.Size.Height)
-
-			return &primitives.Point2D[int]{
-				X: xRoomPoint + roomWall + l.random.Intn(roomWidth-(roomWall*2)),
-				Y: yRoomPoint + roomWall + l.random.Intn(roomHeight-(roomWall*2)),
-			}, nil
+			return room.GetRandomFreePosition(l.random), nil
 		}
 	}
 
