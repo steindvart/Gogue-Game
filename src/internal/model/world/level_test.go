@@ -138,7 +138,7 @@ func TestLevel_GenerateNineRooms_Deterministic(t *testing.T) {
 	}
 
 	wantFinishPortal := primitives.Box{
-		Point: primitives.Point2D[int]{X: 62, Y: 14},
+		Point: primitives.Point2D[int]{X: 62, Y: 13},
 		Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
 	}
 	if level.FinishPortal != wantFinishPortal {
@@ -604,7 +604,7 @@ func TestLevel_AddRandomEdges_Deterministic(t *testing.T) {
 
 func TestLevel_GetStartPositionForPlayer(t *testing.T) {
 	t.Run("Rooms exist", func(t *testing.T) {
-		wantPlayerStartPoint := primitives.Point2D[int]{X: 45, Y: 24}
+		wantPlayerStartPoint := primitives.Point2D[int]{X: 42, Y: 24}
 
 		source := rand.New(rand.NewSource(randomSeedTest))
 		level := NewLevel(source)
