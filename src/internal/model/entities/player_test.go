@@ -68,6 +68,41 @@ func TestPlayer_EquipWeapon_AppliesEffectAndStoresWeapon(t *testing.T) {
 	}
 }
 
+func TestPlayer_EquipWeapon_NilIsNothing(t *testing.T) {
+	box := &primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
+	p := NewPlayer(box)
+	base := p.Attributes
+
+	p.EquipWeapon(nil)
+
+	if p.Weapon != nil {
+		t.Errorf("Weapon should remain nil when equipping nil")
+	}
+
+	if p.Attributes.Strength != base.Strength || p.Attributes.Agility != base.Agility {
+		t.Errorf("Attributes should not change when equipping nil: got (S %.1f, A %.1f) want (S %.1f, A %.1f)", p.Attributes.Strength, p.Attributes.Agility, base.Strength, base.Agility)
+	}
+
+	rnd := utils.NewRandomGeneratorWithSeed(defaultPlayerTestSeed)
+	w := items.NewWeaponBuiltin(rnd, primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 1}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}, items.WeaponTypeSword)
+	if w == nil || w.Effect == nil {
+		t.Fatalf("Weapon or its effect/attributes should be initialized")
+	}
+	delta := w.Effect.Attributes
+
+	p.EquipWeapon(w)
+	p.EquipWeapon(nil) // Equip nil after valid weapon
+
+	if p.Weapon != w {
+		t.Errorf("Weapon should remain unchanged when equipping nil")
+	}
+
+	// Attributes should remain as after valid equip
+	if p.Attributes.Strength != base.Strength+delta.Strength || p.Attributes.Agility != base.Agility+delta.Agility {
+		t.Errorf("Attributes should remain unchanged when equipping nil: got (S %.1f, A %.1f) want (S %.1f, A %.1f)", p.Attributes.Strength, p.Attributes.Agility, base.Strength+delta.Strength, base.Agility+delta.Agility)
+	}
+}
+
 func TestPlayer_UnequipWeapon_RevertsEffectAndUnsetsWeapon(t *testing.T) {
 	box := &primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 	p := NewPlayer(box)

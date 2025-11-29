@@ -32,6 +32,10 @@ func NewPlayer(box *primitives.Box) *Player {
 }
 
 func (p *Player) EquipWeapon(w *items.Weapon) {
+	if w == nil {
+		return
+	}
+
 	// @todo - сделать обработку случая когда уже есть экипированный предмет
 	p.Weapon = w
 	p.Character.Use(w)
