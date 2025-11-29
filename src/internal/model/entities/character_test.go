@@ -133,6 +133,36 @@ func TestCharacter_AttackEqualsStrength(t *testing.T) {
 	}
 }
 
+func TestCharacter_ApplyEffect_NilIsNothing(t *testing.T) {
+	const maxHealth = 100
+	const wantHealth = 50
+	const wantStrength = 10.0
+	const wantAgility = 5.0
+
+	c := NewCharacter(
+		primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
+		primitives.Attributes{MaxHealth: maxHealth, Health: wantHealth, Strength: wantStrength, Agility: wantAgility},
+	)
+
+	c.ApplyEffect(nil)
+
+	if len(c.TemporaryEffects) != 0 {
+		t.Fatalf("Nil effect must not be tracked, got len=%d", len(c.TemporaryEffects))
+	}
+
+	if c.Attributes.Health != wantHealth {
+		t.Errorf("Health should remain unchanged: got %v, want 50", c.Attributes.Health)
+	}
+
+	if c.Attributes.Strength != wantStrength {
+		t.Errorf("Strength should remain unchanged: want %v got %v", wantStrength, c.Attributes.Strength)
+	}
+
+	if c.Attributes.Agility != wantAgility {
+		t.Errorf("Agility should remain unchanged: want %v got %v", wantAgility, c.Attributes.Agility)
+	}
+}
+
 func TestCharacter_ApplyEffect_AllPermanent_ClampsHealth(t *testing.T) {
 	const maxHealth = 100
 
@@ -251,6 +281,29 @@ func TestCharacter_RemoveTemporaryEffect_HealPermanent_OthersRevert(t *testing.T
 	}
 	if c.Attributes.Strength != 3 || c.Attributes.Agility != 2 {
 		t.Errorf("Other attributes should revert: got (S %.1f, A %.1f)", c.Attributes.Strength, c.Attributes.Agility)
+	}
+}
+
+func TestCharacter_RemoveTemporaryEffect_NilIsNothing(t *testing.T) {
+	c := NewCharacter(
+		primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
+		primitives.Attributes{MaxHealth: 100, Health: 40, Agility: 2, Strength: 3},
+	)
+	e := &primitives.Effect{
+		Duration:   primitives.EffectDuration{Type: primitives.EffectDurationTypeAllTemporaryHealPermanent, Steps: 5},
+		Attributes: primitives.Attributes{Health: 30, Strength: 7, Agility: 11},
+	}
+
+	c.ApplyEffect(e)
+
+	if c.Attributes.Health != 70 || c.Attributes.Strength != 10 || c.Attributes.Agility != 13 {
+		t.Fatalf("Precondition after ApplyEffect failed: got (H %.1f, S %.1f, A %.1f)", c.Attributes.Health, c.Attributes.Strength, c.Attributes.Agility)
+	}
+
+	c.RemoveTemporaryEffect(nil)
+
+	if c.Attributes.Health != 70 || c.Attributes.Strength != 10 || c.Attributes.Agility != 13 {
+		t.Fatalf("Precondition after ApplyEffect failed: got (H %.1f, S %.1f, A %.1f)", c.Attributes.Health, c.Attributes.Strength, c.Attributes.Agility)
 	}
 }
 

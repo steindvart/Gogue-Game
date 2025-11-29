@@ -71,7 +71,9 @@ func (c *Character) ProcessTemporaryEffects(steps uint32) {
 }
 
 func (c *Character) ApplyEffect(effect *primitives.Effect) {
-	// @todo - сделать обработку nil значений
+	if effect == nil {
+		return
+	}
 
 	if effect.Duration.Type == primitives.EffectDurationTypeAllTemporary ||
 		effect.Duration.Type == primitives.EffectDurationTypeAllTemporaryHealPermanent {
@@ -87,7 +89,9 @@ func (c *Character) ApplyEffect(effect *primitives.Effect) {
 }
 
 func (c *Character) RemoveTemporaryEffect(effect *primitives.Effect) {
-	// @todo - сделать обработку nil значений
+	if effect == nil {
+		return
+	}
 
 	for i, e := range c.TemporaryEffects {
 		if e == effect {
