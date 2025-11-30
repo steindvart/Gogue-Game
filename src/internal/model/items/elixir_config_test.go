@@ -8,44 +8,58 @@ import (
 
 func TestGetElixirConfig(t *testing.T) {
 	tests := []struct {
-		name              string
-		elixirType        ElixirType
-		wantType          ElixirType
-		wantStrengthRange primitives.AttributeRange
-		wantAgilityRange  primitives.AttributeRange
-		wantDurationRange ElixirDurationStepsRange
+		name               string
+		elixirType         ElixirType
+		wantType           ElixirType
+		wantStrengthRange  primitives.AttributeRange
+		wantAgilityRange   primitives.AttributeRange
+		wantMaxHealthRange primitives.AttributeRange
+		wantDurationRange  ElixirDurationStepsRange
 	}{
 		{
-			name:              "Get Strength config",
-			elixirType:        ElixirTypeStrength,
-			wantType:          ElixirTypeStrength,
-			wantStrengthRange: primitives.AttributeRange{Min: 5, Max: 20},
-			wantAgilityRange:  primitives.AttributeRange{Min: 0, Max: 0},
-			wantDurationRange: defaultDurationRange,
+			name:               "Get Strength config",
+			elixirType:         ElixirTypeStrength,
+			wantType:           ElixirTypeStrength,
+			wantStrengthRange:  primitives.AttributeRange{Min: 5, Max: 20},
+			wantAgilityRange:   primitives.AttributeRange{Min: 0, Max: 0},
+			wantMaxHealthRange: primitives.AttributeRange{Min: 0, Max: 0},
+			wantDurationRange:  defaultDurationRange,
 		},
 		{
-			name:              "Get Agility config",
-			elixirType:        ElixirTypeAgility,
-			wantType:          ElixirTypeAgility,
-			wantStrengthRange: primitives.AttributeRange{Min: 0, Max: 0},
-			wantAgilityRange:  primitives.AttributeRange{Min: 5, Max: 20},
-			wantDurationRange: defaultDurationRange,
+			name:               "Get Agility config",
+			elixirType:         ElixirTypeAgility,
+			wantType:           ElixirTypeAgility,
+			wantStrengthRange:  primitives.AttributeRange{Min: 0, Max: 0},
+			wantAgilityRange:   primitives.AttributeRange{Min: 5, Max: 20},
+			wantMaxHealthRange: primitives.AttributeRange{Min: 0, Max: 0},
+			wantDurationRange:  defaultDurationRange,
 		},
 		{
-			name:              "Get Dwarfism config - negative strength",
-			elixirType:        ElixirTypeDwarfism,
-			wantType:          ElixirTypeDwarfism,
-			wantStrengthRange: primitives.AttributeRange{Min: -10, Max: -2},
-			wantAgilityRange:  primitives.AttributeRange{Min: 10, Max: 30},
-			wantDurationRange: defaultDurationRange,
+			name:               "Get Dwarfism config - negative strength",
+			elixirType:         ElixirTypeDwarfism,
+			wantType:           ElixirTypeDwarfism,
+			wantStrengthRange:  primitives.AttributeRange{Min: -10, Max: -2},
+			wantAgilityRange:   primitives.AttributeRange{Min: 10, Max: 30},
+			wantMaxHealthRange: primitives.AttributeRange{Min: 0, Max: 0},
+			wantDurationRange:  defaultDurationRange,
 		},
 		{
-			name:              "Get Giantism config - negative agility",
-			elixirType:        ElixirTypeGiantism,
-			wantType:          ElixirTypeGiantism,
-			wantStrengthRange: primitives.AttributeRange{Min: 10, Max: 30},
-			wantAgilityRange:  primitives.AttributeRange{Min: -10, Max: -2},
-			wantDurationRange: defaultDurationRange,
+			name:               "Get Giantism config - negative agility",
+			elixirType:         ElixirTypeGiantism,
+			wantType:           ElixirTypeGiantism,
+			wantStrengthRange:  primitives.AttributeRange{Min: 10, Max: 30},
+			wantAgilityRange:   primitives.AttributeRange{Min: -10, Max: -2},
+			wantMaxHealthRange: primitives.AttributeRange{Min: 0, Max: 0},
+			wantDurationRange:  defaultDurationRange,
+		},
+		{
+			name:               "Get MaxHealth config - positive MaxHealth",
+			elixirType:         ElixirMaxHealth,
+			wantType:           ElixirMaxHealth,
+			wantStrengthRange:  primitives.AttributeRange{Min: 0, Max: 0},
+			wantAgilityRange:   primitives.AttributeRange{Min: 0, Max: 0},
+			wantMaxHealthRange: primitives.AttributeRange{Min: 20, Max: 50},
+			wantDurationRange:  defaultDurationRange,
 		},
 		{
 			name:              "Get Mystery config - all attributes",
@@ -56,12 +70,13 @@ func TestGetElixirConfig(t *testing.T) {
 			wantDurationRange: defaultDurationRange,
 		},
 		{
-			name:              "Unknown type returns Mystery",
-			elixirType:        "Unknown Elixir",
-			wantType:          ElixirTypeMystery,
-			wantStrengthRange: primitives.AttributeRange{Min: -20, Max: 30},
-			wantAgilityRange:  primitives.AttributeRange{Min: -20, Max: 30},
-			wantDurationRange: defaultDurationRange,
+			name:               "Unknown type returns Mystery",
+			elixirType:         "Unknown Elixir",
+			wantType:           ElixirTypeMystery,
+			wantStrengthRange:  primitives.AttributeRange{Min: -20, Max: 30},
+			wantAgilityRange:   primitives.AttributeRange{Min: -20, Max: 30},
+			wantMaxHealthRange: primitives.AttributeRange{Min: -30, Max: 70},
+			wantDurationRange:  defaultDurationRange,
 		},
 	}
 
