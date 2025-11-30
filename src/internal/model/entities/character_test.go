@@ -649,7 +649,7 @@ func TestCharacter_Use_WithElixir(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			rng := utils.NewRandomGeneratorWithSeed(defaultCharacterTestSeed)
+			rng := utils.NewRandomWithSeed(defaultCharacterTestSeed)
 			c := NewCharacter(
 				primitives.Box{
 					Point: primitives.Point2D[int]{X: 0, Y: 0},
@@ -690,7 +690,7 @@ func TestCharacter_Use_WithElixir(t *testing.T) {
 func TestCharacter_Use_WithScroll(t *testing.T) {
 	t.Parallel()
 
-	rng := utils.NewRandomGeneratorWithSeed(defaultCharacterTestSeed)
+	rng := utils.NewRandomWithSeed(defaultCharacterTestSeed)
 	c := NewCharacter(
 		primitives.Box{
 			Point: primitives.Point2D[int]{X: 0, Y: 0},
