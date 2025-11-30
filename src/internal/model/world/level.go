@@ -229,7 +229,14 @@ func (l *Level) addItemsAtRooms(totalCount uint) {
 		// items.ScrollTypeCustom,
 	}
 
+	cycleCount := 0
 	for i := 0; i < int(totalCount); i++ {
+		cycleCount++
+		maxCycleCount := 1000
+		if cycleCount == maxCycleCount {
+			return
+		}
+
 		roomInd := l.random.Intn(roomsCount)
 		if roomInd == startRoomInd {
 			i--
