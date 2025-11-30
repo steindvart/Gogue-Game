@@ -256,7 +256,7 @@ func (l *Level) addItemsAtRooms(totalCount uint) {
 		case scroll:
 			res = l.createScroll(roomInd, allScrollTypes)
 		}
-		if res == false {
+		if !res {
 			i--
 			continue
 		}

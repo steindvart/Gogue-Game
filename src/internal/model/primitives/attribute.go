@@ -18,7 +18,7 @@ func (a *Attributes) Affect(delta Attributes) {
 	a.Strength += delta.Strength
 }
 
-func (a *Attributes) Inverse() Attributes {
+func Inverse(a Attributes) Attributes {
 	return Attributes{
 		MaxHealth: -a.MaxHealth,
 		Health:    -a.Health,

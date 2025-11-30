@@ -3,6 +3,7 @@ package entities
 import (
 	"testing"
 
+	"gogue/internal/model/items"
 	"gogue/internal/model/primitives"
 	"gogue/internal/utils"
 )
@@ -198,6 +199,122 @@ func TestCharacter_ApplyEffect_AllTemporary_TracksAndMutates(t *testing.T) {
 	}
 }
 
+func TestCharacter_ApplyEffect_MaxHealthIncrease_AdjustsCurrentHealth(t *testing.T) {
+	c := NewCharacter(
+		primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
+		primitives.Attributes{MaxHealth: 100, Health: 50, Strength: 10, Agility: 5},
+	)
+
+	e := &primitives.Effect{
+		Duration:   primitives.EffectDuration{Type: primitives.EffectDurationTypeAllPermanent, Steps: 0},
+		Attributes: primitives.Attributes{MaxHealth: 20},
+	}
+
+	c.ApplyEffect(e)
+
+	if c.Attributes.MaxHealth != 120 {
+		t.Errorf("MaxHealth after ApplyEffect = %.1f, want 120", c.Attributes.MaxHealth)
+	}
+	if c.Attributes.Health != 70 {
+		t.Errorf("Health after ApplyEffect = %.1f, want 70", c.Attributes.Health)
+	}
+}
+
+func TestCharacter_ApplyEffect_MaxHealthDecrease_HealthClampedToOne(t *testing.T) {
+	c := NewCharacter(
+		primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
+		primitives.Attributes{MaxHealth: 100, Health: 10, Strength: 10, Agility: 5},
+	)
+
+	e := &primitives.Effect{
+		Duration:   primitives.EffectDuration{Type: primitives.EffectDurationTypeAllPermanent, Steps: 0},
+		Attributes: primitives.Attributes{MaxHealth: -20},
+	}
+
+	c.ApplyEffect(e)
+
+	if c.Attributes.MaxHealth != 80 {
+		t.Errorf("MaxHealth after decreasing effect = %.1f, want 80", c.Attributes.MaxHealth)
+	}
+	if c.Attributes.Health != 1 {
+		t.Errorf("Health should be clamped to 1 when effect reduces it <= 0; got %.1f", c.Attributes.Health)
+	}
+}
+
+func TestCharacter_ProcessTemporaryEffects_MaxHealthPermamentAffectHealth(t *testing.T) {
+	c := NewCharacter(
+		primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
+		primitives.Attributes{MaxHealth: 100, Health: 10, Strength: 10, Agility: 5},
+	)
+
+	e := &primitives.Effect{
+		Duration:   primitives.EffectDuration{Type: primitives.EffectDurationTypeAllTemporaryHealPermanent, Steps: 3},
+		Attributes: primitives.Attributes{MaxHealth: 20},
+	}
+
+	c.ApplyEffect(e)
+
+	if c.Attributes.MaxHealth != 120 {
+		t.Errorf("MaxHealth after ApplyEffect = %.1f, want 120", c.Attributes.MaxHealth)
+	}
+	if c.Attributes.Health != 30 {
+		t.Errorf("Health after ApplyEffect = %.1f, want 30", c.Attributes.Health)
+	}
+
+	c.ProcessTemporaryEffects(2)
+	if c.Attributes.MaxHealth != 120 {
+		t.Errorf("MaxHealth after ApplyEffect = %.1f, want 120", c.Attributes.MaxHealth)
+	}
+	if c.Attributes.Health != 30 {
+		t.Errorf("Health after ApplyEffect = %.1f, want 30", c.Attributes.Health)
+	}
+
+	c.ProcessTemporaryEffects(2)
+	if c.Attributes.MaxHealth != 100 {
+		t.Errorf("MaxHealth after ApplyEffect = %.1f, want 100", c.Attributes.MaxHealth)
+	}
+	if c.Attributes.Health != 30 {
+		t.Errorf("Health after ApplyEffect = %.1f, want 30", c.Attributes.Health)
+	}
+}
+
+func TestCharacter_ProcessTemporaryEffects_MaxHealthTemporaryAffectHealth(t *testing.T) {
+	c := NewCharacter(
+		primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
+		primitives.Attributes{MaxHealth: 100, Health: 10, Strength: 10, Agility: 5},
+	)
+
+	e := &primitives.Effect{
+		Duration:   primitives.EffectDuration{Type: primitives.EffectDurationTypeAllTemporary, Steps: 3},
+		Attributes: primitives.Attributes{MaxHealth: 20},
+	}
+
+	c.ApplyEffect(e)
+
+	if c.Attributes.MaxHealth != 120 {
+		t.Errorf("MaxHealth after ApplyEffect = %.1f, want 120", c.Attributes.MaxHealth)
+	}
+	if c.Attributes.Health != 30 {
+		t.Errorf("Health after ApplyEffect = %.1f, want 30", c.Attributes.Health)
+	}
+
+	c.ProcessTemporaryEffects(2)
+	if c.Attributes.MaxHealth != 120 {
+		t.Errorf("MaxHealth after ApplyEffect = %.1f, want 120", c.Attributes.MaxHealth)
+	}
+	if c.Attributes.Health != 30 {
+		t.Errorf("Health after ApplyEffect = %.1f, want 30", c.Attributes.Health)
+	}
+
+	c.ProcessTemporaryEffects(2)
+	if c.Attributes.MaxHealth != 100 {
+		t.Errorf("MaxHealth after ApplyEffect = %.1f, want 100", c.Attributes.MaxHealth)
+	}
+	if c.Attributes.Health != 10 {
+		t.Errorf("Health after ApplyEffect = %.1f, want 10", c.Attributes.Health)
+	}
+}
+
 func TestCharacter_ProcessTemporaryEffects_ExpiresAndRollsBack(t *testing.T) {
 	c := NewCharacter(
 		primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
@@ -342,5 +459,587 @@ func TestCharacter_CheckEvasion_NoRandom(t *testing.T) {
 
 	if evasionsCount1 == evasionsCount2 {
 		t.Errorf("Expected different evasion counts with different random seeds; got both %d/%d", evasionsCount1, total)
+	}
+}
+
+type MockUsable struct {
+	effect *primitives.Effect
+}
+
+func (m *MockUsable) Use() *primitives.Effect {
+	return m.effect
+}
+
+func TestCharacter_Use_WithMockUsable(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name           string
+		initialHealth  float64
+		initialStr     float64
+		initialAgi     float64
+		effectAttrs    primitives.Attributes
+		effectDuration primitives.EffectDuration
+		wantHealth     float64
+		wantStr        float64
+		wantAgi        float64
+		wantEffectsCnt int
+	}{
+		{
+			name:          "Permanent effect increases attributes",
+			initialHealth: 50,
+			initialStr:    10,
+			initialAgi:    5,
+			effectAttrs: primitives.Attributes{
+				Health:   20,
+				Strength: 5,
+				Agility:  3,
+			},
+			effectDuration: primitives.EffectDuration{
+				Type:  primitives.EffectDurationTypeAllPermanent,
+				Steps: 0,
+			},
+			wantHealth:     70,
+			wantStr:        15,
+			wantAgi:        8,
+			wantEffectsCnt: 0, // Permanent не добавляется в TemporaryEffects
+		},
+		{
+			name:          "Temporary effect tracked",
+			initialHealth: 30,
+			initialStr:    8,
+			initialAgi:    2,
+			effectAttrs: primitives.Attributes{
+				Health:   10,
+				Strength: 4,
+				Agility:  6,
+			},
+			effectDuration: primitives.EffectDuration{
+				Type:  primitives.EffectDurationTypeAllTemporary,
+				Steps: 5,
+			},
+			wantHealth:     40,
+			wantStr:        12,
+			wantAgi:        8,
+			wantEffectsCnt: 1,
+		},
+		{
+			name:          "Heal permanent type tracked",
+			initialHealth: 40,
+			initialStr:    5,
+			initialAgi:    3,
+			effectAttrs: primitives.Attributes{
+				Health:   30,
+				Strength: 10,
+				Agility:  5,
+			},
+			effectDuration: primitives.EffectDuration{
+				Type:  primitives.EffectDurationTypeAllTemporaryHealPermanent,
+				Steps: 3,
+			},
+			wantHealth:     70,
+			wantStr:        15,
+			wantAgi:        8,
+			wantEffectsCnt: 1,
+		},
+		{
+			name:          "Health clamped to MaxHealth",
+			initialHealth: 90,
+			initialStr:    10,
+			initialAgi:    5,
+			effectAttrs: primitives.Attributes{
+				Health:   50, // Превысит MaxHealth (100)
+				Strength: 0,
+				Agility:  0,
+			},
+			effectDuration: primitives.EffectDuration{
+				Type:  primitives.EffectDurationTypeAllPermanent,
+				Steps: 0,
+			},
+			wantHealth:     100, // Зажато до MaxHealth
+			wantStr:        10,
+			wantAgi:        5,
+			wantEffectsCnt: 0,
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			c := NewCharacter(
+				primitives.Box{
+					Point: primitives.Point2D[int]{X: 0, Y: 0},
+					Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
+				},
+				primitives.Attributes{
+					MaxHealth: 100,
+					Health:    tt.initialHealth,
+					Strength:  tt.initialStr,
+					Agility:   tt.initialAgi,
+				},
+			)
+
+			usable := &MockUsable{
+				effect: &primitives.Effect{
+					Duration:   tt.effectDuration,
+					Attributes: tt.effectAttrs,
+				},
+			}
+
+			c.Use(usable)
+
+			if c.Attributes.Health != tt.wantHealth {
+				t.Errorf("Health = %.1f, want %.1f", c.Attributes.Health, tt.wantHealth)
+			}
+			if c.Attributes.Strength != tt.wantStr {
+				t.Errorf("Strength = %.1f, want %.1f", c.Attributes.Strength, tt.wantStr)
+			}
+			if c.Attributes.Agility != tt.wantAgi {
+				t.Errorf("Agility = %.1f, want %.1f", c.Attributes.Agility, tt.wantAgi)
+			}
+			if len(c.TemporaryEffects) != tt.wantEffectsCnt {
+				t.Errorf("TemporaryEffects count = %d, want %d", len(c.TemporaryEffects), tt.wantEffectsCnt)
+			}
+		})
+	}
+}
+
+func TestCharacter_Use_WithElixir(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name           string
+		elixirType     items.ElixirType
+		initialHealth  float64
+		initialStr     float64
+		initialAgi     float64
+		wantMinHealth  float64 // Минимальное ожидаемое здоровье (из-за random)
+		wantMinStr     float64
+		wantMinAgi     float64
+		wantEffectsCnt int
+	}{
+		{
+			name:           "Use Strength elixir",
+			elixirType:     items.ElixirTypeStrength,
+			initialHealth:  50,
+			initialStr:     10,
+			initialAgi:     5,
+			wantMinHealth:  50,
+			wantMinStr:     15, // Ожидаем прирост силы
+			wantMinAgi:     5,
+			wantEffectsCnt: 1, // Temporary effect
+		},
+		{
+			name:           "Use Agility elixir",
+			elixirType:     items.ElixirTypeAgility,
+			initialHealth:  60,
+			initialStr:     12,
+			initialAgi:     3,
+			wantMinHealth:  60,
+			wantMinStr:     12,
+			wantMinAgi:     8, // Ожидаем прирост ловкости
+			wantEffectsCnt: 1,
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			rng := utils.NewRandomWithSeed(defaultCharacterTestSeed)
+			c := NewCharacter(
+				primitives.Box{
+					Point: primitives.Point2D[int]{X: 0, Y: 0},
+					Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
+				},
+				primitives.Attributes{
+					MaxHealth: 100,
+					Health:    tt.initialHealth,
+					Strength:  tt.initialStr,
+					Agility:   tt.initialAgi,
+				},
+			)
+
+			box := primitives.Box{
+				Point: primitives.Point2D[int]{X: 0, Y: 0},
+				Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
+			}
+			elixir := items.NewElixirBuiltin(rng, box, tt.elixirType)
+
+			c.Use(elixir)
+
+			if c.Attributes.Health < tt.wantMinHealth {
+				t.Errorf("Health = %.1f, want >= %.1f", c.Attributes.Health, tt.wantMinHealth)
+			}
+			if c.Attributes.Strength < tt.wantMinStr {
+				t.Errorf("Strength = %.1f, want >= %.1f", c.Attributes.Strength, tt.wantMinStr)
+			}
+			if c.Attributes.Agility < tt.wantMinAgi {
+				t.Errorf("Agility = %.1f, want >= %.1f", c.Attributes.Agility, tt.wantMinAgi)
+			}
+			if len(c.TemporaryEffects) != tt.wantEffectsCnt {
+				t.Errorf("TemporaryEffects count = %d, want %d", len(c.TemporaryEffects), tt.wantEffectsCnt)
+			}
+		})
+	}
+}
+
+func TestCharacter_Use_WithScroll(t *testing.T) {
+	t.Parallel()
+
+	rng := utils.NewRandomWithSeed(defaultCharacterTestSeed)
+	c := NewCharacter(
+		primitives.Box{
+			Point: primitives.Point2D[int]{X: 0, Y: 0},
+			Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
+		},
+		primitives.Attributes{
+			MaxHealth: 100,
+			Health:    50,
+			Strength:  10,
+			Agility:   5,
+		},
+	)
+
+	initialHealth := c.Attributes.Health
+	initialStr := c.Attributes.Strength
+	initialAgi := c.Attributes.Agility
+
+	box := primitives.Box{
+		Point: primitives.Point2D[int]{X: 0, Y: 0},
+		Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
+	}
+	scroll := items.NewScrollBuiltin(rng, box, items.ScrollTypeStrength)
+
+	c.Use(scroll)
+
+	attributesChanged := c.Attributes.Health != initialHealth ||
+		c.Attributes.Strength != initialStr ||
+		c.Attributes.Agility != initialAgi
+
+	if !attributesChanged {
+		t.Error("Expected scroll to change at least one attribute")
+	}
+
+	// Свиток не должен добавлять временных эффектов
+	if len(c.TemporaryEffects) != 0 {
+		t.Error("Expected scroll not to add temporary effects")
+	}
+}
+
+func TestCharacter_Use_MultipleUsables(t *testing.T) {
+	t.Parallel()
+
+	c := NewCharacter(
+		primitives.Box{
+			Point: primitives.Point2D[int]{X: 0, Y: 0},
+			Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
+		},
+		primitives.Attributes{
+			MaxHealth: 100,
+			Health:    30,
+			Strength:  5,
+			Agility:   3,
+		},
+	)
+
+	// Первый эффект: +20 здоровья, +5 силы (temporary)
+	usable1 := &MockUsable{
+		effect: &primitives.Effect{
+			Duration: primitives.EffectDuration{
+				Type:  primitives.EffectDurationTypeAllTemporary,
+				Steps: 5,
+			},
+			Attributes: primitives.Attributes{
+				Health:   20,
+				Strength: 5,
+				Agility:  0,
+			},
+		},
+	}
+
+	// Второй эффект: +10 здоровья, +3 ловкости (temporary)
+	usable2 := &MockUsable{
+		effect: &primitives.Effect{
+			Duration: primitives.EffectDuration{
+				Type:  primitives.EffectDurationTypeAllTemporary,
+				Steps: 3,
+			},
+			Attributes: primitives.Attributes{
+				Health:   10,
+				Strength: 0,
+				Agility:  3,
+			},
+		},
+	}
+
+	// Act
+	c.Use(usable1)
+	c.Use(usable2)
+
+	// Assert
+	expectedHealth := 60.0
+	expectedStr := 10.0
+	expectedAgi := 6.0
+
+	if c.Attributes.Health != expectedHealth {
+		t.Errorf("Health after multiple uses = %.1f, want %.1f", c.Attributes.Health, expectedHealth)
+	}
+	if c.Attributes.Strength != expectedStr {
+		t.Errorf("Strength after multiple uses = %.1f, want %.1f", c.Attributes.Strength, expectedStr)
+	}
+	if c.Attributes.Agility != expectedAgi {
+		t.Errorf("Agility after multiple uses = %.1f, want %.1f", c.Attributes.Agility, expectedAgi)
+	}
+	if len(c.TemporaryEffects) != 2 {
+		t.Errorf("Expected 2 temporary effects, got %d", len(c.TemporaryEffects))
+	}
+}
+
+func TestCharacter_Use_EffectInteractionWithProcessing(t *testing.T) {
+	t.Parallel()
+
+	c := NewCharacter(
+		primitives.Box{
+			Point: primitives.Point2D[int]{X: 0, Y: 0},
+			Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
+		},
+		primitives.Attributes{
+			MaxHealth: 100,
+			Health:    50,
+			Strength:  10,
+			Agility:   5,
+		},
+	)
+
+	usable := &MockUsable{
+		effect: &primitives.Effect{
+			Duration: primitives.EffectDuration{
+				Type:  primitives.EffectDurationTypeAllTemporary,
+				Steps: 3,
+			},
+			Attributes: primitives.Attributes{
+				Health:   20,
+				Strength: 5,
+				Agility:  3,
+			},
+		},
+	}
+
+	c.Use(usable)
+
+	if c.Attributes.Health != 70 || c.Attributes.Strength != 15 || c.Attributes.Agility != 8 {
+		t.Fatalf("After Use: unexpected attributes (H=%.1f, S=%.1f, A=%.1f)",
+			c.Attributes.Health, c.Attributes.Strength, c.Attributes.Agility)
+	}
+
+	// Обрабатываем 2 шага
+	c.ProcessTemporaryEffects(2)
+
+	// Эффект должен остаться
+	if len(c.TemporaryEffects) != 1 {
+		t.Fatalf("Expected effect to remain after 2 steps, got %d effects", len(c.TemporaryEffects))
+	}
+
+	// Обрабатываем последний шаг
+	c.ProcessTemporaryEffects(1)
+
+	// Эффект должен исчезнуть
+	if len(c.TemporaryEffects) != 0 {
+		t.Errorf("Expected effect to expire, got %d effects", len(c.TemporaryEffects))
+	}
+
+	// Атрибуты должны вернуться к базовым
+	if c.Attributes.Health != 50 || c.Attributes.Strength != 10 || c.Attributes.Agility != 5 {
+		t.Errorf("After expiration: unexpected attributes (H=%.1f, S=%.1f, A=%.1f)",
+			c.Attributes.Health, c.Attributes.Strength, c.Attributes.Agility)
+	}
+}
+
+func TestCharacter_Use_NilEffect(t *testing.T) {
+	t.Parallel()
+
+	c := NewCharacter(
+		primitives.Box{
+			Point: primitives.Point2D[int]{X: 0, Y: 0},
+			Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
+		},
+		primitives.Attributes{
+			MaxHealth: 100,
+			Health:    50,
+			Strength:  10,
+			Agility:   5,
+		},
+	)
+
+	initialHealth := c.Attributes.Health
+	initialStr := c.Attributes.Strength
+	initialAgi := c.Attributes.Agility
+
+	usable := &MockUsable{
+		effect: nil,
+	}
+
+	// Act - не должно паниковать, но может быть nil pointer dereference
+	// В зависимости от реализации ApplyEffect
+	defer func() {
+		if r := recover(); r != nil {
+			// Если паника, это ожидаемо для nil effect
+			// Можно добавить комментарий, что нужна валидация
+			t.Logf("Panic on nil effect (expected if no validation): %v", r)
+		}
+	}()
+
+	c.Use(usable)
+
+	// Если не запаниковало, атрибуты не должны измениться
+	if c.Attributes.Health != initialHealth ||
+		c.Attributes.Strength != initialStr ||
+		c.Attributes.Agility != initialAgi {
+		t.Error("Attributes should not change with nil effect")
+	}
+}
+
+func TestCharacter_Use_ZeroEffect(t *testing.T) {
+	t.Parallel()
+
+	c := NewCharacter(
+		primitives.Box{
+			Point: primitives.Point2D[int]{X: 0, Y: 0},
+			Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
+		},
+		primitives.Attributes{
+			MaxHealth: 100,
+			Health:    50,
+			Strength:  10,
+			Agility:   5,
+		},
+	)
+
+	usable := &MockUsable{
+		effect: &primitives.Effect{
+			Duration: primitives.EffectDuration{
+				Type:  primitives.EffectDurationTypeAllPermanent,
+				Steps: 0,
+			},
+			Attributes: primitives.Attributes{
+				Health:   0,
+				Strength: 0,
+				Agility:  0,
+			},
+		},
+	}
+
+	c.Use(usable)
+
+	// Assert - атрибуты не должны измениться
+	if c.Attributes.Health != 50 || c.Attributes.Strength != 10 || c.Attributes.Agility != 5 {
+		t.Errorf("Zero effect should not change attributes: got (H=%.1f, S=%.1f, A=%.1f)",
+			c.Attributes.Health, c.Attributes.Strength, c.Attributes.Agility)
+	}
+
+	if len(c.TemporaryEffects) != 0 {
+		t.Error("Zero permanent effect should not add temporary effects")
+	}
+}
+
+func TestCharacter_Use_LowHealthScenario(t *testing.T) {
+	t.Parallel()
+
+	c := NewCharacter(
+		primitives.Box{
+			Point: primitives.Point2D[int]{X: 0, Y: 0},
+			Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
+		},
+		primitives.Attributes{
+			MaxHealth: 100,
+			Health:    5, // Критически низкое HP
+			Strength:  10,
+			Agility:   5,
+		},
+	)
+
+	if c.IsAlive() == false {
+		t.Fatal("Character should be alive with Health=5")
+	}
+
+	// Используем лечебный предмет
+	usable := &MockUsable{
+		effect: &primitives.Effect{
+			Duration: primitives.EffectDuration{
+				Type:  primitives.EffectDurationTypeAllPermanent,
+				Steps: 0,
+			},
+			Attributes: primitives.Attributes{
+				Health:   50,
+				Strength: 0,
+				Agility:  0,
+			},
+		},
+	}
+
+	c.Use(usable)
+
+	// Assert
+	if c.Attributes.Health != 55 {
+		t.Errorf("Health after healing = %.1f, want 55", c.Attributes.Health)
+	}
+
+	if !c.IsAlive() {
+		t.Error("Character should be alive after healing")
+	}
+}
+
+func TestCharacter_Use_NegativeEffects(t *testing.T) {
+	t.Parallel()
+
+	c := NewCharacter(
+		primitives.Box{
+			Point: primitives.Point2D[int]{X: 0, Y: 0},
+			Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
+		},
+		primitives.Attributes{
+			MaxHealth: 100,
+			Health:    50,
+			Strength:  10,
+			Agility:   5,
+		},
+	)
+
+	// Предмет с "побочными эффектами" - уменьшает силу
+	usable := &MockUsable{
+		effect: &primitives.Effect{
+			Duration: primitives.EffectDuration{
+				Type:  primitives.EffectDurationTypeAllTemporary,
+				Steps: 2,
+			},
+			Attributes: primitives.Attributes{
+				Health:   30,
+				Strength: -5, // Уменьшение силы
+				Agility:  10,
+			},
+		},
+	}
+
+	c.Use(usable)
+
+	if c.Attributes.Health != 80 {
+		t.Errorf("Health = %.1f, want 80", c.Attributes.Health)
+	}
+	if c.Attributes.Strength != 5 {
+		t.Errorf("Strength should decrease: got %.1f, want 5", c.Attributes.Strength)
+	}
+	if c.Attributes.Agility != 15 {
+		t.Errorf("Agility = %.1f, want 15", c.Attributes.Agility)
+	}
+
+	// После истечения эффекта атрибуты должны вернуться
+	c.ProcessTemporaryEffects(2)
+
+	if c.Attributes.Strength != 10 {
+		t.Errorf("Strength should return to 10, got %.1f", c.Attributes.Strength)
 	}
 }
