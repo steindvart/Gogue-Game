@@ -103,6 +103,95 @@ func TestPlayer_EquipWeapon_NilIsNothing(t *testing.T) {
 	}
 }
 
+func TestPlayer_EquipWeapon_NoAddToBackpackIfPreviousWeaponIsNil(t *testing.T) {
+	box := &primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
+	p := NewPlayer(box)
+	base := p.Attributes
+
+	if p.Weapon != nil {
+		t.Fatalf("Precondition failed: expected no weapon equipped")
+	}
+
+	rnd1 := utils.NewRandomGeneratorWithSeed(100)
+	w1 := items.NewWeaponBuiltin(rnd1, primitives.Box{}, items.WeaponTypeDagger)
+	delta := w1.Effect.Attributes
+	p.EquipWeapon(w1)
+
+	if p.Weapon != w1 {
+		t.Errorf("Expected weapon reference to point to last equipped weapon")
+	}
+
+	if p.Attributes.Strength != base.Strength+delta.Strength || p.Attributes.Agility != base.Agility+delta.Agility {
+		t.Errorf("Attributes should reflect last equipped weapon only: got (S %.1f, A %.1f) want (S %.1f, A %.1f)", p.Attributes.Strength, p.Attributes.Agility, base.Strength+delta.Strength, base.Agility+delta.Agility)
+	}
+
+	// Проверяем что рюкзак пуст в случае экипировки на пустой слот
+	if !p.Backpack.IsEmpty() || p.Backpack.ItemsNum != 0 {
+		t.Fatalf("Expected backpack to have 0 items after equipping weapon on free weapon slot, got %d items", p.Backpack.ItemsNum)
+	}
+}
+
+func TestPlayer_EquipWeapon_MovePreviousWeaponToBackpack(t *testing.T) {
+	box := &primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
+	p := NewPlayer(box)
+	base := p.Attributes
+
+	rnd1 := utils.NewRandomGeneratorWithSeed(100)
+	w1 := items.NewWeaponBuiltin(rnd1, primitives.Box{}, items.WeaponTypeDagger)
+	delta := w1.Effect.Attributes
+	p.EquipWeapon(w1)
+
+	rnd2 := utils.NewRandomGeneratorWithSeed(200)
+	w2 := items.NewWeaponBuiltin(rnd2, primitives.Box{}, items.WeaponTypeAxe)
+	delta = w2.Effect.Attributes
+	p.EquipWeapon(w2)
+
+	if p.Weapon != w2 {
+		t.Errorf("Expected weapon reference to point to last equipped weapon")
+	}
+
+	if p.Attributes.Strength != base.Strength+delta.Strength || p.Attributes.Agility != base.Agility+delta.Agility {
+		t.Errorf("Attributes should reflect last equipped weapon only: got (S %.1f, A %.1f) want (S %.1f, A %.1f)", p.Attributes.Strength, p.Attributes.Agility, base.Strength+delta.Strength, base.Agility+delta.Agility)
+	}
+
+	// Проверяем что первый предмет теперь в рюкзаке
+	if p.Backpack.IsEmpty() || p.Backpack.ItemsNum != 1 {
+		t.Fatalf("Expected backpack to have 1 item after equipping second weapon, got %d items", p.Backpack.ItemsNum)
+	}
+
+	wInBackpack, ok := p.Backpack.Weapons.Front().Value.(*items.Weapon)
+	if !ok || wInBackpack != w1 {
+		t.Errorf("Expected first equipped weapon to be in backpack, got %v", wInBackpack)
+	}
+}
+
+func TestPlayer_EquipWeapon_PreviousWeaponIsNotNilAndBackpackIsFull_IsError(t *testing.T) {
+	box := &primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
+	p := NewPlayer(box)
+
+	rnd1 := utils.NewRandomGeneratorWithSeed(100)
+	w1 := items.NewWeaponBuiltin(rnd1, primitives.Box{}, items.WeaponTypeDagger)
+	p.EquipWeapon(w1)
+
+	p.Backpack.Capacity = 0 // Уменьшаем вместимость рюкзака для теста
+
+	rnd2 := utils.NewRandomGeneratorWithSeed(200)
+	w2 := items.NewWeaponBuiltin(rnd2, primitives.Box{}, items.WeaponTypeAxe)
+	err := p.EquipWeapon(w2)
+	if err == nil {
+		t.Fatalf("Expected error when equipping weapon with full backpack, got nil")
+	}
+
+	if p.Weapon != w1 {
+		t.Errorf("Weapon should remain unchanged after failed equip attempt")
+	}
+
+	// Проверяем что рюкзак остался с 0 предметов
+	if !p.Backpack.IsEmpty() || p.Backpack.ItemsNum != 0 {
+		t.Fatalf("Expected backpack to have 0 items after failed equip attempt, got %d items", p.Backpack.ItemsNum)
+	}
+}
+
 func TestPlayer_UnequipWeapon_RevertsEffectAndUnsetsWeapon(t *testing.T) {
 	box := &primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 	p := NewPlayer(box)
@@ -142,32 +231,5 @@ func TestPlayer_UnequipWeapon_NoWeapon(t *testing.T) {
 	// Nothing should change
 	if p.Attributes != base {
 		t.Errorf("Attributes should not change when unequipping without weapon")
-	}
-}
-
-// @todo - пока такое поведение, но в будущем нужно пересмотреть
-func TestPlayer_EquipWeapon_Twice_StacksByDesign(t *testing.T) {
-	// Document current behavior: equipping a second weapon does not auto-revert the first; effects stack.
-	box := &primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
-	p := NewPlayer(box)
-	base := p.Attributes
-
-	rnd1 := utils.NewRandomGeneratorWithSeed(100)
-	w1 := items.NewWeaponBuiltin(rnd1, primitives.Box{}, items.WeaponTypeDagger)
-	d1 := w1.Effect.Attributes
-	p.EquipWeapon(w1)
-
-	rnd2 := utils.NewRandomGeneratorWithSeed(200)
-	w2 := items.NewWeaponBuiltin(rnd2, primitives.Box{}, items.WeaponTypeAxe)
-	d2 := w2.Effect.Attributes
-	p.EquipWeapon(w2)
-
-	// Last equipped weapon reference is stored
-	if p.Weapon != w2 {
-		t.Errorf("Expected weapon reference to point to last equipped weapon")
-	}
-	// Attributes include both effects
-	if p.Attributes.Strength != base.Strength+d1.Strength+d2.Strength || p.Attributes.Agility != base.Agility+d1.Agility+d2.Agility {
-		t.Errorf("Attributes should stack with multiple equips: got (S %.1f, A %.1f) want (S %.1f, A %.1f)", p.Attributes.Strength, p.Attributes.Agility, base.Strength+d1.Strength+d2.Strength, base.Agility+d1.Agility+d2.Agility)
 	}
 }

@@ -31,14 +31,25 @@ func NewPlayer(box *primitives.Box) *Player {
 	}
 }
 
-func (p *Player) EquipWeapon(w *items.Weapon) {
+func (p *Player) EquipWeapon(w *items.Weapon) error {
 	if w == nil {
-		return
+		return nil
 	}
 
-	// @todo - сделать обработку случая когда уже есть экипированный предмет
+	// Если уже есть экипированный предмет, пытаемся положить его в рюкзак.
+	if p.Weapon != nil {
+		if p.Backpack.IsFull() {
+			return items.BackpackIsFullError{}
+		}
+
+		previousWeapon := p.UnequipWeapon()
+		p.Backpack.AddItem(previousWeapon)
+	}
+
 	p.Weapon = w
 	p.Character.Use(w)
+
+	return nil
 }
 
 func (p *Player) UnequipWeapon() *items.Weapon {
