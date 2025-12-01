@@ -336,9 +336,9 @@ func (g *Game) makeField(w, h int) [][]common.GameEntityType {
 		g.putPassage(passages, field)
 	}
 
-	for _, room := range g.level.Rooms {
-		g.putEnemies(room, field)
-	}
+	// for _, room := range g.level.Rooms {
+	// 	g.putEnemies(room, field)
+	// }
 
 	px := g.player.Character.Shape.Point.X
 	py := g.player.Character.Shape.Point.Y
@@ -421,8 +421,8 @@ func (g *Game) putItems(room world.Room, field [][]common.GameEntityType) {
 		field[food.Item.Shape.Point.Y][food.Item.Shape.Point.X] = fd
 	}
 
-	for _, food := range room.Elixirs {
-		switch food.Type {
+	for _, elixir := range room.Elixirs {
+		switch elixir.Type {
 		case items.ElixirTypeStrength:
 			fd = common.ElixirTypeStrength
 		case items.ElixirTypeAgility:
@@ -434,11 +434,11 @@ func (g *Game) putItems(room world.Room, field [][]common.GameEntityType) {
 		case items.ElixirTypeMystery:
 			fd = common.ElixirTypeMystery
 		}
-		field[food.Item.Shape.Point.Y][food.Item.Shape.Point.X] = fd
+		field[elixir.Item.Shape.Point.Y][elixir.Item.Shape.Point.X] = fd
 	}
 
-	for _, food := range room.Scrolls {
-		switch food.Type {
+	for _, scroll := range room.Scrolls {
+		switch scroll.Type {
 		case items.ScrollTypeStrength:
 			fd = common.ScrollTypeStrength
 		case items.ScrollTypeAgility:
@@ -450,6 +450,24 @@ func (g *Game) putItems(room world.Room, field [][]common.GameEntityType) {
 		case items.ScrollTypeMystery:
 			fd = common.ScrollTypeMystery
 		}
-		field[food.Item.Shape.Point.Y][food.Item.Shape.Point.X] = fd
+		field[scroll.Item.Shape.Point.Y][scroll.Item.Shape.Point.X] = fd
+	}
+
+	for _, weapon := range room.Weapons {
+		switch weapon.Type {
+		case items.WeaponTypeDagger:
+			fd = common.Weapon
+		case items.WeaponTypeSpear:
+			fd = common.Weapon
+		case items.WeaponTypeSword:
+			fd = common.Weapon
+		case items.WeaponTypeAxe:
+			fd = common.Weapon
+		case items.WeaponTypeMaul:
+			fd = common.Weapon
+		case items.WeaponTypeMystery:
+			fd = common.Weapon
+		}
+		field[weapon.Item.Shape.Point.Y][weapon.Item.Shape.Point.X] = fd
 	}
 }
