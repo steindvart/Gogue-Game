@@ -80,11 +80,19 @@ func (c *Character) ApplyEffect(effect *primitives.Effect) {
 		c.TemporaryEffects = append(c.TemporaryEffects, effect)
 	}
 
-	// Apply attribute changes (permanent or immediate part of temporary)
+	// При изменении максимального здоровья, текущее здоровье также изменяется на ту же величину.
+	if effect.Attributes.MaxHealth != 0 {
+		effect.Attributes.Health = effect.Attributes.MaxHealth
+	}
+
 	c.Attributes.Affect(effect.Attributes)
 
+	// Если здоровье превысило максимальное, устанавливаем его в максимум.
+	// Если здоровье стало отрицательным, устанавливаем его в 1, чтобы персонаж не умер от эффекта.
 	if c.Attributes.Health > c.Attributes.MaxHealth {
 		c.Attributes.Health = c.Attributes.MaxHealth
+	} else if c.Attributes.Health <= 0 {
+		c.Attributes.Health = 1
 	}
 }
 
