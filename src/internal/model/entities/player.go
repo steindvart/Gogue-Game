@@ -43,7 +43,10 @@ func (p *Player) EquipWeapon(w *items.Weapon) error {
 		}
 
 		previousWeapon := p.UnequipWeapon()
-		p.Backpack.AddItem(previousWeapon)
+		err := p.Backpack.AddItem(previousWeapon)
+		if err != nil {
+			return err
+		}
 	}
 
 	p.Weapon = w

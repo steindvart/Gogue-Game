@@ -56,7 +56,10 @@ func TestPlayer_EquipWeapon_AppliesEffectAndStoresWeapon(t *testing.T) {
 	}
 	delta := w.Effect.Attributes
 
-	p.EquipWeapon(w)
+	err := p.EquipWeapon(w)
+	if err != nil {
+		t.Fatalf("EquipWeapon returned unexpected error: %v", err)
+	}
 
 	if p.Weapon != w {
 		t.Errorf("EquipWeapon should set current weapon")
@@ -73,7 +76,10 @@ func TestPlayer_EquipWeapon_NilIsNothing(t *testing.T) {
 	p := NewPlayer(box)
 	base := p.Attributes
 
-	p.EquipWeapon(nil)
+	err := p.EquipWeapon(nil)
+	if err != nil {
+		t.Fatalf("EquipWeapon returned unexpected error: %v", err)
+	}
 
 	if p.Weapon != nil {
 		t.Errorf("Weapon should remain nil when equipping nil")
@@ -90,8 +96,14 @@ func TestPlayer_EquipWeapon_NilIsNothing(t *testing.T) {
 	}
 	delta := w.Effect.Attributes
 
-	p.EquipWeapon(w)
-	p.EquipWeapon(nil) // Equip nil after valid weapon
+	err = p.EquipWeapon(w)
+	if err != nil {
+		t.Fatalf("EquipWeapon returned unexpected error: %v", err)
+	}
+	err = p.EquipWeapon(nil) // Equip nil after valid weapon
+	if err != nil {
+		t.Fatalf("EquipWeapon returned unexpected error: %v", err)
+	}
 
 	if p.Weapon != w {
 		t.Errorf("Weapon should remain unchanged when equipping nil")
@@ -115,7 +127,10 @@ func TestPlayer_EquipWeapon_NoAddToBackpackIfPreviousWeaponIsNil(t *testing.T) {
 	rnd1 := utils.NewRandomGeneratorWithSeed(100)
 	w1 := items.NewWeaponBuiltin(rnd1, primitives.Box{}, items.WeaponTypeDagger)
 	delta := w1.Effect.Attributes
-	p.EquipWeapon(w1)
+	err := p.EquipWeapon(w1)
+	if err != nil {
+		t.Fatalf("EquipWeapon returned unexpected error: %v", err)
+	}
 
 	if p.Weapon != w1 {
 		t.Errorf("Expected weapon reference to point to last equipped weapon")
