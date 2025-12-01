@@ -154,12 +154,18 @@ func TestPlayer_EquipWeapon_MovePreviousWeaponToBackpack(t *testing.T) {
 	rnd1 := utils.NewRandomGeneratorWithSeed(100)
 	w1 := items.NewWeaponBuiltin(rnd1, primitives.Box{}, items.WeaponTypeDagger)
 	delta := w1.Effect.Attributes
-	p.EquipWeapon(w1)
+	err := p.EquipWeapon(w1)
+	if err != nil {
+		t.Fatalf("EquipWeapon returned unexpected error: %v", err)
+	}
 
 	rnd2 := utils.NewRandomGeneratorWithSeed(200)
 	w2 := items.NewWeaponBuiltin(rnd2, primitives.Box{}, items.WeaponTypeAxe)
 	delta = w2.Effect.Attributes
-	p.EquipWeapon(w2)
+	err = p.EquipWeapon(w2)
+	if err != nil {
+		t.Fatalf("EquipWeapon returned unexpected error: %v", err)
+	}
 
 	if p.Weapon != w2 {
 		t.Errorf("Expected weapon reference to point to last equipped weapon")
@@ -186,13 +192,16 @@ func TestPlayer_EquipWeapon_PreviousWeaponIsNotNilAndBackpackIsFull_IsError(t *t
 
 	rnd1 := utils.NewRandomGeneratorWithSeed(100)
 	w1 := items.NewWeaponBuiltin(rnd1, primitives.Box{}, items.WeaponTypeDagger)
-	p.EquipWeapon(w1)
+	err := p.EquipWeapon(w1)
+	if err != nil {
+		t.Fatalf("EquipWeapon returned unexpected error: %v", err)
+	}
 
 	p.Backpack.Capacity = 0 // Уменьшаем вместимость рюкзака для теста
 
 	rnd2 := utils.NewRandomGeneratorWithSeed(200)
 	w2 := items.NewWeaponBuiltin(rnd2, primitives.Box{}, items.WeaponTypeAxe)
-	err := p.EquipWeapon(w2)
+	err = p.EquipWeapon(w2)
 	if err == nil {
 		t.Fatalf("Expected error when equipping weapon with full backpack, got nil")
 	}
@@ -216,7 +225,11 @@ func TestPlayer_UnequipWeapon_RevertsEffectAndUnsetsWeapon(t *testing.T) {
 	w := items.NewWeaponBuiltin(rnd, primitives.Box{Point: primitives.Point2D[int]{X: 2, Y: 2}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}, items.WeaponTypeDagger)
 	delta := w.Effect.Attributes
 
-	p.EquipWeapon(w)
+	err := p.EquipWeapon(w)
+	if err != nil {
+		t.Fatalf("EquipWeapon returned unexpected error: %v", err)
+	}
+
 	if p.Attributes.Strength != base.Strength+delta.Strength || p.Attributes.Agility != base.Agility+delta.Agility {
 		t.Fatalf("Precondition failed after equip: got (S %.1f, A %.1f)", p.Attributes.Strength, p.Attributes.Agility)
 	}
