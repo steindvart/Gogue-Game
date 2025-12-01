@@ -71,3 +71,7 @@ func (r *Room) GetRandomFreePosition(rand utils.Randomizer) *primitives.Point2D[
 
 	return nil
 }
+
+func (r *Room) GetCountFreePosition() int {
+	return int(r.Shape.Size.Width*r.Shape.Size.Height) - len(r.OccupiedPositions)
+}

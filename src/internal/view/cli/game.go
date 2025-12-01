@@ -43,35 +43,37 @@ func (*Game) SetFieldToScreen(screen tcell.Screen, field [][]common.GameEntityTy
 			case common.EntityTypeSnakeMage:
 				ch = '🐍'
 			case common.FoodTypePotatoes:
-				ch = '🍟'
+				ch = 'ꕔ' //'🍟'
 			case common.FoodTypeBread:
-				ch = '🥖'
+				ch = 'ꕔ' //'🥖'
 			case common.FoodTypeMeat:
-				ch = '🍖'
+				ch = 'ꕔ' //'🍖'
 			case common.FoodTypeMistery:
-				ch = '🍄'
+				ch = 'ꕔ' //'🍄'
 			case common.FoodTypeBeer:
-				ch = '🍺'
+				ch = 'ꕔ' //'🍺'
 			case common.ElixirTypeStrength:
-				ch = '🧡'
+				ch = 'ᗨ' //'🧡'
 			case common.ElixirTypeAgility:
-				ch = '💚'
+				ch = 'ᗨ' //'💚'
 			case common.ElixirTypeDwarfism:
-				ch = '🩵'
+				ch = 'ᗨ' //'🩵'
 			case common.ElixirTypeGiantism:
-				ch = '💙'
+				ch = 'ᗨ' //'💙'
 			case common.ElixirTypeMystery:
-				ch = '🖤' // 🩶
+				ch = 'ᗨ' //'🖤'
 			case common.ScrollTypeStrength:
-				ch = '📙'
+				ch = '⎕' //'📙'
 			case common.ScrollTypeAgility:
-				ch = '📗'
+				ch = '⎕' //'📗'
 			case common.ScrollTypeUltimate:
-				ch = '📘'
+				ch = '⎕' //'📘'
 			case common.ScrollTypeMaxHealth:
-				ch = '📕'
+				ch = '⎕' //'📕'
 			case common.ScrollTypeMystery:
-				ch = '📓'
+				ch = '⎕' //'📓'
+			case common.Weapon:
+				ch = 'T' //'🗡'
 			}
 
 			screen.SetContent(ox+x, oy+y, ch, nil, tcell.StyleDefault.Background(tcell.ColorBlack))

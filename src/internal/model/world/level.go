@@ -76,10 +76,8 @@ func (l *Level) GenerateLevel(sizeMap primitives.Size2D[uint]) error {
 		return err
 	}
 
-	//	// @todo - "С каждым новым уровнем снижается количество полезных предметов (и повышается количество сокровищ, которые выпадают с побежденных противников)"
-	//	// @todo - логику этого условия буду делать отдельным MR. Тут просто выведу сущности на поле в бессмысленном количестве n
-	n := 10
-	l.addItemsAtRooms(uint(n))
+	// @todo - "С каждым новым уровнем снижается количество полезных предметов (и повышается количество сокровищ, которые выпадают с побежденных противников)"
+	l.addItemsAtRooms(1, 1, 1, 1)
 
 	return nil
 }
@@ -195,14 +193,28 @@ func (l *Level) generatePassages() error {
 	return nil
 }
 
-func (l *Level) addItemsAtRooms(totalCount uint) {
-	var startRoomInd int
-	for ind, room := range l.Rooms {
-		if room.Type == RoomTypeStart {
-			startRoomInd = ind
+func (l *Level) getFreePosition() (int, *primitives.Point2D[int], error) {
+	indexes := l.random.Perm(roomsCount)
+
+	for indCount := 0; indCount < len(l.Rooms); indCount++ {
+		ind := indexes[indCount]
+		if l.Rooms[ind].Type == RoomTypeStart {
+			continue
 		}
+
+		if l.Rooms[ind].GetCountFreePosition() <= 0 {
+			continue
+		}
+
+		pos := l.Rooms[ind].GetRandomFreePosition(l.random)
+
+		return ind, pos, nil
 	}
 
+	return 0, nil, errors.New("no available positions шin Rooms")
+}
+
+func (l *Level) addItemsAtRooms(countFood, countElixir, countScroll, countWeapon uint) {
 	allFoodTypes := []items.FoodType{
 		items.FoodTypePotatoes,
 		items.FoodTypeBread,
@@ -210,7 +222,6 @@ func (l *Level) addItemsAtRooms(totalCount uint) {
 		items.FoodTypeMistery,
 		items.FoodTypeBeer,
 	}
-
 	allElixirTypes := []items.ElixirType{
 		items.ElixirTypeStrength,
 		items.ElixirTypeAgility,
@@ -219,7 +230,6 @@ func (l *Level) addItemsAtRooms(totalCount uint) {
 		items.ElixirTypeMystery,
 		// items.ElixirTypeCustom,
 	}
-
 	var allScrollTypes = []items.ScrollType{
 		items.ScrollTypeStrength,
 		items.ScrollTypeAgility,
@@ -228,38 +238,43 @@ func (l *Level) addItemsAtRooms(totalCount uint) {
 		items.ScrollTypeMystery,
 		// items.ScrollTypeCustom,
 	}
+	var allWeaponTypes = []items.WeaponType{
+		items.WeaponTypeDagger,
+		items.WeaponTypeSpear,
+		items.WeaponTypeSword,
+		items.WeaponTypeAxe,
+		items.WeaponTypeMaul,
+		items.WeaponTypeMystery,
+		// items.WeaponTypeCustom,
+	}
 
-	cycleCount := 0
-	for i := 0; i < int(totalCount); i++ {
-		cycleCount++
-		maxCycleCount := 1000
-		if cycleCount == maxCycleCount {
+	for j := 0; j < int(countFood); j++ {
+		roomInd, pos, err := l.getFreePosition()
+		if err != nil {
 			return
 		}
-
-		roomInd := l.random.Intn(roomsCount)
-		if roomInd == startRoomInd {
-			i--
-			continue
+		l.createFood(roomInd, *pos, allFoodTypes)
+	}
+	for j := 0; j < int(countElixir); j++ {
+		roomInd, pos, err := l.getFreePosition()
+		if err != nil {
+			return
 		}
-
-		food := 0
-		elixir := 1
-		scroll := 2
-		itemCategory := l.random.Intn(3)
-		res := false
-		switch itemCategory {
-		case food:
-			res = l.createFood(roomInd, allFoodTypes)
-		case elixir:
-			res = l.createElixir(roomInd, allElixirTypes)
-		case scroll:
-			res = l.createScroll(roomInd, allScrollTypes)
+		l.createElixir(roomInd, *pos, allElixirTypes)
+	}
+	for j := 0; j < int(countScroll); j++ {
+		roomInd, pos, err := l.getFreePosition()
+		if err != nil {
+			return
 		}
-		if !res {
-			i--
-			continue
+		l.createScroll(roomInd, *pos, allScrollTypes)
+	}
+	for j := 0; j < int(countWeapon); j++ {
+		roomInd, pos, err := l.getFreePosition()
+		if err != nil {
+			return
 		}
+		l.createWeapon(roomInd, *pos, allWeaponTypes)
 	}
 }
 
@@ -268,54 +283,50 @@ func getRandomElement[T any](random utils.Randomizer, slice []T) T {
 	return slice[idx]
 }
 
-func (l *Level) createFood(roomInd int, allFoodType []items.FoodType) bool {
-	randomPos := l.Rooms[roomInd].GetRandomFreePosition(l.random)
-	if randomPos == nil {
-		return false
-	}
-
+func (l *Level) createFood(roomInd int, pos primitives.Point2D[int], allFoodType []items.FoodType) {
 	foodType := getRandomElement(l.random, allFoodType)
 	itemBox := primitives.Box{
-		Point: *randomPos,
+		Point: pos,
 		Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
 	}
 
-	food := items.NewFoodBuiltin(l.random, itemBox, foodType)
-	l.Rooms[roomInd].Foods = append(l.Rooms[roomInd].Foods, *food)
-	return true
+	newFood := items.NewFoodBuiltin(l.random, itemBox, foodType)
+	l.Rooms[roomInd].Foods = append(l.Rooms[roomInd].Foods, *newFood)
 }
 
-func (l *Level) createElixir(roomInd int, allElixirType []items.ElixirType) bool {
-	randomPos := l.Rooms[roomInd].GetRandomFreePosition(l.random)
-	if randomPos == nil {
-		return false
-	}
-
+func (l *Level) createElixir(roomInd int, pos primitives.Point2D[int], allElixirType []items.ElixirType) bool {
 	elixirType := getRandomElement(l.random, allElixirType)
 	itemBox := primitives.Box{
-		Point: *randomPos,
+		Point: pos,
 		Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
 	}
 
-	elixir := items.NewElixirBuiltin(l.random, itemBox, elixirType)
-	l.Rooms[roomInd].Elixirs = append(l.Rooms[roomInd].Elixirs, *elixir)
+	newElixir := items.NewElixirBuiltin(l.random, itemBox, elixirType)
+	l.Rooms[roomInd].Elixirs = append(l.Rooms[roomInd].Elixirs, *newElixir)
 	return true
 }
 
-func (l *Level) createScroll(roomInd int, allScrollType []items.ScrollType) bool {
-	randomPos := l.Rooms[roomInd].GetRandomFreePosition(l.random)
-	if randomPos == nil {
-		return false
-	}
-
+func (l *Level) createScroll(roomInd int, pos primitives.Point2D[int], allScrollType []items.ScrollType) bool {
 	scrollType := getRandomElement(l.random, allScrollType)
 	itemBox := primitives.Box{
-		Point: *randomPos,
+		Point: pos,
 		Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
 	}
 
-	scroll := items.NewScrollBuiltin(l.random, itemBox, scrollType)
-	l.Rooms[roomInd].Scrolls = append(l.Rooms[roomInd].Scrolls, *scroll)
+	newScroll := items.NewScrollBuiltin(l.random, itemBox, scrollType)
+	l.Rooms[roomInd].Scrolls = append(l.Rooms[roomInd].Scrolls, *newScroll)
+	return true
+}
+
+func (l *Level) createWeapon(roomInd int, pos primitives.Point2D[int], allWeaponTypes []items.WeaponType) bool {
+	weaponType := getRandomElement(l.random, allWeaponTypes)
+	itemBox := primitives.Box{
+		Point: pos,
+		Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
+	}
+
+	newWeapon := items.NewWeaponBuiltin(l.random, itemBox, weaponType)
+	l.Rooms[roomInd].Weapons = append(l.Rooms[roomInd].Weapons, *newWeapon)
 	return true
 }
 

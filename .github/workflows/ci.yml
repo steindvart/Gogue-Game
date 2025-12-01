@@ -22,7 +22,6 @@ jobs:
         with:
           version: v1.60
           working-directory: src
-          skip-cache: true
 
   build:
     runs-on: ubuntu-latest

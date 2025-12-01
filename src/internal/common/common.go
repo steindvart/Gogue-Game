@@ -28,4 +28,5 @@ const (
 	ScrollTypeUltimate
 	ScrollTypeMaxHealth
 	ScrollTypeMystery
+	Weapon
 )
