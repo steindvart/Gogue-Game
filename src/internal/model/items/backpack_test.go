@@ -405,6 +405,23 @@ func TestBackpack_AddElixir(t *testing.T) {
 	}
 }
 
+func TestBackpack_AddElixir_NilIsNothing(t *testing.T) {
+	backpack := NewBackpack()
+	err := backpack.AddElixir(nil)
+
+	if err != nil {
+		t.Fatalf("Add nil elixir must do nothing, without error, but got error: %v", err)
+	}
+
+	if backpack.ItemsNum != 0 {
+		t.Errorf("Expected ItemsNum 0, got %d", backpack.ItemsNum)
+	}
+
+	if backpack.Elixirs.Len() != 0 {
+		t.Errorf("Expected 0 elixirs in map, got %d", backpack.Elixirs.Len())
+	}
+}
+
 func TestBackpack_RemoveElixir(t *testing.T) {
 	tests := []struct {
 		name         string
@@ -497,6 +514,26 @@ func TestBackpack_RemoveElixir(t *testing.T) {
 	}
 }
 
+func TestBackpack_RemoveElixir_NilIsError(t *testing.T) {
+	backpack := NewBackpack()
+	rng := utils.NewRandomGeneratorWithSeed(testBackpackSeed)
+	_ = backpack.AddElixir(createTestElixir(rng, ElixirTypeStrength))
+
+	err := backpack.RemoveElixir(nil)
+
+	if err == nil {
+		t.Fatalf("Remove nil elixir must return error, got nil")
+	}
+
+	if backpack.ItemsNum != 1 {
+		t.Errorf("Expected ItemsNum 1, got %d", backpack.ItemsNum)
+	}
+
+	if backpack.Elixirs.Len() != 1 {
+		t.Errorf("Expected 1 elixirs in map, got %d", backpack.Elixirs.Len())
+	}
+}
+
 func TestBackpack_AddScroll(t *testing.T) {
 	backpack := NewBackpack()
 	rng := utils.NewRandomGeneratorWithSeed(testBackpackSeed)
@@ -514,6 +551,23 @@ func TestBackpack_AddScroll(t *testing.T) {
 
 	if backpack.Scrolls.Len() != 1 {
 		t.Errorf("Expected 1 scroll in list, got %d", backpack.Scrolls.Len())
+	}
+}
+
+func TestBackpack_AddScroll_NilIsNothing(t *testing.T) {
+	backpack := NewBackpack()
+	err := backpack.AddScroll(nil)
+
+	if err != nil {
+		t.Fatalf("Add nil scroll must do nothing, without error, but got error: %v", err)
+	}
+
+	if backpack.ItemsNum != 0 {
+		t.Errorf("Expected ItemsNum 0, got %d", backpack.ItemsNum)
+	}
+
+	if backpack.Scrolls.Len() != 0 {
+		t.Errorf("Expected 0 scrolls in map, got %d", backpack.Scrolls.Len())
 	}
 }
 
@@ -539,6 +593,26 @@ func TestBackpack_RemoveScroll(t *testing.T) {
 	}
 }
 
+func TestBackpack_RemoveScroll_NilIsError(t *testing.T) {
+	backpack := NewBackpack()
+	rng := utils.NewRandomGeneratorWithSeed(testBackpackSeed)
+	_ = backpack.AddScroll(createTestScroll(rng, ScrollTypeStrength))
+
+	err := backpack.RemoveScroll(nil)
+
+	if err == nil {
+		t.Fatalf("Remove nil scroll must return error, got nil")
+	}
+
+	if backpack.ItemsNum != 1 {
+		t.Errorf("Expected ItemsNum 1, got %d", backpack.ItemsNum)
+	}
+
+	if backpack.Scrolls.Len() != 1 {
+		t.Errorf("Expected 1 scroll in list, got %d", backpack.Scrolls.Len())
+	}
+}
+
 func TestBackpack_AddFood(t *testing.T) {
 	backpack := NewBackpack()
 	rng := utils.NewRandomGeneratorWithSeed(testBackpackSeed)
@@ -556,6 +630,23 @@ func TestBackpack_AddFood(t *testing.T) {
 
 	if backpack.Foods.Len() != 1 {
 		t.Errorf("Expected 1 food in list, got %d", backpack.Foods.Len())
+	}
+}
+
+func TestBackpack_AddFood_NilIsNothing(t *testing.T) {
+	backpack := NewBackpack()
+	err := backpack.AddFood(nil)
+
+	if err != nil {
+		t.Fatalf("Add nil food must do nothing, without error, but got error: %v", err)
+	}
+
+	if backpack.ItemsNum != 0 {
+		t.Errorf("Expected ItemsNum 0, got %d", backpack.ItemsNum)
+	}
+
+	if backpack.Foods.Len() != 0 {
+		t.Errorf("Expected 0 foods in map, got %d", backpack.Foods.Len())
 	}
 }
 
@@ -581,6 +672,26 @@ func TestBackpack_RemoveFood(t *testing.T) {
 	}
 }
 
+func TestBackpack_RemoveFood_NilIsError(t *testing.T) {
+	backpack := NewBackpack()
+	rng := utils.NewRandomGeneratorWithSeed(testBackpackSeed)
+	_ = backpack.AddFood(createTestFood(rng, FoodTypeBread))
+
+	err := backpack.RemoveFood(nil)
+
+	if err == nil {
+		t.Fatalf("Remove nil food must return error, got nil")
+	}
+
+	if backpack.ItemsNum != 1 {
+		t.Errorf("Expected ItemsNum 1, got %d", backpack.ItemsNum)
+	}
+
+	if backpack.Foods.Len() != 1 {
+		t.Errorf("Expected 1 food in list, got %d", backpack.Foods.Len())
+	}
+}
+
 func TestBackpack_AddWeapon(t *testing.T) {
 	backpack := NewBackpack()
 	rng := utils.NewRandomGeneratorWithSeed(testBackpackSeed)
@@ -598,6 +709,23 @@ func TestBackpack_AddWeapon(t *testing.T) {
 
 	if backpack.Weapons.Len() != 1 {
 		t.Errorf("Expected 1 weapon in list, got %d", backpack.Weapons.Len())
+	}
+}
+
+func TestBackpack_AddWeapon_NilIsNothing(t *testing.T) {
+	backpack := NewBackpack()
+	err := backpack.AddWeapon(nil)
+
+	if err != nil {
+		t.Fatalf("Add nil weapon must do nothing, without error, but got error: %v", err)
+	}
+
+	if backpack.ItemsNum != 0 {
+		t.Errorf("Expected ItemsNum 0, got %d", backpack.ItemsNum)
+	}
+
+	if backpack.Weapons.Len() != 0 {
+		t.Errorf("Expected 0 weapons in map, got %d", backpack.Weapons.Len())
 	}
 }
 
@@ -620,6 +748,26 @@ func TestBackpack_RemoveWeapon(t *testing.T) {
 
 	if backpack.Weapons.Len() != 0 {
 		t.Errorf("Expected 0 weapons in list, got %d", backpack.Weapons.Len())
+	}
+}
+
+func TestBackpack_RemoveWeapon_NilIsError(t *testing.T) {
+	backpack := NewBackpack()
+	rng := utils.NewRandomGeneratorWithSeed(testBackpackSeed)
+	_ = backpack.AddWeapon(createTestWeapon(rng, WeaponTypeSword))
+
+	err := backpack.RemoveWeapon(nil)
+
+	if err == nil {
+		t.Fatalf("Remove nil weapon must return error, got nil")
+	}
+
+	if backpack.ItemsNum != 1 {
+		t.Errorf("Expected ItemsNum 1, got %d", backpack.ItemsNum)
+	}
+
+	if backpack.Weapons.Len() != 1 {
+		t.Errorf("Expected 1 weapon in list, got %d", backpack.Weapons.Len())
 	}
 }
 
@@ -680,6 +828,21 @@ func TestBackpack_AddTreasure(t *testing.T) {
 				t.Errorf("Expected ItemsNum %d, got %d (treasures don't count)", tt.wantItemsNum, backpack.ItemsNum)
 			}
 		})
+	}
+}
+
+func TestBackpack_AddTreasure_NilIsNothing(t *testing.T) {
+	backpack := NewBackpack()
+	initialTreasures := backpack.Treasures
+
+	backpack.AddTreasure(nil)
+
+	if backpack.Treasures != initialTreasures {
+		t.Errorf("Add nil treasure must do nothing, expected Treasures=%d, got %d", initialTreasures, backpack.Treasures)
+	}
+
+	if backpack.ItemsNum != 0 {
+		t.Errorf("Expected ItemsNum 0, got %d", backpack.ItemsNum)
 	}
 }
 
