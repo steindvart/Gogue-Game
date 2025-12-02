@@ -77,7 +77,7 @@ func (l *Level) GenerateLevel(sizeMap primitives.Size2D[uint]) error {
 	}
 
 	// @todo - "С каждым новым уровнем снижается количество полезных предметов (и повышается количество сокровищ, которые выпадают с побежденных противников)"
-	l.addItemsAtRooms(1, 1, 1, 1)
+	l.addItemsAtRooms(2, 2, 2, 2)
 
 	return nil
 }
@@ -207,11 +207,14 @@ func (l *Level) getFreePosition() (int, *primitives.Point2D[int], error) {
 		}
 
 		pos := l.Rooms[ind].GetRandomFreePosition(l.random)
+		if pos == nil {
+			continue
+		}
 
 		return ind, pos, nil
 	}
 
-	return 0, nil, errors.New("no available positions шin Rooms")
+	return 0, nil, errors.New("no available positions in Rooms")
 }
 
 func (l *Level) addItemsAtRooms(countFood, countElixir, countScroll, countWeapon uint) {

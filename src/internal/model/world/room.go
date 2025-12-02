@@ -44,28 +44,25 @@ func NewRoom(roomType RoomType, shape primitives.Box) *Room {
 func (r *Room) GetRandomFreePosition(rand utils.Randomizer) *primitives.Point2D[int] {
 	// Получаем все возможные точки внутри комнаты без границ
 	minX := r.Shape.Point.X + 1
-	maxX := r.Shape.Point.X + int(r.Shape.Size.Width)
 	minY := r.Shape.Point.Y + 1
-	maxY := r.Shape.Point.Y + int(r.Shape.Size.Height)
-
-	width := maxX - minX
-	height := maxY - minY
+	width := r.Shape.Size.Width - 1
+	height := r.Shape.Size.Height - 1
 
 	if width <= 0 || height <= 0 {
 		return nil
 	}
 
-	totalPossiblePoints := width * height
+	totalPossiblePoints := int(width) * int(height)
 
 	for attempt := 0; attempt < totalPossiblePoints; attempt++ {
-		p := primitives.Point2D[int]{
-			X: minX + rand.Intn(width),
-			Y: minY + rand.Intn(height),
+		pos := primitives.Point2D[int]{
+			X: minX + rand.Intn(int(width)),
+			Y: minY + rand.Intn(int(height)),
 		}
 
-		if !r.OccupiedPositions[p] {
-			r.OccupiedPositions[p] = true
-			return &p
+		if !r.OccupiedPositions[pos] {
+			r.OccupiedPositions[pos] = true
+			return &pos
 		}
 	}
 
