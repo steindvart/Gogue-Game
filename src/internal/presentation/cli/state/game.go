@@ -454,20 +454,7 @@ func (g *Game) putItems(room world.Room, field [][]common.GameEntityType) {
 	}
 
 	for _, weapon := range room.Weapons {
-		switch weapon.Type {
-		case items.WeaponTypeDagger:
-			fd = common.Weapon
-		case items.WeaponTypeSpear:
-			fd = common.Weapon
-		case items.WeaponTypeSword:
-			fd = common.Weapon
-		case items.WeaponTypeAxe:
-			fd = common.Weapon
-		case items.WeaponTypeMaul:
-			fd = common.Weapon
-		case items.WeaponTypeMystery:
-			fd = common.Weapon
-		}
+		fd = common.Weapon
 		field[weapon.Item.Shape.Point.Y][weapon.Item.Shape.Point.X] = fd
 	}
 }

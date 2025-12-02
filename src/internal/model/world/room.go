@@ -1,6 +1,7 @@
 package world
 
 import (
+	"errors"
 	"gogue/internal/model/entities"
 	"gogue/internal/model/items"
 	"gogue/internal/model/primitives"
@@ -29,6 +30,10 @@ type Room struct {
 }
 
 func NewRoom(roomType RoomType, shape primitives.Box) *Room {
+	if shape.Size.Width < RoomMinWidth || shape.Size.Height < RoomMinHeight {
+		shape.Size.Width = RoomMinWidth
+		shape.Size.Height = RoomMinHeight
+	}
 	return &Room{
 		Shape:             shape,
 		Type:              roomType,
@@ -41,16 +46,12 @@ func NewRoom(roomType RoomType, shape primitives.Box) *Room {
 	}
 }
 
-func (r *Room) GetRandomFreePosition(rand utils.Randomizer) *primitives.Point2D[int] {
+func (r *Room) GetRandomFreePosition(rand utils.Randomizer) (*primitives.Point2D[int], error) {
 	// Получаем все возможные точки внутри комнаты без границ
 	minX := r.Shape.Point.X + 1
 	minY := r.Shape.Point.Y + 1
 	width := r.Shape.Size.Width - 1
 	height := r.Shape.Size.Height - 1
-
-	if width <= 0 || height <= 0 {
-		return nil
-	}
 
 	totalPossiblePoints := int(width) * int(height)
 
@@ -62,11 +63,11 @@ func (r *Room) GetRandomFreePosition(rand utils.Randomizer) *primitives.Point2D[
 
 		if !r.OccupiedPositions[pos] {
 			r.OccupiedPositions[pos] = true
-			return &pos
+			return &pos, nil
 		}
 	}
 
-	return nil
+	return nil, errors.New("no available positions in Rooms")
 }
 
 func (r *Room) GetCountFreePosition() int {

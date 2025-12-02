@@ -132,7 +132,10 @@ func (l *Level) generateNineRooms(sizeMap primitives.Size2D[uint]) error {
 			l.Rooms[roomIndex] = *NewRoom(roomType, roomBox)
 
 			if roomType == RoomTypeFinish {
-				portalPos := l.Rooms[roomIndex].GetRandomFreePosition(l.random)
+				portalPos, errPos := l.Rooms[roomIndex].GetRandomFreePosition(l.random)
+				if errPos != nil {
+					return errors.New("in finish room not free position")
+				}
 				l.FinishPortal = primitives.Box{
 					Point: *portalPos,
 					Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
@@ -149,9 +152,9 @@ func (l *Level) generatePassages() error {
 		return fmt.Errorf("number of rooms is less than expected. expected %d, got %d", roomsCount, len(l.Rooms))
 	}
 	roomIndex := l.random.Intn(roomsCount)
-	treeEdges, err := generateSpanningTree(roomIndex, l.random)
-	if err != nil {
-		return err
+	treeEdges, errTree := generateSpanningTree(roomIndex, l.random)
+	if errTree != nil {
+		return errTree
 	}
 
 	extraEdgesCount := l.random.Intn(MaxExtraPassageCount) + 1
@@ -206,8 +209,8 @@ func (l *Level) getFreePosition() (int, *primitives.Point2D[int], error) {
 			continue
 		}
 
-		pos := l.Rooms[ind].GetRandomFreePosition(l.random)
-		if pos == nil {
+		pos, err := l.Rooms[ind].GetRandomFreePosition(l.random)
+		if err != nil {
 			continue
 		}
 
@@ -354,7 +357,11 @@ func (l *Level) GenerateStartPlayerPosition() (*primitives.Point2D[int], error) 
 
 	for _, room := range l.Rooms {
 		if room.Type == RoomTypeStart {
-			return room.GetRandomFreePosition(l.random), nil
+			pos, err := room.GetRandomFreePosition(l.random)
+			if err != nil {
+				return nil, fmt.Errorf("in starting room not free position")
+			}
+			return pos, nil
 		}
 	}
 
