@@ -104,10 +104,10 @@ func (l *Level) generateNineRooms(sizeMap primitives.Size2D[uint]) error {
 
 			cellXStart := x*int(sectionSize.Width) + MinRoomPadding
 			cellYStart := y*int(sectionSize.Height) + MinRoomPadding
-			cellXEnd := (x+1)*int(sectionSize.Width) - MinRoomPadding
-			cellYEnd := (y+1)*int(sectionSize.Height) - MinRoomPadding
+			cellXEnd := (x + 1) * int(sectionSize.Width)
+			cellYEnd := (y + 1) * int(sectionSize.Height)
 
-			maxRoomWidth := cellXEnd - cellXStart
+			maxRoomWidth := cellXEnd - cellXStart //
 			maxRoomHeight := cellYEnd - cellYStart
 
 			if maxRoomWidth < RoomMinWidth || maxRoomHeight < RoomMinHeight {
@@ -148,11 +148,8 @@ func calculateRoomSectionSize(sizeMap primitives.Size2D[uint]) (primitives.Size2
 		return primitives.Size2D[uint]{}, errors.New("game map size is too big")
 	}
 
-	totalPaddingWidth := uint(MinRoomPadding * 2)
-	totalPaddingHeight := uint(MinRoomPadding * 2)
-
-	availableWidth := sizeMap.Width - totalPaddingWidth
-	availableHeight := sizeMap.Height - totalPaddingHeight
+	availableWidth := sizeMap.Width
+	availableHeight := sizeMap.Height
 
 	sectionSize := primitives.Size2D[uint]{
 		Width:  availableWidth / numberXYSections,
@@ -372,19 +369,33 @@ func getDoorRightWall(room Room, random utils.RandomSource) primitives.Point2D[i
 	const wall = 1
 	doorYFrom := room.Shape.Point.Y + wall
 	doorYTo := room.Shape.Point.Y + int(room.Shape.Size.Height) - wall
-	return primitives.Point2D[int]{X: room.Shape.Point.X + int(room.Shape.Size.Width), Y: random.Intn(doorYTo-doorYFrom) + doorYFrom}
+	return primitives.Point2D[int]{X: room.Shape.Point.X + int(room.Shape.Size.Width) - 1, Y: random.Intn(doorYTo-doorYFrom) + doorYFrom}
 }
 
 func getDoorTopWall(room Room, random utils.RandomSource) primitives.Point2D[int] {
 	const wall = 1
 	doorXFrom := room.Shape.Point.X + wall
-	doorXTo := room.Shape.Point.X + int(room.Shape.Size.Width) - wall
-	return primitives.Point2D[int]{X: random.Intn(doorXTo-doorXFrom) + doorXFrom, Y: room.Shape.Point.Y}
+	doorXTo := room.Shape.Point.X + int(room.Shape.Size.Width) - wall - 1
+	insideRoomWidth := doorXTo - doorXFrom
+	var doorX int
+	if insideRoomWidth == 0 {
+		doorX = doorXFrom
+	} else {
+		doorX = random.Intn(doorXTo-doorXFrom) + doorXFrom
+	}
+	return primitives.Point2D[int]{X: doorX, Y: room.Shape.Point.Y}
 }
 
 func getDoorDownWall(room Room, random utils.RandomSource) primitives.Point2D[int] {
 	const wall = 1
 	doorXFrom := room.Shape.Point.X + wall
-	doorXTo := room.Shape.Point.X + int(room.Shape.Size.Width)
-	return primitives.Point2D[int]{X: random.Intn(doorXTo-doorXFrom) + doorXFrom, Y: room.Shape.Point.Y + int(room.Shape.Size.Height)}
+	doorXTo := room.Shape.Point.X + int(room.Shape.Size.Width) - wall - 1
+	insideRoomWidth := doorXTo - doorXFrom
+	var doorX int
+	if insideRoomWidth == 0 {
+		doorX = doorXFrom
+	} else {
+		doorX = random.Intn(doorXTo-doorXFrom) + doorXFrom
+	}
+	return primitives.Point2D[int]{X: doorX, Y: room.Shape.Point.Y + int(room.Shape.Size.Height) - 1}
 }
