@@ -13,8 +13,8 @@ import (
 const (
 	RoomMinWidth         = 3
 	RoomMinHeight        = 3
-	RoomMaxWidth         = 200
-	RoomMaxHeight        = 150
+	MapMaxWidth          = 200
+	MapMaxHeight         = 150
 	MinRoomPadding       = 1
 	MaxExtraPassageCount = 2
 	numberXYSections     = 3
@@ -77,7 +77,10 @@ func (l *Level) GenerateLevel(sizeMap primitives.Size2D[uint]) error {
 	}
 
 	// @todo - "С каждым новым уровнем снижается количество полезных предметов (и повышается количество сокровищ, которые выпадают с побежденных противников)"
-	l.addItemsAtRooms(2, 2, 2, 2)
+	err = l.addItemsAtRooms(2, 2, 2, 2)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -196,31 +199,11 @@ func (l *Level) generatePassages() error {
 	return nil
 }
 
-func (l *Level) getFreePosition() (int, *primitives.Point2D[int], error) {
-	indexes := l.random.Perm(roomsCount)
-
-	for indCount := 0; indCount < len(l.Rooms); indCount++ {
-		ind := indexes[indCount]
-		if l.Rooms[ind].Type == RoomTypeStart {
-			continue
-		}
-
-		if l.Rooms[ind].GetCountFreePosition() <= 0 {
-			continue
-		}
-
-		pos, err := l.Rooms[ind].GetRandomFreePosition(l.random)
-		if err != nil {
-			continue
-		}
-
-		return ind, pos, nil
+func (l *Level) addItemsAtRooms(countFood, countElixir, countScroll, countWeapon uint) error {
+	if l.Rooms == nil {
+		return errors.New("no rooms on level")
 	}
 
-	return 0, nil, errors.New("no available positions in Rooms")
-}
-
-func (l *Level) addItemsAtRooms(countFood, countElixir, countScroll, countWeapon uint) {
 	allFoodTypes := []items.FoodType{
 		items.FoodTypePotatoes,
 		items.FoodTypeBread,
@@ -257,36 +240,33 @@ func (l *Level) addItemsAtRooms(countFood, countElixir, countScroll, countWeapon
 	for j := 0; j < int(countFood); j++ {
 		roomInd, pos, err := l.getFreePosition()
 		if err != nil {
-			return
+			return nil
 		}
 		l.createFood(roomInd, *pos, allFoodTypes)
 	}
 	for j := 0; j < int(countElixir); j++ {
 		roomInd, pos, err := l.getFreePosition()
 		if err != nil {
-			return
+			return nil
 		}
 		l.createElixir(roomInd, *pos, allElixirTypes)
 	}
 	for j := 0; j < int(countScroll); j++ {
 		roomInd, pos, err := l.getFreePosition()
 		if err != nil {
-			return
+			return nil
 		}
 		l.createScroll(roomInd, *pos, allScrollTypes)
 	}
 	for j := 0; j < int(countWeapon); j++ {
 		roomInd, pos, err := l.getFreePosition()
 		if err != nil {
-			return
+			return nil
 		}
 		l.createWeapon(roomInd, *pos, allWeaponTypes)
 	}
-}
 
-func getRandomElement[T any](random utils.Randomizer, slice []T) T {
-	idx := random.Intn(len(slice))
-	return slice[idx]
+	return nil
 }
 
 func (l *Level) createFood(roomInd int, pos primitives.Point2D[int], allFoodType []items.FoodType) {
@@ -336,6 +316,35 @@ func (l *Level) createWeapon(roomInd int, pos primitives.Point2D[int], allWeapon
 	return true
 }
 
+func (l *Level) getFreePosition() (int, *primitives.Point2D[int], error) {
+	indexes := l.random.Perm(roomsCount)
+
+	for indCount := 0; indCount < len(l.Rooms); indCount++ {
+		ind := indexes[indCount]
+		if l.Rooms[ind].Type == RoomTypeStart {
+			continue
+		}
+
+		if l.Rooms[ind].GetCountFreePosition() <= 0 {
+			continue
+		}
+
+		pos, err := l.Rooms[ind].GetRandomFreePosition(l.random)
+		if err != nil {
+			continue
+		}
+
+		return ind, pos, nil
+	}
+
+	return 0, nil, errors.New("no available positions in Rooms")
+}
+
+func getRandomElement[T any](random utils.Randomizer, slice []T) T {
+	idx := random.Intn(len(slice))
+	return slice[idx]
+}
+
 func (l *Level) addDoorsAtRoom(twoRoomsIndexes [2]uint, doorOne, doorTwo primitives.Point2D[int]) error {
 	for _, roomIndex := range twoRoomsIndexes {
 		if roomIndex > roomsCount-1 {
@@ -369,7 +378,7 @@ func (l *Level) GenerateStartPlayerPosition() (*primitives.Point2D[int], error) 
 }
 
 func calculateRoomSectionSize(sizeMap primitives.Size2D[uint]) (primitives.Size2D[uint], error) {
-	if sizeMap.Width > RoomMaxWidth || sizeMap.Height > RoomMaxHeight {
+	if sizeMap.Width > MapMaxWidth || sizeMap.Height > MapMaxHeight {
 		return primitives.Size2D[uint]{}, errors.New("game map size is too big")
 	}
 

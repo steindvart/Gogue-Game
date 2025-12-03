@@ -136,7 +136,6 @@ func TestLevel_GenerateNineRooms_Deterministic(t *testing.T) {
 			},
 		},
 	}
-
 	wantFinishPortal := primitives.Box{
 		Point: primitives.Point2D[int]{X: 62, Y: 13},
 		Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
@@ -164,6 +163,31 @@ func TestLevel_GenerateNineRooms_Deterministic(t *testing.T) {
 		if gotRoom.Shape != wantRoom.Shape {
 			t.Errorf("Room %d: expected Shape %+v, got %+v", i, wantRoom.Shape, gotRoom.Shape)
 		}
+	}
+}
+
+func TestLevel_GenerateNineRooms_Minimal(t *testing.T) {
+	tests := []struct {
+		name      string
+		sizeMap   primitives.Size2D[uint]
+		wantErr   bool
+		errorText string
+	}{
+		{
+			name:    "Minimum allowed value",
+			sizeMap: primitives.Size2D[uint]{Height: 17, Width: 17},
+			wantErr: false,
+		},
+		//{
+		//	name:    "Minimum value",
+		//	sizeMap: primitives.Size2D[uint]{Height: 16, Width: 16},
+		//	wantErr: false,
+		//},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+		})
 	}
 }
 
@@ -702,6 +726,108 @@ func TestLevel_addDoorsAtRoom(t *testing.T) {
 
 				if !reflect.DeepEqual(level.Rooms[1].Doors, tt.wantDoorsInRooms[1].Doors) {
 					t.Errorf("addDoorsAtRoom() room 1 doors = %v, want %v", level.Rooms[1].Doors, tt.wantDoorsInRooms[1].Doors)
+				}
+			}
+		})
+	}
+}
+
+func TestLevel_addItemsAtRooms(t *testing.T) {
+	source := rand.New(rand.NewSource(randomSeedTest))
+
+	tests := []struct {
+		name                string
+		countFood           uint
+		countElixir         uint
+		countScroll         uint
+		countWeapon         uint
+		sizeMap             primitives.Size2D[uint]
+		wantFoodPositions   map[primitives.Point2D[int]]bool
+		wantElixirPositions map[primitives.Point2D[int]]bool
+		wantScrollPositions map[primitives.Point2D[int]]bool
+		wantWeaponPositions map[primitives.Point2D[int]]bool
+		wantErr             error
+	}{
+		{
+			name:                "Base test",
+			countFood:           3,
+			countElixir:         3,
+			countScroll:         3,
+			countWeapon:         3,
+			sizeMap:             primitives.Size2D[uint]{Height: 30, Width: 90},
+			wantFoodPositions:   map[primitives.Point2D[int]]bool{{73, 22}: true, {74, 23}: true, {39, 7}: true},
+			wantElixirPositions: map[primitives.Point2D[int]]bool{{37, 4}: true, {70, 24}: true, {75, 23}: true},
+			wantScrollPositions: map[primitives.Point2D[int]]bool{{36, 7}: true, {69, 22}: true, {70, 4}: true},
+			wantWeaponPositions: map[primitives.Point2D[int]]bool{{17, 16}: true, {22, 14}: true, {65, 13}: true},
+			wantErr:             nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			level := NewLevel(source)
+			err := level.generateNineRooms(tt.sizeMap)
+			if err != nil {
+				t.Fatalf("generateNineRooms returned an error: %v", err)
+				return
+			}
+
+			err = level.addItemsAtRooms(tt.countFood, tt.countElixir, tt.countScroll, tt.countWeapon)
+			if tt.wantErr != nil {
+				if err == nil {
+					t.Errorf("addItemsAtRooms() expected error %v, but got nil", tt.wantErr)
+				}
+			} else {
+				if err != nil {
+					t.Errorf("addItemsAtRooms() expected no error, but got %v", err)
+				}
+
+				foodPositions := make(map[primitives.Point2D[int]]bool)
+				for _, room := range level.Rooms {
+					for _, food := range room.Foods {
+						if !foodPositions[food.Shape.Point] {
+							foodPositions[food.Shape.Point] = true
+						}
+					}
+				}
+				if !reflect.DeepEqual(tt.wantFoodPositions, foodPositions) {
+					t.Errorf("expected %+v food positions, got %+v", tt.wantFoodPositions, foodPositions)
+				}
+
+				elixirPositions := make(map[primitives.Point2D[int]]bool)
+				for _, room := range level.Rooms {
+					for _, elixir := range room.Elixirs {
+						if !elixirPositions[elixir.Shape.Point] {
+							elixirPositions[elixir.Shape.Point] = true
+						}
+					}
+				}
+				if !reflect.DeepEqual(tt.wantElixirPositions, elixirPositions) {
+					t.Errorf("expected %+v elixir positions, got %+v", tt.wantElixirPositions, elixirPositions)
+				}
+
+				scrollPositions := make(map[primitives.Point2D[int]]bool)
+				for _, room := range level.Rooms {
+					for _, scroll := range room.Scrolls {
+						if !scrollPositions[scroll.Shape.Point] {
+							scrollPositions[scroll.Shape.Point] = true
+						}
+					}
+				}
+				if !reflect.DeepEqual(tt.wantScrollPositions, scrollPositions) {
+					t.Errorf("expected %+v scroll positions, got %+v", tt.wantScrollPositions, scrollPositions)
+				}
+
+				weaponPositions := make(map[primitives.Point2D[int]]bool)
+				for _, room := range level.Rooms {
+					for _, weapon := range room.Weapons {
+						if !weaponPositions[weapon.Shape.Point] {
+							weaponPositions[weapon.Shape.Point] = true
+						}
+					}
+				}
+				if !reflect.DeepEqual(tt.wantWeaponPositions, weaponPositions) {
+					t.Errorf("expected %+v weapon positions, got %+v", tt.wantWeaponPositions, weaponPositions)
 				}
 			}
 		})
