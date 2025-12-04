@@ -155,8 +155,8 @@ func calculateRoomSectionSize(sizeMap primitives.Size2D[uint]) (primitives.Size2
 		Width:  availableWidth / numberXYSections,
 		Height: availableHeight / numberXYSections,
 	}
-
-	if sectionSize.Width < RoomMinWidth || sectionSize.Height < RoomMinHeight {
+	const areaForPassage = 1
+	if sectionSize.Width < RoomMinWidth+areaForPassage || sectionSize.Height < RoomMinHeight+areaForPassage {
 		return primitives.Size2D[uint]{}, errors.New("game map size is too small")
 	}
 
