@@ -107,7 +107,7 @@ func (l *Level) generateNineRooms(sizeMap primitives.Size2D[uint]) error {
 			cellXEnd := (x + 1) * int(sectionSize.Width)
 			cellYEnd := (y + 1) * int(sectionSize.Height)
 
-			maxRoomWidth := cellXEnd - cellXStart //
+			maxRoomWidth := cellXEnd - cellXStart
 			maxRoomHeight := cellYEnd - cellYStart
 
 			if maxRoomWidth < RoomMinWidth || maxRoomHeight < RoomMinHeight {
