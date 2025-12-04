@@ -73,3 +73,55 @@ func (r *Room) GetRandomFreePosition(rand utils.Randomizer) (*primitives.Point2D
 func (r *Room) GetCountFreePosition() int {
 	return int(r.Shape.Size.Width*r.Shape.Size.Height) - len(r.OccupiedPositions)
 }
+
+func (r *Room) createFood(rand utils.Randomizer, pos primitives.Point2D[int], allFoodType []items.FoodType) {
+	foodType := getRandomElement(rand, allFoodType)
+	itemBox := primitives.Box{
+		Point: pos,
+		Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
+	}
+
+	newFood := items.NewFoodBuiltin(rand, itemBox, foodType)
+	r.Foods = append(r.Foods, *newFood)
+}
+
+func (r *Room) createElixir(rand utils.Randomizer, pos primitives.Point2D[int], allElixirType []items.ElixirType) bool {
+	elixirType := getRandomElement(rand, allElixirType)
+	itemBox := primitives.Box{
+		Point: pos,
+		Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
+	}
+
+	newElixir := items.NewElixirBuiltin(rand, itemBox, elixirType)
+	r.Elixirs = append(r.Elixirs, *newElixir)
+	return true
+}
+
+func (r *Room) createScroll(rand utils.Randomizer, pos primitives.Point2D[int], allScrollType []items.ScrollType) bool {
+	scrollType := getRandomElement(rand, allScrollType)
+	itemBox := primitives.Box{
+		Point: pos,
+		Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
+	}
+
+	newScroll := items.NewScrollBuiltin(rand, itemBox, scrollType)
+	r.Scrolls = append(r.Scrolls, *newScroll)
+	return true
+}
+
+func (r *Room) createWeapon(rand utils.Randomizer, pos primitives.Point2D[int], allWeaponTypes []items.WeaponType) bool {
+	weaponType := getRandomElement(rand, allWeaponTypes)
+	itemBox := primitives.Box{
+		Point: pos,
+		Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
+	}
+
+	newWeapon := items.NewWeaponBuiltin(rand, itemBox, weaponType)
+	r.Weapons = append(r.Weapons, *newWeapon)
+	return true
+}
+
+func getRandomElement[T any](random utils.Randomizer, slice []T) T {
+	idx := random.Intn(len(slice))
+	return slice[idx]
+}
