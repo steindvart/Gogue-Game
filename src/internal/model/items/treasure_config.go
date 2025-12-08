@@ -55,7 +55,7 @@ func GetTreasureConfig(t TreasureType) TreasureConfig {
 	return TreasureRegistry[TreasureTypeMystery]
 }
 
-func (cfg *TreasureConfig) GenerateValue(rng *utils.RandomGenerator) int32 {
+func (cfg *TreasureConfig) GenerateValue(rng *utils.Random) int32 {
 	return int32(utils.RandomIntInRange(rng, int(cfg.ValueRange.Min), int(cfg.ValueRange.Max)))
 }
 

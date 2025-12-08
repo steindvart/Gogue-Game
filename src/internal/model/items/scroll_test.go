@@ -36,7 +36,7 @@ func TestScroll_NewScroll_BuiltinConfig(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			rng := utils.NewRandomGeneratorWithSeed(defaultItemsTestSeed)
+			rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
 			box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 
 			scroll := NewScrollBuiltin(rng, box, tt.scrollType)
@@ -180,7 +180,7 @@ func TestScroll_NewScrollByConfig(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			rng := utils.NewRandomGeneratorWithSeed(tt.seed)
+			rng := utils.NewRandomWithSeed(tt.seed)
 			scroll, err := NewScrollByConfig(rng, tt.box, tt.config)
 
 			if tt.wantError {
@@ -267,7 +267,7 @@ func TestScroll_NewScrollByConfig_FixedValues(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			rng := utils.NewRandomGeneratorWithSeed(tt.seed)
+			rng := utils.NewRandomWithSeed(tt.seed)
 			scroll, err := NewScrollByConfig(rng, tt.box, tt.config)
 
 			if tt.wantError {
@@ -358,11 +358,11 @@ func TestScroll_NewScroll_Deterministic(t *testing.T) {
 			box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 
 			// Create first scroll
-			rng1 := utils.NewRandomGeneratorWithSeed(tt.seed)
+			rng1 := utils.NewRandomWithSeed(tt.seed)
 			scroll1 := NewScrollBuiltin(rng1, box, tt.scrollType)
 
 			// Create second scroll with same seed
-			rng2 := utils.NewRandomGeneratorWithSeed(tt.seed)
+			rng2 := utils.NewRandomWithSeed(tt.seed)
 			scroll2 := NewScrollBuiltin(rng2, box, tt.scrollType)
 
 			// Verify they are identical
@@ -417,7 +417,7 @@ func TestScroll_NewScroll_Randomness(t *testing.T) {
 
 			// Generate multiple scrolls with different seeds
 			for i := 0; i < tt.iterations; i++ {
-				rng := utils.NewRandomGeneratorWithSeed(int64(i))
+				rng := utils.NewRandomWithSeed(int64(i))
 				scroll := NewScrollBuiltin(rng, box, tt.scrollType)
 				strengthValues[scroll.Effect.Attributes.Strength] = true
 				agilityValues[scroll.Effect.Attributes.Agility] = true
@@ -451,7 +451,7 @@ func TestScroll_NewScroll_Randomness(t *testing.T) {
 }
 
 func TestScroll_NewScroll_UnknownTypeDefaultsToMystery(t *testing.T) {
-	rng := utils.NewRandomGeneratorWithSeed(defaultItemsTestSeed)
+	rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 
 	scroll := NewScrollBuiltin(rng, box, "Unknown Scroll Type")
@@ -474,7 +474,7 @@ func TestScroll_NewScroll_UnknownTypeDefaultsToMystery(t *testing.T) {
 }
 
 func TestScroll_NewScroll_ZeroSizedBoxIsOk(t *testing.T) {
-	rng := utils.NewRandomGeneratorWithSeed(defaultItemsTestSeed)
+	rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 0, Height: 0}}
 	scroll := NewScrollBuiltin(rng, box, ScrollTypeStrength)
 
@@ -517,7 +517,7 @@ func TestScroll_NewScroll_VariousPositions(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			rng := utils.NewRandomGeneratorWithSeed(defaultItemsTestSeed)
+			rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
 			box := primitives.Box{Point: tt.position, Size: tt.size}
 			scroll := NewScrollBuiltin(rng, box, ScrollTypeAgility)
 
@@ -566,7 +566,7 @@ func TestScroll_Use(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			rng := utils.NewRandomGeneratorWithSeed(tt.seed)
+			rng := utils.NewRandomWithSeed(tt.seed)
 			box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 			scroll := NewScrollBuiltin(rng, box, tt.scrollType)
 
@@ -594,7 +594,7 @@ func TestScroll_Use(t *testing.T) {
 }
 
 func TestScroll_UseMultipleTimesIsOk(t *testing.T) {
-	rng := utils.NewRandomGeneratorWithSeed(defaultItemsTestSeed)
+	rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 	scroll := NewScrollBuiltin(rng, box, ScrollTypeStrength)
 
@@ -718,28 +718,28 @@ func BenchmarkScroll_NewScroll(b *testing.B) {
 
 	b.Run("Strength", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			rng := utils.NewRandomGeneratorWithSeed(int64(i))
+			rng := utils.NewRandomWithSeed(int64(i))
 			_ = NewScrollBuiltin(rng, box, ScrollTypeStrength)
 		}
 	})
 
 	b.Run("Agility", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			rng := utils.NewRandomGeneratorWithSeed(int64(i))
+			rng := utils.NewRandomWithSeed(int64(i))
 			_ = NewScrollBuiltin(rng, box, ScrollTypeAgility)
 		}
 	})
 
 	b.Run("MaxHealth", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			rng := utils.NewRandomGeneratorWithSeed(int64(i))
+			rng := utils.NewRandomWithSeed(int64(i))
 			_ = NewScrollBuiltin(rng, box, ScrollTypeMaxHealth)
 		}
 	})
 
 	b.Run("Mystery", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			rng := utils.NewRandomGeneratorWithSeed(int64(i))
+			rng := utils.NewRandomWithSeed(int64(i))
 			_ = NewScrollBuiltin(rng, box, ScrollTypeMystery)
 		}
 	})
@@ -757,13 +757,13 @@ func BenchmarkScroll_NewScrollByConfig(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		rng := utils.NewRandomGeneratorWithSeed(int64(i))
+		rng := utils.NewRandomWithSeed(int64(i))
 		_, _ = NewScrollByConfig(rng, box, config)
 	}
 }
 
 func BenchmarkScroll_Use(b *testing.B) {
-	rng := utils.NewRandomGeneratorWithSeed(defaultItemsTestSeed)
+	rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 	scroll := NewScrollBuiltin(rng, box, ScrollTypeStrength)
 

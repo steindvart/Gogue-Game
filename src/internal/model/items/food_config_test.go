@@ -256,10 +256,10 @@ func TestFoodConfig_GenerateAttributes(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Generate twice with same seed
-			rng1 := utils.NewRandomGeneratorWithSeed(tt.seed)
+			rng1 := utils.NewRandomWithSeed(tt.seed)
 			attrs1 := tt.config.GenerateAttributes(rng1)
 
-			rng2 := utils.NewRandomGeneratorWithSeed(tt.seed)
+			rng2 := utils.NewRandomWithSeed(tt.seed)
 			attrs2 := tt.config.GenerateAttributes(rng2)
 
 			// Should be deterministic
@@ -302,7 +302,7 @@ func TestFoodConfig_GenerateAttributes_Randomness(t *testing.T) {
 	iterations := 50
 
 	for i := 0; i < iterations; i++ {
-		rng := utils.NewRandomGeneratorWithSeed(int64(i))
+		rng := utils.NewRandomWithSeed(int64(i))
 		attrs := config.GenerateAttributes(rng)
 		healthValues[attrs.Health] = true
 	}
@@ -331,7 +331,7 @@ func TestFoodConfig_GenerateAttributes_FixedValue(t *testing.T) {
 	iterations := 20
 
 	for i := 0; i < iterations; i++ {
-		rng := utils.NewRandomGeneratorWithSeed(int64(i))
+		rng := utils.NewRandomWithSeed(int64(i))
 		attrs := config.GenerateAttributes(rng)
 
 		if attrs.Health != expectedHealth {
@@ -370,7 +370,7 @@ func BenchmarkFoodConfig_Validate(b *testing.B) {
 
 func BenchmarkFoodConfig_GenerateAttributes(b *testing.B) {
 	config := GetFoodConfig(FoodTypeMistery)
-	rng := utils.NewRandomGeneratorWithSeed(42)
+	rng := utils.NewRandomWithSeed(42)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
