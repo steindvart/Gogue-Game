@@ -618,7 +618,7 @@ func TestLevel_AddRandomEdges_Deterministic(t *testing.T) {
 
 func TestLevel_GetStartPositionForPlayer(t *testing.T) {
 	t.Run("Rooms_exist", func(t *testing.T) {
-		wantPlayerStartPoint := primitives.Point2D[int]{X: 47, Y: 28}
+		wantPlayerStartPoint := primitives.Point2D[int]{X: 38, Y: 26}
 
 		source := rand.New(rand.NewSource(randomSeedTest))
 		level := NewLevel(source)

@@ -87,7 +87,7 @@ func TestRoom_GetRandomFreePosition(t *testing.T) {
 			wantErr:           nil,
 		},
 		{
-			name:     "Room with occupied positions",
+			name:     "RoomWithCccupiedPositions",
 			roomType: RoomTypeOrdinary,
 			roomSize: primitives.Box{Point: primitives.Point2D[int]{X: 6, Y: 3}, Size: primitives.Size2D[uint]{Height: 10, Width: 10}},
 			OccupiedPositions: map[primitives.Point2D[int]]bool{
@@ -99,7 +99,7 @@ func TestRoom_GetRandomFreePosition(t *testing.T) {
 			wantErr: nil,
 		},
 		{
-			name:     "Absence free positions in room",
+			name:     "AbsenceFreePositionsInRoom",
 			roomType: RoomTypeOrdinary,
 			roomSize: primitives.Box{Point: primitives.Point2D[int]{X: 6, Y: 3}, Size: primitives.Size2D[uint]{Height: 3, Width: 3}},
 			OccupiedPositions: map[primitives.Point2D[int]]bool{
