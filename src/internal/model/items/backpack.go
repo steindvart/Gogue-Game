@@ -82,12 +82,20 @@ func (b *Backpack) IsEmpty() bool {
 // Treasures
 
 func (b *Backpack) AddTreasure(t *Treasure) {
+	if t == nil {
+		return
+	}
+
 	b.Treasures += t.Value
 }
 
 // Elixirs
 
 func (b *Backpack) AddElixir(e *Elixir) error {
+	if e == nil {
+		return nil
+	}
+
 	if b.ItemsNum >= b.Capacity {
 		return BackpackIsFullError{}
 	}
@@ -98,6 +106,10 @@ func (b *Backpack) AddElixir(e *Elixir) error {
 }
 
 func (b *Backpack) RemoveElixir(e *Elixir) error {
+	if e == nil {
+		return ItemIsNotInBackpackError{}
+	}
+
 	for elem := b.Elixirs.Front(); elem != nil; elem = elem.Next() {
 		if elem.Value.(*Elixir) == e {
 			b.Elixirs.Remove(elem)
@@ -112,6 +124,10 @@ func (b *Backpack) RemoveElixir(e *Elixir) error {
 // Scrolls
 
 func (b *Backpack) AddScroll(s *Scroll) error {
+	if s == nil {
+		return nil
+	}
+
 	if b.ItemsNum >= b.Capacity {
 		return BackpackIsFullError{}
 	}
@@ -122,6 +138,10 @@ func (b *Backpack) AddScroll(s *Scroll) error {
 }
 
 func (b *Backpack) RemoveScroll(t *Scroll) error {
+	if t == nil {
+		return ItemIsNotInBackpackError{}
+	}
+
 	for elem := b.Scrolls.Front(); elem != nil; elem = elem.Next() {
 		if elem.Value.(*Scroll) == t {
 			b.Scrolls.Remove(elem)
@@ -136,6 +156,10 @@ func (b *Backpack) RemoveScroll(t *Scroll) error {
 // Foods
 
 func (b *Backpack) AddFood(f *Food) error {
+	if f == nil {
+		return nil
+	}
+
 	if b.ItemsNum >= b.Capacity {
 		return BackpackIsFullError{}
 	}
@@ -146,6 +170,10 @@ func (b *Backpack) AddFood(f *Food) error {
 }
 
 func (b *Backpack) RemoveFood(t *Food) error {
+	if t == nil {
+		return ItemIsNotInBackpackError{}
+	}
+
 	for elem := b.Foods.Front(); elem != nil; elem = elem.Next() {
 		if elem.Value.(*Food) == t {
 			b.Foods.Remove(elem)
@@ -160,6 +188,10 @@ func (b *Backpack) RemoveFood(t *Food) error {
 // Weapons
 
 func (b *Backpack) AddWeapon(w *Weapon) error {
+	if w == nil {
+		return nil
+	}
+
 	if b.ItemsNum >= b.Capacity {
 		return BackpackIsFullError{}
 	}
@@ -170,6 +202,10 @@ func (b *Backpack) AddWeapon(w *Weapon) error {
 }
 
 func (b *Backpack) RemoveWeapon(w *Weapon) error {
+	if w == nil {
+		return ItemIsNotInBackpackError{}
+	}
+
 	for elem := b.Weapons.Front(); elem != nil; elem = elem.Next() {
 		if elem.Value.(*Weapon) == w {
 			b.Weapons.Remove(elem)
