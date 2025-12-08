@@ -349,33 +349,33 @@ func (g *Game) makeField(w, h int) [][]common.GameEntityType {
 	return field
 }
 
-func (g *Game) putEnemies(room world.Room, field [][]common.GameEntityType) {
-	var et common.GameEntityType
-
-	for _, e := range room.Enemies {
-		switch e.Type {
-		case entities.EnemyTypeZombie:
-			et = common.EntityTypeZombie
-		case entities.EnemyTypeVampire:
-			et = common.EntityTypeVampire
-		case entities.EnemyTypeGhost:
-			et = common.EntityTypeGhost
-		case entities.EnemyTypeOgre:
-			et = common.EntityTypeOgre
-		case entities.EnemyTypeSnakeMage:
-			et = common.EntityTypeSnakeMage
-		}
-
-		ex := e.Character.Shape.Point.X
-		ey := e.Character.Shape.Point.Y
-
-		h := len(field)
-		w := len(field[0])
-		if ey >= 0 && ey < h && ex >= 0 && ex < w {
-			field[ey][ex] = et
-		}
-	}
-}
+//func (g *Game) putEnemies(room world.Room, field [][]common.GameEntityType) {
+//	var et common.GameEntityType
+//
+//	for _, e := range room.Enemies {
+//		switch e.Type {
+//		case entities.EnemyTypeZombie:
+//			et = common.EntityTypeZombie
+//		case entities.EnemyTypeVampire:
+//			et = common.EntityTypeVampire
+//		case entities.EnemyTypeGhost:
+//			et = common.EntityTypeGhost
+//		case entities.EnemyTypeOgre:
+//			et = common.EntityTypeOgre
+//		case entities.EnemyTypeSnakeMage:
+//			et = common.EntityTypeSnakeMage
+//		}
+//
+//		ex := e.Character.Shape.Point.X
+//		ey := e.Character.Shape.Point.Y
+//
+//		h := len(field)
+//		w := len(field[0])
+//		if ey >= 0 && ey < h && ex >= 0 && ex < w {
+//			field[ey][ex] = et
+//		}
+//	}
+//}
 
 // Тут можно класть только lvl, так как room я получаю из него же шагом выше, а могу и тут
 func (g *Game) putRoom(room world.Room, finishPortal primitives.Box, field [][]common.GameEntityType) {
