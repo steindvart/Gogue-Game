@@ -155,17 +155,18 @@ func isInSomeRoom(pos primitives.Point2D[int], rooms []world.Room) bool {
 }
 
 func isInRoom(pos primitives.Point2D[int], room world.Room) bool {
-	leftEndX := room.Shape.Point.X
-	rightEndX := leftEndX + int(room.Shape.Size.Width)
-	topEndY := room.Shape.Point.Y
-	downEndY := topEndY + int(room.Shape.Size.Height)
+	// Проверка того, что персонаж находится внутри области комнаты
+	leftEndX := room.Shape.Point.X + 1
+	rightEndX := leftEndX + int(room.Shape.Size.Width) - 3
+	topEndY := room.Shape.Point.Y + 1
+	downEndY := topEndY + int(room.Shape.Size.Height) - 3
 
 	return (pos.X >= leftEndX && pos.X <= rightEndX) &&
 		(pos.Y >= topEndY && pos.Y <= downEndY)
 }
 
 func checkCollisionWithRoomWall(pos primitives.Point2D[int], room world.Room) bool {
-	// Двери явлюятся частью комнаты и её стен, но через них можно ходить
+	// Двери являются частью комнаты и её стен, но через них можно ходить
 	if checkCollisionWithDoors(pos, room.Doors) {
 		return false
 	}
@@ -285,46 +286,46 @@ func (g *Game) makeField(w, h int) [][]common.GameEntityType {
 
 	// Добавлено в качестве примера, потом надо будет убрать
 	g.level.Rooms[0].Enemies = []entities.Enemy{
-		{
-			Type: entities.EnemyType(entities.EnemyTypeZombie),
-			Character: &entities.Character{
-				Shape: &primitives.Box{
-					Point: primitives.Point2D[int]{X: 6, Y: 6},
-				},
-			},
-		},
-		{
-			Type: entities.EnemyType(entities.EnemyTypeVampire),
-			Character: &entities.Character{
-				Shape: &primitives.Box{
-					Point: primitives.Point2D[int]{X: 6, Y: 7},
-				},
-			},
-		},
-		{
-			Type: entities.EnemyType(entities.EnemyTypeGhost),
-			Character: &entities.Character{
-				Shape: &primitives.Box{
-					Point: primitives.Point2D[int]{X: 6, Y: 8},
-				},
-			},
-		},
-		{
-			Type: entities.EnemyType(entities.EnemyTypeOgre),
-			Character: &entities.Character{
-				Shape: &primitives.Box{
-					Point: primitives.Point2D[int]{X: 6, Y: 9},
-				},
-			},
-		},
-		{
-			Type: entities.EnemyType(entities.EnemyTypeSnakeMage),
-			Character: &entities.Character{
-				Shape: &primitives.Box{
-					Point: primitives.Point2D[int]{X: 6, Y: 10},
-				},
-			},
-		},
+		//{
+		//	Type: entities.EnemyType(entities.EnemyTypeZombie),
+		//	Character: &entities.Character{
+		//		Shape: &primitives.Box{
+		//			Point: primitives.Point2D[int]{X: 6, Y: 6},
+		//		},
+		//	},
+		//},
+		//{
+		//	Type: entities.EnemyType(entities.EnemyTypeVampire),
+		//	Character: &entities.Character{
+		//		Shape: &primitives.Box{
+		//			Point: primitives.Point2D[int]{X: 6, Y: 7},
+		//		},
+		//	},
+		//},
+		//{
+		//	Type: entities.EnemyType(entities.EnemyTypeGhost),
+		//	Character: &entities.Character{
+		//		Shape: &primitives.Box{
+		//			Point: primitives.Point2D[int]{X: 6, Y: 8},
+		//		},
+		//	},
+		//},
+		//{
+		//	Type: entities.EnemyType(entities.EnemyTypeOgre),
+		//	Character: &entities.Character{
+		//		Shape: &primitives.Box{
+		//			Point: primitives.Point2D[int]{X: 6, Y: 9},
+		//		},
+		//	},
+		//},
+		//{
+		//	Type: entities.EnemyType(entities.EnemyTypeSnakeMage),
+		//	Character: &entities.Character{
+		//		Shape: &primitives.Box{
+		//			Point: primitives.Point2D[int]{X: 6, Y: 10},
+		//		},
+		//	},
+		//},
 	}
 
 	for _, room := range g.level.Rooms {
@@ -381,14 +382,20 @@ func (g *Game) makeField(w, h int) [][]common.GameEntityType {
 func (g *Game) putRoom(room world.Room, finishPortal primitives.Box, field [][]common.GameEntityType) {
 	width := int(room.Shape.Size.Width)
 	height := int(room.Shape.Size.Height)
-	for col := room.Shape.Point.X; col <= room.Shape.Point.X+width; col++ {
-		field[room.Shape.Point.Y][col] = common.WorldTypeWall
-		field[room.Shape.Point.Y+height][col] = common.WorldTypeWall
+
+	startX := room.Shape.Point.X
+	endX := startX + width - 1
+	startY := room.Shape.Point.Y
+	endY := startY + height - 1
+
+	for col := startX; col <= endX; col++ {
+		field[startY][col] = common.WorldTypeWall
+		field[endY][col] = common.WorldTypeWall
 	}
 
-	for row := room.Shape.Point.Y; row < room.Shape.Point.Y+height; row++ {
-		field[row][room.Shape.Point.X] = common.WorldTypeWall
-		field[row][room.Shape.Point.X+width] = common.WorldTypeWall
+	for row := startY; row <= endY; row++ {
+		field[row][startX] = common.WorldTypeWall
+		field[row][endX] = common.WorldTypeWall
 	}
 
 	field[finishPortal.Point.Y][finishPortal.Point.X] = common.WorldTypePortal

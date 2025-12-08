@@ -50,8 +50,8 @@ func (r *Room) GetRandomFreePosition(rand utils.Randomizer) (*primitives.Point2D
 	// Получаем все возможные точки внутри комнаты без границ
 	minX := r.Shape.Point.X + 1
 	minY := r.Shape.Point.Y + 1
-	width := r.Shape.Size.Width - 1
-	height := r.Shape.Size.Height - 1
+	width := r.Shape.Size.Width - 2
+	height := r.Shape.Size.Height - 2
 
 	totalPossiblePoints := int(width) * int(height)
 

@@ -2,7 +2,6 @@ package world
 
 import (
 	"errors"
-	"fmt"
 	"gogue/internal/model/entities"
 	"gogue/internal/model/items"
 	"gogue/internal/model/primitives"
@@ -80,15 +79,15 @@ func TestRoom_GetRandomFreePosition(t *testing.T) {
 		wantErr           error
 	}{
 		{
-			name:              "Base room",
+			name:              "BaseRoom",
 			roomType:          RoomTypeFinish,
 			roomSize:          primitives.Box{Point: primitives.Point2D[int]{X: 6, Y: 3}, Size: primitives.Size2D[uint]{Height: 10, Width: 10}},
 			OccupiedPositions: map[primitives.Point2D[int]]bool{},
-			wantPos:           primitives.Point2D[int]{X: 15, Y: 12},
+			wantPos:           primitives.Point2D[int]{X: 8, Y: 7},
 			wantErr:           nil,
 		},
 		{
-			name:     "Room with occupied positions",
+			name:     "RoomWithCccupiedPositions",
 			roomType: RoomTypeOrdinary,
 			roomSize: primitives.Box{Point: primitives.Point2D[int]{X: 6, Y: 3}, Size: primitives.Size2D[uint]{Height: 10, Width: 10}},
 			OccupiedPositions: map[primitives.Point2D[int]]bool{
@@ -96,11 +95,11 @@ func TestRoom_GetRandomFreePosition(t *testing.T) {
 				primitives.Point2D[int]{X: 11, Y: 11}: true,
 				primitives.Point2D[int]{X: 13, Y: 12}: true,
 			},
-			wantPos: primitives.Point2D[int]{X: 9, Y: 11},
+			wantPos: primitives.Point2D[int]{X: 11, Y: 10},
 			wantErr: nil,
 		},
 		{
-			name:     "Absence free positions in room",
+			name:     "AbsenceFreePositionsInRoom",
 			roomType: RoomTypeOrdinary,
 			roomSize: primitives.Box{Point: primitives.Point2D[int]{X: 6, Y: 3}, Size: primitives.Size2D[uint]{Height: 3, Width: 3}},
 			OccupiedPositions: map[primitives.Point2D[int]]bool{
@@ -114,9 +113,7 @@ func TestRoom_GetRandomFreePosition(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fmt.Println("1")
 			room := NewRoom(tt.roomType, tt.roomSize)
-			fmt.Println("2")
 			for ocPos := range tt.OccupiedPositions {
 				room.OccupiedPositions[ocPos] = true
 			}

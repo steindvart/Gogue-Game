@@ -75,69 +75,69 @@ func TestLevel_GenerateNineRooms_Deterministic(t *testing.T) {
 		{
 			Type: RoomTypeOrdinary,
 			Shape: primitives.Box{
-				Point: primitives.Point2D[int]{X: 4, Y: 1},
-				Size:  primitives.Size2D[uint]{Width: 21, Height: 7},
-			},
-		},
-		{
-			Type: RoomTypeOrdinary,
-			Shape: primitives.Box{
-				Point: primitives.Point2D[int]{X: 35, Y: 3},
-				Size:  primitives.Size2D[uint]{Width: 6, Height: 5},
-			},
-		},
-		{
-			Type: RoomTypeOrdinary,
-			Shape: primitives.Box{
-				Point: primitives.Point2D[int]{X: 67, Y: 3},
-				Size:  primitives.Size2D[uint]{Width: 4, Height: 3},
-			},
-		},
-		{
-			Type: RoomTypeOrdinary,
-			Shape: primitives.Box{
-				Point: primitives.Point2D[int]{X: 12, Y: 10},
-				Size:  primitives.Size2D[uint]{Width: 12, Height: 7},
-			},
-		},
-		{
-			Type: RoomTypeOrdinary,
-			Shape: primitives.Box{
-				Point: primitives.Point2D[int]{X: 39, Y: 11},
-				Size:  primitives.Size2D[uint]{Width: 14, Height: 5},
-			},
-		},
-		{
-			Type: RoomTypeFinish,
-			Shape: primitives.Box{
-				Point: primitives.Point2D[int]{X: 61, Y: 11},
-				Size:  primitives.Size2D[uint]{Width: 7, Height: 5},
-			},
-		},
-		{
-			Type: RoomTypeOrdinary,
-			Shape: primitives.Box{
-				Point: primitives.Point2D[int]{X: 2, Y: 19},
-				Size:  primitives.Size2D[uint]{Width: 26, Height: 7},
-			},
-		},
-		{
-			Type: RoomTypeStart,
-			Shape: primitives.Box{
-				Point: primitives.Point2D[int]{X: 37, Y: 23},
+				Point: primitives.Point2D[int]{X: 8, Y: 3},
 				Size:  primitives.Size2D[uint]{Width: 10, Height: 3},
 			},
 		},
 		{
 			Type: RoomTypeOrdinary,
 			Shape: primitives.Box{
-				Point: primitives.Point2D[int]{X: 66, Y: 21},
-				Size:  primitives.Size2D[uint]{Width: 13, Height: 4},
+				Point: primitives.Point2D[int]{X: 44, Y: 1},
+				Size:  primitives.Size2D[uint]{Width: 16, Height: 8},
+			},
+		},
+		{
+			Type: RoomTypeOrdinary,
+			Shape: primitives.Box{
+				Point: primitives.Point2D[int]{X: 61, Y: 3},
+				Size:  primitives.Size2D[uint]{Width: 26, Height: 6},
+			},
+		},
+		{
+			Type: RoomTypeOrdinary,
+			Shape: primitives.Box{
+				Point: primitives.Point2D[int]{X: 1, Y: 11},
+				Size:  primitives.Size2D[uint]{Width: 9, Height: 8},
+			},
+		},
+		{
+			Type: RoomTypeOrdinary,
+			Shape: primitives.Box{
+				Point: primitives.Point2D[int]{X: 40, Y: 13},
+				Size:  primitives.Size2D[uint]{Width: 20, Height: 3},
+			},
+		},
+		{
+			Type: RoomTypeFinish,
+			Shape: primitives.Box{
+				Point: primitives.Point2D[int]{X: 63, Y: 14},
+				Size:  primitives.Size2D[uint]{Width: 5, Height: 3},
+			},
+		},
+		{
+			Type: RoomTypeOrdinary,
+			Shape: primitives.Box{
+				Point: primitives.Point2D[int]{X: 10, Y: 24},
+				Size:  primitives.Size2D[uint]{Width: 7, Height: 3},
+			},
+		},
+		{
+			Type: RoomTypeStart,
+			Shape: primitives.Box{
+				Point: primitives.Point2D[int]{X: 33, Y: 23},
+				Size:  primitives.Size2D[uint]{Width: 17, Height: 7},
+			},
+		},
+		{
+			Type: RoomTypeOrdinary,
+			Shape: primitives.Box{
+				Point: primitives.Point2D[int]{X: 66, Y: 25},
+				Size:  primitives.Size2D[uint]{Width: 11, Height: 5},
 			},
 		},
 	}
 	wantFinishPortal := primitives.Box{
-		Point: primitives.Point2D[int]{X: 62, Y: 13},
+		Point: primitives.Point2D[int]{X: 64, Y: 15},
 		Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
 	}
 	if level.FinishPortal != wantFinishPortal {
@@ -166,31 +166,6 @@ func TestLevel_GenerateNineRooms_Deterministic(t *testing.T) {
 	}
 }
 
-func TestLevel_GenerateNineRooms_Minimal(t *testing.T) {
-	tests := []struct {
-		name      string
-		sizeMap   primitives.Size2D[uint]
-		wantErr   bool
-		errorText string
-	}{
-		{
-			name:    "Minimum allowed value",
-			sizeMap: primitives.Size2D[uint]{Height: 17, Width: 17},
-			wantErr: false,
-		},
-		//{
-		//	name:    "Minimum value",
-		//	sizeMap: primitives.Size2D[uint]{Height: 16, Width: 16},
-		//	wantErr: false,
-		//},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-
-		})
-	}
-}
-
 func TestLevel_GeneratePassages_Deterministic(t *testing.T) {
 	source := rand.New(rand.NewSource(randomSeedTest))
 	tests := []struct {
@@ -201,78 +176,93 @@ func TestLevel_GeneratePassages_Deterministic(t *testing.T) {
 			name: "Generate Passages with deterministic rooms",
 			wantPassages: []Passage{
 				{
-					DoorOne: primitives.Point2D[int]{X: 25, Y: 3},
-					DoorTwo: primitives.Point2D[int]{X: 35, Y: 4},
+					DoorOne: primitives.Point2D[int]{X: 17, Y: 4},
+					DoorTwo: primitives.Point2D[int]{X: 44, Y: 2},
 					Way: []primitives.Point2D[int]{
-						{X: 26, Y: 3}, {X: 27, Y: 3}, {X: 28, Y: 3}, {X: 29, Y: 3}, {X: 30, Y: 3},
-						{X: 30, Y: 4}, {X: 31, Y: 4}, {X: 32, Y: 4}, {X: 33, Y: 4}, {X: 34, Y: 4},
+						{X: 18, Y: 4}, {X: 19, Y: 4}, {X: 20, Y: 4}, {X: 21, Y: 4}, {X: 22, Y: 4},
+						{X: 23, Y: 4}, {X: 24, Y: 4}, {X: 25, Y: 4}, {X: 26, Y: 4}, {X: 27, Y: 4},
+						{X: 28, Y: 4}, {X: 29, Y: 4}, {X: 30, Y: 4}, {X: 30, Y: 3}, {X: 30, Y: 2},
+						{X: 31, Y: 2}, {X: 32, Y: 2}, {X: 33, Y: 2}, {X: 34, Y: 2}, {X: 35, Y: 2},
+						{X: 36, Y: 2}, {X: 37, Y: 2}, {X: 38, Y: 2}, {X: 39, Y: 2}, {X: 40, Y: 2},
+						{X: 41, Y: 2}, {X: 42, Y: 2}, {X: 43, Y: 2},
 					},
 				},
 				{
-					DoorOne: primitives.Point2D[int]{X: 9, Y: 8},
-					DoorTwo: primitives.Point2D[int]{X: 21, Y: 10},
+					DoorOne: primitives.Point2D[int]{X: 13, Y: 5},
+					DoorTwo: primitives.Point2D[int]{X: 2, Y: 11},
 					Way: []primitives.Point2D[int]{
-						{X: 9, Y: 9}, {X: 10, Y: 9}, {X: 11, Y: 9}, {X: 12, Y: 9},
-						{X: 13, Y: 9}, {X: 14, Y: 9}, {X: 15, Y: 9}, {X: 16, Y: 9},
-						{X: 17, Y: 9}, {X: 18, Y: 9}, {X: 19, Y: 9}, {X: 20, Y: 9}, {X: 21, Y: 9},
+						{X: 13, Y: 6}, {X: 12, Y: 6}, {X: 11, Y: 6}, {X: 10, Y: 6}, {X: 9, Y: 6},
+						{X: 8, Y: 6}, {X: 7, Y: 6}, {X: 6, Y: 6}, {X: 5, Y: 6}, {X: 4, Y: 6},
+						{X: 3, Y: 6}, {X: 2, Y: 6}, {X: 2, Y: 7}, {X: 2, Y: 8}, {X: 2, Y: 9},
+						{X: 2, Y: 10},
 					},
 				},
 				{
-					DoorOne: primitives.Point2D[int]{X: 24, Y: 12},
-					DoorTwo: primitives.Point2D[int]{X: 39, Y: 12},
+					DoorOne: primitives.Point2D[int]{X: 9, Y: 14},
+					DoorTwo: primitives.Point2D[int]{X: 40, Y: 14},
 					Way: []primitives.Point2D[int]{
-						{X: 25, Y: 12}, {X: 26, Y: 12}, {X: 27, Y: 12}, {X: 28, Y: 12}, {X: 29, Y: 12},
-						{X: 30, Y: 12}, {X: 31, Y: 12}, {X: 32, Y: 12}, {X: 33, Y: 12}, {X: 34, Y: 12},
-						{X: 35, Y: 12}, {X: 36, Y: 12}, {X: 37, Y: 12}, {X: 38, Y: 12},
+						{X: 10, Y: 14}, {X: 11, Y: 14}, {X: 12, Y: 14}, {X: 13, Y: 14}, {X: 14, Y: 14},
+						{X: 15, Y: 14}, {X: 16, Y: 14}, {X: 17, Y: 14}, {X: 18, Y: 14}, {X: 19, Y: 14},
+						{X: 20, Y: 14}, {X: 21, Y: 14}, {X: 22, Y: 14}, {X: 23, Y: 14}, {X: 24, Y: 14},
+						{X: 25, Y: 14}, {X: 26, Y: 14}, {X: 27, Y: 14}, {X: 28, Y: 14}, {X: 29, Y: 14},
+						{X: 30, Y: 14}, {X: 31, Y: 14}, {X: 32, Y: 14}, {X: 33, Y: 14}, {X: 34, Y: 14},
+						{X: 35, Y: 14}, {X: 36, Y: 14}, {X: 37, Y: 14}, {X: 38, Y: 14}, {X: 39, Y: 14},
 					},
 				},
 				{
-					DoorOne: primitives.Point2D[int]{X: 13, Y: 17},
-					DoorTwo: primitives.Point2D[int]{X: 11, Y: 19},
+					DoorOne: primitives.Point2D[int]{X: 4, Y: 18},
+					DoorTwo: primitives.Point2D[int]{X: 11, Y: 24},
 					Way: []primitives.Point2D[int]{
-						{X: 13, Y: 18}, {X: 12, Y: 18}, {X: 11, Y: 18},
+						{X: 4, Y: 19}, {X: 5, Y: 19}, {X: 6, Y: 19}, {X: 7, Y: 19}, {X: 8, Y: 19},
+						{X: 9, Y: 19}, {X: 10, Y: 19}, {X: 11, Y: 19}, {X: 11, Y: 20}, {X: 11, Y: 21},
+						{X: 11, Y: 22}, {X: 11, Y: 23},
 					},
 				},
 				{
-					DoorOne: primitives.Point2D[int]{X: 28, Y: 20},
-					DoorTwo: primitives.Point2D[int]{X: 37, Y: 24},
+					DoorOne: primitives.Point2D[int]{X: 16, Y: 25},
+					DoorTwo: primitives.Point2D[int]{X: 33, Y: 25},
 					Way: []primitives.Point2D[int]{
-						{X: 29, Y: 20}, {X: 30, Y: 20}, {X: 31, Y: 20}, {X: 31, Y: 21},
-						{X: 31, Y: 22}, {X: 31, Y: 23}, {X: 31, Y: 24}, {X: 32, Y: 24},
-						{X: 33, Y: 24}, {X: 34, Y: 24}, {X: 35, Y: 24}, {X: 36, Y: 24},
+						{X: 17, Y: 25}, {X: 18, Y: 25}, {X: 19, Y: 25}, {X: 20, Y: 25}, {X: 21, Y: 25},
+						{X: 22, Y: 25}, {X: 23, Y: 25}, {X: 24, Y: 25}, {X: 25, Y: 25}, {X: 26, Y: 25},
+						{X: 27, Y: 25}, {X: 28, Y: 25}, {X: 29, Y: 25}, {X: 30, Y: 25}, {X: 31, Y: 25},
+						{X: 32, Y: 25},
 					},
 				},
 				{
-					DoorOne: primitives.Point2D[int]{X: 47, Y: 24},
-					DoorTwo: primitives.Point2D[int]{X: 66, Y: 23},
+					DoorOne: primitives.Point2D[int]{X: 49, Y: 24},
+					DoorTwo: primitives.Point2D[int]{X: 66, Y: 26},
 					Way: []primitives.Point2D[int]{
-						{X: 48, Y: 24}, {X: 49, Y: 24}, {X: 50, Y: 24}, {X: 51, Y: 24}, {X: 52, Y: 24},
-						{X: 53, Y: 24}, {X: 54, Y: 24}, {X: 55, Y: 24}, {X: 56, Y: 24}, {X: 57, Y: 24},
-						{X: 57, Y: 23}, {X: 58, Y: 23}, {X: 59, Y: 23}, {X: 60, Y: 23}, {X: 61, Y: 23},
-						{X: 62, Y: 23}, {X: 63, Y: 23}, {X: 64, Y: 23}, {X: 65, Y: 23},
+						{X: 50, Y: 24}, {X: 50, Y: 25}, {X: 50, Y: 26}, {X: 51, Y: 26}, {X: 52, Y: 26},
+						{X: 53, Y: 26}, {X: 54, Y: 26}, {X: 55, Y: 26}, {X: 56, Y: 26}, {X: 57, Y: 26},
+						{X: 58, Y: 26}, {X: 59, Y: 26}, {X: 60, Y: 26}, {X: 61, Y: 26}, {X: 62, Y: 26},
+						{X: 63, Y: 26}, {X: 64, Y: 26}, {X: 65, Y: 26},
 					},
 				},
 				{
-					DoorOne: primitives.Point2D[int]{X: 66, Y: 16},
-					DoorTwo: primitives.Point2D[int]{X: 69, Y: 21},
+					DoorOne: primitives.Point2D[int]{X: 64, Y: 16},
+					DoorTwo: primitives.Point2D[int]{X: 72, Y: 25},
 					Way: []primitives.Point2D[int]{
-						{X: 66, Y: 17}, {X: 67, Y: 17}, {X: 68, Y: 17},
-						{X: 69, Y: 17}, {X: 69, Y: 18}, {X: 69, Y: 19}, {X: 69, Y: 20},
+						{X: 64, Y: 17}, {X: 65, Y: 17}, {X: 66, Y: 17}, {X: 67, Y: 17}, {X: 68, Y: 17},
+						{X: 69, Y: 17}, {X: 70, Y: 17}, {X: 71, Y: 17}, {X: 72, Y: 17}, {X: 72, Y: 18},
+						{X: 72, Y: 19}, {X: 72, Y: 20}, {X: 72, Y: 21}, {X: 72, Y: 22}, {X: 72, Y: 23},
+						{X: 72, Y: 24},
 					},
 				},
 				{
-					DoorOne: primitives.Point2D[int]{X: 68, Y: 6},
-					DoorTwo: primitives.Point2D[int]{X: 63, Y: 11},
+					DoorOne: primitives.Point2D[int]{X: 68, Y: 8},
+					DoorTwo: primitives.Point2D[int]{X: 64, Y: 14},
 					Way: []primitives.Point2D[int]{
-						{X: 68, Y: 7}, {X: 68, Y: 8}, {X: 68, Y: 9}, {X: 67, Y: 9},
-						{X: 66, Y: 9}, {X: 65, Y: 9}, {X: 64, Y: 9}, {X: 63, Y: 9}, {X: 63, Y: 10},
+						{X: 68, Y: 9}, {X: 68, Y: 10}, {X: 68, Y: 11}, {X: 68, Y: 12},
+						{X: 67, Y: 12}, {X: 66, Y: 12}, {X: 65, Y: 12}, {X: 64, Y: 12}, {X: 64, Y: 13},
 					},
 				},
 				{
-					DoorOne: primitives.Point2D[int]{X: 39, Y: 8},
-					DoorTwo: primitives.Point2D[int]{X: 41, Y: 11},
+					DoorOne: primitives.Point2D[int]{X: 47, Y: 8},
+					DoorTwo: primitives.Point2D[int]{X: 56, Y: 13},
 					Way: []primitives.Point2D[int]{
-						{X: 39, Y: 9}, {X: 40, Y: 9}, {X: 41, Y: 9}, {X: 41, Y: 10},
+						{X: 47, Y: 9}, {X: 47, Y: 10}, {X: 47, Y: 11}, {X: 48, Y: 11}, {X: 49, Y: 11},
+						{X: 50, Y: 11}, {X: 51, Y: 11}, {X: 52, Y: 11}, {X: 53, Y: 11}, {X: 54, Y: 11},
+						{X: 55, Y: 11}, {X: 56, Y: 11}, {X: 56, Y: 12},
 					},
 				},
 			},
@@ -305,16 +295,16 @@ func TestLevel_GeneratePassages_Deterministic(t *testing.T) {
 						i, wantPassage.DoorOne, gotPassage.DoorOne)
 				}
 				if gotPassage.DoorTwo != wantPassage.DoorTwo {
-					t.Errorf("Passage at index %d field 'DoorOne' mismatches: expected %v, got %v",
+					t.Errorf("Passage at index %d field 'DoorTwo' mismatches: expected %v, got %v",
 						i, wantPassage.DoorTwo, gotPassage.DoorTwo)
 				}
 				if len(gotPassage.Way) != len(wantPassage.Way) {
-					t.Errorf("Passage at index %d Passage slice length mismatch: expected %d, got %d", i, len(wantPassage.Way), len(gotPassage.Way))
+					t.Errorf("Passage at index %d Way slice length mismatch: expected %d, got %d", i, len(wantPassage.Way), len(gotPassage.Way))
 				} else {
 					for j, wantPoint := range wantPassage.Way {
 						gotPoint := gotPassage.Way[j]
 						if gotPoint != wantPoint {
-							t.Errorf("Passage at index %d, point in Passage at index %d mismatch: expected %+v, got %+v", i, j, wantPoint, gotPoint)
+							t.Errorf("Passage at index %d, point in Way at index %d mismatch: expected %+v, got %+v", i, j, wantPoint, gotPoint)
 						}
 					}
 				}
@@ -333,17 +323,17 @@ func TestLevel_CalculateRoomSectionSize(t *testing.T) {
 		{
 			name:    "Valid size 33x33",
 			sizeMap: primitives.Size2D[uint]{Width: 33, Height: 33},
-			want:    primitives.Size2D[uint]{Width: 10, Height: 10},
+			want:    primitives.Size2D[uint]{Width: 11, Height: 11},
 			wantErr: nil,
 		},
 		{
 			name:    "Valid size 60x45",
 			sizeMap: primitives.Size2D[uint]{Width: 60, Height: 45},
-			want:    primitives.Size2D[uint]{Width: 19, Height: 14},
+			want:    primitives.Size2D[uint]{Width: 20, Height: 15},
 			wantErr: nil,
 		},
 		{
-			name:    "Size too small for rooms",
+			name:    "SizeTooSmallForRooms",
 			sizeMap: primitives.Size2D[uint]{Width: 10, Height: 10},
 			want:    primitives.Size2D[uint]{},
 			wantErr: errors.New("game map size is too small"),
@@ -367,21 +357,21 @@ func TestLevel_CalculateRoomSectionSize(t *testing.T) {
 			wantErr: errors.New("game map size is too big"),
 		},
 		{
-			name:    "Minimum valid size 15x15",
-			sizeMap: primitives.Size2D[uint]{Width: 15, Height: 15},
+			name:    "Minimum valid size 12x12",
+			sizeMap: primitives.Size2D[uint]{Width: 12, Height: 12},
 			want:    primitives.Size2D[uint]{Width: 4, Height: 4},
 			wantErr: nil,
 		},
 		{
-			name:    "Size just below minimum - 10x10",
-			sizeMap: primitives.Size2D[uint]{Width: 10, Height: 10},
+			name:    "Size just below minimum - 11x11",
+			sizeMap: primitives.Size2D[uint]{Width: 11, Height: 11},
 			want:    primitives.Size2D[uint]{},
 			wantErr: errors.New("game map size is too small"),
 		},
 		{
 			name:    "Size with remainder - 35x34",
 			sizeMap: primitives.Size2D[uint]{Width: 35, Height: 34},
-			want:    primitives.Size2D[uint]{Width: 11, Height: 10},
+			want:    primitives.Size2D[uint]{Width: 11, Height: 11},
 			wantErr: nil,
 		},
 	}
@@ -395,14 +385,14 @@ func TestLevel_CalculateRoomSectionSize(t *testing.T) {
 					t.Errorf("Expected error to contain: %v, got: %v", tt.wantErr, err)
 				}
 			} else if tt.wantErr != nil && err == nil {
-				t.Errorf("Expected error to contain: %v, got: <nil>", tt.wantErr)
+				t.Fatalf("Expected error to contain: %v, got: <nil>", tt.wantErr)
 			} else if tt.wantErr == nil && err != nil {
-				t.Errorf("Expected: <nil>, got error: %v", err)
+				t.Fatalf("Expected: <nil>, got error: %v", err)
 			}
 
 			if tt.wantErr == nil {
 				if res != tt.want {
-					t.Errorf("Expected size (H, W): %v, got size (H, W): %v", tt.want, res)
+					t.Fatalf("Expected size %+v, got size %+v", tt.want, res)
 				}
 			}
 		})
@@ -627,8 +617,8 @@ func TestLevel_AddRandomEdges_Deterministic(t *testing.T) {
 }
 
 func TestLevel_GetStartPositionForPlayer(t *testing.T) {
-	t.Run("Rooms exist", func(t *testing.T) {
-		wantPlayerStartPoint := primitives.Point2D[int]{X: 40, Y: 24}
+	t.Run("Rooms_exist", func(t *testing.T) {
+		wantPlayerStartPoint := primitives.Point2D[int]{X: 38, Y: 26}
 
 		source := rand.New(rand.NewSource(randomSeedTest))
 		level := NewLevel(source)
@@ -749,16 +739,16 @@ func TestLevel_addItemsAtRooms(t *testing.T) {
 		wantErr             error
 	}{
 		{
-			name:                "Base test",
+			name:                "BaseTest",
 			countFood:           3,
 			countElixir:         3,
 			countScroll:         3,
 			countWeapon:         3,
 			sizeMap:             primitives.Size2D[uint]{Height: 30, Width: 90},
-			wantFoodPositions:   map[primitives.Point2D[int]]bool{{X: 73, Y: 22}: true, {X: 74, Y: 23}: true, {X: 39, Y: 7}: true},
-			wantElixirPositions: map[primitives.Point2D[int]]bool{{X: 37, Y: 4}: true, {X: 70, Y: 24}: true, {X: 75, Y: 23}: true},
-			wantScrollPositions: map[primitives.Point2D[int]]bool{{X: 36, Y: 7}: true, {X: 69, Y: 22}: true, {X: 70, Y: 4}: true},
-			wantWeaponPositions: map[primitives.Point2D[int]]bool{{X: 17, Y: 16}: true, {X: 22, Y: 14}: true, {X: 65, Y: 13}: true},
+			wantFoodPositions:   map[primitives.Point2D[int]]bool{{X: 56, Y: 3}: true, {X: 67, Y: 26}: true, {X: 71, Y: 27}: true},
+			wantElixirPositions: map[primitives.Point2D[int]]bool{{X: 54, Y: 6}: true, {X: 67, Y: 28}: true, {X: 72, Y: 27}: true},
+			wantScrollPositions: map[primitives.Point2D[int]]bool{{X: 8, Y: 17}: true, {X: 58, Y: 7}: true, {X: 67, Y: 5}: true},
+			wantWeaponPositions: map[primitives.Point2D[int]]bool{{X: 11, Y: 25}: true, {X: 54, Y: 4}: true, {X: 56, Y: 14}: true},
 			wantErr:             nil,
 		},
 	}
