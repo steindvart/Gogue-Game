@@ -227,10 +227,10 @@ func TestWeaponConfig_GenerateAttributes(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Generate twice with same seed
-			rng1 := utils.NewRandomGeneratorWithSeed(tt.seed)
+			rng1 := utils.NewRandomWithSeed(tt.seed)
 			attrs1 := tt.config.GenerateAttributes(rng1)
 
-			rng2 := utils.NewRandomGeneratorWithSeed(tt.seed)
+			rng2 := utils.NewRandomWithSeed(tt.seed)
 			attrs2 := tt.config.GenerateAttributes(rng2)
 
 			// Should be deterministic
@@ -266,7 +266,7 @@ func TestWeaponConfig_GenerateAttributes_Randomness(t *testing.T) {
 	iterations := 50
 
 	for i := 0; i < iterations; i++ {
-		rng := utils.NewRandomGeneratorWithSeed(int64(i))
+		rng := utils.NewRandomWithSeed(int64(i))
 		attrs := config.GenerateAttributes(rng)
 		strengthValues[attrs.Strength] = true
 		agilityValues[attrs.Agility] = true
@@ -289,7 +289,7 @@ func TestWeaponConfig_GenerateAttributes_LightWeaponBalance(t *testing.T) {
 	agilitySum := 0.0
 
 	for i := 0; i < iterations; i++ {
-		rng := utils.NewRandomGeneratorWithSeed(int64(i))
+		rng := utils.NewRandomWithSeed(int64(i))
 		attrs := config.GenerateAttributes(rng)
 		strengthSum += attrs.Strength
 		agilitySum += attrs.Agility
@@ -319,7 +319,7 @@ func TestWeaponConfig_GenerateAttributes_HeavyWeaponBalance(t *testing.T) {
 	agilitySum := 0.0
 
 	for i := 0; i < iterations; i++ {
-		rng := utils.NewRandomGeneratorWithSeed(int64(i))
+		rng := utils.NewRandomWithSeed(int64(i))
 		attrs := config.GenerateAttributes(rng)
 		strengthSum += attrs.Strength
 		agilitySum += attrs.Agility
@@ -376,7 +376,7 @@ func TestWeaponConfig_GenerateAttributes_FixedRanges(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			rng := utils.NewRandomGeneratorWithSeed(defaultItemsTestSeed)
+			rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
 			attrs := tt.config.GenerateAttributes(rng)
 
 			// Check if ranges are fixed
@@ -409,7 +409,7 @@ func TestWeaponConfig_GenerateAttributes_LargeRanges(t *testing.T) {
 	agilityValues := make(map[float64]bool)
 
 	for i := 0; i < iterations; i++ {
-		rng := utils.NewRandomGeneratorWithSeed(int64(i))
+		rng := utils.NewRandomWithSeed(int64(i))
 		attrs := config.GenerateAttributes(rng)
 
 		if attrs.Strength < config.StrengthRange.Min || attrs.Strength > config.StrengthRange.Max {
@@ -444,7 +444,7 @@ func BenchmarkWeaponConfig_GenerateAttributes(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		rng := utils.NewRandomGeneratorWithSeed(int64(i))
+		rng := utils.NewRandomWithSeed(int64(i))
 		_ = config.GenerateAttributes(rng)
 	}
 }

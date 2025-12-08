@@ -3,6 +3,7 @@ package world
 import (
 	"errors"
 	"fmt"
+	"gogue/internal/model/items"
 	"gogue/internal/model/primitives"
 	"gogue/internal/utils"
 	"math"
@@ -12,8 +13,8 @@ import (
 const (
 	RoomMinWidth         = 3
 	RoomMinHeight        = 3
-	RoomMaxWidth         = 200
-	RoomMaxHeight        = 150
+	MapMaxWidth          = 200
+	MapMaxHeight         = 150
 	MinRoomPadding       = 1
 	MaxExtraPassageCount = 2
 	numberXYSections     = 3
@@ -55,10 +56,10 @@ type Level struct {
 	Passages     []Passage
 	Number       uint
 	FinishPortal primitives.Box
-	random       utils.RandomSource
+	random       utils.Randomizer
 }
 
-func NewLevel(random utils.RandomSource) *Level {
+func NewLevel(random utils.Randomizer) *Level {
 	return &Level{
 		random: random,
 	}
@@ -71,6 +72,12 @@ func (l *Level) GenerateLevel(sizeMap primitives.Size2D[uint]) error {
 	}
 
 	err = l.generatePassages()
+	if err != nil {
+		return err
+	}
+
+	// @todo - "С каждым новым уровнем снижается количество полезных предметов (и повышается количество сокровищ, которые выпадают с побежденных противников)"
+	err = l.addItemsAtRooms(2, 2, 2, 2)
 	if err != nil {
 		return err
 	}
@@ -92,14 +99,12 @@ func (l *Level) generateNineRooms(sizeMap primitives.Size2D[uint]) error {
 	for y := 0; y < numberXYSections; y++ {
 		for x := 0; x < numberXYSections; x++ {
 			roomIndex := y*numberXYSections + x
-			var roomType RoomType
+			roomType := RoomTypeOrdinary
 			switch roomIndex {
 			case startRoomIndex:
 				roomType = RoomTypeStart
 			case finishRoomIndex:
 				roomType = RoomTypeFinish
-			default:
-				roomType = RoomTypeOrdinary
 			}
 
 			cellXStart := x*int(sectionSize.Width) + MinRoomPadding
@@ -120,50 +125,27 @@ func (l *Level) generateNineRooms(sizeMap primitives.Size2D[uint]) error {
 			xCell := cellXStart + l.random.Intn(maxRoomWidth-width+1)
 			yCell := cellYStart + l.random.Intn(maxRoomHeight-height+1)
 
-			if roomType == RoomTypeFinish {
-				roomWall := 1
-				l.FinishPortal = primitives.Box{
-					Point: primitives.Point2D[int]{
-						X: xCell + roomWall + l.random.Intn(width-(roomWall*2)),
-						Y: yCell + roomWall + l.random.Intn(height-(roomWall*2)),
-					},
-					Size: primitives.Size2D[uint]{Height: 1, Width: 1},
-				}
-			}
-
 			roomBox := primitives.Box{
 				Point: primitives.Point2D[int]{X: xCell, Y: yCell},
 				Size:  primitives.Size2D[uint]{Width: uint(width), Height: uint(height)},
 			}
 
 			l.Rooms[roomIndex] = *NewRoom(roomType, roomBox)
+
+			if roomType == RoomTypeFinish {
+				portalPos, errPos := l.Rooms[roomIndex].GetRandomFreePosition(l.random)
+				if errPos != nil {
+					return errors.New("no free positions in finish room to place level portal")
+				}
+				l.FinishPortal = primitives.Box{
+					Point: *portalPos,
+					Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
+				}
+			}
 		}
 	}
 
 	return nil
-}
-
-func calculateRoomSectionSize(sizeMap primitives.Size2D[uint]) (primitives.Size2D[uint], error) {
-	if sizeMap.Width > RoomMaxWidth || sizeMap.Height > RoomMaxHeight {
-		return primitives.Size2D[uint]{}, errors.New("game map size is too big")
-	}
-
-	totalPaddingWidth := uint(MinRoomPadding * 2)
-	totalPaddingHeight := uint(MinRoomPadding * 2)
-
-	availableWidth := sizeMap.Width - totalPaddingWidth
-	availableHeight := sizeMap.Height - totalPaddingHeight
-
-	sectionSize := primitives.Size2D[uint]{
-		Width:  availableWidth / numberXYSections,
-		Height: availableHeight / numberXYSections,
-	}
-
-	if sectionSize.Width < RoomMinWidth || sectionSize.Height < RoomMinHeight {
-		return primitives.Size2D[uint]{}, errors.New("game map size is too small")
-	}
-
-	return sectionSize, nil
 }
 
 func (l *Level) generatePassages() error {
@@ -215,6 +197,100 @@ func (l *Level) generatePassages() error {
 	return nil
 }
 
+func (l *Level) addItemsAtRooms(countFood, countElixir, countScroll, countWeapon uint) error {
+	if l.Rooms == nil {
+		return errors.New("no rooms on level")
+	}
+
+	allFoodTypes := []items.FoodType{
+		items.FoodTypePotatoes,
+		items.FoodTypeBread,
+		items.FoodTypeMeat,
+		items.FoodTypeMistery,
+		items.FoodTypeBeer,
+	}
+	allElixirTypes := []items.ElixirType{
+		items.ElixirTypeStrength,
+		items.ElixirTypeAgility,
+		items.ElixirTypeDwarfism,
+		items.ElixirTypeGiantism,
+		items.ElixirTypeMystery,
+		// items.ElixirTypeCustom,
+	}
+	allScrollTypes := []items.ScrollType{
+		items.ScrollTypeStrength,
+		items.ScrollTypeAgility,
+		items.ScrollTypeUltimate,
+		items.ScrollTypeMaxHealth,
+		items.ScrollTypeMystery,
+		// items.ScrollTypeCustom,
+	}
+	allWeaponTypes := []items.WeaponType{
+		items.WeaponTypeDagger,
+		items.WeaponTypeSpear,
+		items.WeaponTypeSword,
+		items.WeaponTypeAxe,
+		items.WeaponTypeMaul,
+		items.WeaponTypeMystery,
+		// items.WeaponTypeCustom,
+	}
+
+	for j := 0; j < int(countFood); j++ {
+		roomInd, pos, err := l.getFreePosition()
+		if err != nil {
+			return nil
+		}
+		l.Rooms[roomInd].createFood(l.random, *pos, allFoodTypes)
+	}
+	for j := 0; j < int(countElixir); j++ {
+		roomInd, pos, err := l.getFreePosition()
+		if err != nil {
+			return nil
+		}
+		l.Rooms[roomInd].createElixir(l.random, *pos, allElixirTypes)
+	}
+	for j := 0; j < int(countScroll); j++ {
+		roomInd, pos, err := l.getFreePosition()
+		if err != nil {
+			return nil
+		}
+		l.Rooms[roomInd].createScroll(l.random, *pos, allScrollTypes)
+	}
+	for j := 0; j < int(countWeapon); j++ {
+		roomInd, pos, err := l.getFreePosition()
+		if err != nil {
+			return nil
+		}
+		l.Rooms[roomInd].createWeapon(l.random, *pos, allWeaponTypes)
+	}
+
+	return nil
+}
+
+func (l *Level) getFreePosition() (int, *primitives.Point2D[int], error) {
+	indexes := l.random.Perm(roomsCount)
+
+	for indCount := 0; indCount < len(l.Rooms); indCount++ {
+		ind := indexes[indCount]
+		if l.Rooms[ind].Type == RoomTypeStart {
+			continue
+		}
+
+		if l.Rooms[ind].GetCountFreePosition() <= 0 {
+			continue
+		}
+
+		pos, err := l.Rooms[ind].GetRandomFreePosition(l.random)
+		if err != nil {
+			continue
+		}
+
+		return ind, pos, nil
+	}
+
+	return 0, nil, errors.New("no available positions in Rooms")
+}
+
 func (l *Level) addDoorsAtRoom(twoRoomsIndexes [2]uint, doorOne, doorTwo primitives.Point2D[int]) error {
 	for _, roomIndex := range twoRoomsIndexes {
 		if roomIndex > roomsCount-1 {
@@ -236,23 +312,41 @@ func (l *Level) GenerateStartPlayerPosition() (*primitives.Point2D[int], error) 
 
 	for _, room := range l.Rooms {
 		if room.Type == RoomTypeStart {
-			roomWall := 1
-			xRoomPoint := room.Shape.Point.X
-			yRoomPoint := room.Shape.Point.Y
-			roomWidth := int(room.Shape.Size.Width)
-			roomHeight := int(room.Shape.Size.Height)
-
-			return &primitives.Point2D[int]{
-				X: xRoomPoint + roomWall + l.random.Intn(roomWidth-(roomWall*2)),
-				Y: yRoomPoint + roomWall + l.random.Intn(roomHeight-(roomWall*2)),
-			}, nil
+			pos, err := room.GetRandomFreePosition(l.random)
+			if err != nil {
+				return nil, fmt.Errorf("in starting room not free position")
+			}
+			return pos, nil
 		}
 	}
 
 	return nil, fmt.Errorf("starting room was not found")
 }
 
-func generateSpanningTree(startRoom int, random utils.RandomSource) ([][2]int, error) {
+func calculateRoomSectionSize(sizeMap primitives.Size2D[uint]) (primitives.Size2D[uint], error) {
+	if sizeMap.Width > MapMaxWidth || sizeMap.Height > MapMaxHeight {
+		return primitives.Size2D[uint]{}, errors.New("game map size is too big")
+	}
+
+	totalPaddingWidth := uint(MinRoomPadding * 2)
+	totalPaddingHeight := uint(MinRoomPadding * 2)
+
+	availableWidth := sizeMap.Width - totalPaddingWidth
+	availableHeight := sizeMap.Height - totalPaddingHeight
+
+	sectionSize := primitives.Size2D[uint]{
+		Width:  availableWidth / numberXYSections,
+		Height: availableHeight / numberXYSections,
+	}
+
+	if sectionSize.Width < RoomMinWidth || sectionSize.Height < RoomMinHeight {
+		return primitives.Size2D[uint]{}, errors.New("game map size is too small")
+	}
+
+	return sectionSize, nil
+}
+
+func generateSpanningTree(startRoom int, random utils.Randomizer) ([][2]int, error) {
 	if startRoom < 0 || startRoom > roomsCount {
 		return nil, fmt.Errorf("start room must be between 0 and %d", roomsCount)
 	}
@@ -290,7 +384,7 @@ func generateSpanningTree(startRoom int, random utils.RandomSource) ([][2]int, e
 	return edges, nil
 }
 
-func addRandomEdges(sourceEdges [][2]int, extraEdgesCount int, random utils.RandomSource) [][2]int {
+func addRandomEdges(sourceEdges [][2]int, extraEdgesCount int, random utils.Randomizer) [][2]int {
 	const minExtraPassageCount = 1
 	if extraEdgesCount < minExtraPassageCount {
 		extraEdgesCount = minExtraPassageCount
@@ -361,28 +455,28 @@ func sortByOrderAsc(first, second int) (int, int) {
 	return minIndex, maxIndex
 }
 
-func getDoorLeftWall(room Room, random utils.RandomSource) primitives.Point2D[int] {
+func getDoorLeftWall(room Room, random utils.Randomizer) primitives.Point2D[int] {
 	const wall = 1
 	doorYFrom := room.Shape.Point.Y + wall
 	doorYTo := room.Shape.Point.Y + int(room.Shape.Size.Height) - wall
 	return primitives.Point2D[int]{X: room.Shape.Point.X, Y: random.Intn(doorYTo-doorYFrom) + doorYFrom}
 }
 
-func getDoorRightWall(room Room, random utils.RandomSource) primitives.Point2D[int] {
+func getDoorRightWall(room Room, random utils.Randomizer) primitives.Point2D[int] {
 	const wall = 1
 	doorYFrom := room.Shape.Point.Y + wall
 	doorYTo := room.Shape.Point.Y + int(room.Shape.Size.Height) - wall
 	return primitives.Point2D[int]{X: room.Shape.Point.X + int(room.Shape.Size.Width), Y: random.Intn(doorYTo-doorYFrom) + doorYFrom}
 }
 
-func getDoorTopWall(room Room, random utils.RandomSource) primitives.Point2D[int] {
+func getDoorTopWall(room Room, random utils.Randomizer) primitives.Point2D[int] {
 	const wall = 1
 	doorXFrom := room.Shape.Point.X + wall
 	doorXTo := room.Shape.Point.X + int(room.Shape.Size.Width) - wall
 	return primitives.Point2D[int]{X: random.Intn(doorXTo-doorXFrom) + doorXFrom, Y: room.Shape.Point.Y}
 }
 
-func getDoorDownWall(room Room, random utils.RandomSource) primitives.Point2D[int] {
+func getDoorDownWall(room Room, random utils.Randomizer) primitives.Point2D[int] {
 	const wall = 1
 	doorXFrom := room.Shape.Point.X + wall
 	doorXTo := room.Shape.Point.X + int(room.Shape.Size.Width)

@@ -64,7 +64,7 @@ func GetScrollConfig(t ScrollType) ScrollConfig {
 	return ScrollRegistry[ScrollTypeMystery]
 }
 
-func (cfg *ScrollConfig) GenerateAttributes(rng *utils.RandomGenerator) primitives.Attributes {
+func (cfg *ScrollConfig) GenerateAttributes(rng utils.Randomizer) primitives.Attributes {
 	return primitives.Attributes{
 		Strength:  float64(utils.RandomRoundedFloatInRange(rng, cfg.StrengthRange.Min, cfg.StrengthRange.Max)),
 		Agility:   float64(utils.RandomRoundedFloatInRange(rng, cfg.AgilityRange.Min, cfg.AgilityRange.Max)),

@@ -19,12 +19,12 @@ func NewScroll(box primitives.Box, t ScrollType, e *primitives.Effect) *Scroll {
 	}
 }
 
-func NewScrollBuiltin(rnd *utils.RandomGenerator, box primitives.Box, t ScrollType) *Scroll {
+func NewScrollBuiltin(rnd utils.Randomizer, box primitives.Box, t ScrollType) *Scroll {
 	s, _ := NewScrollByConfig(rnd, box, GetScrollConfig(t))
 	return s
 }
 
-func NewScrollByConfig(rnd *utils.RandomGenerator, box primitives.Box, cfg ScrollConfig) (*Scroll, error) {
+func NewScrollByConfig(rnd utils.Randomizer, box primitives.Box, cfg ScrollConfig) (*Scroll, error) {
 	if err := cfg.Validate(); err != nil {
 		return nil, err
 	}
