@@ -516,7 +516,7 @@ func TestBackpack_RemoveElixir(t *testing.T) {
 
 func TestBackpack_RemoveElixir_NilIsError(t *testing.T) {
 	backpack := NewBackpack()
-	rng := utils.NewRandomGeneratorWithSeed(testBackpackSeed)
+	rng := utils.NewRandomWithSeed(testBackpackSeed)
 	_ = backpack.AddElixir(createTestElixir(rng, ElixirTypeStrength))
 
 	err := backpack.RemoveElixir(nil)
@@ -595,7 +595,7 @@ func TestBackpack_RemoveScroll(t *testing.T) {
 
 func TestBackpack_RemoveScroll_NilIsError(t *testing.T) {
 	backpack := NewBackpack()
-	rng := utils.NewRandomGeneratorWithSeed(testBackpackSeed)
+	rng := utils.NewRandomWithSeed(testBackpackSeed)
 	_ = backpack.AddScroll(createTestScroll(rng, ScrollTypeStrength))
 
 	err := backpack.RemoveScroll(nil)
@@ -674,7 +674,7 @@ func TestBackpack_RemoveFood(t *testing.T) {
 
 func TestBackpack_RemoveFood_NilIsError(t *testing.T) {
 	backpack := NewBackpack()
-	rng := utils.NewRandomGeneratorWithSeed(testBackpackSeed)
+	rng := utils.NewRandomWithSeed(testBackpackSeed)
 	_ = backpack.AddFood(createTestFood(rng, FoodTypeBread))
 
 	err := backpack.RemoveFood(nil)
@@ -753,7 +753,7 @@ func TestBackpack_RemoveWeapon(t *testing.T) {
 
 func TestBackpack_RemoveWeapon_NilIsError(t *testing.T) {
 	backpack := NewBackpack()
-	rng := utils.NewRandomGeneratorWithSeed(testBackpackSeed)
+	rng := utils.NewRandomWithSeed(testBackpackSeed)
 	_ = backpack.AddWeapon(createTestWeapon(rng, WeaponTypeSword))
 
 	err := backpack.RemoveWeapon(nil)

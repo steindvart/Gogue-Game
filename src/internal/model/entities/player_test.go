@@ -89,7 +89,7 @@ func TestPlayer_EquipWeapon_NilIsNothing(t *testing.T) {
 		t.Errorf("Attributes should not change when equipping nil: got (S %.1f, A %.1f) want (S %.1f, A %.1f)", p.Attributes.Strength, p.Attributes.Agility, base.Strength, base.Agility)
 	}
 
-	rnd := utils.NewRandomGeneratorWithSeed(defaultPlayerTestSeed)
+	rnd := utils.NewRandomWithSeed(defaultPlayerTestSeed)
 	w := items.NewWeaponBuiltin(rnd, primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 1}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}, items.WeaponTypeSword)
 	if w == nil || w.Effect == nil {
 		t.Fatalf("Weapon or its effect/attributes should be initialized")
@@ -124,7 +124,7 @@ func TestPlayer_EquipWeapon_NoAddToBackpackIfPreviousWeaponIsNil(t *testing.T) {
 		t.Fatalf("Precondition failed: expected no weapon equipped")
 	}
 
-	rnd1 := utils.NewRandomGeneratorWithSeed(100)
+	rnd1 := utils.NewRandomWithSeed(100)
 	w1 := items.NewWeaponBuiltin(rnd1, primitives.Box{}, items.WeaponTypeDagger)
 	delta := w1.Effect.Attributes
 	err := p.EquipWeapon(w1)
@@ -151,7 +151,7 @@ func TestPlayer_EquipWeapon_MovePreviousWeaponToBackpack(t *testing.T) {
 	p := NewPlayer(box)
 	base := p.Attributes
 
-	rnd1 := utils.NewRandomGeneratorWithSeed(100)
+	rnd1 := utils.NewRandomWithSeed(100)
 	w1 := items.NewWeaponBuiltin(rnd1, primitives.Box{}, items.WeaponTypeDagger)
 	delta := w1.Effect.Attributes
 	err := p.EquipWeapon(w1)
@@ -159,7 +159,7 @@ func TestPlayer_EquipWeapon_MovePreviousWeaponToBackpack(t *testing.T) {
 		t.Fatalf("EquipWeapon returned unexpected error: %v", err)
 	}
 
-	rnd2 := utils.NewRandomGeneratorWithSeed(200)
+	rnd2 := utils.NewRandomWithSeed(200)
 	w2 := items.NewWeaponBuiltin(rnd2, primitives.Box{}, items.WeaponTypeAxe)
 	delta = w2.Effect.Attributes
 	err = p.EquipWeapon(w2)
@@ -190,7 +190,7 @@ func TestPlayer_EquipWeapon_PreviousWeaponIsNotNilAndBackpackIsFull_IsError(t *t
 	box := &primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 	p := NewPlayer(box)
 
-	rnd1 := utils.NewRandomGeneratorWithSeed(100)
+	rnd1 := utils.NewRandomWithSeed(100)
 	w1 := items.NewWeaponBuiltin(rnd1, primitives.Box{}, items.WeaponTypeDagger)
 	err := p.EquipWeapon(w1)
 	if err != nil {
@@ -199,7 +199,7 @@ func TestPlayer_EquipWeapon_PreviousWeaponIsNotNilAndBackpackIsFull_IsError(t *t
 
 	p.Backpack.Capacity = 0 // Уменьшаем вместимость рюкзака для теста
 
-	rnd2 := utils.NewRandomGeneratorWithSeed(200)
+	rnd2 := utils.NewRandomWithSeed(200)
 	w2 := items.NewWeaponBuiltin(rnd2, primitives.Box{}, items.WeaponTypeAxe)
 	err = p.EquipWeapon(w2)
 	if err == nil {
@@ -263,28 +263,27 @@ func TestPlayer_UnequipWeapon_NoWeapon(t *testing.T) {
 }
 
 // @todo - пока такое поведение, но в будущем нужно пересмотреть
-func TestPlayer_EquipWeapon_Twice_StacksByDesign(t *testing.T) {
-	// Document current behavior: equipping a second weapon does not auto-revert the first; effects stack.
-	box := &primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
-	p := NewPlayer(box)
-	base := p.Attributes
-
-	rnd1 := utils.NewRandomWithSeed(100)
-	w1 := items.NewWeaponBuiltin(rnd1, primitives.Box{}, items.WeaponTypeDagger)
-	d1 := w1.Effect.Attributes
-	p.EquipWeapon(w1)
-
-	rnd2 := utils.NewRandomWithSeed(200)
-	w2 := items.NewWeaponBuiltin(rnd2, primitives.Box{}, items.WeaponTypeAxe)
-	d2 := w2.Effect.Attributes
-	p.EquipWeapon(w2)
-
-	// Last equipped weapon reference is stored
-	if p.Weapon != w2 {
-		t.Errorf("Expected weapon reference to point to last equipped weapon")
-	}
-	// Attributes include both effects
-	if p.Attributes.Strength != base.Strength+d1.Strength+d2.Strength || p.Attributes.Agility != base.Agility+d1.Agility+d2.Agility {
-		t.Errorf("Attributes should stack with multiple equips: got (S %.1f, A %.1f) want (S %.1f, A %.1f)", p.Attributes.Strength, p.Attributes.Agility, base.Strength+d1.Strength+d2.Strength, base.Agility+d1.Agility+d2.Agility)
-	}
-}
+//func TestPlayer_EquipWeapon_Twice_StacksByDesign(t *testing.T) {
+//	box := &primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
+//	p := NewPlayer(box)
+//	base := p.Attributes
+//
+//	rnd1 := utils.NewRandomWithSeed(100)
+//	w1 := items.NewWeaponBuiltin(rnd1, primitives.Box{}, items.WeaponTypeDagger)
+//	d1 := w1.Effect.Attributes
+//	p.EquipWeapon(w1)
+//
+//	rnd2 := utils.NewRandomWithSeed(200)
+//	w2 := items.NewWeaponBuiltin(rnd2, primitives.Box{}, items.WeaponTypeAxe)
+//	d2 := w2.Effect.Attributes
+//	p.EquipWeapon(w2)
+//
+//	// Last equipped weapon reference is stored
+//	if p.Weapon != w2 {
+//		t.Errorf("Expected weapon reference to point to last equipped weapon")
+//	}
+//	// Attributes include both effects
+//	if p.Attributes.Strength != base.Strength+d1.Strength+d2.Strength || p.Attributes.Agility != base.Agility+d1.Agility+d2.Agility {
+//		t.Errorf("Attributes should stack with multiple equips: got (S %.1f, A %.1f) want (S %.1f, A %.1f)", p.Attributes.Strength, p.Attributes.Agility, base.Strength+d1.Strength+d2.Strength, base.Agility+d1.Agility+d2.Agility)
+//	}
+//}
