@@ -59,16 +59,18 @@ type Level struct {
 	Number       uint
 	FinishPortal primitives.Box
 	random       utils.Randomizer
+	mapSize      primitives.Size2D[uint]
 }
 
-func NewLevel(random utils.Randomizer) *Level {
+func NewLevel(random utils.Randomizer, mapSize primitives.Size2D[uint]) *Level {
 	return &Level{
-		random: random,
+		random:  random,
+		mapSize: mapSize,
 	}
 }
 
-func (l *Level) Generate(sizeMap primitives.Size2D[uint]) error {
-	err := l.generateMap(sizeMap)
+func (l *Level) Generate() error {
+	err := l.generateMap()
 	if err != nil {
 		return err
 	}
@@ -81,8 +83,8 @@ func (l *Level) Generate(sizeMap primitives.Size2D[uint]) error {
 	return nil
 }
 
-func (l *Level) GenerateWithExistingPlayer(sizeMap primitives.Size2D[uint], player *entities.Player) error {
-	err := l.generateMap(sizeMap)
+func (l *Level) GenerateWithExistingPlayer(player *entities.Player) error {
+	err := l.generateMap()
 	if err != nil {
 		return err
 	}
@@ -99,8 +101,8 @@ func (l *Level) GenerateWithExistingPlayer(sizeMap primitives.Size2D[uint], play
 	return nil
 }
 
-func (l *Level) generateMap(sizeMap primitives.Size2D[uint]) error {
-	err := l.generateNineRooms(sizeMap)
+func (l *Level) generateMap() error {
+	err := l.generateNineRooms()
 	if err != nil {
 		return err
 	}
@@ -134,8 +136,8 @@ func (l *Level) generatePlayer() error {
 	return nil
 }
 
-func (l *Level) generateNineRooms(sizeMap primitives.Size2D[uint]) error {
-	sectionSize, err := calculateRoomSectionSize(sizeMap)
+func (l *Level) generateNineRooms() error {
+	sectionSize, err := calculateRoomSectionSize(l.mapSize)
 	if err != nil {
 		return err
 	}
@@ -542,4 +544,139 @@ func getDoorDownWall(room Room, random utils.Randomizer) primitives.Point2D[int]
 		doorX = random.Intn(doorXTo-doorXFrom) + doorXFrom
 	}
 	return primitives.Point2D[int]{X: doorX, Y: room.Shape.Point.Y + int(room.Shape.Size.Height) - 1}
+}
+
+func (l *Level) MovePlayer(delta primitives.Point2D[int]) {
+	oldPlayerPos := l.Player.GetPosition()
+	l.Player.Move(delta)
+
+	if l.checkCollision(l.Player.GetPosition()) {
+		l.Player.SetPosition(oldPlayerPos)
+	}
+
+}
+
+func (l *Level) checkCollision(pos primitives.Point2D[int]) bool {
+	if l.checkCollisionWithMapBorders(pos) {
+		return true
+	}
+	if l.checkCollisionWithRoomsWall(pos) {
+		return true
+	}
+	if l.checkCollisionWithEnemy(pos) {
+		return true
+	}
+
+	if !isInSomeRoom(pos, l.Rooms) && !l.checkCollisionWithPassages(pos) {
+		return true
+	}
+
+	return false
+}
+
+func (l *Level) checkCollisionWithMapBorders(pos primitives.Point2D[int]) bool {
+	if pos.X < 0 || pos.Y < 0 {
+		return true
+	}
+	if pos.X >= int(l.mapSize.Width) || pos.Y >= int(l.mapSize.Height) {
+		return true
+	}
+
+	return false
+}
+
+func (l *Level) checkCollisionWithRoomsWall(pos primitives.Point2D[int]) bool {
+	for _, room := range l.Rooms {
+		if isInRoom(pos, room) && checkCollisionWithRoomWall(pos, room) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func isInSomeRoom(pos primitives.Point2D[int], rooms []Room) bool {
+	for _, room := range rooms {
+		if isInRoom(pos, room) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func isInRoom(pos primitives.Point2D[int], room Room) bool {
+	// Проверка того, что персонаж находится внутри области комнаты
+	leftEndX := room.Shape.Point.X + 1
+	rightEndX := leftEndX + int(room.Shape.Size.Width) - 3
+	topEndY := room.Shape.Point.Y + 1
+	downEndY := topEndY + int(room.Shape.Size.Height) - 3
+
+	return (pos.X >= leftEndX && pos.X <= rightEndX) &&
+		(pos.Y >= topEndY && pos.Y <= downEndY)
+}
+
+func checkCollisionWithRoomWall(pos primitives.Point2D[int], room Room) bool {
+	// Двери являются частью комнаты и её стен, но через них можно ходить
+	if checkCollisionWithDoors(pos, room.Doors) {
+		return false
+	}
+
+	leftEndX := room.Shape.Point.X
+	rightEndX := leftEndX + int(room.Shape.Size.Width)
+	topEndY := room.Shape.Point.Y
+	downEndY := topEndY + int(room.Shape.Size.Height)
+
+	if (pos.X == leftEndX || pos.X == rightEndX) || (pos.Y == topEndY || pos.Y == downEndY) {
+		return true
+	}
+
+	return false
+}
+
+func checkCollisionWithDoors(pos primitives.Point2D[int], doors []primitives.Point2D[int]) bool {
+	for _, door := range doors {
+		if pos == door {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (l *Level) checkCollisionWithPassages(newPos primitives.Point2D[int]) bool {
+	for _, passage := range l.Passages {
+		if isInPassage(newPos, passage) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func isInPassage(pos primitives.Point2D[int], passage Passage) bool {
+	// Двери являются как частью комнаты, так и частью прохода
+	if pos == passage.DoorOne || pos == passage.DoorTwo {
+		return true
+	}
+
+	for _, wayPoint := range passage.Way {
+		if pos == wayPoint {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (l *Level) checkCollisionWithEnemy(pos primitives.Point2D[int]) bool {
+	for _, room := range l.Rooms {
+		for _, enemy := range room.Enemies {
+			if pos == enemy.GetPosition() {
+				return true
+			}
+		}
+	}
+
+	return false
 }

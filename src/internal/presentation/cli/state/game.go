@@ -18,8 +18,8 @@ import (
 )
 
 const (
-	LevelHeight = 30
-	LevelWidth  = 90
+	MapHeight = 30
+	MapWidth  = 90
 )
 
 type Game struct {
@@ -30,12 +30,9 @@ type Game struct {
 
 func NewGame() (*Game, error) {
 	source := rand.New(rand.NewSource(time.Now().UnixNano()))
-	level := world.NewLevel(source)
+	level := world.NewLevel(source, primitives.Size2D[uint]{Height: MapHeight, Width: MapWidth})
 
-	err := level.Generate(primitives.Size2D[uint]{Height: LevelHeight, Width: LevelWidth})
-	if err != nil {
-		return nil, err
-	}
+	level.Generate()
 
 	game := Game{
 		level: level,
@@ -71,14 +68,7 @@ func NewGame() (*Game, error) {
 			action.MoveRightUpperCorner,
 			action.MoveLefLowerCorner,
 			action.MoveRightLowerCorner:
-
-			oldPlayerPos := game.level.Player.GetPosition()
-			game.level.Player.Move(movementRegistry[game.eventToAction(event)])
-
-			if game.checkCollision(game.level.Player.GetPosition()) {
-				game.level.Player.SetPosition(oldPlayerPos)
-			}
-
+			level.MovePlayer(movementRegistry[game.eventToAction(event)])
 		case action.Exit:
 			game.signal = signals.Stop
 			return nil
@@ -89,131 +79,6 @@ func NewGame() (*Game, error) {
 	})
 
 	return &game, nil
-}
-
-func (g *Game) checkCollision(pos primitives.Point2D[int]) bool {
-	if g.checkCollisionWithFieldBorders(pos) {
-		return true
-	}
-	if g.checkCollisionWithRoomsWall(pos) {
-		return true
-	}
-	if g.checkCollisionWithEnemy(pos) {
-		return true
-	}
-
-	if !isInSomeRoom(pos, g.level.Rooms) && !g.checkCollisionWithPassages(pos) {
-		return true
-	}
-
-	return false
-}
-
-func (g *Game) checkCollisionWithFieldBorders(pos primitives.Point2D[int]) bool {
-	if pos.X < 0 || pos.Y < 0 {
-		return true
-	}
-	if pos.X >= LevelWidth || pos.Y >= LevelHeight {
-		return true
-	}
-
-	return false
-}
-
-func (g *Game) checkCollisionWithRoomsWall(pos primitives.Point2D[int]) bool {
-	for _, room := range g.level.Rooms {
-		if isInRoom(pos, room) && checkCollisionWithRoomWall(pos, room) {
-			return true
-		}
-	}
-
-	return false
-}
-
-func isInSomeRoom(pos primitives.Point2D[int], rooms []world.Room) bool {
-	for _, room := range rooms {
-		if isInRoom(pos, room) {
-			return true
-		}
-	}
-
-	return false
-}
-
-func isInRoom(pos primitives.Point2D[int], room world.Room) bool {
-	// Проверка того, что персонаж находится внутри области комнаты
-	leftEndX := room.Shape.Point.X + 1
-	rightEndX := leftEndX + int(room.Shape.Size.Width) - 3
-	topEndY := room.Shape.Point.Y + 1
-	downEndY := topEndY + int(room.Shape.Size.Height) - 3
-
-	return (pos.X >= leftEndX && pos.X <= rightEndX) &&
-		(pos.Y >= topEndY && pos.Y <= downEndY)
-}
-
-func checkCollisionWithRoomWall(pos primitives.Point2D[int], room world.Room) bool {
-	// Двери являются частью комнаты и её стен, но через них можно ходить
-	if checkCollisionWithDoors(pos, room.Doors) {
-		return false
-	}
-
-	leftEndX := room.Shape.Point.X
-	rightEndX := leftEndX + int(room.Shape.Size.Width)
-	topEndY := room.Shape.Point.Y
-	downEndY := topEndY + int(room.Shape.Size.Height)
-
-	if (pos.X == leftEndX || pos.X == rightEndX) || (pos.Y == topEndY || pos.Y == downEndY) {
-		return true
-	}
-
-	return false
-}
-
-func checkCollisionWithDoors(pos primitives.Point2D[int], doors []primitives.Point2D[int]) bool {
-	for _, door := range doors {
-		if pos == door {
-			return true
-		}
-	}
-
-	return false
-}
-
-func (g *Game) checkCollisionWithPassages(newPos primitives.Point2D[int]) bool {
-	for _, passage := range g.level.Passages {
-		if isInPassage(newPos, passage) {
-			return true
-		}
-	}
-
-	return false
-}
-
-func isInPassage(pos primitives.Point2D[int], passage world.Passage) bool {
-	// Двери являются как частью комнаты, так и частью прохода
-	if pos == passage.DoorOne || pos == passage.DoorTwo {
-		return true
-	}
-
-	for _, wayPoint := range passage.Way {
-		if pos == wayPoint {
-			return true
-		}
-	}
-
-	return false
-}
-
-func (g *Game) checkCollisionWithEnemy(pos primitives.Point2D[int]) bool {
-	for _, room := range g.level.Rooms {
-		for _, enemy := range room.Enemies {
-			if pos == enemy.GetPosition() {
-				return true
-			}
-		}
-	}
-
-	return false
 }
 
 func (g *Game) eventToAction(event *tcell.EventKey) action.Type {
