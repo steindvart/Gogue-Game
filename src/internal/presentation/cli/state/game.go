@@ -23,7 +23,6 @@ const (
 )
 
 type Game struct {
-	player *entities.Player
 	level  *world.Level
 	view   *viewcli.Game
 	signal signals.Type
@@ -33,26 +32,14 @@ func NewGame() (*Game, error) {
 	source := rand.New(rand.NewSource(time.Now().UnixNano()))
 	level := world.NewLevel(source)
 
-	err := level.GenerateLevel(primitives.Size2D[uint]{Height: LevelHeight, Width: LevelWidth})
+	err := level.Generate(primitives.Size2D[uint]{Height: LevelHeight, Width: LevelWidth})
 	if err != nil {
 		return nil, err
 	}
-
-	startPlayerPos, err := level.GenerateStartPlayerPosition()
-	if err != nil {
-		return nil, err
-	}
-	player := entities.NewPlayer(&primitives.Box{
-		Point: *startPlayerPos,
-		Size:  primitives.Size2D[uint]{Height: 1, Width: 1},
-	})
-
-	gameView := viewcli.NewGame()
 
 	game := Game{
-		player: player,
-		level:  level,
-		view:   gameView,
+		level: level,
+		view:  viewcli.NewGame(),
 	}
 
 	game.view.SetDrawFunc(func(screen tcell.Screen, x, y, width, height int) (int, int, int, int) {
@@ -85,11 +72,11 @@ func NewGame() (*Game, error) {
 			action.MoveLefLowerCorner,
 			action.MoveRightLowerCorner:
 
-			oldPlayerPos := game.player.GetPosition()
-			game.player.Move(movementRegistry[game.eventToAction(event)])
+			oldPlayerPos := game.level.Player.GetPosition()
+			game.level.Player.Move(movementRegistry[game.eventToAction(event)])
 
-			if game.checkCollision(game.player.GetPosition()) {
-				game.player.SetPosition(oldPlayerPos)
+			if game.checkCollision(game.level.Player.GetPosition()) {
+				game.level.Player.SetPosition(oldPlayerPos)
 			}
 
 		case action.Exit:
@@ -340,8 +327,8 @@ func (g *Game) makeField(w, h int) [][]common.GameEntityType {
 	// 	g.putEnemies(room, field)
 	// }
 
-	px := g.player.Character.Shape.Point.X
-	py := g.player.Character.Shape.Point.Y
+	px := g.level.Player.Character.Shape.Point.X
+	py := g.level.Player.Character.Shape.Point.Y
 	if py >= 0 && py < h && px >= 0 && px < w {
 		field[py][px] = common.EntityTypePlayer
 	}

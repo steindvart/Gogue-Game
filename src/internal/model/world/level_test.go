@@ -622,7 +622,7 @@ func TestLevel_GetStartPositionForPlayer(t *testing.T) {
 
 		source := rand.New(rand.NewSource(randomSeedTest))
 		level := NewLevel(source)
-		err := level.GenerateLevel(primitives.Size2D[uint]{Height: 30, Width: 90})
+		err := level.Generate(primitives.Size2D[uint]{Height: 30, Width: 90})
 		if err != nil {
 			t.Fatalf("GenerateLevel returned unexpected error: %v", err)
 		}

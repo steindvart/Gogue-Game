@@ -3,6 +3,7 @@ package world
 import (
 	"errors"
 	"fmt"
+	"gogue/internal/model/entities"
 	"gogue/internal/model/items"
 	"gogue/internal/model/primitives"
 	"gogue/internal/utils"
@@ -54,6 +55,7 @@ var verticalNeighborRoomsSet = map[[2]int]struct{}{
 type Level struct {
 	Rooms        []Room
 	Passages     []Passage
+	Player       *entities.Player
 	Number       uint
 	FinishPortal primitives.Box
 	random       utils.Randomizer
@@ -65,7 +67,39 @@ func NewLevel(random utils.Randomizer) *Level {
 	}
 }
 
-func (l *Level) GenerateLevel(sizeMap primitives.Size2D[uint]) error {
+func (l *Level) Generate(sizeMap primitives.Size2D[uint]) error {
+	err := l.generateMap(sizeMap)
+	if err != nil {
+		return err
+	}
+
+	err = l.generatePlayer()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (l *Level) GenerateWithExistingPlayer(sizeMap primitives.Size2D[uint], player *entities.Player) error {
+	err := l.generateMap(sizeMap)
+	if err != nil {
+		return err
+	}
+
+	l.Player = player
+
+	startPlayerPos, err := l.GenerateStartPlayerPosition()
+	if err != nil {
+		return err
+	}
+
+	l.Player.SetPosition(*startPlayerPos)
+
+	return nil
+}
+
+func (l *Level) generateMap(sizeMap primitives.Size2D[uint]) error {
 	err := l.generateNineRooms(sizeMap)
 	if err != nil {
 		return err
@@ -82,6 +116,20 @@ func (l *Level) GenerateLevel(sizeMap primitives.Size2D[uint]) error {
 	if err != nil {
 		return err
 	}
+
+	return nil
+}
+
+func (l *Level) generatePlayer() error {
+	startPlayerPos, err := l.GenerateStartPlayerPosition()
+	if err != nil {
+		return err
+	}
+
+	l.Player = entities.NewPlayer(&primitives.Box{
+		Point: *startPlayerPos,
+		Size:  primitives.Size2D[uint]{Height: 1, Width: 1},
+	})
 
 	return nil
 }
@@ -150,7 +198,7 @@ func (l *Level) generateNineRooms(sizeMap primitives.Size2D[uint]) error {
 }
 
 func (l *Level) generatePassages() error {
-	if len(l.Rooms) < 9 {
+	if len(l.Rooms) < roomsCount {
 		return fmt.Errorf("number of rooms is less than expected. expected %d, got %d", roomsCount, len(l.Rooms))
 	}
 	roomIndex := l.random.Intn(roomsCount)
