@@ -57,6 +57,7 @@ func (g *StateMachine) Run() {
 func (g *StateMachine) runUpdateLoop(fpsLimit int) {
 	ticker := time.NewTicker(time.Second / time.Duration(fpsLimit))
 	var lastTime = time.Now()
+
 	go func() {
 		defer ticker.Stop()
 		for range ticker.C {

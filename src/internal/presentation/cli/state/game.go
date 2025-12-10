@@ -30,7 +30,6 @@ type Game struct {
 }
 
 func NewGame() (*Game, error) {
-	// @todo - выделить отрисовку в отдельный файл в view/cli
 	source := rand.New(rand.NewSource(time.Now().UnixNano()))
 	level := world.NewLevel(source)
 
