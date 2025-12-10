@@ -36,7 +36,11 @@ func NewGame() (*Game, error) {
 		view:  viewcli.NewGame(),
 	}
 
-	game.level.Generate()
+	err := game.level.Generate()
+	if err != nil {
+		return nil, err
+	}
+
 	game.initRender()
 	game.initInput()
 
