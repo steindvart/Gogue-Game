@@ -30,23 +30,30 @@ type Game struct {
 
 func NewGame() (*Game, error) {
 	source := rand.New(rand.NewSource(time.Now().UnixNano()))
-	level := world.NewLevel(source, primitives.Size2D[uint]{Height: MapHeight, Width: MapWidth})
-
-	level.Generate()
 
 	game := Game{
-		level: level,
+		level: world.NewLevel(source, primitives.Size2D[uint]{Height: MapHeight, Width: MapWidth}),
 		view:  viewcli.NewGame(),
 	}
 
-	game.view.SetDrawFunc(func(screen tcell.Screen, x, y, width, height int) (int, int, int, int) {
+	game.level.Generate()
+	game.initRender()
+	game.initInput()
+
+	return &game, nil
+}
+
+func (g *Game) initRender() {
+	g.view.SetDrawFunc(func(screen tcell.Screen, x, y, width, height int) (int, int, int, int) {
 		// -2: учёт рамки
 		fw, fh := width-2, height-2
-		field := game.makeField(fw, fh)
-		game.view.SetFieldToScreen(screen, field, x+1, y+1)
+		field := g.makeField(fw, fh)
+		g.view.SetFieldToScreen(screen, field, x+1, y+1)
 		return x, y, width, height
 	})
+}
 
+func (g *Game) initInput() {
 	movementRegistry := map[action.Type]primitives.Point2D[int]{
 		action.MoveUp:               {X: 0, Y: -1},
 		action.MoveDown:             {X: 0, Y: 1},
@@ -58,8 +65,8 @@ func NewGame() (*Game, error) {
 		action.MoveRightLowerCorner: {X: 1, Y: 1},
 	}
 
-	game.view.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		switch game.eventToAction(event) {
+	g.view.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		switch g.eventToAction(event) {
 		case action.MoveUp,
 			action.MoveDown,
 			action.MoveLeft,
@@ -68,17 +75,15 @@ func NewGame() (*Game, error) {
 			action.MoveRightUpperCorner,
 			action.MoveLefLowerCorner,
 			action.MoveRightLowerCorner:
-			level.MovePlayer(movementRegistry[game.eventToAction(event)])
+			g.level.MovePlayer(movementRegistry[g.eventToAction(event)])
 		case action.Exit:
-			game.signal = signals.Stop
+			g.signal = signals.Stop
 			return nil
 		default:
 			return event
 		}
 		return nil
 	})
-
-	return &game, nil
 }
 
 func (g *Game) eventToAction(event *tcell.EventKey) action.Type {
