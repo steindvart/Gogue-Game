@@ -2,8 +2,6 @@ package world
 
 import (
 	"errors"
-	"gogue/internal/model/entities"
-	"gogue/internal/model/items"
 	"gogue/internal/model/primitives"
 	"math/rand"
 	"reflect"
@@ -22,13 +20,8 @@ func TestRoom_NewRoom(t *testing.T) {
 			roomType: RoomTypeFinish,
 			mapSize:  primitives.Box{Point: primitives.Point2D[int]{X: 6, Y: 3}, Size: primitives.Size2D[uint]{Height: 10, Width: 10}},
 			want: Room{
-				Shape:   primitives.Box{Point: primitives.Point2D[int]{X: 6, Y: 3}, Size: primitives.Size2D[uint]{Height: 10, Width: 10}},
-				Type:    RoomTypeFinish,
-				Foods:   []items.Food{},
-				Elixirs: []items.Elixir{},
-				Scrolls: []items.Scroll{},
-				Weapons: []items.Weapon{},
-				Enemies: []entities.Enemy{},
+				Shape: primitives.Box{Point: primitives.Point2D[int]{X: 6, Y: 3}, Size: primitives.Size2D[uint]{Height: 10, Width: 10}},
+				Type:  RoomTypeFinish,
 			},
 		},
 		{
@@ -36,13 +29,8 @@ func TestRoom_NewRoom(t *testing.T) {
 			roomType: RoomTypeOrdinary,
 			mapSize:  primitives.Box{Point: primitives.Point2D[int]{X: 6, Y: 3}, Size: primitives.Size2D[uint]{Height: 10, Width: 10}},
 			want: Room{
-				Shape:   primitives.Box{Point: primitives.Point2D[int]{X: 6, Y: 3}, Size: primitives.Size2D[uint]{Height: 10, Width: 10}},
-				Type:    RoomTypeOrdinary,
-				Foods:   []items.Food{},
-				Elixirs: []items.Elixir{},
-				Scrolls: []items.Scroll{},
-				Weapons: []items.Weapon{},
-				Enemies: []entities.Enemy{},
+				Shape: primitives.Box{Point: primitives.Point2D[int]{X: 6, Y: 3}, Size: primitives.Size2D[uint]{Height: 10, Width: 10}},
+				Type:  RoomTypeOrdinary,
 			},
 		},
 		{
@@ -50,13 +38,8 @@ func TestRoom_NewRoom(t *testing.T) {
 			roomType: RoomTypeStart,
 			mapSize:  primitives.Box{Point: primitives.Point2D[int]{X: 6, Y: 3}, Size: primitives.Size2D[uint]{Height: 10, Width: 10}},
 			want: Room{
-				Shape:   primitives.Box{Point: primitives.Point2D[int]{X: 6, Y: 3}, Size: primitives.Size2D[uint]{Height: 10, Width: 10}},
-				Type:    RoomTypeStart,
-				Foods:   []items.Food{},
-				Elixirs: []items.Elixir{},
-				Scrolls: []items.Scroll{},
-				Weapons: []items.Weapon{},
-				Enemies: []entities.Enemy{},
+				Shape: primitives.Box{Point: primitives.Point2D[int]{X: 6, Y: 3}, Size: primitives.Size2D[uint]{Height: 10, Width: 10}},
+				Type:  RoomTypeStart,
 			},
 		},
 	}
@@ -115,7 +98,7 @@ func TestRoom_GetRandomFreePosition(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			room := NewRoom(tt.roomType, tt.roomSize)
 			for ocPos := range tt.OccupiedPositions {
-				room.OccupiedPositions[ocPos] = true
+				room.occupiedPositions[ocPos] = true
 			}
 			gotPoint, err := room.GetRandomFreePosition(source)
 

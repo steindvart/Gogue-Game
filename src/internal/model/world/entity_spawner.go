@@ -1,0 +1,240 @@
+package world
+
+import (
+	"errors"
+	"fmt"
+	"gogue/internal/model/entities"
+	"gogue/internal/model/items"
+	"gogue/internal/model/primitives"
+	"gogue/internal/utils"
+)
+
+type RoomBasedEntitySpawner struct {
+	foodTypes   []items.FoodType
+	elixirTypes []items.ElixirType
+	scrollTypes []items.ScrollType
+	weaponTypes []items.WeaponType
+}
+
+func NewRoomBasedEntitySpawner() *RoomBasedEntitySpawner {
+	return &RoomBasedEntitySpawner{
+		foodTypes: []items.FoodType{
+			items.FoodTypePotatoes,
+			items.FoodTypeBread,
+			items.FoodTypeMeat,
+			items.FoodTypeMistery,
+			items.FoodTypeBeer,
+		},
+		elixirTypes: []items.ElixirType{
+			items.ElixirTypeStrength,
+			items.ElixirTypeAgility,
+			items.ElixirTypeDwarfism,
+			items.ElixirTypeGiantism,
+			items.ElixirTypeMystery,
+		},
+		scrollTypes: []items.ScrollType{
+			items.ScrollTypeStrength,
+			items.ScrollTypeAgility,
+			items.ScrollTypeUltimate,
+			items.ScrollTypeMaxHealth,
+			items.ScrollTypeMystery,
+		},
+		weaponTypes: []items.WeaponType{
+			items.WeaponTypeDagger,
+			items.WeaponTypeSpear,
+			items.WeaponTypeSword,
+			items.WeaponTypeAxe,
+			items.WeaponTypeMaul,
+			items.WeaponTypeMystery,
+		},
+	}
+}
+
+func (s *RoomBasedEntitySpawner) SpawnEntities(
+	rooms []Room,
+	config ItemSpawnConfig,
+	random utils.Randomizer,
+) (*SpawnedEntities, error) {
+	if len(rooms) == 0 {
+		return nil, errors.New("no rooms provided for entity spawning")
+	}
+
+	result := &SpawnedEntities{
+		Foods:   make([]items.Food, 0, config.FoodsQuntity),
+		Elixirs: make([]items.Elixir, 0, config.ElixirsQuntity),
+		Scrolls: make([]items.Scroll, 0, config.ScrollsQuntity),
+		Weapons: make([]items.Weapon, 0, config.WeaponsQuntity),
+		Enemies: make([]entities.Enemy, 0),
+	}
+
+	// Создаем изменяемые копии комнат для отслеживания занятых позиций
+	roomsForSpawning := make([]*Room, len(rooms))
+	for i := range rooms {
+		roomsForSpawning[i] = &rooms[i]
+	}
+
+	// Спавним предметы
+	var err error
+	result.Foods, err = s.spawnFoods(roomsForSpawning, config.FoodsQuntity, random)
+	if err != nil {
+		return nil, fmt.Errorf("failed to spawn foods: %w", err)
+	}
+
+	result.Elixirs, err = s.spawnElixirs(roomsForSpawning, config.ElixirsQuntity, random)
+	if err != nil {
+		return nil, fmt.Errorf("failed to spawn elixirs: %w", err)
+	}
+
+	result.Scrolls, err = s.spawnScrolls(roomsForSpawning, config.ScrollsQuntity, random)
+	if err != nil {
+		return nil, fmt.Errorf("failed to spawn scrolls: %w", err)
+	}
+
+	result.Weapons, err = s.spawnWeapons(roomsForSpawning, config.WeaponsQuntity, random)
+	if err != nil {
+		return nil, fmt.Errorf("failed to spawn weapons: %w", err)
+	}
+
+	return result, nil
+}
+
+func (s *RoomBasedEntitySpawner) spawnFoods(
+	rooms []*Room,
+	quantity uint,
+	random utils.Randomizer,
+) ([]items.Food, error) {
+	result := make([]items.Food, 0, quantity)
+
+	for i := uint(0); i < quantity; i++ {
+		room, pos, err := s.findAvailablePositionInSomeRoom(rooms, random)
+		if err != nil {
+			return nil, err
+		}
+
+		foodType := utils.GetRandomElement(random, s.foodTypes)
+		itemBox := primitives.Box{
+			Point: *pos,
+			Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
+		}
+
+		food := items.NewFoodBuiltin(random, itemBox, foodType)
+		result = append(result, *food)
+
+		room.MarkOccupied(*pos)
+	}
+
+	return result, nil
+}
+
+func (s *RoomBasedEntitySpawner) spawnElixirs(
+	rooms []*Room,
+	quantity uint,
+	random utils.Randomizer,
+) ([]items.Elixir, error) {
+	result := make([]items.Elixir, 0, quantity)
+
+	for i := uint(0); i < quantity; i++ {
+		room, pos, err := s.findAvailablePositionInSomeRoom(rooms, random)
+		if err != nil {
+			return nil, err
+		}
+
+		elixirType := utils.GetRandomElement(random, s.elixirTypes)
+		itemBox := primitives.Box{
+			Point: *pos,
+			Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
+		}
+
+		elixir := items.NewElixirBuiltin(random, itemBox, elixirType)
+		result = append(result, *elixir)
+
+		room.MarkOccupied(*pos)
+	}
+
+	return result, nil
+}
+
+func (s *RoomBasedEntitySpawner) spawnScrolls(
+	rooms []*Room,
+	quantity uint,
+	random utils.Randomizer,
+) ([]items.Scroll, error) {
+	result := make([]items.Scroll, 0, quantity)
+
+	for i := uint(0); i < quantity; i++ {
+		room, pos, err := s.findAvailablePositionInSomeRoom(rooms, random)
+		if err != nil {
+			return nil, err
+		}
+
+		scrollType := utils.GetRandomElement(random, s.scrollTypes)
+		itemBox := primitives.Box{
+			Point: *pos,
+			Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
+		}
+
+		scroll := items.NewScrollBuiltin(random, itemBox, scrollType)
+		result = append(result, *scroll)
+
+		room.MarkOccupied(*pos)
+	}
+
+	return result, nil
+}
+
+func (s *RoomBasedEntitySpawner) spawnWeapons(
+	rooms []*Room,
+	quantity uint,
+	random utils.Randomizer,
+) ([]items.Weapon, error) {
+	result := make([]items.Weapon, 0, quantity)
+
+	for i := uint(0); i < quantity; i++ {
+		room, pos, err := s.findAvailablePositionInSomeRoom(rooms, random)
+		if err != nil {
+			return nil, err
+		}
+
+		weaponType := utils.GetRandomElement(random, s.weaponTypes)
+		itemBox := primitives.Box{
+			Point: *pos,
+			Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
+		}
+
+		weapon := items.NewWeaponBuiltin(random, itemBox, weaponType)
+		result = append(result, *weapon)
+
+		room.MarkOccupied(*pos)
+	}
+
+	return result, nil
+}
+
+func (s *RoomBasedEntitySpawner) findAvailablePositionInSomeRoom(
+	rooms []*Room,
+	random utils.Randomizer,
+) (*Room, *primitives.Point2D[int], error) {
+	indexes := random.Perm(len(rooms))
+
+	for _, idx := range indexes {
+		room := rooms[idx]
+
+		// Не размещаем в стартовой комнате
+		if room.Type == RoomTypeStart {
+			continue
+		}
+
+		if room.GetCountFreePosition() <= 0 {
+			continue
+		}
+
+		pos, err := room.GetRandomFreePosition(random)
+		if err != nil {
+			continue
+		}
+
+		return room, pos, nil
+	}
+
+	return nil, nil, errors.New("no available positions in rooms for entity spawning")
+}
