@@ -18,52 +18,46 @@ import (
 )
 
 const (
-	LevelHeight = 30
-	LevelWidth  = 90
+	MapHeight = 30
+	MapWidth  = 90
 )
 
 type Game struct {
-	player *entities.Player
 	level  *world.Level
 	view   *viewcli.Game
 	signal signals.Type
 }
 
 func NewGame() (*Game, error) {
-	// @todo - выделить отрисовку в отдельный файл в view/cli
 	source := rand.New(rand.NewSource(time.Now().UnixNano()))
-	level := world.NewLevel(source)
-
-	err := level.GenerateLevel(primitives.Size2D[uint]{Height: LevelHeight, Width: LevelWidth})
-	if err != nil {
-		return nil, err
-	}
-
-	startPlayerPos, err := level.GenerateStartPlayerPosition()
-	if err != nil {
-		return nil, err
-	}
-	player := entities.NewPlayer(&primitives.Box{
-		Point: *startPlayerPos,
-		Size:  primitives.Size2D[uint]{Height: 1, Width: 1},
-	})
-
-	gameView := viewcli.NewGame()
 
 	game := Game{
-		player: player,
-		level:  level,
-		view:   gameView,
+		level: world.NewLevel(source, primitives.Size2D[uint]{Height: MapHeight, Width: MapWidth}),
+		view:  viewcli.NewGame(),
 	}
 
-	game.view.SetDrawFunc(func(screen tcell.Screen, x, y, width, height int) (int, int, int, int) {
+	err := game.level.Generate()
+	if err != nil {
+		return nil, err
+	}
+
+	game.initRender()
+	game.initInput()
+
+	return &game, nil
+}
+
+func (g *Game) initRender() {
+	g.view.SetDrawFunc(func(screen tcell.Screen, x, y, width, height int) (int, int, int, int) {
 		// -2: учёт рамки
 		fw, fh := width-2, height-2
-		field := game.makeField(fw, fh)
-		game.view.SetFieldToScreen(screen, field, x+1, y+1)
+		field := g.makeField(fw, fh)
+		g.view.SetFieldToScreen(screen, field, x+1, y+1)
 		return x, y, width, height
 	})
+}
 
+func (g *Game) initInput() {
 	movementRegistry := map[action.Type]primitives.Point2D[int]{
 		action.MoveUp:               {X: 0, Y: -1},
 		action.MoveDown:             {X: 0, Y: 1},
@@ -75,8 +69,8 @@ func NewGame() (*Game, error) {
 		action.MoveRightLowerCorner: {X: 1, Y: 1},
 	}
 
-	game.view.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		switch game.eventToAction(event) {
+	g.view.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		switch g.eventToAction(event) {
 		case action.MoveUp,
 			action.MoveDown,
 			action.MoveLeft,
@@ -85,149 +79,15 @@ func NewGame() (*Game, error) {
 			action.MoveRightUpperCorner,
 			action.MoveLefLowerCorner,
 			action.MoveRightLowerCorner:
-
-			oldPlayerPos := game.player.GetPosition()
-			game.player.Move(movementRegistry[game.eventToAction(event)])
-
-			if game.checkCollision(game.player.GetPosition()) {
-				game.player.SetPosition(oldPlayerPos)
-			}
-
+			g.level.MovePlayer(movementRegistry[g.eventToAction(event)])
 		case action.Exit:
-			game.signal = signals.Stop
+			g.signal = signals.Stop
 			return nil
 		default:
 			return event
 		}
 		return nil
 	})
-
-	return &game, nil
-}
-
-func (g *Game) checkCollision(pos primitives.Point2D[int]) bool {
-	if g.checkCollisionWithFieldBorders(pos) {
-		return true
-	}
-	if g.checkCollisionWithRoomsWall(pos) {
-		return true
-	}
-	if g.checkCollisionWithEnemy(pos) {
-		return true
-	}
-
-	if !isInSomeRoom(pos, g.level.Rooms) && !g.checkCollisionWithPassages(pos) {
-		return true
-	}
-
-	return false
-}
-
-func (g *Game) checkCollisionWithFieldBorders(pos primitives.Point2D[int]) bool {
-	if pos.X < 0 || pos.Y < 0 {
-		return true
-	}
-	if pos.X >= LevelWidth || pos.Y >= LevelHeight {
-		return true
-	}
-
-	return false
-}
-
-func (g *Game) checkCollisionWithRoomsWall(pos primitives.Point2D[int]) bool {
-	for _, room := range g.level.Rooms {
-		if isInRoom(pos, room) && checkCollisionWithRoomWall(pos, room) {
-			return true
-		}
-	}
-
-	return false
-}
-
-func isInSomeRoom(pos primitives.Point2D[int], rooms []world.Room) bool {
-	for _, room := range rooms {
-		if isInRoom(pos, room) {
-			return true
-		}
-	}
-
-	return false
-}
-
-func isInRoom(pos primitives.Point2D[int], room world.Room) bool {
-	// Проверка того, что персонаж находится внутри области комнаты
-	leftEndX := room.Shape.Point.X + 1
-	rightEndX := leftEndX + int(room.Shape.Size.Width) - 3
-	topEndY := room.Shape.Point.Y + 1
-	downEndY := topEndY + int(room.Shape.Size.Height) - 3
-
-	return (pos.X >= leftEndX && pos.X <= rightEndX) &&
-		(pos.Y >= topEndY && pos.Y <= downEndY)
-}
-
-func checkCollisionWithRoomWall(pos primitives.Point2D[int], room world.Room) bool {
-	// Двери являются частью комнаты и её стен, но через них можно ходить
-	if checkCollisionWithDoors(pos, room.Doors) {
-		return false
-	}
-
-	leftEndX := room.Shape.Point.X
-	rightEndX := leftEndX + int(room.Shape.Size.Width)
-	topEndY := room.Shape.Point.Y
-	downEndY := topEndY + int(room.Shape.Size.Height)
-
-	if (pos.X == leftEndX || pos.X == rightEndX) || (pos.Y == topEndY || pos.Y == downEndY) {
-		return true
-	}
-
-	return false
-}
-
-func checkCollisionWithDoors(pos primitives.Point2D[int], doors []primitives.Point2D[int]) bool {
-	for _, door := range doors {
-		if pos == door {
-			return true
-		}
-	}
-
-	return false
-}
-
-func (g *Game) checkCollisionWithPassages(newPos primitives.Point2D[int]) bool {
-	for _, passage := range g.level.Passages {
-		if isInPassage(newPos, passage) {
-			return true
-		}
-	}
-
-	return false
-}
-
-func isInPassage(pos primitives.Point2D[int], passage world.Passage) bool {
-	// Двери являются как частью комнаты, так и частью прохода
-	if pos == passage.DoorOne || pos == passage.DoorTwo {
-		return true
-	}
-
-	for _, wayPoint := range passage.Way {
-		if pos == wayPoint {
-			return true
-		}
-	}
-
-	return false
-}
-
-func (g *Game) checkCollisionWithEnemy(pos primitives.Point2D[int]) bool {
-	for _, room := range g.level.Rooms {
-		for _, enemy := range room.Enemies {
-			if pos == enemy.GetPosition() {
-				return true
-			}
-		}
-	}
-
-	return false
 }
 
 func (g *Game) eventToAction(event *tcell.EventKey) action.Type {
@@ -341,8 +201,8 @@ func (g *Game) makeField(w, h int) [][]common.GameEntityType {
 	// 	g.putEnemies(room, field)
 	// }
 
-	px := g.player.Character.Shape.Point.X
-	py := g.player.Character.Shape.Point.Y
+	px := g.level.Player.Character.Shape.Point.X
+	py := g.level.Player.Character.Shape.Point.Y
 	if py >= 0 && py < h && px >= 0 && px < w {
 		field[py][px] = common.EntityTypePlayer
 	}

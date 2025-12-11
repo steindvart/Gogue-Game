@@ -15,24 +15,24 @@ const randomSeedTest = 42
 func TestLevel_GenerateNineRooms(t *testing.T) {
 	tests := []struct {
 		name      string
-		sizeMap   primitives.Size2D[uint]
+		mapSize   primitives.Size2D[uint]
 		wantErr   bool
 		errorText string
 	}{
 		{
 			name:    "Valid map size 30x90",
-			sizeMap: primitives.Size2D[uint]{Height: 30, Width: 90},
+			mapSize: primitives.Size2D[uint]{Height: 30, Width: 90},
 			wantErr: false,
 		},
 		{
 			name:      "Map too small",
-			sizeMap:   primitives.Size2D[uint]{Height: 6, Width: 6},
+			mapSize:   primitives.Size2D[uint]{Height: 6, Width: 6},
 			wantErr:   true,
 			errorText: "game map size is too small",
 		},
 		{
 			name:      "Map too big",
-			sizeMap:   primitives.Size2D[uint]{Height: 300, Width: 300},
+			mapSize:   primitives.Size2D[uint]{Height: 300, Width: 300},
 			wantErr:   true,
 			errorText: "game map size is too big",
 		},
@@ -41,9 +41,9 @@ func TestLevel_GenerateNineRooms(t *testing.T) {
 	source := rand.New(rand.NewSource(randomSeedTest))
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			level := NewLevel(source)
+			level := NewLevel(source, tt.mapSize)
 
-			err := level.generateNineRooms(tt.sizeMap)
+			err := level.generateNineRooms()
 
 			if tt.wantErr {
 				if err == nil {
@@ -63,10 +63,10 @@ func TestLevel_GenerateNineRooms(t *testing.T) {
 
 func TestLevel_GenerateNineRooms_Deterministic(t *testing.T) {
 	source := rand.New(rand.NewSource(randomSeedTest))
-	testSize := primitives.Size2D[uint]{Height: 30, Width: 90}
+	mapSize := primitives.Size2D[uint]{Height: 30, Width: 90}
 
-	level := NewLevel(source)
-	err := level.generateNineRooms(testSize)
+	level := NewLevel(source, mapSize)
+	err := level.generateNineRooms()
 	if err != nil {
 		t.Fatalf("generateNineRooms failed: %v", err)
 	}
@@ -271,8 +271,8 @@ func TestLevel_GeneratePassages_Deterministic(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			level := NewLevel(source)
-			err := level.generateNineRooms(primitives.Size2D[uint]{Height: 30, Width: 90})
+			level := NewLevel(source, primitives.Size2D[uint]{Height: 30, Width: 90})
+			err := level.generateNineRooms()
 			if err != nil {
 				t.Fatalf("generateNineRooms returned an error: %v", err)
 			}
@@ -617,12 +617,12 @@ func TestLevel_AddRandomEdges_Deterministic(t *testing.T) {
 }
 
 func TestLevel_GetStartPositionForPlayer(t *testing.T) {
-	t.Run("Rooms_exist", func(t *testing.T) {
-		wantPlayerStartPoint := primitives.Point2D[int]{X: 38, Y: 26}
+	t.Run("Rooms exist", func(t *testing.T) {
+		wantPlayerStartPoint := primitives.Point2D[int]{X: 46, Y: 24}
 
 		source := rand.New(rand.NewSource(randomSeedTest))
-		level := NewLevel(source)
-		err := level.GenerateLevel(primitives.Size2D[uint]{Height: 30, Width: 90})
+		level := NewLevel(source, primitives.Size2D[uint]{Height: 30, Width: 90})
+		err := level.Generate()
 		if err != nil {
 			t.Fatalf("GenerateLevel returned unexpected error: %v", err)
 		}
@@ -638,7 +638,7 @@ func TestLevel_GetStartPositionForPlayer(t *testing.T) {
 	t.Run("Rooms don't exist", func(t *testing.T) {
 		wantErrorText := "should be 9 rooms"
 		source := rand.New(rand.NewSource(randomSeedTest))
-		level := NewLevel(source)
+		level := NewLevel(source, primitives.Size2D[uint]{Height: 30, Width: 90})
 		_, err := level.GenerateStartPlayerPosition()
 		if err == nil {
 			t.Fatalf("GenerateStartPlayerPosition returned nil error, expected %q", wantErrorText)
@@ -681,9 +681,9 @@ func TestLevel_addDoorsAtRoom(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			source := rand.New(rand.NewSource(randomSeedTest))
-			testSize := primitives.Size2D[uint]{Height: 30, Width: 90}
-			level := NewLevel(source)
-			err := level.generateNineRooms(testSize)
+			testSizeMap := primitives.Size2D[uint]{Height: 30, Width: 90}
+			level := NewLevel(source, testSizeMap)
+			err := level.generateNineRooms()
 			if err != nil {
 				t.Fatalf("generateNineRooms returned an error: %v", err)
 			}
@@ -731,7 +731,7 @@ func TestLevel_addItemsAtRooms(t *testing.T) {
 		countElixir         uint
 		countScroll         uint
 		countWeapon         uint
-		sizeMap             primitives.Size2D[uint]
+		mapSize             primitives.Size2D[uint]
 		wantFoodPositions   map[primitives.Point2D[int]]bool
 		wantElixirPositions map[primitives.Point2D[int]]bool
 		wantScrollPositions map[primitives.Point2D[int]]bool
@@ -744,7 +744,7 @@ func TestLevel_addItemsAtRooms(t *testing.T) {
 			countElixir:         3,
 			countScroll:         3,
 			countWeapon:         3,
-			sizeMap:             primitives.Size2D[uint]{Height: 30, Width: 90},
+			mapSize:             primitives.Size2D[uint]{Height: 30, Width: 90},
 			wantFoodPositions:   map[primitives.Point2D[int]]bool{{X: 56, Y: 3}: true, {X: 67, Y: 26}: true, {X: 71, Y: 27}: true},
 			wantElixirPositions: map[primitives.Point2D[int]]bool{{X: 54, Y: 6}: true, {X: 67, Y: 28}: true, {X: 72, Y: 27}: true},
 			wantScrollPositions: map[primitives.Point2D[int]]bool{{X: 8, Y: 17}: true, {X: 58, Y: 7}: true, {X: 67, Y: 5}: true},
@@ -755,8 +755,8 @@ func TestLevel_addItemsAtRooms(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			level := NewLevel(source)
-			err := level.generateNineRooms(tt.sizeMap)
+			level := NewLevel(source, tt.mapSize)
+			err := level.generateNineRooms()
 			if err != nil {
 				t.Fatalf("generateNineRooms returned an error: %v", err)
 				return

@@ -25,13 +25,13 @@ func (*Game) SetFieldToScreen(screen tcell.Screen, field [][]common.GameEntityTy
 			case common.EntityTypePlayer:
 				ch = '☿' // 🦸
 			case common.WorldTypeWall:
-				ch = '⚀'
+				ch = '█'
 			case common.WorldTypePortal:
 				ch = '0'
 			case common.WorldTypePassage:
 				ch = '*'
 			case common.WorldTypeDoor:
-				ch = 'П'
+				ch = '*'
 			case common.EntityTypeZombie:
 				ch = '🧟'
 			case common.EntityTypeVampire:
