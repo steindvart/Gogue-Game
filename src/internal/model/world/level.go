@@ -3,6 +3,7 @@ package world
 import (
 	"errors"
 	"fmt"
+	"gogue/internal/common"
 	"gogue/internal/model/entities"
 	"gogue/internal/model/items"
 	"gogue/internal/model/primitives"
@@ -679,4 +680,191 @@ func (l *Level) checkCollisionWithEnemy(pos primitives.Point2D[int]) bool {
 	}
 
 	return false
+}
+
+func (l *Level) MakeCurrentMap(w, h int) [][]common.GameEntityType {
+	field := make([][]common.GameEntityType, h)
+	for y := range field {
+		field[y] = make([]common.GameEntityType, w)
+	}
+
+	// Добавлено в качестве примера, потом надо будет убрать
+	l.Rooms[0].Enemies = []entities.Enemy{
+		//{
+		//	Type: entities.EnemyType(entities.EnemyTypeZombie),
+		//	Character: &entities.Character{
+		//		Shape: &primitives.Box{
+		//			Point: primitives.Point2D[int]{X: 6, Y: 6},
+		//		},
+		//	},
+		//},
+		//{
+		//	Type: entities.EnemyType(entities.EnemyTypeVampire),
+		//	Character: &entities.Character{
+		//		Shape: &primitives.Box{
+		//			Point: primitives.Point2D[int]{X: 6, Y: 7},
+		//		},
+		//	},
+		//},
+		//{
+		//	Type: entities.EnemyType(entities.EnemyTypeGhost),
+		//	Character: &entities.Character{
+		//		Shape: &primitives.Box{
+		//			Point: primitives.Point2D[int]{X: 6, Y: 8},
+		//		},
+		//	},
+		//},
+		//{
+		//	Type: entities.EnemyType(entities.EnemyTypeOgre),
+		//	Character: &entities.Character{
+		//		Shape: &primitives.Box{
+		//			Point: primitives.Point2D[int]{X: 6, Y: 9},
+		//		},
+		//	},
+		//},
+		//{
+		//	Type: entities.EnemyType(entities.EnemyTypeSnakeMage),
+		//	Character: &entities.Character{
+		//		Shape: &primitives.Box{
+		//			Point: primitives.Point2D[int]{X: 6, Y: 10},
+		//		},
+		//	},
+		//},
+	}
+
+	for _, room := range l.Rooms {
+		l.putRoom(room, l.FinishPortal, field)
+		l.putItems(room, field)
+	}
+
+	for _, passages := range l.Passages {
+		l.putPassage(passages, field)
+	}
+
+	// for _, room := range l.Rooms {
+	// 	g.putEnemies(room, field)
+	// }
+
+	px := l.Player.Character.Shape.Point.X
+	py := l.Player.Character.Shape.Point.Y
+	if py >= 0 && py < h && px >= 0 && px < w {
+		field[py][px] = common.EntityTypePlayer
+	}
+
+	return field
+}
+
+//func (g *Game) putEnemies(room Room, field [][]common.GameEntityType) {
+//	var et common.GameEntityType
+//
+//	for _, e := range room.Enemies {
+//		switch e.Type {
+//		case entities.EnemyTypeZombie:
+//			et = common.EntityTypeZombie
+//		case entities.EnemyTypeVampire:
+//			et = common.EntityTypeVampire
+//		case entities.EnemyTypeGhost:
+//			et = common.EntityTypeGhost
+//		case entities.EnemyTypeOgre:
+//			et = common.EntityTypeOgre
+//		case entities.EnemyTypeSnakeMage:
+//			et = common.EntityTypeSnakeMage
+//		}
+//
+//		ex := e.Character.Shape.Point.X
+//		ey := e.Character.Shape.Point.Y
+//
+//		h := len(field)
+//		w := len(field[0])
+//		if ey >= 0 && ey < h && ex >= 0 && ex < w {
+//			field[ey][ex] = et
+//		}
+//	}
+//}
+
+func (l *Level) putRoom(room Room, finishPortal primitives.Box, field [][]common.GameEntityType) {
+	width := int(room.Shape.Size.Width)
+	height := int(room.Shape.Size.Height)
+
+	startX := room.Shape.Point.X
+	endX := startX + width - 1
+	startY := room.Shape.Point.Y
+	endY := startY + height - 1
+
+	for col := startX; col <= endX; col++ {
+		field[startY][col] = common.WorldTypeWall
+		field[endY][col] = common.WorldTypeWall
+	}
+
+	for row := startY; row <= endY; row++ {
+		field[row][startX] = common.WorldTypeWall
+		field[row][endX] = common.WorldTypeWall
+	}
+
+	field[finishPortal.Point.Y][finishPortal.Point.X] = common.WorldTypePortal
+}
+
+func (l *Level) putPassage(passage Passage, field [][]common.GameEntityType) {
+	for i := 0; i < len(passage.Way); i++ {
+		field[passage.Way[i].Y][passage.Way[i].X] = common.WorldTypePassage
+	}
+	field[passage.DoorOne.Y][passage.DoorOne.X] = common.WorldTypeDoor
+	field[passage.DoorTwo.Y][passage.DoorTwo.X] = common.WorldTypeDoor
+}
+
+// @todo - оставить ли это всё кучей?
+func (l *Level) putItems(room Room, field [][]common.GameEntityType) {
+	var fd common.GameEntityType
+	for _, food := range room.Foods {
+		switch food.Type {
+		case items.FoodTypePotatoes:
+			fd = common.FoodTypePotatoes
+		case items.FoodTypeBread:
+			fd = common.FoodTypeBread
+		case items.FoodTypeMeat:
+			fd = common.FoodTypeMeat
+		case items.FoodTypeMistery:
+			fd = common.FoodTypeMistery
+		case items.FoodTypeBeer:
+			fd = common.FoodTypeBeer
+		}
+		field[food.Item.Shape.Point.Y][food.Item.Shape.Point.X] = fd
+	}
+
+	for _, elixir := range room.Elixirs {
+		switch elixir.Type {
+		case items.ElixirTypeStrength:
+			fd = common.ElixirTypeStrength
+		case items.ElixirTypeAgility:
+			fd = common.ElixirTypeAgility
+		case items.ElixirTypeDwarfism:
+			fd = common.ElixirTypeDwarfism
+		case items.ElixirTypeGiantism:
+			fd = common.ElixirTypeGiantism
+		case items.ElixirTypeMystery:
+			fd = common.ElixirTypeMystery
+		}
+		field[elixir.Item.Shape.Point.Y][elixir.Item.Shape.Point.X] = fd
+	}
+
+	for _, scroll := range room.Scrolls {
+		switch scroll.Type {
+		case items.ScrollTypeStrength:
+			fd = common.ScrollTypeStrength
+		case items.ScrollTypeAgility:
+			fd = common.ScrollTypeAgility
+		case items.ScrollTypeUltimate:
+			fd = common.ScrollTypeUltimate
+		case items.ScrollTypeMaxHealth:
+			fd = common.ScrollTypeMaxHealth
+		case items.ScrollTypeMystery:
+			fd = common.ScrollTypeMystery
+		}
+		field[scroll.Item.Shape.Point.Y][scroll.Item.Shape.Point.X] = fd
+	}
+
+	for _, weapon := range room.Weapons {
+		fd = common.Weapon
+		field[weapon.Item.Shape.Point.Y][weapon.Item.Shape.Point.X] = fd
+	}
 }
