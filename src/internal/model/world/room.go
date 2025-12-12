@@ -24,8 +24,8 @@ type Room struct {
 }
 
 func NewRoom(roomType RoomType, shape primitives.Box) *Room {
-	const roomMinWidth = 5
-	const roomMinHeight = 4
+	const roomMinWidth = 3
+	const roomMinHeight = 3
 
 	if shape.Size.Width < roomMinWidth || shape.Size.Height < roomMinHeight {
 		shape.Size.Width = roomMinWidth

@@ -34,10 +34,6 @@ type Level struct {
 	playerSpawner PlayerSpawner
 }
 
-func NewLevel(random utils.Randomizer, mapSize primitives.Size2D[uint]) *Level {
-	return NewLevelWithDefaults(random, mapSize)
-}
-
 func NewLevelWithDefaults(random utils.Randomizer, mapSize primitives.Size2D[uint]) *Level {
 	cfg := DefaultLevelConfig(mapSize)
 	return NewLevelWithComponents(random, cfg, NewGridRoomGenerator(), NewConnectionTreePassageGenerator(), NewRoomBasedEntitySpawner(), NewStartRoomPlayerSpawner())
@@ -61,6 +57,37 @@ func NewLevelWithComponents(random utils.Randomizer, cfg LevelConfig, roomGen Ro
 
 // Generate генерирует геометрию, сущности и игрока
 func (l *Level) Generate() error {
+	err := l.generateEnvironment()
+	if err != nil {
+		return err
+	}
+
+	player, err := l.playerSpawner.SpawnPlayer(l.Rooms, l.random)
+	if err != nil {
+		return err
+	}
+	l.Player = player
+
+	return nil
+}
+
+// GenerateWithExistingPlayer генерирует мир, но использует переданного игрока
+func (l *Level) GenerateWithExistingPlayer(player *entities.Player) error {
+	err := l.generateEnvironment()
+	if err != nil {
+		return err
+	}
+
+	l.Player = player
+	startPos, err := l.playerSpawner.GetStartPosition(l.Rooms, l.random)
+	if err != nil {
+		return err
+	}
+	l.Player.SetPosition(*startPos)
+	return nil
+}
+
+func (l *Level) generateEnvironment() error {
 	// Геометрия
 	rooms, finishPortal, err := l.roomGen.GenerateRooms(l.config, l.random)
 	if err != nil {
@@ -80,41 +107,6 @@ func (l *Level) Generate() error {
 	if err != nil {
 		return err
 	}
-	l.Foods = spawned.Foods
-	l.Elixirs = spawned.Elixirs
-	l.Scrolls = spawned.Scrolls
-	l.Weapons = spawned.Weapons
-	l.Enemies = spawned.Enemies
-
-	// Игрок
-	player, err := l.playerSpawner.SpawnPlayer(l.Rooms, l.random)
-	if err != nil {
-		return err
-	}
-	l.Player = player
-
-	return nil
-}
-
-// GenerateWithExistingPlayer генерирует мир, но использует переданного игрока
-func (l *Level) GenerateWithExistingPlayer(player *entities.Player) error {
-	rooms, finishPortal, err := l.roomGen.GenerateRooms(l.config, l.random)
-	if err != nil {
-		return err
-	}
-	l.Rooms = rooms
-	l.FinishPortal = finishPortal
-
-	passages, err := l.passageGen.GeneratePassages(l.Rooms, l.config, l.random)
-	if err != nil {
-		return err
-	}
-	l.Passages = passages
-
-	spawned, err := l.entitySpawner.SpawnEntities(l.Rooms, l.config.ItemCounts, l.random)
-	if err != nil {
-		return err
-	}
 
 	l.Foods = spawned.Foods
 	l.Elixirs = spawned.Elixirs
@@ -122,17 +114,10 @@ func (l *Level) GenerateWithExistingPlayer(player *entities.Player) error {
 	l.Weapons = spawned.Weapons
 	l.Enemies = spawned.Enemies
 
-	l.Player = player
-	startPos, err := l.playerSpawner.GetStartPosition(l.Rooms, l.random)
-	if err != nil {
-		return err
-	}
-	l.Player.SetPosition(*startPos)
 	return nil
 }
 
-// MovePlayer перемещает игрока с проверкой коллизий
-func (l *Level) MovePlayer(delta primitives.Point2D[int]) {
+func (l *Level) MovePlayerWithCheckCollision(delta primitives.Point2D[int]) {
 	oldPlayerPos := l.Player.GetPosition()
 	l.Player.Move(delta)
 
@@ -141,7 +126,6 @@ func (l *Level) MovePlayer(delta primitives.Point2D[int]) {
 	}
 }
 
-// checkCollision проверяет столкновения с границами, стенами, врагами и проходами
 func (l *Level) checkCollision(pos primitives.Point2D[int]) bool {
 	if l.checkCollisionWithMapBorders(pos) {
 		return true
