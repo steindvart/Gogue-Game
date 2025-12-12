@@ -1,0 +1,262 @@
+package world
+
+import (
+	"gogue/internal/common"
+	"gogue/internal/model/entities"
+	"gogue/internal/model/items"
+	"gogue/internal/model/primitives"
+)
+
+type FieldRenderer interface {
+	RenderField(width, height int, level *Level) [][]common.GameEntityType
+}
+
+type DefaultFieldRenderer struct{}
+
+func NewDefaultFieldRenderer() *DefaultFieldRenderer {
+	return &DefaultFieldRenderer{}
+}
+
+func (r *DefaultFieldRenderer) RenderField(width, height int, level *Level) [][]common.GameEntityType {
+	field := r.createEmptyField(width, height)
+
+	// Порядок рендеринга (от фона к переднему плану):
+	// 1. Комнаты (стены и пол)
+	// 2. Коридоры и двери
+	// 3. Предметы (еда, зелья, свитки, оружие)
+	// 4. Враги
+	// 5. Игрок (всегда поверх всех)
+
+	r.renderRooms(level.Rooms, level.FinishPortal, field)
+	r.renderPassages(level.Passages, field)
+	r.renderItems(level.Foods, level.Elixirs, level.Scrolls, level.Weapons, field, width, height)
+	r.renderEnemies(level.Enemies, field, width, height)
+	r.renderPlayer(level.Player, field, width, height)
+
+	return field
+}
+
+func (r *DefaultFieldRenderer) createEmptyField(width, height int) [][]common.GameEntityType {
+	field := make([][]common.GameEntityType, height)
+	for y := range field {
+		field[y] = make([]common.GameEntityType, width)
+	}
+	return field
+}
+
+func (r *DefaultFieldRenderer) renderRooms(rooms []Room, finishPortal primitives.Box, field [][]common.GameEntityType) {
+	if len(rooms) == 0 {
+		return
+	}
+
+	for _, room := range rooms {
+		r.renderSingleRoom(room, field)
+	}
+
+	// Рендерим портал поверх комнаты
+	r.renderPortal(finishPortal, field)
+}
+
+func (r *DefaultFieldRenderer) renderSingleRoom(room Room, field [][]common.GameEntityType) {
+	width := int(room.Shape.Size.Width)
+	height := int(room.Shape.Size.Height)
+
+	startX := room.Shape.Point.X
+	endX := startX + width - 1
+	startY := room.Shape.Point.Y
+	endY := startY + height - 1
+
+	// Горизонтальные стены (верх и низ)
+	for col := startX; col <= endX; col++ {
+		if r.isInBounds(col, startY, field) {
+			field[startY][col] = common.WorldTypeWall
+		}
+		if r.isInBounds(col, endY, field) {
+			field[endY][col] = common.WorldTypeWall
+		}
+	}
+
+	// Вертикальные стены (левая и правая)
+	for row := startY; row <= endY; row++ {
+		if r.isInBounds(startX, row, field) {
+			field[row][startX] = common.WorldTypeWall
+		}
+		if r.isInBounds(endX, row, field) {
+			field[row][endX] = common.WorldTypeWall
+		}
+	}
+}
+
+func (r *DefaultFieldRenderer) renderPortal(portal primitives.Box, field [][]common.GameEntityType) {
+	x, y := portal.Point.X, portal.Point.Y
+	if r.isInBounds(x, y, field) {
+		field[y][x] = common.WorldTypePortal
+	}
+}
+
+func (r *DefaultFieldRenderer) renderPassages(passages []Passage, field [][]common.GameEntityType) {
+	for _, passage := range passages {
+		r.renderSinglePassage(passage, field)
+	}
+}
+
+func (r *DefaultFieldRenderer) renderSinglePassage(passage Passage, field [][]common.GameEntityType) {
+	// Отрисовка пути коридора
+	for _, point := range passage.Way {
+		if r.isInBounds(point.X, point.Y, field) {
+			field[point.Y][point.X] = common.WorldTypePassage
+		}
+	}
+
+	// Отрисовка дверей
+	if r.isInBounds(passage.DoorOne.X, passage.DoorOne.Y, field) {
+		field[passage.DoorOne.Y][passage.DoorOne.X] = common.WorldTypeDoor
+	}
+	if r.isInBounds(passage.DoorTwo.X, passage.DoorTwo.Y, field) {
+		field[passage.DoorTwo.Y][passage.DoorTwo.X] = common.WorldTypeDoor
+	}
+}
+
+func (r *DefaultFieldRenderer) renderItems(
+	foods []items.Food,
+	elixirs []items.Elixir,
+	scrolls []items.Scroll,
+	weapons []items.Weapon,
+	field [][]common.GameEntityType,
+	width, height int,
+) {
+	// Еда
+	for _, food := range foods {
+		pt := food.Item.Shape.Point
+		if r.isInBoundsWH(pt.X, pt.Y, width, height) {
+			field[pt.Y][pt.X] = convertFoodToEntityType(food.Type)
+		}
+	}
+
+	// Зелья
+	for _, elixir := range elixirs {
+		pt := elixir.Item.Shape.Point
+		if r.isInBoundsWH(pt.X, pt.Y, width, height) {
+			field[pt.Y][pt.X] = convertElixirToEntityType(elixir.Type)
+		}
+	}
+
+	// Свитки
+	for _, scroll := range scrolls {
+		pt := scroll.Item.Shape.Point
+		if r.isInBoundsWH(pt.X, pt.Y, width, height) {
+			field[pt.Y][pt.X] = convertScrollToEntityType(scroll.Type)
+		}
+	}
+
+	// Оружие
+	for _, weapon := range weapons {
+		pt := weapon.Item.Shape.Point
+		if r.isInBoundsWH(pt.X, pt.Y, width, height) {
+			field[pt.Y][pt.X] = common.Weapon
+		}
+	}
+}
+
+func (r *DefaultFieldRenderer) renderEnemies(enemies []entities.Enemy, field [][]common.GameEntityType, width, height int) {
+	for _, enemy := range enemies {
+		pt := enemy.GetPosition()
+		if r.isInBoundsWH(pt.X, pt.Y, width, height) {
+			field[pt.Y][pt.X] = convertEnemyToEntityType(enemy.Type)
+		}
+	}
+}
+
+func (r *DefaultFieldRenderer) renderPlayer(player *entities.Player, field [][]common.GameEntityType, width, height int) {
+	if player == nil {
+		return
+	}
+
+	px := player.Character.Shape.Point.X
+	py := player.Character.Shape.Point.Y
+
+	if r.isInBoundsWH(px, py, width, height) {
+		field[py][px] = common.EntityTypePlayer
+	}
+}
+
+func (r *DefaultFieldRenderer) isInBounds(x, y int, field [][]common.GameEntityType) bool {
+	if len(field) == 0 {
+		return false
+	}
+	return y >= 0 && y < len(field) && x >= 0 && x < len(field[0])
+}
+
+func (r *DefaultFieldRenderer) isInBoundsWH(x, y, width, height int) bool {
+	return x >= 0 && x < width && y >= 0 && y < height
+}
+
+// Вспомогательные функции для конвертации типов
+
+func convertFoodToEntityType(foodType items.FoodType) common.GameEntityType {
+	switch foodType {
+	case items.FoodTypePotatoes:
+		return common.FoodTypePotatoes
+	case items.FoodTypeBread:
+		return common.FoodTypeBread
+	case items.FoodTypeMeat:
+		return common.FoodTypeMeat
+	case items.FoodTypeMistery:
+		return common.FoodTypeMistery
+	case items.FoodTypeBeer:
+		return common.FoodTypeBeer
+	default:
+		return common.FoodTypeMistery
+	}
+}
+
+func convertElixirToEntityType(elixirType items.ElixirType) common.GameEntityType {
+	switch elixirType {
+	case items.ElixirTypeStrength:
+		return common.ElixirTypeStrength
+	case items.ElixirTypeAgility:
+		return common.ElixirTypeAgility
+	case items.ElixirTypeDwarfism:
+		return common.ElixirTypeDwarfism
+	case items.ElixirTypeGiantism:
+		return common.ElixirTypeGiantism
+	case items.ElixirTypeMystery:
+		return common.ElixirTypeMystery
+	default:
+		return common.ElixirTypeMystery
+	}
+}
+
+func convertScrollToEntityType(scrollType items.ScrollType) common.GameEntityType {
+	switch scrollType {
+	case items.ScrollTypeStrength:
+		return common.ScrollTypeStrength
+	case items.ScrollTypeAgility:
+		return common.ScrollTypeAgility
+	case items.ScrollTypeUltimate:
+		return common.ScrollTypeUltimate
+	case items.ScrollTypeMaxHealth:
+		return common.ScrollTypeMaxHealth
+	case items.ScrollTypeMystery:
+		return common.ScrollTypeMystery
+	default:
+		return common.ScrollTypeMystery
+	}
+}
+
+func convertEnemyToEntityType(enemyType entities.EnemyType) common.GameEntityType {
+	switch enemyType {
+	case entities.EnemyTypeZombie:
+		return common.EntityTypeZombie
+	case entities.EnemyTypeVampire:
+		return common.EntityTypeVampire
+	case entities.EnemyTypeGhost:
+		return common.EntityTypeGhost
+	case entities.EnemyTypeOgre:
+		return common.EntityTypeOgre
+	case entities.EnemyTypeSnakeMage:
+		return common.EntityTypeSnakeMage
+	default:
+		return common.EntityTypeZombie
+	}
+}
