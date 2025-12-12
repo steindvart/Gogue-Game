@@ -59,3 +59,8 @@ func RandomRoundedFloatInRange(random Randomizer, min, max float64) int {
 func RandomIntInRange(random Randomizer, min, max int) int {
 	return min + random.Intn(max-min+1)
 }
+
+func GetRandomElement[T any](random Randomizer, slice []T) T {
+	idx := random.Intn(len(slice))
+	return slice[idx]
+}

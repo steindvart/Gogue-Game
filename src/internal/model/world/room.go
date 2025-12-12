@@ -2,8 +2,6 @@ package world
 
 import (
 	"errors"
-	"gogue/internal/model/entities"
-	"gogue/internal/model/items"
 	"gogue/internal/model/primitives"
 	"gogue/internal/utils"
 )
@@ -17,32 +15,27 @@ const (
 )
 
 type Room struct {
-	Shape   primitives.Box
-	Type    RoomType
-	Doors   []primitives.Point2D[int]
-	Foods   []items.Food
-	Elixirs []items.Elixir
-	Scrolls []items.Scroll
-	Weapons []items.Weapon
-	Enemies []entities.Enemy
+	Shape primitives.Box
+	Type  RoomType
+	Doors []primitives.Point2D[int]
 
-	OccupiedPositions map[primitives.Point2D[int]]bool
+	// occupiedPositions используется только во время генерации для отслеживания занятых позиций
+	occupiedPositions map[primitives.Point2D[int]]bool
 }
 
 func NewRoom(roomType RoomType, shape primitives.Box) *Room {
-	if shape.Size.Width < RoomMinWidth || shape.Size.Height < RoomMinHeight {
-		shape.Size.Width = RoomMinWidth
-		shape.Size.Height = RoomMinHeight
+	const roomMinWidth = 3
+	const roomMinHeight = 3
+
+	if shape.Size.Width < roomMinWidth || shape.Size.Height < roomMinHeight {
+		shape.Size.Width = roomMinWidth
+		shape.Size.Height = roomMinHeight
 	}
 	return &Room{
 		Shape:             shape,
 		Type:              roomType,
-		Foods:             []items.Food{},
-		Elixirs:           []items.Elixir{},
-		Scrolls:           []items.Scroll{},
-		Weapons:           []items.Weapon{},
-		Enemies:           []entities.Enemy{},
-		OccupiedPositions: make(map[primitives.Point2D[int]]bool),
+		Doors:             []primitives.Point2D[int]{},
+		occupiedPositions: make(map[primitives.Point2D[int]]bool),
 	}
 }
 
@@ -61,67 +54,19 @@ func (r *Room) GetRandomFreePosition(rand utils.Randomizer) (*primitives.Point2D
 			Y: minY + rand.Intn(int(height)),
 		}
 
-		if !r.OccupiedPositions[pos] {
-			r.OccupiedPositions[pos] = true
+		if !r.occupiedPositions[pos] {
+			r.occupiedPositions[pos] = true
 			return &pos, nil
 		}
 	}
 
-	return nil, errors.New("no available positions in Rooms")
+	return nil, errors.New("no available positions in room")
+}
+
+func (r *Room) MarkOccupied(pos primitives.Point2D[int]) {
+	r.occupiedPositions[pos] = true
 }
 
 func (r *Room) GetCountFreePosition() int {
-	return int(r.Shape.Size.Width*r.Shape.Size.Height) - len(r.OccupiedPositions)
-}
-
-func (r *Room) createFood(rand utils.Randomizer, pos primitives.Point2D[int], allFoodType []items.FoodType) {
-	foodType := getRandomElement(rand, allFoodType)
-	itemBox := primitives.Box{
-		Point: pos,
-		Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
-	}
-
-	newFood := items.NewFoodBuiltin(rand, itemBox, foodType)
-	r.Foods = append(r.Foods, *newFood)
-}
-
-func (r *Room) createElixir(rand utils.Randomizer, pos primitives.Point2D[int], allElixirType []items.ElixirType) bool {
-	elixirType := getRandomElement(rand, allElixirType)
-	itemBox := primitives.Box{
-		Point: pos,
-		Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
-	}
-
-	newElixir := items.NewElixirBuiltin(rand, itemBox, elixirType)
-	r.Elixirs = append(r.Elixirs, *newElixir)
-	return true
-}
-
-func (r *Room) createScroll(rand utils.Randomizer, pos primitives.Point2D[int], allScrollType []items.ScrollType) bool {
-	scrollType := getRandomElement(rand, allScrollType)
-	itemBox := primitives.Box{
-		Point: pos,
-		Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
-	}
-
-	newScroll := items.NewScrollBuiltin(rand, itemBox, scrollType)
-	r.Scrolls = append(r.Scrolls, *newScroll)
-	return true
-}
-
-func (r *Room) createWeapon(rand utils.Randomizer, pos primitives.Point2D[int], allWeaponTypes []items.WeaponType) bool {
-	weaponType := getRandomElement(rand, allWeaponTypes)
-	itemBox := primitives.Box{
-		Point: pos,
-		Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
-	}
-
-	newWeapon := items.NewWeaponBuiltin(rand, itemBox, weaponType)
-	r.Weapons = append(r.Weapons, *newWeapon)
-	return true
-}
-
-func getRandomElement[T any](random utils.Randomizer, slice []T) T {
-	idx := random.Intn(len(slice))
-	return slice[idx]
+	return int(r.Shape.Size.Width*r.Shape.Size.Height) - len(r.occupiedPositions)
 }

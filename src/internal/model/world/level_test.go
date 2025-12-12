@@ -1,18 +1,15 @@
 package world
 
 import (
-	"errors"
-	"fmt"
 	"gogue/internal/model/primitives"
 	"math/rand"
-	"reflect"
 	"strings"
 	"testing"
 )
 
 const randomSeedTest = 42
 
-func TestLevel_GenerateNineRooms(t *testing.T) {
+func TestLevel_Generate(t *testing.T) {
 	tests := []struct {
 		name      string
 		mapSize   primitives.Size2D[uint]
@@ -38,12 +35,12 @@ func TestLevel_GenerateNineRooms(t *testing.T) {
 		},
 	}
 
-	source := rand.New(rand.NewSource(randomSeedTest))
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			level := NewLevel(source, tt.mapSize)
+			source := rand.New(rand.NewSource(randomSeedTest))
+			level := NewLevelWithDefaults(source, tt.mapSize)
 
-			err := level.generateNineRooms()
+			err := level.Generate()
 
 			if tt.wantErr {
 				if err == nil {
@@ -56,19 +53,38 @@ func TestLevel_GenerateNineRooms(t *testing.T) {
 				if err != nil {
 					t.Errorf("Unexpected error: %v", err)
 				}
+				// Проверяем, что всё сгенерировано
+				if len(level.Rooms) == 0 {
+					t.Error("Expected rooms to be generated")
+				}
+				if len(level.Elixirs) == 0 {
+					t.Error("Expected elixirs to be generated")
+				}
+				if len(level.Scrolls) == 0 {
+					t.Error("Expected scrolls to be generated")
+				}
+				if len(level.Weapons) == 0 {
+					t.Error("Expected weapons to be generated")
+				}
+				if len(level.Foods) == 0 {
+					t.Error("Expected foods to be generated")
+				}
+				if level.Player == nil {
+					t.Error("Expected player to be generated")
+				}
 			}
 		})
 	}
 }
 
-func TestLevel_GenerateNineRooms_Deterministic(t *testing.T) {
+func TestLevel_GenerateRooms_Deterministic(t *testing.T) {
 	source := rand.New(rand.NewSource(randomSeedTest))
 	mapSize := primitives.Size2D[uint]{Height: 30, Width: 90}
 
-	level := NewLevel(source, mapSize)
-	err := level.generateNineRooms()
+	level := NewLevelWithDefaults(source, mapSize)
+	err := level.Generate()
 	if err != nil {
-		t.Fatalf("generateNineRooms failed: %v", err)
+		t.Fatalf("Generate failed: %v", err)
 	}
 
 	wantRooms := []Room{
@@ -167,7 +183,6 @@ func TestLevel_GenerateNineRooms_Deterministic(t *testing.T) {
 }
 
 func TestLevel_GeneratePassages_Deterministic(t *testing.T) {
-	source := rand.New(rand.NewSource(randomSeedTest))
 	tests := []struct {
 		name         string
 		wantPassages []Passage
@@ -271,14 +286,11 @@ func TestLevel_GeneratePassages_Deterministic(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			level := NewLevel(source, primitives.Size2D[uint]{Height: 30, Width: 90})
-			err := level.generateNineRooms()
+			source := rand.New(rand.NewSource(randomSeedTest))
+			level := NewLevelWithDefaults(source, primitives.Size2D[uint]{Height: 30, Width: 90})
+			err := level.Generate()
 			if err != nil {
-				t.Fatalf("generateNineRooms returned an error: %v", err)
-			}
-			err = level.generatePassages()
-			if err != nil {
-				t.Fatalf("generatePassages returned an error: %v", err)
+				t.Fatalf("Generate returned an error: %v", err)
 			}
 
 			if len(level.Passages) != len(tt.wantPassages) {
@@ -307,517 +319,6 @@ func TestLevel_GeneratePassages_Deterministic(t *testing.T) {
 							t.Errorf("Passage at index %d, point in Way at index %d mismatch: expected %+v, got %+v", i, j, wantPoint, gotPoint)
 						}
 					}
-				}
-			}
-		})
-	}
-}
-
-func TestLevel_CalculateRoomSectionSize(t *testing.T) {
-	tests := []struct {
-		name    string
-		sizeMap primitives.Size2D[uint]
-		want    primitives.Size2D[uint]
-		wantErr error
-	}{
-		{
-			name:    "Valid size 33x33",
-			sizeMap: primitives.Size2D[uint]{Width: 33, Height: 33},
-			want:    primitives.Size2D[uint]{Width: 11, Height: 11},
-			wantErr: nil,
-		},
-		{
-			name:    "Valid size 60x45",
-			sizeMap: primitives.Size2D[uint]{Width: 60, Height: 45},
-			want:    primitives.Size2D[uint]{Width: 20, Height: 15},
-			wantErr: nil,
-		},
-		{
-			name:    "SizeTooSmallForRooms",
-			sizeMap: primitives.Size2D[uint]{Width: 10, Height: 10},
-			want:    primitives.Size2D[uint]{},
-			wantErr: errors.New("game map size is too small"),
-		},
-		{
-			name:    "Size too big - width",
-			sizeMap: primitives.Size2D[uint]{Width: 201, Height: 100},
-			want:    primitives.Size2D[uint]{},
-			wantErr: errors.New("game map size is too big"),
-		},
-		{
-			name:    "Size too big - height",
-			sizeMap: primitives.Size2D[uint]{Width: 100, Height: 151},
-			want:    primitives.Size2D[uint]{},
-			wantErr: errors.New("game map size is too big"),
-		},
-		{
-			name:    "Size too big - both",
-			sizeMap: primitives.Size2D[uint]{Width: 300, Height: 200},
-			want:    primitives.Size2D[uint]{},
-			wantErr: errors.New("game map size is too big"),
-		},
-		{
-			name:    "Minimum valid size 12x12",
-			sizeMap: primitives.Size2D[uint]{Width: 12, Height: 12},
-			want:    primitives.Size2D[uint]{Width: 4, Height: 4},
-			wantErr: nil,
-		},
-		{
-			name:    "Size just below minimum - 11x11",
-			sizeMap: primitives.Size2D[uint]{Width: 11, Height: 11},
-			want:    primitives.Size2D[uint]{},
-			wantErr: errors.New("game map size is too small"),
-		},
-		{
-			name:    "Size with remainder - 35x34",
-			sizeMap: primitives.Size2D[uint]{Width: 35, Height: 34},
-			want:    primitives.Size2D[uint]{Width: 11, Height: 11},
-			wantErr: nil,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			res, err := calculateRoomSectionSize(tt.sizeMap)
-
-			if tt.wantErr != nil && err != nil {
-				if err.Error() != tt.wantErr.Error() {
-					t.Errorf("Expected error to contain: %v, got: %v", tt.wantErr, err)
-				}
-			} else if tt.wantErr != nil && err == nil {
-				t.Fatalf("Expected error to contain: %v, got: <nil>", tt.wantErr)
-			} else if tt.wantErr == nil && err != nil {
-				t.Fatalf("Expected: <nil>, got error: %v", err)
-			}
-
-			if tt.wantErr == nil {
-				if res != tt.want {
-					t.Fatalf("Expected size %+v, got size %+v", tt.want, res)
-				}
-			}
-		})
-	}
-}
-
-func TestLevel_GenerateSpanningTree_Errors(t *testing.T) {
-	tests := []struct {
-		name      string
-		startRoom int
-		wantErr   error
-	}{
-		{
-			name:      "Start room is negative",
-			startRoom: -1,
-			wantErr:   errors.New("start room must be between 0 and 9"),
-		},
-		{
-			name:      "Start room is too big",
-			startRoom: 12,
-			wantErr:   errors.New("start room must be between 0 and 9"),
-		},
-		{
-			name:      "Start room is zero",
-			startRoom: 0,
-			wantErr:   nil,
-		},
-		{
-			name:      "Start room is eight",
-			startRoom: 8,
-			wantErr:   nil,
-		},
-	}
-
-	source := rand.New(rand.NewSource(randomSeedTest))
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			_, err := generateSpanningTree(tt.startRoom, source)
-
-			if tt.wantErr != nil {
-				if err == nil {
-					t.Fatalf("Expected error containing %v, but got <nil>", tt.wantErr)
-				}
-			} else {
-				if err != nil {
-					t.Errorf("Expected Success for startRoom=%d, but got error: %v", tt.startRoom, err)
-				}
-			}
-		})
-	}
-}
-
-func TestLevel_GenerateSpanningTree_Deterministic(t *testing.T) {
-	tests := []struct {
-		name          string
-		startRoom     int
-		wantTreeEdges [][2]int
-	}{
-		{
-			name:          "Start room 0",
-			startRoom:     0,
-			wantTreeEdges: [][2]int{{0, 3}, {0, 1}, {1, 4}, {1, 2}, {2, 5}, {5, 8}, {8, 7}, {7, 6}},
-		},
-		{
-			name:          "Start room 4",
-			startRoom:     4,
-			wantTreeEdges: [][2]int{{4, 5}, {4, 7}, {4, 1}, {4, 3}, {3, 6}, {3, 0}, {1, 2}, {7, 8}},
-		},
-		{
-			name:          "Start room 8",
-			startRoom:     8,
-			wantTreeEdges: [][2]int{{8, 7}, {8, 5}, {5, 4}, {5, 2}, {2, 1}, {1, 0}, {0, 3}, {3, 6}},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			source := rand.New(rand.NewSource(randomSeedTest))
-			treeEdges, err := generateSpanningTree(tt.startRoom, source)
-
-			if err != nil {
-				t.Fatalf("generateSpanningTree returned unexpected error: %v", err)
-			}
-
-			if len(treeEdges) != len(tt.wantTreeEdges) {
-				t.Errorf("Expected %d edges in tree, got %d", len(tt.wantTreeEdges), len(treeEdges))
-				t.Logf("Real treeEdges for startRoom %d: %v", tt.startRoom, treeEdges)
-				return
-			}
-
-			for i, wantEdge := range tt.wantTreeEdges {
-				if i >= len(treeEdges) {
-					t.Errorf("Edge at index %d does not exist in result", i)
-					continue
-				}
-				gotEdge := treeEdges[i]
-				if gotEdge != wantEdge {
-					t.Errorf("Edge %d: expected %v, got %v", i, wantEdge, gotEdge)
-				}
-			}
-		})
-	}
-}
-
-func TestLevel_AddRandomEdges(t *testing.T) {
-	tests := []struct {
-		name            string
-		sourceEdges     [][2]int
-		extraEdgesCount int
-		wantEdgeCount   int
-	}{
-		{
-			name:            "Add zero extra edges",
-			sourceEdges:     [][2]int{{0, 1}},
-			extraEdgesCount: 0,
-			wantEdgeCount:   1 + 1,
-		},
-		{
-
-			name:            "Add positive extra edges",
-			sourceEdges:     [][2]int{},
-			extraEdgesCount: 2,
-			wantEdgeCount:   2,
-		},
-		{
-			name:            "Add more extra edges than possible",
-			sourceEdges:     [][2]int{},
-			extraEdgesCount: 20,
-			wantEdgeCount:   2,
-		},
-		{
-			name:            "Add extra edges when some connections already exist",
-			sourceEdges:     [][2]int{{0, 1}, {1, 2}},
-			extraEdgesCount: 3,
-			wantEdgeCount:   2 + 2,
-		},
-		{
-			name:            "Add negative extra edges",
-			sourceEdges:     [][2]int{{0, 1}, {1, 2}, {2, 3}},
-			extraEdgesCount: -5,
-			wantEdgeCount:   3 + 1,
-		},
-	}
-
-	source := rand.New(rand.NewSource(randomSeedTest))
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			result := addRandomEdges(tt.sourceEdges, tt.extraEdgesCount, source)
-
-			if len(result) != tt.wantEdgeCount {
-				t.Errorf("Expected %d edges, got %d. Input sourceEdges: %v, extraEdgesCount: %d", tt.wantEdgeCount, len(result), tt.sourceEdges, tt.extraEdgesCount)
-			}
-
-			resultMap := make(map[[2]int]bool)
-			for _, edge := range result {
-				minIdx, maxIdx := sortByOrderAsc(edge[0], edge[1])
-				resultMap[[2]int{minIdx, maxIdx}] = true
-			}
-			for _, originalEdge := range tt.sourceEdges {
-				minIdx, maxIdx := sortByOrderAsc(originalEdge[0], originalEdge[1])
-				originalKey := [2]int{minIdx, maxIdx}
-				if !resultMap[originalKey] {
-					t.Errorf("Original edge %v (key %v) is missing from the result", originalEdge, originalKey)
-				}
-			}
-		})
-	}
-}
-
-func TestLevel_AddRandomEdges_Deterministic(t *testing.T) {
-	tests := []struct {
-		name            string
-		sourceEdges     [][2]int
-		extraEdgesCount int
-		wantResult      [][2]int
-	}{
-		{
-			name:            "Add 1 extra to empty",
-			sourceEdges:     [][2]int{{0, 3}, {0, 1}},
-			extraEdgesCount: 1,
-			wantResult:      [][2]int{{0, 3}, {0, 1}, {6, 7}},
-		},
-		{
-			name:            "Add 2 extra to simple tree",
-			sourceEdges:     [][2]int{{0, 3}, {0, 1}},
-			extraEdgesCount: 2,
-			wantResult:      [][2]int{{0, 3}, {0, 1}, {6, 7}, {4, 7}},
-		},
-		{
-			name:            "Add -1 extra (clamped to 1)",
-			sourceEdges:     [][2]int{{0, 3}, {0, 1}},
-			extraEdgesCount: -1,
-			wantResult:      [][2]int{{0, 3}, {0, 1}, {6, 7}},
-		},
-		{
-			name:            "Add 25 extra (clamped to 1)",
-			sourceEdges:     [][2]int{{0, 3}, {0, 1}},
-			extraEdgesCount: 25,
-			wantResult:      [][2]int{{0, 3}, {0, 1}, {6, 7}, {4, 7}},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			source := rand.New(rand.NewSource(randomSeedTest))
-			result := addRandomEdges(tt.sourceEdges, tt.extraEdgesCount, source)
-
-			if len(result) != len(tt.wantResult) {
-				t.Fatalf("Length mismatch: expected %d edges, got %d edges.\nReal result for sourceEdges=%v, extraCount=%d: %v",
-					len(tt.wantResult), len(result), tt.sourceEdges, tt.extraEdgesCount, result)
-			}
-
-			for i := range tt.wantResult {
-				if result[i] != tt.wantResult[i] {
-					t.Errorf("Edge at index %d mismatches: expected %v, got %v", i, tt.wantResult[i], result[i])
-					t.Logf("Full result: %v", result)
-					t.Logf("Full wantResult: %v", tt.wantResult)
-				}
-			}
-		})
-	}
-}
-
-func TestLevel_GetStartPositionForPlayer(t *testing.T) {
-	t.Run("Rooms exist", func(t *testing.T) {
-		wantPlayerStartPoint := primitives.Point2D[int]{X: 46, Y: 24}
-
-		source := rand.New(rand.NewSource(randomSeedTest))
-		level := NewLevel(source, primitives.Size2D[uint]{Height: 30, Width: 90})
-		err := level.Generate()
-		if err != nil {
-			t.Fatalf("GenerateLevel returned unexpected error: %v", err)
-		}
-		playerStartPoint, err := level.GenerateStartPlayerPosition()
-		if err != nil {
-			t.Fatalf("GenerateStartPlayerPosition returned unexpected error: %v", err)
-		}
-
-		if wantPlayerStartPoint != *playerStartPoint {
-			t.Errorf("Position mismatch: expected %+v, got %+v", wantPlayerStartPoint, playerStartPoint)
-		}
-	})
-	t.Run("Rooms don't exist", func(t *testing.T) {
-		wantErrorText := "should be 9 rooms"
-		source := rand.New(rand.NewSource(randomSeedTest))
-		level := NewLevel(source, primitives.Size2D[uint]{Height: 30, Width: 90})
-		_, err := level.GenerateStartPlayerPosition()
-		if err == nil {
-			t.Fatalf("GenerateStartPlayerPosition returned nil error, expected %q", wantErrorText)
-		}
-		if !strings.Contains(err.Error(), wantErrorText) {
-			t.Errorf("Expected error to contain %q, got %q", wantErrorText, err.Error())
-		}
-	})
-}
-
-func TestLevel_addDoorsAtRoom(t *testing.T) {
-	tests := []struct {
-		name             string
-		twoRoomsIndexes  [2]uint
-		doorOne          primitives.Point2D[int]
-		doorTwo          primitives.Point2D[int]
-		wantDoorsInRooms []Room
-		wantErr          error
-	}{
-		{
-			name:            "Add doors to rooms",
-			twoRoomsIndexes: [2]uint{0, 1},
-			doorOne:         primitives.Point2D[int]{X: 5, Y: 5},
-			doorTwo:         primitives.Point2D[int]{X: 6, Y: 6},
-			wantDoorsInRooms: []Room{
-				{Doors: []primitives.Point2D[int]{{X: 5, Y: 5}}},
-				{Doors: []primitives.Point2D[int]{{X: 6, Y: 6}}},
-			},
-			wantErr: nil,
-		},
-		{
-			name:            "Add doors using same room index twice",
-			twoRoomsIndexes: [2]uint{40, 40},
-			doorOne:         primitives.Point2D[int]{X: 0, Y: 0},
-			doorTwo:         primitives.Point2D[int]{X: 0, Y: 0},
-			wantErr:         fmt.Errorf("rooms indexes should be in range from 0 to %d", roomsCount-1),
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			source := rand.New(rand.NewSource(randomSeedTest))
-			testSizeMap := primitives.Size2D[uint]{Height: 30, Width: 90}
-			level := NewLevel(source, testSizeMap)
-			err := level.generateNineRooms()
-			if err != nil {
-				t.Fatalf("generateNineRooms returned an error: %v", err)
-			}
-
-			err = level.addDoorsAtRoom(tt.twoRoomsIndexes, tt.doorOne, tt.doorTwo)
-
-			if tt.wantErr != nil {
-				if err == nil {
-					t.Errorf("addDoorsAtRoom() expected error %v, but got nil", tt.wantErr)
-					return
-				}
-				if err.Error() != tt.wantErr.Error() {
-					t.Errorf("addDoorsAtRoom() expected error %v, but got %v", tt.wantErr, err)
-					return
-				}
-			} else {
-				if err != nil {
-					t.Errorf("addDoorsAtRoom() expected no error, but got %v", err)
-					return
-				}
-
-				if len(level.Rooms) < 2 {
-					t.Errorf("addDoorsAtRoom() expected at least 2 rooms, but got %d", len(level.Rooms))
-					return
-				}
-
-				if !reflect.DeepEqual(level.Rooms[0].Doors, tt.wantDoorsInRooms[0].Doors) {
-					t.Errorf("addDoorsAtRoom() room 0 doors = %v, want %v", level.Rooms[0].Doors, tt.wantDoorsInRooms[0].Doors)
-				}
-
-				if !reflect.DeepEqual(level.Rooms[1].Doors, tt.wantDoorsInRooms[1].Doors) {
-					t.Errorf("addDoorsAtRoom() room 1 doors = %v, want %v", level.Rooms[1].Doors, tt.wantDoorsInRooms[1].Doors)
-				}
-			}
-		})
-	}
-}
-
-func TestLevel_addItemsAtRooms(t *testing.T) {
-	source := rand.New(rand.NewSource(randomSeedTest))
-
-	tests := []struct {
-		name                string
-		countFood           uint
-		countElixir         uint
-		countScroll         uint
-		countWeapon         uint
-		mapSize             primitives.Size2D[uint]
-		wantFoodPositions   map[primitives.Point2D[int]]bool
-		wantElixirPositions map[primitives.Point2D[int]]bool
-		wantScrollPositions map[primitives.Point2D[int]]bool
-		wantWeaponPositions map[primitives.Point2D[int]]bool
-		wantErr             error
-	}{
-		{
-			name:                "BaseTest",
-			countFood:           3,
-			countElixir:         3,
-			countScroll:         3,
-			countWeapon:         3,
-			mapSize:             primitives.Size2D[uint]{Height: 30, Width: 90},
-			wantFoodPositions:   map[primitives.Point2D[int]]bool{{X: 56, Y: 3}: true, {X: 67, Y: 26}: true, {X: 71, Y: 27}: true},
-			wantElixirPositions: map[primitives.Point2D[int]]bool{{X: 54, Y: 6}: true, {X: 67, Y: 28}: true, {X: 72, Y: 27}: true},
-			wantScrollPositions: map[primitives.Point2D[int]]bool{{X: 8, Y: 17}: true, {X: 58, Y: 7}: true, {X: 67, Y: 5}: true},
-			wantWeaponPositions: map[primitives.Point2D[int]]bool{{X: 11, Y: 25}: true, {X: 54, Y: 4}: true, {X: 56, Y: 14}: true},
-			wantErr:             nil,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			level := NewLevel(source, tt.mapSize)
-			err := level.generateNineRooms()
-			if err != nil {
-				t.Fatalf("generateNineRooms returned an error: %v", err)
-				return
-			}
-
-			err = level.addItemsAtRooms(tt.countFood, tt.countElixir, tt.countScroll, tt.countWeapon)
-			if tt.wantErr != nil {
-				if err == nil {
-					t.Errorf("addItemsAtRooms() expected error %v, but got nil", tt.wantErr)
-				}
-			} else {
-				if err != nil {
-					t.Errorf("addItemsAtRooms() expected no error, but got %v", err)
-				}
-
-				foodPositions := make(map[primitives.Point2D[int]]bool)
-				for _, room := range level.Rooms {
-					for _, food := range room.Foods {
-						if !foodPositions[food.Shape.Point] {
-							foodPositions[food.Shape.Point] = true
-						}
-					}
-				}
-				if !reflect.DeepEqual(tt.wantFoodPositions, foodPositions) {
-					t.Errorf("expected %+v food positions, got %+v", tt.wantFoodPositions, foodPositions)
-				}
-
-				elixirPositions := make(map[primitives.Point2D[int]]bool)
-				for _, room := range level.Rooms {
-					for _, elixir := range room.Elixirs {
-						if !elixirPositions[elixir.Shape.Point] {
-							elixirPositions[elixir.Shape.Point] = true
-						}
-					}
-				}
-				if !reflect.DeepEqual(tt.wantElixirPositions, elixirPositions) {
-					t.Errorf("expected %+v elixir positions, got %+v", tt.wantElixirPositions, elixirPositions)
-				}
-
-				scrollPositions := make(map[primitives.Point2D[int]]bool)
-				for _, room := range level.Rooms {
-					for _, scroll := range room.Scrolls {
-						if !scrollPositions[scroll.Shape.Point] {
-							scrollPositions[scroll.Shape.Point] = true
-						}
-					}
-				}
-				if !reflect.DeepEqual(tt.wantScrollPositions, scrollPositions) {
-					t.Errorf("expected %+v scroll positions, got %+v", tt.wantScrollPositions, scrollPositions)
-				}
-
-				weaponPositions := make(map[primitives.Point2D[int]]bool)
-				for _, room := range level.Rooms {
-					for _, weapon := range room.Weapons {
-						if !weaponPositions[weapon.Shape.Point] {
-							weaponPositions[weapon.Shape.Point] = true
-						}
-					}
-				}
-				if !reflect.DeepEqual(tt.wantWeaponPositions, weaponPositions) {
-					t.Errorf("expected %+v weapon positions, got %+v", tt.wantWeaponPositions, weaponPositions)
 				}
 			}
 		})

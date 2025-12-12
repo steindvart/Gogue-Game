@@ -29,7 +29,7 @@ func NewGame() (*Game, error) {
 	source := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	game := Game{
-		level: world.NewLevel(source, primitives.Size2D[uint]{Height: MapHeight, Width: MapWidth}),
+		level: world.NewLevelWithDefaults(source, primitives.Size2D[uint]{Height: MapHeight, Width: MapWidth}),
 		view:  viewcli.NewGame(),
 	}
 
@@ -76,7 +76,7 @@ func (g *Game) initInput() {
 			action.MoveRightUpperCorner,
 			action.MoveLefLowerCorner,
 			action.MoveRightLowerCorner:
-			g.level.MovePlayer(movementRegistry[g.eventToAction(event)])
+			g.level.MovePlayerWithCheckCollision(movementRegistry[g.eventToAction(event)])
 		case action.Exit:
 			g.signal = signals.Stop
 			return nil
