@@ -2,6 +2,7 @@ package world
 
 import (
 	"gogue/internal/model/primitives"
+	"gogue/internal/utils"
 	"math/rand"
 	"strings"
 	"testing"
@@ -58,7 +59,7 @@ func TestPassage_NewPassageOnX(t *testing.T) {
 					dx := current.X - previous.X
 					dy := current.Y - previous.Y
 
-					if !((abs(dx) == 1 && dy == 0) || (dx == 0 && abs(dy) == 1)) {
+					if !((utils.Abs(dx) == 1 && dy == 0) || (dx == 0 && utils.Abs(dy) == 1)) {
 						t.Errorf("Points are not connected properly: %d -> %d", previous, current)
 					}
 				}
@@ -130,7 +131,7 @@ func TestPassage_NewPassageOnY(t *testing.T) {
 					dx := current.X - previous.X
 					dy := current.Y - previous.Y
 
-					if !((abs(dx) == 1 && dy == 0) || (dx == 0 && abs(dy) == 1)) {
+					if !((utils.Abs(dx) == 1 && dy == 0) || (dx == 0 && utils.Abs(dy) == 1)) {
 						t.Errorf("Points are not connected properly: %d -> %d", previous, current)
 					}
 				}
@@ -149,11 +150,4 @@ func TestPassage_NewPassageOnY(t *testing.T) {
 			}
 		})
 	}
-}
-
-func abs(x int) int {
-	if x < 0 {
-		return -x
-	}
-	return x
 }
