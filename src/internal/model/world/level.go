@@ -32,7 +32,7 @@ type Level struct {
 	passageGen    PassageGenerator
 	entitySpawner EntitySpawner
 	playerSpawner PlayerSpawner
-	mapRenderer   FieldRenderer
+	fieldRenderer FieldRenderer
 }
 
 func NewLevelWithDefaults(random utils.Randomizer, mapSize primitives.Size2D[uint]) *Level {
@@ -64,7 +64,7 @@ func NewLevelWithComponents(
 		passageGen:    passageGen,
 		entitySpawner: entitySpawner,
 		playerSpawner: playerSpawner,
-		mapRenderer:   mapRenderer,
+		fieldRenderer: mapRenderer,
 		Enemies:       []entities.Enemy{},
 		Foods:         []items.Food{},
 		Elixirs:       []items.Elixir{},
@@ -254,9 +254,9 @@ func (l *Level) checkCollisionWithEnemy(pos primitives.Point2D[int]) bool {
 	return false
 }
 
-// MakeCurrentMap создаёт двумерное представление карты уровня
-func (l *Level) MakeCurrentMap(w, h int) [][]common.GameEntityType {
-	return l.mapRenderer.RenderField(w, h, l)
+// MakeCurrentField создаёт двумерное представление карты уровня
+func (l *Level) MakeCurrentField(w, h int) [][]common.GameEntityType {
+	return l.fieldRenderer.RenderField(w, h, l)
 }
 
 // GetItemAtPosition возвращает предмет на позиции (если есть)
