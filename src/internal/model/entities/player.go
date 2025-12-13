@@ -11,7 +11,7 @@ type Player struct {
 	*items.Weapon
 	Experience     uint
 	CharacterLevel uint
-	ViewRadius     uint
+	ViewRadius     int
 }
 
 func NewPlayer(box *primitives.Box) *Player {
