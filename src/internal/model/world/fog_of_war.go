@@ -13,7 +13,7 @@ type FogOfWar struct {
 	// Эти клетки остаются видимыми даже когда игрок уходит
 	exploredTiles map[primitives.Point2D[int]]bool
 
-	// Размеры карты для проверки границ
+	// Размеры поля для проверки границ
 	width  int
 	height int
 }
@@ -73,10 +73,10 @@ func (f *FogOfWar) computeVisibleTiles(
 ) map[primitives.Point2D[int]]bool {
 	visible := make(map[primitives.Point2D[int]]bool)
 
-	// Игрок всегда видит свою позицию
+	// Смотрящий всегда видит свою позицию
 	visible[origin] = true
 
-	// Определяем границы области видимости (квадрат вокруг игрока)
+	// Определяем границы области видимости (квадрат вокруг смотрящего)
 	minX := utils.Max(0, origin.X-radius)
 	maxX := utils.Min(f.width-1, origin.X+radius)
 	minY := utils.Max(0, origin.Y-radius)
@@ -87,16 +87,8 @@ func (f *FogOfWar) computeVisibleTiles(
 		for x := minX; x <= maxX; x++ {
 			target := primitives.Point2D[int]{X: x, Y: y}
 
-			// Проверяем расстояние (используем радиус как расстояние, а не квадрат)
-			dx := float64(target.X - origin.X)
-			dy := float64(target.Y - origin.Y)
-			distance := math.Sqrt(dx*dx + dy*dy)
-
-			if distance <= float64(radius) {
-				// Проверяем видимость по лучу
-				if f.isVisible(field, origin, target) {
-					visible[target] = true
-				}
+			if isInVisibleArea(origin, target, radius) {
+				visible[target] = f.isVisible(field, origin, target)
 			}
 		}
 	}
@@ -104,11 +96,32 @@ func (f *FogOfWar) computeVisibleTiles(
 	return visible
 }
 
+func isInVisibleArea(origin, target primitives.Point2D[int], viewRadius int) bool {
+	dx := float64(target.X - origin.X)
+	dy := float64(target.Y - origin.Y)
+	distance := math.Sqrt(dx*dx + dy*dy)
+
+	return distance <= float64(viewRadius)
+}
+
 // isVisible проверяет, видна ли целевая точка из точки origin используя ray casting
 func (f *FogOfWar) isVisible(
 	field [][]common.GameEntityType,
 	origin, target primitives.Point2D[int],
 ) bool {
+	// @todo - ввести в реализацию или удалить (пока больше склоняюсь ко второму варианту)
+	// Краевой случай - когда смотрящий находится в проходе, который расположен вплотную к стене
+	// Стену изнутри прохода не должно быть видно (или должно?)
+	// if passage := f.findPassage(origin, passages); passage != nil {
+	// 	if !f.isInBounds(target) {
+	// 		return false
+	// 	}
+
+	// 	if field[target.Y][target.X] == common.WorldTypeWall {
+	// 		return false
+	// 	}
+	// }
+
 	// Получаем все точки на луче от origin до target
 	rayPoints := f.bresenhamLine(origin, target)
 
@@ -126,10 +139,9 @@ func (f *FogOfWar) isVisible(
 			return false
 		}
 
+		// Стена и пустое пространство блокирует видимость
 		entityType := field[point.Y][point.X]
-
-		// Стена блокирует видимость
-		if entityType == common.WorldTypeWall {
+		if entityType == common.WorldTypeWall || entityType == common.EntityTypeNone {
 			return false
 		}
 	}
@@ -190,13 +202,42 @@ func (f *FogOfWar) isStaticTile(entityType common.GameEntityType) bool {
 	return entityType == common.WorldTypeWall ||
 		entityType == common.WorldTypePassage ||
 		entityType == common.WorldTypeDoor ||
-		entityType == common.WorldTypePortal
+		entityType == common.WorldTypePortal ||
+		entityType == common.WorldTypeRoomFloor
 }
 
-// isInBounds проверяет, находится ли точка в границах карты
+// isInBounds проверяет, находится ли точка в границах текущего поля
 func (f *FogOfWar) isInBounds(pos primitives.Point2D[int]) bool {
 	return pos.X >= 0 && pos.X < f.width && pos.Y >= 0 && pos.Y < f.height
 }
+
+// @todo - ввести в реализацию или удалить (пока больше склоняюсь ко второму варианту)
+// findPlayerPassage определяет, находится ли игрок в каком-либо проходе
+// func (f *FogOfWar) findPassage(pos primitives.Point2D[int], passages []Passage) *Passage {
+// 	for i := range passages {
+// 		if f.isInPassage(pos, passages[i]) {
+// 			return &passages[i]
+// 		}
+// 	}
+// 	return nil
+// }
+
+// // isInPassage проверяет, находится ли позиция внутри прохода
+// func (f *FogOfWar) isInPassage(pos primitives.Point2D[int], passage Passage) bool {
+// 	// Исключение - если игрок в двери, то он не в проходе
+// 	if pos == passage.DoorOne || pos == passage.DoorTwo {
+// 		return false
+// 	}
+
+// 	// Проверяем путь прохода
+// 	for _, wayPoint := range passage.Way {
+// 		if pos == wayPoint {
+// 			return true
+// 		}
+// 	}
+
+// 	return false
+// }
 
 // Reset сбрасывает память о посещённых областях (например, при переходе на новый уровень)
 func (f *FogOfWar) Reset() {
