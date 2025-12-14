@@ -78,6 +78,15 @@ func (r *DefaultFieldRenderer) renderSingleRoom(room Room, field [][]common.Game
 			field[row][endX] = common.WorldTypeWall
 		}
 	}
+
+	// Пространство внутри комнаты
+	for row := startY + 1; row <= endY-1; row++ {
+		for col := startX + 1; col <= endX-1; col++ {
+			if r.isInBounds(col, row, field) {
+				field[row][col] = common.WorldTypeRoomFloor
+			}
+		}
+	}
 }
 
 func (r *DefaultFieldRenderer) renderPortal(portal primitives.Box, field [][]common.GameEntityType) {
