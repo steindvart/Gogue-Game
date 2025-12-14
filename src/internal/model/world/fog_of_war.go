@@ -151,6 +151,7 @@ func (f *FogOfWar) isVisible(
 }
 
 // bresenhamLine реализует алгоритм Брезенхэма для построения линии между двумя точками
+// Wiki: https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
 func (f *FogOfWar) bresenhamLine(from, to primitives.Point2D[int]) []primitives.Point2D[int] {
 	var points []primitives.Point2D[int]
 

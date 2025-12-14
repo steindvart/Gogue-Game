@@ -82,9 +82,9 @@ func TestIsVisible(t *testing.T) {
 		{
 			name: "direct line of sight",
 			field: [][]common.GameEntityType{
-				{0, 0, 0, 0, 0},
-				{0, 0, 0, 0, 0},
-				{0, 0, 0, 0, 0},
+				{common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
+				{common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
+				{common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
 			},
 			origin: primitives.Point2D[int]{X: 0, Y: 1},
 			target: primitives.Point2D[int]{X: 4, Y: 1},
@@ -93,9 +93,20 @@ func TestIsVisible(t *testing.T) {
 		{
 			name: "wall blocking view",
 			field: [][]common.GameEntityType{
-				{0, 0, 0, 0, 0},
-				{0, 0, common.WorldTypeWall, 0, 0},
-				{0, 0, 0, 0, 0},
+				{common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
+				{common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeWall, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
+				{common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
+			},
+			origin: primitives.Point2D[int]{X: 0, Y: 1},
+			target: primitives.Point2D[int]{X: 4, Y: 1},
+			want:   false,
+		},
+		{
+			name: "none type blocking view",
+			field: [][]common.GameEntityType{
+				{common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
+				{common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.EntityTypeNone, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
+				{common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
 			},
 			origin: primitives.Point2D[int]{X: 0, Y: 1},
 			target: primitives.Point2D[int]{X: 4, Y: 1},
@@ -104,10 +115,10 @@ func TestIsVisible(t *testing.T) {
 		{
 			name: "diagonal view through passage",
 			field: [][]common.GameEntityType{
-				{0, 0, 0, 0, 0},
-				{0, common.WorldTypePassage, 0, 0, 0},
-				{0, 0, common.WorldTypePassage, 0, 0},
-				{0, 0, 0, 0, 0},
+				{common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
+				{common.WorldTypeRoomFloor, common.WorldTypePassage, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
+				{common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypePassage, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
+				{common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
 			},
 			origin: primitives.Point2D[int]{X: 0, Y: 0},
 			target: primitives.Point2D[int]{X: 3, Y: 3},
@@ -116,9 +127,9 @@ func TestIsVisible(t *testing.T) {
 		{
 			name: "same position",
 			field: [][]common.GameEntityType{
-				{0, 0, 0},
-				{0, 0, 0},
-				{0, 0, 0},
+				{common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
+				{common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
+				{common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
 			},
 			origin: primitives.Point2D[int]{X: 1, Y: 1},
 			target: primitives.Point2D[int]{X: 1, Y: 1},
@@ -149,11 +160,11 @@ func TestApplyFogOfWar(t *testing.T) {
 	t.Run("player sees items in view radius", func(t *testing.T) {
 		// Создаём простое поле 5x5
 		fullField := [][]common.GameEntityType{
-			{0, 0, 0, 0, 0},
-			{0, common.FoodTypeBread, 0, 0, 0},
-			{0, 0, common.EntityTypePlayer, 0, 0},
-			{0, 0, 0, common.EntityTypeZombie, 0},
-			{0, 0, 0, 0, 0},
+			{common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
+			{common.WorldTypeRoomFloor, common.FoodTypeBread, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
+			{common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.EntityTypePlayer, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
+			{common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.EntityTypeZombie, common.WorldTypeRoomFloor},
+			{common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
 		}
 
 		fog := NewFogOfWar(5, 5)
@@ -181,9 +192,9 @@ func TestApplyFogOfWar(t *testing.T) {
 	t.Run("walls are remembered after viewing", func(t *testing.T) {
 		// Поле со стеной
 		fullField := [][]common.GameEntityType{
-			{common.WorldTypeWall, common.WorldTypeWall, common.WorldTypeWall, 0, 0},
-			{0, 0, 0, 0, 0},
-			{0, 0, 0, 0, 0},
+			{common.WorldTypeWall, common.WorldTypeWall, common.WorldTypeWall, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
+			{common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
+			{common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
 		}
 
 		fog := NewFogOfWar(5, 3)
@@ -213,9 +224,9 @@ func TestApplyFogOfWar(t *testing.T) {
 	t.Run("enemies disappear when out of view", func(t *testing.T) {
 		// Поле с врагом
 		fullField := [][]common.GameEntityType{
-			{common.EntityTypeZombie, 0, 0, 0, 0},
-			{0, 0, 0, 0, 0},
-			{0, 0, 0, 0, 0},
+			{common.EntityTypeZombie, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
+			{common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
+			{common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
 		}
 
 		fog := NewFogOfWar(5, 3)
@@ -245,9 +256,9 @@ func TestApplyFogOfWar(t *testing.T) {
 	t.Run("passages and doors are remembered", func(t *testing.T) {
 		// Поле с проходом и дверью
 		fullField := [][]common.GameEntityType{
-			{common.WorldTypePassage, common.WorldTypeDoor, 0, 0, 0},
-			{0, 0, 0, 0, 0},
-			{0, 0, 0, 0, 0},
+			{common.WorldTypePassage, common.WorldTypeDoor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
+			{common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
+			{common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
 		}
 
 		fog := NewFogOfWar(5, 3)
