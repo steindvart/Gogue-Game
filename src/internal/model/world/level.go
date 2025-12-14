@@ -56,7 +56,7 @@ func NewLevelWithComponents(
 	passageGen PassageGenerator,
 	entitySpawner EntitySpawner,
 	playerSpawner PlayerSpawner,
-	mapRenderer FieldRenderer,
+	fieldRenderer FieldRenderer,
 ) *Level {
 	return &Level{
 		config:        cfg,
@@ -65,7 +65,7 @@ func NewLevelWithComponents(
 		passageGen:    passageGen,
 		entitySpawner: entitySpawner,
 		playerSpawner: playerSpawner,
-		fieldRenderer: mapRenderer,
+		fieldRenderer: fieldRenderer,
 		fogOfWar:      NewFogOfWar(int(cfg.MapSize.Width), int(cfg.MapSize.Height)),
 		Enemies:       []entities.Enemy{},
 		Foods:         []items.Food{},
