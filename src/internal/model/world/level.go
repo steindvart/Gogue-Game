@@ -32,7 +32,8 @@ type Level struct {
 	passageGen    PassageGenerator
 	entitySpawner EntitySpawner
 	playerSpawner PlayerSpawner
-	mapRenderer   FieldRenderer
+	fieldRenderer FieldRenderer
+	fogOfWar      *FogOfWar
 }
 
 func NewLevelWithDefaults(random utils.Randomizer, mapSize primitives.Size2D[uint]) *Level {
@@ -55,7 +56,7 @@ func NewLevelWithComponents(
 	passageGen PassageGenerator,
 	entitySpawner EntitySpawner,
 	playerSpawner PlayerSpawner,
-	mapRenderer FieldRenderer,
+	fieldRenderer FieldRenderer,
 ) *Level {
 	return &Level{
 		config:        cfg,
@@ -64,7 +65,8 @@ func NewLevelWithComponents(
 		passageGen:    passageGen,
 		entitySpawner: entitySpawner,
 		playerSpawner: playerSpawner,
-		mapRenderer:   mapRenderer,
+		fieldRenderer: fieldRenderer,
+		fogOfWar:      NewFogOfWar(int(cfg.MapSize.Width), int(cfg.MapSize.Height)),
 		Enemies:       []entities.Enemy{},
 		Foods:         []items.Food{},
 		Elixirs:       []items.Elixir{},
@@ -106,6 +108,9 @@ func (l *Level) GenerateWithExistingPlayer(player *entities.Player) error {
 }
 
 func (l *Level) generateEnvironment() error {
+	// Сбрасываем туман войны при генерации нового уровня
+	l.fogOfWar.Reset()
+
 	// Геометрия
 	rooms, finishPortal, err := l.roomGen.GenerateRooms(l.config, l.random)
 	if err != nil {
@@ -254,9 +259,18 @@ func (l *Level) checkCollisionWithEnemy(pos primitives.Point2D[int]) bool {
 	return false
 }
 
-// MakeCurrentMap создаёт двумерное представление карты уровня
-func (l *Level) MakeCurrentMap(w, h int) [][]common.GameEntityType {
-	return l.mapRenderer.RenderField(w, h, l)
+// MakeCurrentField создаёт двумерное представление карты уровня с учётом тумана войны
+func (l *Level) MakeCurrentField(w, h int) [][]common.GameEntityType {
+	// Сначала рендерим полное поле
+	fullField := l.fieldRenderer.RenderField(w, h, l)
+
+	// Если игрока нет, возвращаем пустое поле (всё скрыто туманом войны)
+	if l.Player == nil {
+		return utils.CreateEmpty2DSlice[common.GameEntityType](h, w)
+	}
+
+	// Фильтруем поле с учётом тумана войны и радиуса обзора игрока
+	return l.fogOfWar.ApplyFogOfWar(fullField, l.Player.GetPosition(), l.Player.ViewRadius)
 }
 
 // GetItemAtPosition возвращает предмет на позиции (если есть)

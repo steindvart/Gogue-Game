@@ -48,7 +48,7 @@ func (g *Game) initRender() {
 	g.view.SetDrawFunc(func(screen tcell.Screen, x, y, width, height int) (int, int, int, int) {
 		// -2: учёт рамки
 		fw, fh := width-2, height-2
-		field := g.level.MakeCurrentMap(fw, fh)
+		field := g.level.MakeCurrentField(fw, fh)
 		g.view.SetFieldToScreen(screen, field, x+1, y+1)
 		return x, y, width, height
 	})

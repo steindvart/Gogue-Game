@@ -5,6 +5,7 @@ import (
 	"gogue/internal/model/entities"
 	"gogue/internal/model/items"
 	"gogue/internal/model/primitives"
+	"gogue/internal/utils"
 )
 
 type FieldRenderer interface {
@@ -18,7 +19,7 @@ func NewDefaultFieldRenderer() *DefaultFieldRenderer {
 }
 
 func (r *DefaultFieldRenderer) RenderField(width, height int, level *Level) [][]common.GameEntityType {
-	field := r.createEmptyField(width, height)
+	field := utils.CreateEmpty2DSlice[common.GameEntityType](height, width)
 
 	// Порядок рендеринга (от фона к переднему плану):
 	// 1. Комнаты (стены и пол)
@@ -33,14 +34,6 @@ func (r *DefaultFieldRenderer) RenderField(width, height int, level *Level) [][]
 	r.renderEnemies(level.Enemies, field, width, height)
 	r.renderPlayer(level.Player, field, width, height)
 
-	return field
-}
-
-func (r *DefaultFieldRenderer) createEmptyField(width, height int) [][]common.GameEntityType {
-	field := make([][]common.GameEntityType, height)
-	for y := range field {
-		field[y] = make([]common.GameEntityType, width)
-	}
 	return field
 }
 
@@ -83,6 +76,15 @@ func (r *DefaultFieldRenderer) renderSingleRoom(room Room, field [][]common.Game
 		}
 		if r.isInBounds(endX, row, field) {
 			field[row][endX] = common.WorldTypeWall
+		}
+	}
+
+	// Пространство внутри комнаты
+	for row := startY + 1; row <= endY-1; row++ {
+		for col := startX + 1; col <= endX-1; col++ {
+			if r.isInBounds(col, row, field) {
+				field[row][col] = common.WorldTypeRoomFloor
+			}
 		}
 	}
 }

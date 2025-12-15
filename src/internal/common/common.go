@@ -3,8 +3,10 @@ package common
 type GameEntityType int
 
 const (
-	EntityTypePlayer GameEntityType = iota + 1
+	EntityTypeNone GameEntityType = iota
+	EntityTypePlayer
 	WorldTypeWall
+	WorldTypeRoomFloor
 	WorldTypePortal
 	WorldTypePassage
 	WorldTypeDoor
