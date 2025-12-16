@@ -49,7 +49,7 @@ func (g *Game) updateGameView() {
 
 	player := g.level.Player
 	if player != nil {
-		g.view.UpdatePlayerInfo(viewcli.PlayerInfo{
+		g.view.UpdatePlayerInfo(&viewcli.PlayerInfo{
 			Health:           player.Attributes.Health,
 			MaxHealth:        player.Attributes.MaxHealth,
 			Strength:         player.Attributes.Strength,

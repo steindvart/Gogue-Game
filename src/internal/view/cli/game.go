@@ -17,8 +17,11 @@ const (
 )
 
 const (
+	// Общие цвета
+	ColorWhite = "#FFFFFF" // White
+
 	// Цвета игрока
-	ColorPlayerFg = "#FFD700" // Gold
+	ColorPlayer = "#FFD700" // Gold
 
 	// Цвета стен и структур
 	ColorWall   = "#808080" // Gray
@@ -46,10 +49,11 @@ const (
 )
 
 type PlayerInfo struct {
-	Health           float64
-	MaxHealth        float64
-	Strength         float64
-	Agility          float64
+	Health    float64
+	MaxHealth float64
+	Strength  float64
+	Agility   float64
+	// @todo - сделать view структура для эффектов
 	TemporaryEffects []*primitives.Effect
 }
 
@@ -70,170 +74,172 @@ func NewGame() *Game {
 		fieldPanel:   tview.NewTextView(),
 	}
 
-	// Настройка панели статистики
-	game.statsPanel.
+	game.setupPanels()
+	game.setupLayout()
+
+	return game
+}
+
+func (g *Game) setupPanels() {
+	g.statsPanel.
 		SetDynamicColors(true).
 		SetBorder(true).
 		SetTitle("Stats").
 		SetBackgroundColor(tcell.ColorBlack)
 
-	// Настройка панели эффектов
-	game.effectsPanel.
+	g.effectsPanel.
 		SetDynamicColors(true).
 		SetBorder(true).
 		SetTitle("Effects").
 		SetBackgroundColor(tcell.ColorBlack)
 
-	// Настройка контейнера информационной панели (вертикальное расположение)
-	game.infoPanel.
+	g.infoPanel.
 		SetDirection(tview.FlexRow).
-		AddItem(game.statsPanel, 0, 1, false).
-		AddItem(game.effectsPanel, 0, 1, false).
+		AddItem(g.statsPanel, 0, 1, false).
+		AddItem(g.effectsPanel, 0, 1, false).
 		SetBackgroundColor(tcell.ColorBlack)
 
-	// Настройка игрового поля (правые 2/3)
-	game.fieldPanel.
-		SetDynamicColors(true). // Включаем обработку цветных тегов
-		SetWordWrap(false).     // Отключаем перенос строк
+	g.fieldPanel.
+		SetDynamicColors(true).
+		SetWordWrap(false).
 		SetBorder(true).
 		SetTitle("Game").
 		SetBackgroundColor(tcell.ColorBlack)
+}
 
-	// Горизонтальная компоновка: информационная панель (фиксированная ширина) + игровое поле
-	horizontalFlex := tview.NewFlex().SetDirection(tview.FlexColumn)
-
-	horizontalFlex.
-		AddItem(game.infoPanel, MaxInfoPanelWidth, 0, false).
-		AddItem(game.fieldPanel, 0, 1, true)
-
+func (g *Game) setupLayout() {
+	// Горизонтальная компоновка: информационная панель + игровое поле
+	horizontalFlex := tview.NewFlex().
+		SetDirection(tview.FlexColumn).
+		AddItem(g.infoPanel, MaxInfoPanelWidth, 0, false).
+		AddItem(g.fieldPanel, 0, 1, true)
 	horizontalFlex.SetBackgroundColor(tcell.ColorBlack)
 
-	// Создаём пустой primitives.Box с тёмным фоном для выравнивания элементов
+	// Пустой бокс для нижнего отступа
 	gapBox := tview.NewBox().SetBackgroundColor(tcell.ColorBlack)
 
-	// Вертикальная компоновка: верхний отступ + панели (ограниченная высота) + нижний отступ
-	game.container.SetDirection(tview.FlexRow).
-		AddItem(horizontalFlex, MaxPanelHeight, 0, true). // Основные панели (фиксированная высота)
-		AddItem(gapBox, 0, 1, false).                     // Нижний отступ (растягивается)
+	// Вертикальная компоновка: панели + нижний отступ
+	g.container.
+		SetDirection(tview.FlexRow).
+		AddItem(horizontalFlex, MaxPanelHeight, 0, true).
+		AddItem(gapBox, 0, 1, false).
 		SetBackgroundColor(tcell.ColorBlack)
-
-	return game
 }
 
 func (g *Game) GetContainer() *tview.Flex {
 	return g.container
 }
 
-func (g *Game) UpdatePlayerInfo(info PlayerInfo) {
-	// Обновление панели статистики
+func (g *Game) UpdatePlayerInfo(info *PlayerInfo) {
+	g.updateStatsPanel(info)
+	g.updateEffectsPanel(info.TemporaryEffects)
+}
+
+func (g *Game) updateStatsPanel(info *PlayerInfo) {
 	g.statsPanel.Clear()
-	fmt.Fprintf(g.statsPanel, "\n")
+	fmt.Fprintln(g.statsPanel)
 	fmt.Fprintf(g.statsPanel, " [%s::b]HP:[-:-:-]       %.f/%-.f\n", ColorHP, info.Health, info.MaxHealth)
 	fmt.Fprintf(g.statsPanel, " [%s::b]Strength:[-:-:-] %.f\n", ColorStrength, info.Strength)
 	fmt.Fprintf(g.statsPanel, " [%s::b]Agility:[-:-:-]  %.f\n", ColorAgility, info.Agility)
+}
 
-	// Обновление панели эффектов
+// @todo - сделать view структура для эффектов
+func (g *Game) updateEffectsPanel(effects []*primitives.Effect) {
 	g.effectsPanel.Clear()
-	fmt.Fprintf(g.effectsPanel, " [%s::b]ACTIVE EFFECTS:[-:-:-] (%d)\n\n", ColorEffects, len(info.TemporaryEffects))
+	fmt.Fprintf(g.effectsPanel, " [%s::b]ACTIVE EFFECTS:[-:-:-] (%d)\n\n", ColorEffects, len(effects))
 
-	if len(info.TemporaryEffects) > 0 {
-		for i, effect := range info.TemporaryEffects {
-			if i > 0 {
-				fmt.Fprintln(g.effectsPanel, "───────────────────────────────────")
-			}
-			fmt.Fprintf(g.effectsPanel, "[%s::b]Duration:[-:-:-] %d steps\n", ColorEffects, effect.Duration.Steps)
-			fmt.Fprintf(g.effectsPanel, "  HP:  %+6.1f\n", effect.Attributes.Health)
-			fmt.Fprintf(g.effectsPanel, "  STR: %+6.1f\n", effect.Attributes.Strength)
-			fmt.Fprintf(g.effectsPanel, "  AGI: %+6.1f\n", effect.Attributes.Agility)
+	for i, effect := range effects {
+		if i > 0 {
+			fmt.Fprintln(g.effectsPanel, "───────────────────────────────────")
 		}
+		g.renderEffect(effect)
 	}
+}
+
+func (g *Game) renderEffect(effect *primitives.Effect) {
+	fmt.Fprintf(g.effectsPanel, "[%s::b]Duration:[-:-:-] %d steps\n", ColorEffects, effect.Duration.Steps)
+	fmt.Fprintf(g.effectsPanel, "  HP:  %+6.1f\n", effect.Attributes.Health)
+	fmt.Fprintf(g.effectsPanel, "  STR: %+6.1f\n", effect.Attributes.Strength)
+	fmt.Fprintf(g.effectsPanel, "  AGI: %+6.1f\n", effect.Attributes.Agility)
 }
 
 func (g *Game) UpdateGameField(field [][]common.GameEntityType) {
 	g.fieldPanel.Clear()
+	g.renderField(field)
+}
 
-	// Отступ по Y
-	for i := 0; i < FieldMarginY; i++ {
+func (g *Game) renderMarginsY(margin int) {
+	for i := 0; i < margin; i++ {
 		fmt.Fprintln(g.fieldPanel)
 	}
+}
+
+func (g *Game) renderField(field [][]common.GameEntityType) {
+	g.renderMarginsY(FieldMarginY)
 
 	for y := range field {
-		// Отступ по X
-		for i := 0; i < FieldMarginX; i++ {
-			fmt.Fprint(g.fieldPanel, " ")
-		}
+		g.renderMarginX(FieldMarginX)
+		g.renderRow(field, y)
+		g.resetColorAndNewLine()
+	}
+}
 
-		// Отрисовка строки поля
-		for x := range field[0] {
-			ch := ' '
-			color := "#FFFFFF"   // Белый по умолчанию
-			bgcolor := "#000000" // Чёрный фон для всех
+func (g *Game) renderMarginX(margin int) {
+	for i := 0; i < margin; i++ {
+		fmt.Fprint(g.fieldPanel, " ")
+	}
+}
 
-			switch field[y][x] {
-			case common.EntityTypePlayer:
-				ch = '☿'
-				color = ColorPlayerFg
-			case common.WorldTypeWall:
-				ch = '█'
-				color = ColorWall
-			case common.WorldTypeRoomFloor:
-				ch = ' '
-			case common.WorldTypePortal:
-				ch = '◎'
-				color = ColorPortal
-			case common.WorldTypePassage,
-				common.WorldTypeDoor:
-				ch = '█'
-				color = ColorDoor
-			case common.EntityTypeZombie:
-				ch = 'Z'
-				color = ColorZombie
-			case common.EntityTypeVampire:
-				ch = 'V'
-				color = ColorVampire
-			case common.EntityTypeGhost:
-				ch = 'G'
-				color = ColorGhost
-			case common.EntityTypeOgre:
-				ch = 'O'
-				color = ColorOgre
-			case common.EntityTypeSnakeMage:
-				ch = 'S'
-				color = ColorSnakeMage
-			case common.FoodTypePotatoes,
-				common.FoodTypeBread,
-				common.FoodTypeMeat,
-				common.FoodTypeMistery,
-				common.FoodTypeBeer:
-				ch = 'ð'
-				color = ColorFood
-			case common.ElixirTypeStrength,
-				common.ElixirTypeAgility,
-				common.ElixirTypeDwarfism,
-				common.ElixirTypeGiantism,
-				common.ElixirTypeMystery:
-				ch = '¶'
-				color = ColorElixir
-			case common.ScrollTypeStrength,
-				common.ScrollTypeAgility,
-				common.ScrollTypeUltimate,
-				common.ScrollTypeMaxHealth,
-				common.ScrollTypeMystery:
-				ch = '!'
-				color = ColorScroll
-			case common.Weapon:
-				ch = 'ƒ'
-				color = ColorWeapon
-			}
+func (g *Game) renderRow(field [][]common.GameEntityType, y int) {
+	for x := range field[0] {
+		ch, colorFg := g.getCellAppearance(field[y][x])
 
-			// @todo - сделать разные фоны для разных типов поверхностей
-			// @todo - сделать так, чтобы цвет фона зависел от типа поверхности под объектом (разделить поле на два слоя?)
-			// Формат с фоном: [foreground:background]char
-			fmt.Fprintf(g.fieldPanel, "[%s:%s]%c", color, bgcolor, ch)
-		}
+		// @todo - сделать разные фоны для разных типов поверхностей
+		// @todo - сделать так, чтобы цвет фона зависел от типа поверхности под объектом (разделить поле на два слоя?)
+		// Формат с фоном: [foreground:background]char
+		fmt.Fprintf(g.fieldPanel, "[%s:#000000]%c", colorFg, ch)
+	}
+}
 
-		// Сброс цвета в конце строки и перевод строки
-		fmt.Fprintf(g.fieldPanel, "[-]\n")
+func (g *Game) resetColorAndNewLine() {
+	fmt.Fprintf(g.fieldPanel, "[-]\n")
+}
+
+func (g *Game) getCellAppearance(entityType common.GameEntityType) (rune, string) {
+	switch entityType {
+	case common.EntityTypePlayer:
+		return '☿', ColorPlayer
+	case common.WorldTypeWall:
+		return '█', ColorWall
+	case common.WorldTypeRoomFloor:
+		return ' ', ColorWhite
+	case common.WorldTypePortal:
+		return '◎', ColorPortal
+	case common.WorldTypePassage, common.WorldTypeDoor:
+		return '█', ColorDoor
+	case common.EntityTypeZombie:
+		return 'Z', ColorZombie
+	case common.EntityTypeVampire:
+		return 'V', ColorVampire
+	case common.EntityTypeGhost:
+		return 'G', ColorGhost
+	case common.EntityTypeOgre:
+		return 'O', ColorOgre
+	case common.EntityTypeSnakeMage:
+		return 'S', ColorSnakeMage
+	case common.FoodTypePotatoes, common.FoodTypeBread, common.FoodTypeMeat,
+		common.FoodTypeMistery, common.FoodTypeBeer:
+		return 'ð', ColorFood
+	case common.ElixirTypeStrength, common.ElixirTypeAgility, common.ElixirTypeDwarfism,
+		common.ElixirTypeGiantism, common.ElixirTypeMystery:
+		return '¶', ColorElixir
+	case common.ScrollTypeStrength, common.ScrollTypeAgility, common.ScrollTypeUltimate,
+		common.ScrollTypeMaxHealth, common.ScrollTypeMystery:
+		return '!', ColorScroll
+	case common.Weapon:
+		return 'ƒ', ColorWeapon
+	default:
+		return ' ', ColorWhite
 	}
 }
 
