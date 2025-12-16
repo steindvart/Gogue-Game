@@ -17,16 +17,17 @@ const (
 
 const (
 	// Общие цвета
+	ColorBlack = "#000000" // Black
 	ColorWhite = "#FFFFFF" // White
 
 	// Цвета игрока
 	ColorPlayer = "#FFD700" // Gold
 
 	// Цвета стен и структур
-	ColorWall   = "#808080" // Gray
-	ColorFoor   = "#808080" // Gray
-	ColorDoor   = "#C0C0C0" // Silber
-	ColorPortal = "#FF00FF" // Purple
+	ColorWall    = "#808080" // Gray
+	ColorFloor   = "#808080" // Gray
+	ColorPassage = "#C0C0C0" // Silber
+	ColorPortal  = "#FF00FF" // Purple
 
 	// Цвета врагов
 	ColorZombie    = "#00FF00" // Green
@@ -197,12 +198,12 @@ func (g *Game) renderMarginX(margin int) {
 
 func (g *Game) renderRow(field [][]common.GameEntityType, y int) {
 	for x := range field[0] {
-		ch, colorFg := g.getCellAppearance(field[y][x])
+		ch, colorFg, colorBg := g.getCellAppearance(field[y][x])
 
 		// @todo - сделать разные фоны для разных типов поверхностей
 		// @todo - сделать так, чтобы цвет фона зависел от типа поверхности под объектом (разделить поле на два слоя?)
 		// Формат с фоном: [foreground:background]char
-		fmt.Fprintf(g.fieldPanel, "[%s:#000000]%c", colorFg, ch)
+		fmt.Fprintf(g.fieldPanel, "[%s:%s]%c", colorFg, colorBg, ch)
 	}
 }
 
@@ -210,41 +211,41 @@ func (g *Game) resetColorAndNewLine() {
 	fmt.Fprintf(g.fieldPanel, "[-]\n")
 }
 
-func (g *Game) getCellAppearance(entityType common.GameEntityType) (rune, string) {
+func (g *Game) getCellAppearance(entityType common.GameEntityType) (rune, string, string) {
 	switch entityType {
 	case common.EntityTypePlayer:
-		return '☿', ColorPlayer
+		return '☿', ColorPlayer, ColorBlack
 	case common.WorldTypeWall:
-		return '█', ColorWall
+		return ' ', ColorWall, ColorWall
 	case common.WorldTypeRoomFloor:
-		return '.', ColorFoor
+		return '.', ColorFloor, ColorBlack
 	case common.WorldTypePortal:
-		return '◎', ColorPortal
+		return '◎', ColorPortal, ColorBlack
 	case common.WorldTypePassage, common.WorldTypeDoor:
-		return '█', ColorDoor
+		return ' ', ColorPassage, ColorPassage
 	case common.EntityTypeZombie:
-		return 'Z', ColorZombie
+		return 'Z', ColorZombie, ColorBlack
 	case common.EntityTypeVampire:
-		return 'V', ColorVampire
+		return 'V', ColorVampire, ColorBlack
 	case common.EntityTypeGhost:
-		return 'G', ColorGhost
+		return 'G', ColorGhost, ColorBlack
 	case common.EntityTypeOgre:
-		return 'O', ColorOgre
+		return 'O', ColorOgre, ColorBlack
 	case common.EntityTypeSnakeMage:
-		return 'S', ColorSnakeMage
+		return 'S', ColorSnakeMage, ColorBlack
 	case common.FoodTypePotatoes, common.FoodTypeBread, common.FoodTypeMeat,
 		common.FoodTypeMistery, common.FoodTypeBeer:
-		return 'ð', ColorFood
+		return 'ð', ColorFood, ColorBlack
 	case common.ElixirTypeStrength, common.ElixirTypeAgility, common.ElixirTypeDwarfism,
 		common.ElixirTypeGiantism, common.ElixirTypeMystery:
-		return '¶', ColorElixir
+		return '¶', ColorElixir, ColorBlack
 	case common.ScrollTypeStrength, common.ScrollTypeAgility, common.ScrollTypeUltimate,
 		common.ScrollTypeMaxHealth, common.ScrollTypeMystery:
-		return '!', ColorScroll
+		return '!', ColorScroll, ColorBlack
 	case common.Weapon:
-		return 'ƒ', ColorWeapon
+		return 'ƒ', ColorWeapon, ColorBlack
 	default:
-		return ' ', ColorWhite
+		return ' ', ColorWhite, ColorBlack
 	}
 }
 
