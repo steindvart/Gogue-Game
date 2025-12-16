@@ -45,13 +45,25 @@ func NewGame() (*Game, error) {
 }
 
 func (g *Game) initRender() {
-	g.view.SetDrawFunc(func(screen tcell.Screen, x, y, width, height int) (int, int, int, int) {
-		// -2: учёт рамки
+	g.view.SetFieldDrawFunc(func(screen tcell.Screen, x, y, width, height int) (int, int, int, int) {
+		// -2: учёт рамки в поле отображения
 		fw, fh := width-2, height-2
 		field := g.level.MakeCurrentField(fw, fh)
-		g.view.SetFieldToScreen(screen, field, x+1, y+1)
+		g.view.SetFieldToScreen(screen, field, x, y)
 		return x, y, width, height
 	})
+
+	// Обновляем информацию об игроке
+	player := g.level.Player
+	if player != nil {
+		g.view.UpdatePlayerInfo(viewcli.PlayerInfo{
+			Health:           player.Attributes.Health,
+			MaxHealth:        player.Attributes.MaxHealth,
+			Strength:         player.Attributes.Strength,
+			Agility:          player.Attributes.Agility,
+			TemporaryEffects: player.TemporaryEffects,
+		})
+	}
 }
 
 func (g *Game) initInput() {
@@ -125,12 +137,22 @@ func (g *Game) eventToAction(event *tcell.EventKey) action.Type {
 }
 
 func (g *Game) Update(float64) signals.Type {
-	// Нет lastField, всё строится на лету
+	player := g.level.Player
+	if player != nil {
+		g.view.UpdatePlayerInfo(viewcli.PlayerInfo{
+			Health:           player.Attributes.Health,
+			MaxHealth:        player.Attributes.MaxHealth,
+			Strength:         player.Attributes.Strength,
+			Agility:          player.Attributes.Agility,
+			TemporaryEffects: player.TemporaryEffects,
+		})
+	}
+
 	sig := g.signal
 	g.signal = signals.NoSignal
 	return sig
 }
 
 func (g *Game) Primitive() tview.Primitive {
-	return g.view
+	return g.view.GetContainer()
 }
