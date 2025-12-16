@@ -54,23 +54,41 @@ type PlayerInfo struct {
 }
 
 type Game struct {
-	container  *tview.Flex
-	infoPanel  *tview.TextView
-	fieldPanel *tview.TextView
+	container    *tview.Flex
+	infoPanel    *tview.Flex // Контейнер для statsPanel и effectsPanel
+	statsPanel   *tview.TextView
+	effectsPanel *tview.TextView
+	fieldPanel   *tview.TextView
 }
 
 func NewGame() *Game {
 	game := &Game{
-		container:  tview.NewFlex(),
-		infoPanel:  tview.NewTextView(),
-		fieldPanel: tview.NewTextView(),
+		container:    tview.NewFlex(),
+		infoPanel:    tview.NewFlex(),
+		statsPanel:   tview.NewTextView(),
+		effectsPanel: tview.NewTextView(),
+		fieldPanel:   tview.NewTextView(),
 	}
 
-	// Настройка информационной панели (левая 1/3)
-	game.infoPanel.
+	// Настройка панели статистики
+	game.statsPanel.
 		SetDynamicColors(true).
 		SetBorder(true).
-		SetTitle("Player Info").
+		SetTitle("Stats").
+		SetBackgroundColor(tcell.ColorBlack)
+
+	// Настройка панели эффектов
+	game.effectsPanel.
+		SetDynamicColors(true).
+		SetBorder(true).
+		SetTitle("Effects").
+		SetBackgroundColor(tcell.ColorBlack)
+
+	// Настройка контейнера информационной панели (вертикальное расположение)
+	game.infoPanel.
+		SetDirection(tview.FlexRow).
+		AddItem(game.statsPanel, 0, 1, false).
+		AddItem(game.effectsPanel, 0, 1, false).
 		SetBackgroundColor(tcell.ColorBlack)
 
 	// Настройка игрового поля (правые 2/3)
@@ -107,24 +125,26 @@ func (g *Game) GetContainer() *tview.Flex {
 }
 
 func (g *Game) UpdatePlayerInfo(info PlayerInfo) {
-	g.infoPanel.Clear()
-	fmt.Fprintf(g.infoPanel, "[%s::b]HP:[-:-:-] %.1f / %.1f\n", ColorHP, info.Health, info.MaxHealth)
-	fmt.Fprintf(g.infoPanel, "[%s::b]Strength:[-:-:-] %.1f\n", ColorStrength, info.Strength)
-	fmt.Fprintf(g.infoPanel, "[%s::b]Agility:[-:-:-] %.1f\n\n", ColorAgility, info.Agility)
+	// Обновление панели статистики
+	g.statsPanel.Clear()
+	fmt.Fprintf(g.statsPanel, "\n")
+	fmt.Fprintf(g.statsPanel, " [%s::b]HP:[-:-:-]       %.f/%-.f\n", ColorHP, info.Health, info.MaxHealth)
+	fmt.Fprintf(g.statsPanel, " [%s::b]Strength:[-:-:-] %.f\n", ColorStrength, info.Strength)
+	fmt.Fprintf(g.statsPanel, " [%s::b]Agility:[-:-:-]  %.f\n", ColorAgility, info.Agility)
+
+	// Обновление панели эффектов
+	g.effectsPanel.Clear()
+	fmt.Fprintf(g.effectsPanel, " [%s::b]ACTIVE EFFECTS:[-:-:-] (%d)\n\n", ColorEffects, len(info.TemporaryEffects))
 
 	if len(info.TemporaryEffects) > 0 {
-		fmt.Fprintf(g.infoPanel, "[%s::b]Active Effects:[-:-:-]\n", ColorEffects)
-		for _, effect := range info.TemporaryEffects {
-			fmt.Fprintf(g.infoPanel, "  • Duration: %d steps\n", effect.Duration.Steps)
-			if effect.Attributes.Health != 0 {
-				fmt.Fprintf(g.infoPanel, "    HP: %+.1f\n", effect.Attributes.Health)
+		for i, effect := range info.TemporaryEffects {
+			if i > 0 {
+				fmt.Fprintln(g.effectsPanel, "───────────────────────────────────")
 			}
-			if effect.Attributes.Strength != 0 {
-				fmt.Fprintf(g.infoPanel, "    Str: %+.1f\n", effect.Attributes.Strength)
-			}
-			if effect.Attributes.Agility != 0 {
-				fmt.Fprintf(g.infoPanel, "    Agi: %+.1f\n", effect.Attributes.Agility)
-			}
+			fmt.Fprintf(g.effectsPanel, "[%s::b]Duration:[-:-:-] %d steps\n", ColorEffects, effect.Duration.Steps)
+			fmt.Fprintf(g.effectsPanel, "  HP:  %+6.1f\n", effect.Attributes.Health)
+			fmt.Fprintf(g.effectsPanel, "  STR: %+6.1f\n", effect.Attributes.Strength)
+			fmt.Fprintf(g.effectsPanel, "  AGI: %+6.1f\n", effect.Attributes.Agility)
 		}
 	}
 }
