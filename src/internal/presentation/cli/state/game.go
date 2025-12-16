@@ -38,22 +38,15 @@ func NewGame() (*Game, error) {
 		return nil, err
 	}
 
-	game.initRender()
+	game.updateGameView()
 	game.initInput()
 
 	return &game, nil
 }
 
-func (g *Game) initRender() {
-	g.view.SetFieldDrawFunc(func(screen tcell.Screen, x, y, width, height int) (int, int, int, int) {
-		// -2: учёт рамки в поле отображения
-		fw, fh := width-2, height-2
-		field := g.level.MakeCurrentField(fw, fh)
-		g.view.SetFieldToScreen(screen, field, x, y)
-		return x, y, width, height
-	})
+func (g *Game) updateGameView() {
+	g.view.UpdateGameField(g.level.MakeCurrentField(MapWidth, MapHeight))
 
-	// Обновляем информацию об игроке
 	player := g.level.Player
 	if player != nil {
 		g.view.UpdatePlayerInfo(viewcli.PlayerInfo{
@@ -137,16 +130,7 @@ func (g *Game) eventToAction(event *tcell.EventKey) action.Type {
 }
 
 func (g *Game) Update(float64) signals.Type {
-	player := g.level.Player
-	if player != nil {
-		g.view.UpdatePlayerInfo(viewcli.PlayerInfo{
-			Health:           player.Attributes.Health,
-			MaxHealth:        player.Attributes.MaxHealth,
-			Strength:         player.Attributes.Strength,
-			Agility:          player.Attributes.Agility,
-			TemporaryEffects: player.TemporaryEffects,
-		})
-	}
+	g.updateGameView()
 
 	sig := g.signal
 	g.signal = signals.NoSignal

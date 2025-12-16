@@ -12,6 +12,8 @@ import (
 const (
 	MaxPanelHeight    = 40
 	MaxInfoPanelWidth = 40
+	FieldMarginY      = 3
+	FieldMarginX      = 31
 )
 
 type PlayerInfo struct {
@@ -25,24 +27,27 @@ type PlayerInfo struct {
 type Game struct {
 	container  *tview.Flex
 	infoPanel  *tview.TextView
-	fieldPanel *tview.Box
+	fieldPanel *tview.TextView
 }
 
 func NewGame() *Game {
 	game := &Game{
 		container:  tview.NewFlex(),
 		infoPanel:  tview.NewTextView(),
-		fieldPanel: tview.NewBox(),
+		fieldPanel: tview.NewTextView(),
 	}
 
-	// Настройка информационной панели (левая треть)
+	// Настройка информационной панели (левая 1/3)
 	game.infoPanel.
+		SetDynamicColors(true).
 		SetBorder(true).
 		SetTitle("Player Info").
 		SetBackgroundColor(tcell.ColorBlack)
 
-	// Настройка игрового поля (правые две трети)
+	// Настройка игрового поля (правые 2/3)
 	game.fieldPanel.
+		SetDynamicColors(true). // Включаем обработку цветных тегов
+		SetWordWrap(false).     // Отключаем перенос строк
 		SetBorder(true).
 		SetTitle("Game").
 		SetBackgroundColor(tcell.ColorBlack)
@@ -68,12 +73,10 @@ func NewGame() *Game {
 	return game
 }
 
-// GetContainer возвращает контейнер для встраивания в tview приложение
 func (g *Game) GetContainer() *tview.Flex {
 	return g.container
 }
 
-// UpdatePlayerInfo обновляет информацию об игроке на информационной панели
 func (g *Game) UpdatePlayerInfo(info PlayerInfo) {
 	g.infoPanel.Clear()
 	fmt.Fprintf(g.infoPanel, "[yellow::b]HP:[-:-:-] %.1f / %.1f\n", info.Health, info.MaxHealth)
@@ -97,83 +100,89 @@ func (g *Game) UpdatePlayerInfo(info PlayerInfo) {
 	}
 }
 
-// SetFieldDrawFunc устанавливает функцию отрисовки игрового поля
-func (g *Game) SetFieldDrawFunc(draw func(screen tcell.Screen, x, y, width, height int) (int, int, int, int)) {
-	g.fieldPanel.SetDrawFunc(draw)
-}
+func (g *Game) UpdateGameField(field [][]common.GameEntityType) {
+	g.fieldPanel.Clear()
 
-// SetInputCapture устанавливает обработчик ввода для всего контейнера
-func (g *Game) SetInputCapture(capture func(event *tcell.EventKey) *tcell.EventKey) {
-	g.container.SetInputCapture(capture)
-}
+	// Отступ по Y
+	for i := 0; i < FieldMarginY; i++ {
+		fmt.Fprintln(g.fieldPanel)
+	}
 
-// SetFieldToScreen отрисовывает игровое поле на экране
-func (g *Game) SetFieldToScreen(screen tcell.Screen, field [][]common.GameEntityType, ox, oy int) {
-	const marginX, marginY = 31, 4
+	for y := range field {
+		// Отступ по X
+		for i := 0; i < FieldMarginX; i++ {
+			fmt.Fprint(g.fieldPanel, " ")
+		}
 
-	for y := range len(field) - marginY {
-		for x := range len(field[0]) - marginX {
+		// Отрисовка строки поля
+		for x := range field[0] {
 			ch := ' '
-			style := tcell.StyleDefault.Background(tcell.ColorBlack)
+			color := "white"
+
 			switch field[y][x] {
 			case common.EntityTypePlayer:
 				ch = '☿' // 🦸
-				style = style.Foreground(tcell.ColorYellow)
+				color = "yellow"
 			case common.WorldTypeWall:
 				ch = '█'
-				style = style.Foreground(tcell.ColorGray)
+				color = "gray"
 			case common.WorldTypePortal:
 				ch = '0'
-			case common.WorldTypePassage:
-				fallthrough
-			case common.WorldTypeDoor:
+				color = "magenta"
+			case common.WorldTypePassage,
+				common.WorldTypeDoor:
 				ch = '█'
-				style = style.Foreground(tcell.ColorSilver)
+				color = "silver"
 			case common.EntityTypeZombie:
-				ch = '🧟'
+				ch = 'Z'
+				color = "green"
 			case common.EntityTypeVampire:
-				ch = '🧛'
+				ch = 'V'
+				color = "red"
 			case common.EntityTypeGhost:
-				ch = '👻'
+				ch = 'G'
+				color = "white"
 			case common.EntityTypeOgre:
-				ch = '👹'
+				ch = 'O'
+				color = "brown"
 			case common.EntityTypeSnakeMage:
-				ch = '🐍'
-			case common.FoodTypePotatoes:
-				ch = 'ꕔ' //'🍟'
-			case common.FoodTypeBread:
-				ch = 'ꕔ' //'🥖'
-			case common.FoodTypeMeat:
-				ch = 'ꕔ' //'🍖'
-			case common.FoodTypeMistery:
-				ch = 'ꕔ' //'🍄'
-			case common.FoodTypeBeer:
-				ch = 'ꕔ' //'🍺'
-			case common.ElixirTypeStrength:
-				ch = 'ᗨ' //'🧡'
-			case common.ElixirTypeAgility:
-				ch = 'ᗨ' //'💚'
-			case common.ElixirTypeDwarfism:
-				ch = 'ᗨ' //'🩵'
-			case common.ElixirTypeGiantism:
-				ch = 'ᗨ' //'💙'
-			case common.ElixirTypeMystery:
-				ch = 'ᗨ' //'🖤'
-			case common.ScrollTypeStrength:
-				ch = '⎕' //'📙'
-			case common.ScrollTypeAgility:
-				ch = '⎕' //'📗'
-			case common.ScrollTypeUltimate:
-				ch = '⎕' //'📘'
-			case common.ScrollTypeMaxHealth:
-				ch = '⎕' //'📕'
-			case common.ScrollTypeMystery:
-				ch = '⎕' //'📓'
+				ch = 'S'
+				color = "lime"
+			case common.FoodTypePotatoes,
+				common.FoodTypeBread,
+				common.FoodTypeMeat,
+				common.FoodTypeMistery,
+				common.FoodTypeBeer:
+				ch = 'ꕔ'
+				color = "orange"
+			case common.ElixirTypeStrength,
+				common.ElixirTypeAgility,
+				common.ElixirTypeDwarfism,
+				common.ElixirTypeGiantism,
+				common.ElixirTypeMystery:
+				ch = 'ᗨ'
+				color = "purple"
+			case common.ScrollTypeStrength,
+				common.ScrollTypeAgility,
+				common.ScrollTypeUltimate,
+				common.ScrollTypeMaxHealth,
+				common.ScrollTypeMystery:
+				ch = '⎕'
+				color = "cyan"
 			case common.Weapon:
-				ch = 'T' //'🗡'
+				ch = 'T'
+				color = "blue"
 			}
 
-			screen.SetContent(ox+x+marginX, oy+y+marginY, ch, nil, style)
+			// Правильный формат символа с тегом: [tag]char без закрывающего тега между символами
+			fmt.Fprintf(g.fieldPanel, "[%s]%c", color, ch)
 		}
+
+		// Сброс цвета в конце строки и перевод строки
+		fmt.Fprintf(g.fieldPanel, "[-]\n")
 	}
+}
+
+func (g *Game) SetInputCapture(capture func(event *tcell.EventKey) *tcell.EventKey) {
+	g.container.SetInputCapture(capture)
 }
