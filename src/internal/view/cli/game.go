@@ -220,7 +220,7 @@ func (g *Game) getCellAppearance(entityType common.GameEntityType) (rune, string
 	case common.WorldTypeRoomFloor:
 		return '.', ColorFloor, ColorBlack
 	case common.WorldTypePortal:
-		return '◎', ColorPortal, ColorBlack
+		return '@', ColorPortal, ColorBlack
 	case common.WorldTypePassage, common.WorldTypeDoor:
 		return ' ', ColorPassage, ColorPassage
 	case common.EntityTypeZombie:
