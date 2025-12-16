@@ -24,6 +24,7 @@ const (
 
 	// Цвета стен и структур
 	ColorWall   = "#808080" // Gray
+	ColorFoor   = "#808080" // Gray
 	ColorDoor   = "#C0C0C0" // Silber
 	ColorPortal = "#FF00FF" // Purple
 
@@ -216,7 +217,7 @@ func (g *Game) getCellAppearance(entityType common.GameEntityType) (rune, string
 	case common.WorldTypeWall:
 		return '█', ColorWall
 	case common.WorldTypeRoomFloor:
-		return ' ', ColorWhite
+		return '.', ColorFoor
 	case common.WorldTypePortal:
 		return '◎', ColorPortal
 	case common.WorldTypePassage, common.WorldTypeDoor:

@@ -203,8 +203,7 @@ func (f *FogOfWar) isStaticTile(entityType common.GameEntityType) bool {
 	return entityType == common.WorldTypeWall ||
 		entityType == common.WorldTypePassage ||
 		entityType == common.WorldTypeDoor ||
-		entityType == common.WorldTypePortal ||
-		entityType == common.WorldTypeRoomFloor
+		entityType == common.WorldTypePortal
 }
 
 // isInBounds проверяет, находится ли точка в границах текущего поля
