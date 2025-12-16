@@ -3,7 +3,6 @@ package cli
 import (
 	"fmt"
 	"gogue/internal/common"
-	"gogue/internal/model/primitives"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -48,13 +47,19 @@ const (
 	ColorEffects  = "#87CEEB" // Sky blue
 )
 
+type EffectInfo struct {
+	DurationSteps  int
+	HealthModify   float64
+	StrengthModify float64
+	AgilityModify  float64
+}
+
 type PlayerInfo struct {
-	Health    float64
-	MaxHealth float64
-	Strength  float64
-	Agility   float64
-	// @todo - сделать view структура для эффектов
-	TemporaryEffects []*primitives.Effect
+	Health           float64
+	MaxHealth        float64
+	Strength         float64
+	Agility          float64
+	TemporaryEffects []EffectInfo
 }
 
 type Game struct {
@@ -143,8 +148,7 @@ func (g *Game) updateStatsPanel(info *PlayerInfo) {
 	fmt.Fprintf(g.statsPanel, " [%s::b]Agility:[-:-:-]  %.f\n", ColorAgility, info.Agility)
 }
 
-// @todo - сделать view структура для эффектов
-func (g *Game) updateEffectsPanel(effects []*primitives.Effect) {
+func (g *Game) updateEffectsPanel(effects []EffectInfo) {
 	g.effectsPanel.Clear()
 	fmt.Fprintf(g.effectsPanel, " [%s::b]ACTIVE EFFECTS:[-:-:-] (%d)\n\n", ColorEffects, len(effects))
 
@@ -152,15 +156,15 @@ func (g *Game) updateEffectsPanel(effects []*primitives.Effect) {
 		if i > 0 {
 			fmt.Fprintln(g.effectsPanel, "───────────────────────────────────")
 		}
-		g.renderEffect(effect)
+		g.renderEffect(&effect)
 	}
 }
 
-func (g *Game) renderEffect(effect *primitives.Effect) {
-	fmt.Fprintf(g.effectsPanel, "[%s::b]Duration:[-:-:-] %d steps\n", ColorEffects, effect.Duration.Steps)
-	fmt.Fprintf(g.effectsPanel, "  HP:  %+6.1f\n", effect.Attributes.Health)
-	fmt.Fprintf(g.effectsPanel, "  STR: %+6.1f\n", effect.Attributes.Strength)
-	fmt.Fprintf(g.effectsPanel, "  AGI: %+6.1f\n", effect.Attributes.Agility)
+func (g *Game) renderEffect(effect *EffectInfo) {
+	fmt.Fprintf(g.effectsPanel, "[%s::b]Duration:[-:-:-] %d steps\n", ColorEffects, effect.DurationSteps)
+	fmt.Fprintf(g.effectsPanel, "  HP:  %+6.1f\n", effect.HealthModify)
+	fmt.Fprintf(g.effectsPanel, "  STR: %+6.1f\n", effect.StrengthModify)
+	fmt.Fprintf(g.effectsPanel, "  AGI: %+6.1f\n", effect.AgilityModify)
 }
 
 func (g *Game) UpdateGameField(field [][]common.GameEntityType) {

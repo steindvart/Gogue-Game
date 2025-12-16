@@ -54,9 +54,22 @@ func (g *Game) updateGameView() {
 			MaxHealth:        player.Attributes.MaxHealth,
 			Strength:         player.Attributes.Strength,
 			Agility:          player.Attributes.Agility,
-			TemporaryEffects: player.TemporaryEffects,
+			TemporaryEffects: g.convertEffectsToView(player.TemporaryEffects),
 		})
 	}
+}
+
+func (g *Game) convertEffectsToView(effects []*primitives.Effect) []viewcli.EffectInfo {
+	viewEffects := make([]viewcli.EffectInfo, 0, len(effects))
+	for _, effect := range effects {
+		viewEffects = append(viewEffects, viewcli.EffectInfo{
+			DurationSteps:  int(effect.Duration.Steps),
+			HealthModify:   effect.Attributes.Health,
+			StrengthModify: effect.Attributes.Strength,
+			AgilityModify:  effect.Attributes.Agility,
+		})
+	}
+	return viewEffects
 }
 
 func (g *Game) initInput() {
