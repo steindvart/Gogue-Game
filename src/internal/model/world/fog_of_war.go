@@ -4,7 +4,6 @@ import (
 	"gogue/internal/common"
 	"gogue/internal/model/primitives"
 	"gogue/internal/utils"
-	"math"
 )
 
 // FogOfWar управляет видимостью игрока и запоминает ранее посещённые области
@@ -87,7 +86,7 @@ func (f *FogOfWar) computeVisibleTiles(
 		for x := minX; x <= maxX; x++ {
 			target := primitives.Point2D[int]{X: x, Y: y}
 
-			if isInVisibleArea(origin, target, radius) {
+			if isInVisibleAreaCircle(origin, target, radius) {
 				visible[target] = f.isVisible(field, origin, target)
 			}
 		}
@@ -96,12 +95,17 @@ func (f *FogOfWar) computeVisibleTiles(
 	return visible
 }
 
-func isInVisibleArea(origin, target primitives.Point2D[int], viewRadius int) bool {
-	dx := float64(target.X - origin.X)
-	dy := float64(target.Y - origin.Y)
-	distance := math.Sqrt(dx*dx + dy*dy)
+// isInVisibleAreaCircle проверяет, находится ли целевая точка в области видимости
+// Использует октагональную метрику (круг) для более естественной формы на grid-сетке
+func isInVisibleAreaCircle(origin, target primitives.Point2D[int], viewRadius int) bool {
+	dx := utils.Abs(target.X - origin.X)
+	dy := utils.Abs(target.Y - origin.Y)
 
-	return distance <= float64(viewRadius)
+	minDist := utils.Min(dx, dy)
+	maxDist := utils.Max(dx, dy)
+	octagonalDistance := maxDist + minDist/2
+
+	return octagonalDistance <= viewRadius
 }
 
 // isVisible проверяет, видна ли целевая точка из точки origin используя ray casting
@@ -203,8 +207,7 @@ func (f *FogOfWar) isStaticTile(entityType common.GameEntityType) bool {
 	return entityType == common.WorldTypeWall ||
 		entityType == common.WorldTypePassage ||
 		entityType == common.WorldTypeDoor ||
-		entityType == common.WorldTypePortal ||
-		entityType == common.WorldTypeRoomFloor
+		entityType == common.WorldTypePortal
 }
 
 // isInBounds проверяет, находится ли точка в границах текущего поля

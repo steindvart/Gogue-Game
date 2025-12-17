@@ -38,20 +38,38 @@ func NewGame() (*Game, error) {
 		return nil, err
 	}
 
-	game.initRender()
+	game.updateGameView()
 	game.initInput()
 
 	return &game, nil
 }
 
-func (g *Game) initRender() {
-	g.view.SetDrawFunc(func(screen tcell.Screen, x, y, width, height int) (int, int, int, int) {
-		// -2: учёт рамки
-		fw, fh := width-2, height-2
-		field := g.level.MakeCurrentField(fw, fh)
-		g.view.SetFieldToScreen(screen, field, x+1, y+1)
-		return x, y, width, height
-	})
+func (g *Game) updateGameView() {
+	g.view.UpdateGameField(g.level.MakeCurrentField(MapWidth, MapHeight))
+
+	player := g.level.Player
+	if player != nil {
+		g.view.UpdatePlayerInfo(&viewcli.PlayerInfo{
+			Health:           player.Attributes.Health,
+			MaxHealth:        player.Attributes.MaxHealth,
+			Strength:         player.Attributes.Strength,
+			Agility:          player.Attributes.Agility,
+			TemporaryEffects: g.convertEffectsToView(player.TemporaryEffects),
+		})
+	}
+}
+
+func (g *Game) convertEffectsToView(effects []*primitives.Effect) []viewcli.EffectInfo {
+	viewEffects := make([]viewcli.EffectInfo, 0, len(effects))
+	for _, effect := range effects {
+		viewEffects = append(viewEffects, viewcli.EffectInfo{
+			DurationSteps:  int(effect.Duration.Steps),
+			HealthModify:   effect.Attributes.Health,
+			StrengthModify: effect.Attributes.Strength,
+			AgilityModify:  effect.Attributes.Agility,
+		})
+	}
+	return viewEffects
 }
 
 func (g *Game) initInput() {
@@ -125,12 +143,13 @@ func (g *Game) eventToAction(event *tcell.EventKey) action.Type {
 }
 
 func (g *Game) Update(float64) signals.Type {
-	// Нет lastField, всё строится на лету
+	g.updateGameView()
+
 	sig := g.signal
 	g.signal = signals.NoSignal
 	return sig
 }
 
 func (g *Game) Primitive() tview.Primitive {
-	return g.view
+	return g.view.GetContainer()
 }
