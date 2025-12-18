@@ -14,11 +14,6 @@ type Dropable interface {
 	Drop(position primitives.Point2D[int]) primitives.Box
 }
 
-type ItemLike interface {
-	primitives.Positional2D[int]
-	Dropable
-}
-
 type Item struct {
 	primitives.Box
 	Name string

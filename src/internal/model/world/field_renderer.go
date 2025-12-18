@@ -120,7 +120,7 @@ func (r *DefaultFieldRenderer) renderSinglePassage(passage Passage, field [][]co
 }
 
 func (r *DefaultFieldRenderer) renderItems(
-	itemsList []items.ItemLike,
+	itemsList []primitives.Positional2D[int],
 	field [][]common.GameEntityType,
 	width, height int,
 ) {

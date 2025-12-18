@@ -60,7 +60,7 @@ func (s *RoomBasedEntitySpawner) SpawnEntities(
 	}
 
 	result := &SpawnedEntities{
-		Items:   make([]items.ItemLike, 0),
+		Items:   make([]primitives.Positional2D[int], 0),
 		Enemies: make([]entities.Enemy, 0),
 	}
 

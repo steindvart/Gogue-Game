@@ -13,7 +13,7 @@ func TestDefaultFieldRenderer_RenderMap_EmptyLevel(t *testing.T) {
 	level := &Level{
 		Rooms:    []Room{},
 		Passages: []Passage{},
-		Items:    []items.ItemLike{},
+		Items:    []primitives.Positional2D[int]{},
 		Enemies:  []entities.Enemy{},
 		Player:   nil,
 	}
@@ -51,7 +51,7 @@ func TestDefaultFieldRenderer_RenderSingleRoom(t *testing.T) {
 	level := &Level{
 		Rooms:    []Room{room},
 		Passages: []Passage{},
-		Items:    []items.ItemLike{},
+		Items:    []primitives.Positional2D[int]{},
 		Enemies:  []entities.Enemy{},
 		Player:   nil,
 		FinishPortal: primitives.Box{
@@ -108,7 +108,7 @@ func TestDefaultFieldRenderer_RenderPassage(t *testing.T) {
 	level := &Level{
 		Rooms:    []Room{},
 		Passages: []Passage{passage},
-		Items:    []items.ItemLike{},
+		Items:    []primitives.Positional2D[int]{},
 		Enemies:  []entities.Enemy{},
 		Player:   nil,
 		FinishPortal: primitives.Box{
@@ -149,7 +149,7 @@ func TestDefaultFieldRenderer_RenderPortal(t *testing.T) {
 	level := &Level{
 		Rooms:    []Room{room},
 		Passages: []Passage{},
-		Items:    []items.ItemLike{},
+		Items:    []primitives.Positional2D[int]{},
 		Enemies:  []entities.Enemy{},
 		Player:   nil,
 		FinishPortal: primitives.Box{
@@ -212,7 +212,7 @@ func TestDefaultFieldRenderer_RenderItems(t *testing.T) {
 	level := &Level{
 		Rooms:    []Room{},
 		Passages: []Passage{},
-		Items:    []items.ItemLike{&food, &elixir, &scroll, &weapon},
+		Items:    []primitives.Positional2D[int]{&food, &elixir, &scroll, &weapon},
 		Enemies:  []entities.Enemy{},
 		Player:   nil,
 		FinishPortal: primitives.Box{
@@ -264,7 +264,7 @@ func TestDefaultFieldRenderer_RenderEnemies(t *testing.T) {
 	level := &Level{
 		Rooms:    []Room{},
 		Passages: []Passage{},
-		Items:    []items.ItemLike{},
+		Items:    []primitives.Positional2D[int]{},
 		Enemies:  []entities.Enemy{zombie, vampire},
 		Player:   nil,
 		FinishPortal: primitives.Box{
@@ -295,7 +295,7 @@ func TestDefaultFieldRenderer_RenderPlayer(t *testing.T) {
 	level := &Level{
 		Rooms:    []Room{},
 		Passages: []Passage{},
-		Items:    []items.ItemLike{},
+		Items:    []primitives.Positional2D[int]{},
 		Enemies:  []entities.Enemy{},
 		Player:   player,
 		FinishPortal: primitives.Box{
@@ -334,7 +334,7 @@ func TestDefaultFieldRenderer_PlayerOverlapsItem(t *testing.T) {
 	level := &Level{
 		Rooms:    []Room{},
 		Passages: []Passage{},
-		Items:    []items.ItemLike{&food},
+		Items:    []primitives.Positional2D[int]{&food},
 		Enemies:  []entities.Enemy{},
 		Player:   player,
 		FinishPortal: primitives.Box{
@@ -368,7 +368,7 @@ func TestDefaultFieldRenderer_BoundsChecking(t *testing.T) {
 	level := &Level{
 		Rooms:    []Room{},
 		Passages: []Passage{},
-		Items:    []items.ItemLike{&food},
+		Items:    []primitives.Positional2D[int]{&food},
 		Enemies:  []entities.Enemy{},
 		Player:   nil,
 		FinishPortal: primitives.Box{

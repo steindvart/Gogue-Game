@@ -3,7 +3,6 @@ package world
 import (
 	"gogue/internal/common"
 	"gogue/internal/model/entities"
-	"gogue/internal/model/items"
 	"gogue/internal/model/primitives"
 	"gogue/internal/utils"
 )
@@ -17,7 +16,7 @@ type Level struct {
 	// Сущности, хранящиеся непосредственно в уровне
 	Player  *entities.Player
 	Enemies []entities.Enemy
-	Items   []items.ItemLike // Все предметы хранятся здесь
+	Items   []primitives.Positional2D[int]
 
 	// Метаданные
 	Number uint
@@ -65,7 +64,7 @@ func NewLevelWithComponents(
 		fieldRenderer: fieldRenderer,
 		fogOfWar:      NewFogOfWar(int(cfg.MapSize.Width), int(cfg.MapSize.Height)),
 		Enemies:       []entities.Enemy{},
-		Items:         []items.ItemLike{},
+		Items:         []primitives.Positional2D[int]{},
 	}
 }
 
@@ -264,8 +263,7 @@ func (l *Level) MakeCurrentField(w, h int) [][]common.GameEntityType {
 	return l.fogOfWar.ApplyFogOfWar(fullField, l.Player.GetPosition(), l.Player.ViewRadius)
 }
 
-// GetItemAtPosition возвращает предмет на позиции (если есть)
-func (l *Level) GetItemAtPosition(pos primitives.Point2D[int]) items.ItemLike {
+func (l *Level) GetItemAtPosition(pos primitives.Point2D[int]) primitives.Positional2D[int] {
 	for _, item := range l.Items {
 		if item.GetPosition() == pos {
 			return item
@@ -274,8 +272,7 @@ func (l *Level) GetItemAtPosition(pos primitives.Point2D[int]) items.ItemLike {
 	return nil
 }
 
-// RemoveItem удаляет предмет из уровня
-func (l *Level) RemoveItem(item items.ItemLike) {
+func (l *Level) RemoveItem(item primitives.Positional2D[int]) {
 	for i, it := range l.Items {
 		if it == item {
 			l.Items = append(l.Items[:i], l.Items[i+1:]...)
@@ -284,7 +281,6 @@ func (l *Level) RemoveItem(item items.ItemLike) {
 	}
 }
 
-// AddItem добавляет предмет на уровень (например, при выбрасывании)
-func (l *Level) AddItem(item items.ItemLike) {
+func (l *Level) AddItem(item primitives.Positional2D[int]) {
 	l.Items = append(l.Items, item)
 }

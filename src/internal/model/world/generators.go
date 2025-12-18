@@ -2,7 +2,6 @@ package world
 
 import (
 	"gogue/internal/model/entities"
-	"gogue/internal/model/items"
 	"gogue/internal/model/primitives"
 	"gogue/internal/utils"
 )
@@ -24,7 +23,7 @@ type EntitySpawner interface {
 }
 
 type SpawnedEntities struct {
-	Items   []items.ItemLike
+	Items   []primitives.Positional2D[int]
 	Enemies []entities.Enemy
 }
 
