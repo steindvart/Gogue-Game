@@ -15,7 +15,7 @@ const (
 )
 
 type Room struct {
-	Box   primitives.Box
+	primitives.Box
 	Type  RoomType
 	Doors []primitives.Point2D[int]
 
@@ -23,16 +23,16 @@ type Room struct {
 	occupiedPositions map[primitives.Point2D[int]]bool
 }
 
-func NewRoom(roomType RoomType, shape primitives.Box) *Room {
+func NewRoom(roomType RoomType, box primitives.Box) *Room {
 	const roomMinWidth = 3
 	const roomMinHeight = 3
 
-	if shape.Size.Width < roomMinWidth || shape.Size.Height < roomMinHeight {
-		shape.Size.Width = roomMinWidth
-		shape.Size.Height = roomMinHeight
+	if box.Size.Width < roomMinWidth || box.Size.Height < roomMinHeight {
+		box.Size.Width = roomMinWidth
+		box.Size.Height = roomMinHeight
 	}
 	return &Room{
-		Box:               shape,
+		Box:               box,
 		Type:              roomType,
 		Doors:             []primitives.Point2D[int]{},
 		occupiedPositions: make(map[primitives.Point2D[int]]bool),
