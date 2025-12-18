@@ -19,11 +19,11 @@ func TestCharacter_NewCharacter_BasicInit(t *testing.T) {
 	if c == nil {
 		t.Fatalf("NewCharacter returned nil")
 	}
-	if c.Shape == nil {
-		t.Fatalf("Pointers must be initialized: Shape=%v, Attributes=%v", c.Shape, c.Attributes)
+	if c.Box == nil {
+		t.Fatalf("Pointers must be initialized: Box=%v, Attributes=%v", c.Box, c.Attributes)
 	}
-	if *c.Shape != box {
-		t.Errorf("Shape mismatch: got %+v want %+v", *c.Shape, box)
+	if *c.Box != box {
+		t.Errorf("Box mismatch: got %+v want %+v", *c.Box, box)
 	}
 	if c.Attributes != attrs {
 		t.Errorf("Attributes mismatch: got %+v want %+v", c.Attributes, attrs)
@@ -44,8 +44,8 @@ func TestCharacter_NewCharacter_IndependenceFromArgs(t *testing.T) {
 	attrs.Strength = 0
 	attrs.Agility = 0
 
-	if c.Shape.Point != (primitives.Point2D[int]{X: 5, Y: 5}) {
-		t.Errorf("Shape should be independent from original box; got point=%+v", c.Shape.Point)
+	if c.Box.Point != (primitives.Point2D[int]{X: 5, Y: 5}) {
+		t.Errorf("Box should be independent from original box; got point=%+v", c.Box.Point)
 	}
 	if c.Attributes.Health != 80 || c.Attributes.Strength != 10 || c.Attributes.Agility != 1 {
 		t.Errorf("Attributes should be independent: got (H %.1f, S %.1f, A %.1f)", c.Attributes.Health, c.Attributes.Strength, c.Attributes.Agility)
@@ -96,8 +96,8 @@ func TestCharacter_Move(t *testing.T) {
 	c.Move(delta)
 
 	want := primitives.Point2D[int]{X: 4, Y: 1}
-	if c.Shape.Point != want {
-		t.Errorf("Move() point = %v, want %v", c.Shape.Point, want)
+	if c.Box.Point != want {
+		t.Errorf("Move() point = %v, want %v", c.Box.Point, want)
 	}
 }
 

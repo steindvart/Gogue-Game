@@ -13,7 +13,7 @@ type Scroll struct {
 
 func NewScroll(box primitives.Box, t ScrollType, e *primitives.Effect) *Scroll {
 	return &Scroll{
-		Item:   &Item{Shape: box, Name: string(t)},
+		Item:   &Item{Box: box, Name: string(t)},
 		Effect: e,
 		Type:   t,
 	}

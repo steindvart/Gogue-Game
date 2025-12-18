@@ -87,10 +87,10 @@ func TestRoomBasedEntitySpawner_SpawnEntities_InRoomBounds(t *testing.T) {
 	// Функция для проверки что точка находится в какой-то комнате
 	isInRoom := func(point primitives.Point2D[int]) bool {
 		for _, room := range rooms {
-			minX := room.Shape.Point.X
-			minY := room.Shape.Point.Y
-			maxX := room.Shape.Point.X + int(room.Shape.Size.Width)
-			maxY := room.Shape.Point.Y + int(room.Shape.Size.Height)
+			minX := room.Box.Point.X
+			minY := room.Box.Point.Y
+			maxX := room.Box.Point.X + int(room.Box.Size.Width)
+			maxY := room.Box.Point.Y + int(room.Box.Size.Height)
 
 			if point.X >= minX && point.X < maxX && point.Y >= minY && point.Y < maxY {
 				return true
@@ -140,10 +140,10 @@ func TestRoomBasedEntitySpawner_SpawnEntities_NoStartRoom(t *testing.T) {
 
 	// Функция для проверки что точка находится в стартовой комнате
 	isInStartRoom := func(point primitives.Point2D[int]) bool {
-		minX := startRoom.Shape.Point.X
-		minY := startRoom.Shape.Point.Y
-		maxX := startRoom.Shape.Point.X + int(startRoom.Shape.Size.Width)
-		maxY := startRoom.Shape.Point.Y + int(startRoom.Shape.Size.Height)
+		minX := startRoom.Box.Point.X
+		minY := startRoom.Box.Point.Y
+		maxX := startRoom.Box.Point.X + int(startRoom.Box.Size.Width)
+		maxY := startRoom.Box.Point.Y + int(startRoom.Box.Size.Height)
 
 		return point.X >= minX && point.X < maxX && point.Y >= minY && point.Y < maxY
 	}

@@ -75,8 +75,8 @@ func TestFood_NewFood_BuiltinConfig(t *testing.T) {
 			}
 
 			// Check box is correctly set
-			if food.Shape != box {
-				t.Errorf("Expected box %v, got %v", box, food.Shape)
+			if food.Box != box {
+				t.Errorf("Expected box %v, got %v", box, food.Box)
 			}
 
 			// Other attributes should be zero
@@ -195,8 +195,8 @@ func TestFood_NewFoodByConfig(t *testing.T) {
 			}
 
 			// Verify box is set correctly
-			if food.Shape != tt.box {
-				t.Errorf("Expected box %v, got %v", tt.box, food.Shape)
+			if food.Box != tt.box {
+				t.Errorf("Expected box %v, got %v", tt.box, food.Box)
 			}
 
 			// For fixed-value range, verify exact value
@@ -354,8 +354,8 @@ func TestFood_NewFood_ZeroSizedBoxIsOk(t *testing.T) {
 		t.Fatal("Expected valid food with zero-sized box")
 	}
 
-	if food.Shape != box {
-		t.Errorf("Expected box %v, got %v", box, food.Shape)
+	if food.Box != box {
+		t.Errorf("Expected box %v, got %v", box, food.Box)
 	}
 }
 
@@ -397,12 +397,12 @@ func TestFood_NewFood_VariousPositions(t *testing.T) {
 				t.Fatal("Expected valid food")
 			}
 
-			if food.Shape.Point != tt.position {
-				t.Errorf("Expected position %v, got %v", tt.position, food.Shape.Point)
+			if food.Box.Point != tt.position {
+				t.Errorf("Expected position %v, got %v", tt.position, food.Box.Point)
 			}
 
-			if food.Shape.Size != tt.size {
-				t.Errorf("Expected size %v, got %v", tt.size, food.Shape.Size)
+			if food.Box.Size != tt.size {
+				t.Errorf("Expected size %v, got %v", tt.size, food.Box.Size)
 			}
 		})
 	}

@@ -65,8 +65,8 @@ func TestTreasure_NewTreasure_BuiltinConfig(t *testing.T) {
 			}
 
 			// Check box is correctly set
-			if treasure.Shape != box {
-				t.Errorf("Expected box %v, got %v", box, treasure.Shape)
+			if treasure.Box != box {
+				t.Errorf("Expected box %v, got %v", box, treasure.Box)
 			}
 
 			// Value should be positive
@@ -170,8 +170,8 @@ func TestTreasure_NewTreasureByConfig(t *testing.T) {
 			}
 
 			// Verify box is set correctly
-			if treasure.Shape != tt.box {
-				t.Errorf("Expected box %v, got %v", tt.box, treasure.Shape)
+			if treasure.Box != tt.box {
+				t.Errorf("Expected box %v, got %v", tt.box, treasure.Box)
 			}
 		})
 	}
@@ -334,8 +334,8 @@ func TestTreasure_NewTreasure_ZeroSizedBoxIsOk(t *testing.T) {
 		t.Fatal("Expected valid treasure with zero-sized box")
 	}
 
-	if treasure.Shape != box {
-		t.Errorf("Expected box %v, got %v", box, treasure.Shape)
+	if treasure.Box != box {
+		t.Errorf("Expected box %v, got %v", box, treasure.Box)
 	}
 }
 
@@ -377,12 +377,12 @@ func TestTreasure_NewTreasure_VariousPositions(t *testing.T) {
 				t.Fatal("Expected valid treasure")
 			}
 
-			if treasure.Shape.Point != tt.position {
-				t.Errorf("Expected position %v, got %v", tt.position, treasure.Shape.Point)
+			if treasure.Box.Point != tt.position {
+				t.Errorf("Expected position %v, got %v", tt.position, treasure.Box.Point)
 			}
 
-			if treasure.Shape.Size != tt.size {
-				t.Errorf("Expected size %v, got %v", tt.size, treasure.Shape.Size)
+			if treasure.Box.Size != tt.size {
+				t.Errorf("Expected size %v, got %v", tt.size, treasure.Box.Size)
 			}
 		})
 	}

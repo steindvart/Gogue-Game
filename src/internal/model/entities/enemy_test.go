@@ -18,7 +18,7 @@ package entities
 // 			want: &Zombie{
 // 				Enemy: Enemy{
 // 					Character: Character{
-// 						Shape:     primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 2}},
+// 						Box:     primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 2}},
 // 						Agility:   uint(AttributeRateLow),
 // 						Strength:  uint(AttributeRateAverage),
 // 						Health:    float64(AttributeRateHigh),
@@ -55,7 +55,7 @@ package entities
 // 			want: &Vampire{
 // 				Enemy: Enemy{
 // 					Character: Character{
-// 						Shape:     primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 2}},
+// 						Box:     primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 2}},
 // 						Agility:   uint(AttributeRateHigh),
 // 						Strength:  uint(AttributeRateAverage),
 // 						Health:    float64(AttributeRateHigh),
@@ -93,7 +93,7 @@ package entities
 // 			want: &Ghost{
 // 				Enemy: Enemy{
 // 					Character: Character{
-// 						Shape:     primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 2}},
+// 						Box:     primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 2}},
 // 						Agility:   uint(AttributeRateHigh),
 // 						Strength:  uint(AttributeRateLow),
 // 						Health:    float64(AttributeRateLow),
@@ -131,7 +131,7 @@ package entities
 // 			want: &Ogre{
 // 				Enemy: Enemy{
 // 					Character: Character{
-// 						Shape:     primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 2}},
+// 						Box:     primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 2}},
 // 						Agility:   uint(AttributeRateLow),
 // 						Strength:  uint(AttributeRateVeryHigh),
 // 						Health:    float64(AttributeRateVeryHigh),
@@ -169,7 +169,7 @@ package entities
 // 			want: &SnakeMage{
 // 				Enemy: Enemy{
 // 					Character: Character{
-// 						Shape:     primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 2}},
+// 						Box:     primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 2}},
 // 						Agility:   uint(AttributeRateVeryHigh),
 // 						Strength:  uint(AttributeRateAverage),
 // 						Health:    float64(AttributeRateHigh),

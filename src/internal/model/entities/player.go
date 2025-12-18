@@ -17,7 +17,7 @@ type Player struct {
 func NewPlayer(box *primitives.Box) *Player {
 	return &Player{
 		Character: &Character{
-			Shape: box,
+			Box: box,
 			Attributes: primitives.Attributes{
 				Health:    100,
 				MaxHealth: 100,

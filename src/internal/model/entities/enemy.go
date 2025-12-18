@@ -78,7 +78,7 @@ func NewZombie(box *primitives.Box) *Zombie {
 	return &Zombie{
 		Enemy: Enemy{
 			Character: &Character{
-				Shape: box,
+				Box: box,
 				Attributes: primitives.Attributes{
 					Agility:   float64(AttributeRateLow),
 					Strength:  float64(AttributeRateAverage),
@@ -97,7 +97,7 @@ func NewVampire(box *primitives.Box) *Vampire {
 	return &Vampire{
 		Enemy: Enemy{
 			Character: &Character{
-				Shape: box,
+				Box: box,
 				Attributes: primitives.Attributes{
 					Agility:   float64(AttributeRateHigh),
 					Strength:  float64(AttributeRateAverage),
@@ -117,7 +117,7 @@ func NewGhost(box *primitives.Box) *Ghost {
 	return &Ghost{
 		Enemy: Enemy{
 			Character: &Character{
-				Shape: box,
+				Box: box,
 				Attributes: primitives.Attributes{
 					Agility:   float64(AttributeRateHigh),
 					Strength:  float64(AttributeRateLow),
@@ -137,7 +137,7 @@ func NewOgre(box *primitives.Box) *Ogre {
 	return &Ogre{
 		Enemy: Enemy{
 			Character: &Character{
-				Shape: box,
+				Box: box,
 				Attributes: primitives.Attributes{
 					Agility:   float64(AttributeRateLow),
 					Strength:  float64(AttributeRateVeryHigh),
@@ -157,7 +157,7 @@ func NewSnakeMage(box *primitives.Box) *SnakeMage {
 	return &SnakeMage{
 		Enemy: Enemy{
 			Character: &Character{
-				Shape: box,
+				Box: box,
 				Attributes: primitives.Attributes{
 					Agility:   float64(AttributeRateVeryHigh),
 					Strength:  float64(AttributeRateAverage),

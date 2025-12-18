@@ -31,7 +31,7 @@ func TestStartRoomPlayerSpawner_SpawnPlayer(t *testing.T) {
 	}
 
 	// Проверяем что у игрока есть позиция
-	if player.Shape == nil {
+	if player.Box == nil {
 		t.Fatal("Player shape is nil")
 	}
 
@@ -75,11 +75,11 @@ func TestStartRoomPlayerSpawner_SpawnPlayer_InStartRoom(t *testing.T) {
 	}
 
 	// Проверяем что игрок в пределах стартовой комнаты
-	playerPos := player.Shape.Point
-	minX := startRoom.Shape.Point.X
-	minY := startRoom.Shape.Point.Y
-	maxX := startRoom.Shape.Point.X + int(startRoom.Shape.Size.Width)
-	maxY := startRoom.Shape.Point.Y + int(startRoom.Shape.Size.Height)
+	playerPos := player.Box.Point
+	minX := startRoom.Box.Point.X
+	minY := startRoom.Box.Point.Y
+	maxX := startRoom.Box.Point.X + int(startRoom.Box.Size.Width)
+	maxY := startRoom.Box.Point.Y + int(startRoom.Box.Size.Height)
 
 	if playerPos.X < minX || playerPos.X >= maxX || playerPos.Y < minY || playerPos.Y >= maxY {
 		t.Errorf("Player position %+v is not in start room bounds (X: %d-%d, Y: %d-%d)",
@@ -122,10 +122,10 @@ func TestStartRoomPlayerSpawner_GetStartPosition(t *testing.T) {
 	}
 
 	// Проверяем что позиция в стартовой комнате
-	minX := startRoom.Shape.Point.X
-	minY := startRoom.Shape.Point.Y
-	maxX := startRoom.Shape.Point.X + int(startRoom.Shape.Size.Width)
-	maxY := startRoom.Shape.Point.Y + int(startRoom.Shape.Size.Height)
+	minX := startRoom.Box.Point.X
+	minY := startRoom.Box.Point.Y
+	maxX := startRoom.Box.Point.X + int(startRoom.Box.Size.Width)
+	maxY := startRoom.Box.Point.Y + int(startRoom.Box.Size.Height)
 
 	if position.X < minX || position.X >= maxX || position.Y < minY || position.Y >= maxY {
 		t.Errorf("Position %+v is not in start room bounds (X: %d-%d, Y: %d-%d)",
@@ -151,14 +151,14 @@ func TestStartRoomPlayerSpawner_SpawnPlayer_NoStartRoom(t *testing.T) {
 	rooms := []Room{
 		{
 			Type: RoomTypeOrdinary,
-			Shape: primitives.Box{
+			Box: primitives.Box{
 				Point: primitives.Point2D[int]{X: 10, Y: 10},
 				Size:  primitives.Size2D[uint]{Width: 5, Height: 5},
 			},
 		},
 		{
 			Type: RoomTypeFinish,
-			Shape: primitives.Box{
+			Box: primitives.Box{
 				Point: primitives.Point2D[int]{X: 20, Y: 20},
 				Size:  primitives.Size2D[uint]{Width: 5, Height: 5},
 			},
@@ -201,8 +201,8 @@ func TestStartRoomPlayerSpawner_Consistency(t *testing.T) {
 	}
 
 	// С одинаковым seed должны получить одинаковые позиции
-	if player.Shape.Point != *position {
+	if player.Box.Point != *position {
 		t.Errorf("SpawnPlayer and GetStartPosition returned different positions: %+v vs %+v",
-			player.Shape.Point, *position)
+			player.Box.Point, *position)
 	}
 }

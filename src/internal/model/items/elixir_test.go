@@ -325,8 +325,8 @@ func TestElixir_NewElixir_ZeroSizedBoxIsOk(t *testing.T) {
 		t.Fatal("Expected valid elixir with zero-sized box")
 	}
 
-	if elixir.Shape != box {
-		t.Errorf("Expected box %v, got %v", box, elixir.Shape)
+	if elixir.Box != box {
+		t.Errorf("Expected box %v, got %v", box, elixir.Box)
 	}
 }
 
@@ -335,15 +335,15 @@ func TestElixir_Drop(t *testing.T) {
 	initialBox := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 	elixir := NewElixirBuiltin(rng, initialBox, ElixirTypeStrength)
 
-	if elixir.Shape != initialBox {
-		t.Errorf("Expected initial box %v, got %v", initialBox, elixir.Shape)
+	if elixir.Box != initialBox {
+		t.Errorf("Expected initial box %v, got %v", initialBox, elixir.Box)
 	}
 
 	newPosition := primitives.Point2D[int]{X: 10, Y: 10}
 	resultBox := elixir.Drop(newPosition)
 
-	if elixir.Shape.Point != newPosition {
-		t.Errorf("Expected position to be updated to %v, got %v", newPosition, elixir.Shape.Point)
+	if elixir.Box.Point != newPosition {
+		t.Errorf("Expected position to be updated to %v, got %v", newPosition, elixir.Box.Point)
 	}
 
 	if resultBox.Point != newPosition {

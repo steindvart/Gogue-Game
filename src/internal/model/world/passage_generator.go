@@ -127,22 +127,22 @@ func (g *ConnectionTreePassageGenerator) isVerticalConnection(key [2]int) bool {
 
 func getDoorLeftWall(room Room, random utils.Randomizer) primitives.Point2D[int] {
 	const wall = 1
-	doorYFrom := room.Shape.Point.Y + wall
-	doorYTo := room.Shape.Point.Y + int(room.Shape.Size.Height) - wall
-	return primitives.Point2D[int]{X: room.Shape.Point.X, Y: random.Intn(doorYTo-doorYFrom) + doorYFrom}
+	doorYFrom := room.Box.Point.Y + wall
+	doorYTo := room.Box.Point.Y + int(room.Box.Size.Height) - wall
+	return primitives.Point2D[int]{X: room.Box.Point.X, Y: random.Intn(doorYTo-doorYFrom) + doorYFrom}
 }
 
 func getDoorRightWall(room Room, random utils.Randomizer) primitives.Point2D[int] {
 	const wall = 1
-	doorYFrom := room.Shape.Point.Y + wall
-	doorYTo := room.Shape.Point.Y + int(room.Shape.Size.Height) - wall
-	return primitives.Point2D[int]{X: room.Shape.Point.X + int(room.Shape.Size.Width) - 1, Y: random.Intn(doorYTo-doorYFrom) + doorYFrom}
+	doorYFrom := room.Box.Point.Y + wall
+	doorYTo := room.Box.Point.Y + int(room.Box.Size.Height) - wall
+	return primitives.Point2D[int]{X: room.Box.Point.X + int(room.Box.Size.Width) - 1, Y: random.Intn(doorYTo-doorYFrom) + doorYFrom}
 }
 
 func getDoorTopWall(room Room, random utils.Randomizer) primitives.Point2D[int] {
 	const wall = 1
-	doorXFrom := room.Shape.Point.X + wall
-	doorXTo := room.Shape.Point.X + int(room.Shape.Size.Width) - wall - 1
+	doorXFrom := room.Box.Point.X + wall
+	doorXTo := room.Box.Point.X + int(room.Box.Size.Width) - wall - 1
 	insideRoomWidth := doorXTo - doorXFrom
 	var doorX int
 	if insideRoomWidth == 0 {
@@ -150,13 +150,13 @@ func getDoorTopWall(room Room, random utils.Randomizer) primitives.Point2D[int] 
 	} else {
 		doorX = random.Intn(doorXTo-doorXFrom) + doorXFrom
 	}
-	return primitives.Point2D[int]{X: doorX, Y: room.Shape.Point.Y}
+	return primitives.Point2D[int]{X: doorX, Y: room.Box.Point.Y}
 }
 
 func getDoorDownWall(room Room, random utils.Randomizer) primitives.Point2D[int] {
 	const wall = 1
-	doorXFrom := room.Shape.Point.X + wall
-	doorXTo := room.Shape.Point.X + int(room.Shape.Size.Width) - wall - 1
+	doorXFrom := room.Box.Point.X + wall
+	doorXTo := room.Box.Point.X + int(room.Box.Size.Width) - wall - 1
 	insideRoomWidth := doorXTo - doorXFrom
 	var doorX int
 	if insideRoomWidth == 0 {
@@ -164,5 +164,5 @@ func getDoorDownWall(room Room, random utils.Randomizer) primitives.Point2D[int]
 	} else {
 		doorX = random.Intn(doorXTo-doorXFrom) + doorXFrom
 	}
-	return primitives.Point2D[int]{X: doorX, Y: room.Shape.Point.Y + int(room.Shape.Size.Height) - 1}
+	return primitives.Point2D[int]{X: doorX, Y: room.Box.Point.Y + int(room.Box.Size.Height) - 1}
 }

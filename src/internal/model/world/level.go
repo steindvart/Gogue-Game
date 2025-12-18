@@ -187,10 +187,10 @@ func isInSomeRoom(pos primitives.Point2D[int], rooms []Room) bool {
 }
 
 func isInRoom(pos primitives.Point2D[int], room Room) bool {
-	leftEndX := room.Shape.Point.X + 1
-	rightEndX := leftEndX + int(room.Shape.Size.Width) - 3
-	topEndY := room.Shape.Point.Y + 1
-	downEndY := topEndY + int(room.Shape.Size.Height) - 3
+	leftEndX := room.Box.Point.X + 1
+	rightEndX := leftEndX + int(room.Box.Size.Width) - 3
+	topEndY := room.Box.Point.Y + 1
+	downEndY := topEndY + int(room.Box.Size.Height) - 3
 
 	return (pos.X >= leftEndX && pos.X <= rightEndX) && (pos.Y >= topEndY && pos.Y <= downEndY)
 }
@@ -200,10 +200,10 @@ func checkCollisionWithRoomWall(pos primitives.Point2D[int], room Room) bool {
 		return false
 	}
 
-	leftEndX := room.Shape.Point.X
-	rightEndX := leftEndX + int(room.Shape.Size.Width)
-	topEndY := room.Shape.Point.Y
-	downEndY := topEndY + int(room.Shape.Size.Height)
+	leftEndX := room.Box.Point.X
+	rightEndX := leftEndX + int(room.Box.Size.Width)
+	topEndY := room.Box.Point.Y
+	downEndY := topEndY + int(room.Box.Size.Height)
 
 	if (pos.X == leftEndX || pos.X == rightEndX) || (pos.Y == topEndY || pos.Y == downEndY) {
 		return true

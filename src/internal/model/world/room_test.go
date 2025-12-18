@@ -20,8 +20,8 @@ func TestRoom_NewRoom(t *testing.T) {
 			roomType: RoomTypeFinish,
 			mapSize:  primitives.Box{Point: primitives.Point2D[int]{X: 6, Y: 3}, Size: primitives.Size2D[uint]{Height: 10, Width: 10}},
 			want: Room{
-				Shape: primitives.Box{Point: primitives.Point2D[int]{X: 6, Y: 3}, Size: primitives.Size2D[uint]{Height: 10, Width: 10}},
-				Type:  RoomTypeFinish,
+				Box:  primitives.Box{Point: primitives.Point2D[int]{X: 6, Y: 3}, Size: primitives.Size2D[uint]{Height: 10, Width: 10}},
+				Type: RoomTypeFinish,
 			},
 		},
 		{
@@ -29,8 +29,8 @@ func TestRoom_NewRoom(t *testing.T) {
 			roomType: RoomTypeOrdinary,
 			mapSize:  primitives.Box{Point: primitives.Point2D[int]{X: 6, Y: 3}, Size: primitives.Size2D[uint]{Height: 10, Width: 10}},
 			want: Room{
-				Shape: primitives.Box{Point: primitives.Point2D[int]{X: 6, Y: 3}, Size: primitives.Size2D[uint]{Height: 10, Width: 10}},
-				Type:  RoomTypeOrdinary,
+				Box:  primitives.Box{Point: primitives.Point2D[int]{X: 6, Y: 3}, Size: primitives.Size2D[uint]{Height: 10, Width: 10}},
+				Type: RoomTypeOrdinary,
 			},
 		},
 		{
@@ -38,8 +38,8 @@ func TestRoom_NewRoom(t *testing.T) {
 			roomType: RoomTypeStart,
 			mapSize:  primitives.Box{Point: primitives.Point2D[int]{X: 6, Y: 3}, Size: primitives.Size2D[uint]{Height: 10, Width: 10}},
 			want: Room{
-				Shape: primitives.Box{Point: primitives.Point2D[int]{X: 6, Y: 3}, Size: primitives.Size2D[uint]{Height: 10, Width: 10}},
-				Type:  RoomTypeStart,
+				Box:  primitives.Box{Point: primitives.Point2D[int]{X: 6, Y: 3}, Size: primitives.Size2D[uint]{Height: 10, Width: 10}},
+				Type: RoomTypeStart,
 			},
 		},
 	}

@@ -101,10 +101,10 @@ func TestConnectionTreePassageGenerator_GeneratePassages_Connectivity(t *testing
 		doorTwoInRoom := false
 
 		for _, room := range rooms {
-			if isPointInOrOnBorder(passage.DoorOne, room.Shape) {
+			if isPointInOrOnBorder(passage.DoorOne, room.Box) {
 				doorOneInRoom = true
 			}
-			if isPointInOrOnBorder(passage.DoorTwo, room.Shape) {
+			if isPointInOrOnBorder(passage.DoorTwo, room.Box) {
 				doorTwoInRoom = true
 			}
 		}
@@ -133,22 +133,22 @@ func TestConnectionTreePassageGenerator_DoorPlacer(t *testing.T) {
 	placer := NewDoorPlacer()
 
 	room1 := Room{
-		Shape: primitives.Box{
+		Box: primitives.Box{
 			Point: primitives.Point2D[int]{X: 10, Y: 10},
 			Size:  primitives.Size2D[uint]{Width: 5, Height: 5},
 		},
 	}
 
 	room2 := Room{
-		Shape: primitives.Box{
+		Box: primitives.Box{
 			Point: primitives.Point2D[int]{X: 20, Y: 10},
 			Size:  primitives.Size2D[uint]{Width: 5, Height: 5},
 		},
 	}
 
 	// Комнаты расположены горизонтально
-	doorOne := primitives.Point2D[int]{X: room1.Shape.Point.X + int(room1.Shape.Size.Width) - 1, Y: 12}
-	doorTwo := primitives.Point2D[int]{X: room2.Shape.Point.X, Y: 12}
+	doorOne := primitives.Point2D[int]{X: room1.Box.Point.X + int(room1.Box.Size.Width) - 1, Y: 12}
+	doorTwo := primitives.Point2D[int]{X: room2.Box.Point.X, Y: 12}
 
 	placer.PlaceDoors(&room1, &room2, doorOne, doorTwo)
 

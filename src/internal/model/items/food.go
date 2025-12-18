@@ -13,7 +13,7 @@ type Food struct {
 
 func NewFood(box primitives.Box, t FoodType, e *primitives.Effect) *Food {
 	return &Food{
-		Item:   &Item{Shape: box, Name: string(t)},
+		Item:   &Item{Box: box, Name: string(t)},
 		Effect: e,
 		Type:   t,
 	}

@@ -94,11 +94,11 @@ func TestGridRoomGenerator_GenerateRooms(t *testing.T) {
 
 				// Проверяем что комнаты находятся в пределах карты
 				for i, room := range rooms {
-					if room.Shape.Point.X < 0 || room.Shape.Point.Y < 0 {
-						t.Errorf("Room %d has negative coordinates: %+v", i, room.Shape.Point)
+					if room.Box.Point.X < 0 || room.Box.Point.Y < 0 {
+						t.Errorf("Room %d has negative coordinates: %+v", i, room.Box.Point)
 					}
-					maxX := room.Shape.Point.X + int(room.Shape.Size.Width)
-					maxY := room.Shape.Point.Y + int(room.Shape.Size.Height)
+					maxX := room.Box.Point.X + int(room.Box.Size.Width)
+					maxY := room.Box.Point.Y + int(room.Box.Size.Height)
 					if maxX > int(tt.mapSize.Width) || maxY > int(tt.mapSize.Height) {
 						t.Errorf("Room %d exceeds map boundaries: maxX=%d, maxY=%d, mapSize=%+v",
 							i, maxX, maxY, tt.mapSize)
@@ -160,8 +160,8 @@ func TestGridRoomGenerator_RoomDistribution(t *testing.T) {
 
 	sectionsOccupied := make(map[int]bool)
 	for _, room := range rooms {
-		sectionX := room.Shape.Point.X / sectionWidth
-		sectionY := room.Shape.Point.Y / sectionHeight
+		sectionX := room.Box.Point.X / sectionWidth
+		sectionY := room.Box.Point.Y / sectionHeight
 		sectionIndex := sectionY*3 + sectionX
 		sectionsOccupied[sectionIndex] = true
 	}

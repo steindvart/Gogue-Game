@@ -51,12 +51,12 @@ func (r *DefaultFieldRenderer) renderRooms(rooms []Room, finishPortal primitives
 }
 
 func (r *DefaultFieldRenderer) renderSingleRoom(room Room, field [][]common.GameEntityType) {
-	width := int(room.Shape.Size.Width)
-	height := int(room.Shape.Size.Height)
+	width := int(room.Box.Size.Width)
+	height := int(room.Box.Size.Height)
 
-	startX := room.Shape.Point.X
+	startX := room.Box.Point.X
 	endX := startX + width - 1
-	startY := room.Shape.Point.Y
+	startY := room.Box.Point.Y
 	endY := startY + height - 1
 
 	// Горизонтальные стены (верх и низ)
@@ -161,8 +161,8 @@ func (r *DefaultFieldRenderer) renderPlayer(player *entities.Player, field [][]c
 		return
 	}
 
-	px := player.Character.Shape.Point.X
-	py := player.Character.Shape.Point.Y
+	px := player.Character.Box.Point.X
+	py := player.Character.Box.Point.Y
 
 	if r.isInBoundsWH(px, py, width, height) {
 		field[py][px] = common.EntityTypePlayer

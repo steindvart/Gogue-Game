@@ -14,8 +14,8 @@ type Elixir struct {
 func NewElixir(box primitives.Box, t ElixirType, e *primitives.Effect) *Elixir {
 	return &Elixir{
 		Item: &Item{
-			Shape: box,
-			Name:  string(t),
+			Box:  box,
+			Name: string(t),
 		},
 		Effect: e,
 		Type:   t,
