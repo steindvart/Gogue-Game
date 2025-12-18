@@ -30,7 +30,7 @@ func (r *DefaultFieldRenderer) RenderField(width, height int, level *Level) [][]
 
 	r.renderRooms(level.Rooms, level.FinishPortal, field)
 	r.renderPassages(level.Passages, field)
-	r.renderItems(level.Foods, level.Elixirs, level.Scrolls, level.Weapons, field, width, height)
+	r.renderItems(level.Items, field, width, height)
 	r.renderEnemies(level.Enemies, field, width, height)
 	r.renderPlayer(level.Player, field, width, height)
 
@@ -120,42 +120,29 @@ func (r *DefaultFieldRenderer) renderSinglePassage(passage Passage, field [][]co
 }
 
 func (r *DefaultFieldRenderer) renderItems(
-	foods []items.Food,
-	elixirs []items.Elixir,
-	scrolls []items.Scroll,
-	weapons []items.Weapon,
+	itemsList []items.ItemLike,
 	field [][]common.GameEntityType,
 	width, height int,
 ) {
-	// Еда
-	for _, food := range foods {
-		pt := food.Item.Shape.Point
-		if r.isInBoundsWH(pt.X, pt.Y, width, height) {
-			field[pt.Y][pt.X] = convertFoodToEntityType(food.Type)
+	for _, item := range itemsList {
+		pt := item.GetPosition()
+		if !r.isInBoundsWH(pt.X, pt.Y, width, height) {
+			continue
 		}
-	}
 
-	// Зелья
-	for _, elixir := range elixirs {
-		pt := elixir.Item.Shape.Point
-		if r.isInBoundsWH(pt.X, pt.Y, width, height) {
-			field[pt.Y][pt.X] = convertElixirToEntityType(elixir.Type)
-		}
-	}
-
-	// Свитки
-	for _, scroll := range scrolls {
-		pt := scroll.Item.Shape.Point
-		if r.isInBoundsWH(pt.X, pt.Y, width, height) {
-			field[pt.Y][pt.X] = convertScrollToEntityType(scroll.Type)
-		}
-	}
-
-	// Оружие
-	for _, weapon := range weapons {
-		pt := weapon.Item.Shape.Point
-		if r.isInBoundsWH(pt.X, pt.Y, width, height) {
+		// Type switch для определения типа предмета
+		switch v := item.(type) {
+		case *items.Food:
+			field[pt.Y][pt.X] = convertFoodToEntityType(v.Type)
+		case *items.Elixir:
+			field[pt.Y][pt.X] = convertElixirToEntityType(v.Type)
+		case *items.Scroll:
+			field[pt.Y][pt.X] = convertScrollToEntityType(v.Type)
+		case *items.Weapon:
 			field[pt.Y][pt.X] = common.Weapon
+		case *items.Treasure:
+			// TODO: Добавить константу Treasure в common.GameEntityType
+			field[pt.Y][pt.X] = common.Weapon // Временно используем Weapon
 		}
 	}
 }

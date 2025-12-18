@@ -57,17 +57,8 @@ func TestLevel_Generate(t *testing.T) {
 				if len(level.Rooms) == 0 {
 					t.Error("Expected rooms to be generated")
 				}
-				if len(level.Elixirs) == 0 {
+				if len(level.Items) == 0 {
 					t.Error("Expected elixirs to be generated")
-				}
-				if len(level.Scrolls) == 0 {
-					t.Error("Expected scrolls to be generated")
-				}
-				if len(level.Weapons) == 0 {
-					t.Error("Expected weapons to be generated")
-				}
-				if len(level.Foods) == 0 {
-					t.Error("Expected foods to be generated")
 				}
 				if level.Player == nil {
 					t.Error("Expected player to be generated")

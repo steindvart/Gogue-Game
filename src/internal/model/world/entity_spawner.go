@@ -60,10 +60,7 @@ func (s *RoomBasedEntitySpawner) SpawnEntities(
 	}
 
 	result := &SpawnedEntities{
-		Foods:   make([]items.Food, 0, config.FoodsQuntity),
-		Elixirs: make([]items.Elixir, 0, config.ElixirsQuntity),
-		Scrolls: make([]items.Scroll, 0, config.ScrollsQuntity),
-		Weapons: make([]items.Weapon, 0, config.WeaponsQuntity),
+		Items:   make([]items.ItemLike, 0),
 		Enemies: make([]entities.Enemy, 0),
 	}
 
@@ -75,24 +72,36 @@ func (s *RoomBasedEntitySpawner) SpawnEntities(
 
 	// Спавним предметы
 	var err error
-	result.Foods, err = s.spawnFoods(roomsForSpawning, config.FoodsQuntity, random)
+	foods, err := s.spawnFoods(roomsForSpawning, config.FoodsQuntity, random)
 	if err != nil {
 		return nil, fmt.Errorf("failed to spawn foods: %w", err)
 	}
+	for i := range foods {
+		result.Items = append(result.Items, &foods[i])
+	}
 
-	result.Elixirs, err = s.spawnElixirs(roomsForSpawning, config.ElixirsQuntity, random)
+	elixirs, err := s.spawnElixirs(roomsForSpawning, config.ElixirsQuntity, random)
 	if err != nil {
 		return nil, fmt.Errorf("failed to spawn elixirs: %w", err)
 	}
+	for i := range elixirs {
+		result.Items = append(result.Items, &elixirs[i])
+	}
 
-	result.Scrolls, err = s.spawnScrolls(roomsForSpawning, config.ScrollsQuntity, random)
+	scrolls, err := s.spawnScrolls(roomsForSpawning, config.ScrollsQuntity, random)
 	if err != nil {
 		return nil, fmt.Errorf("failed to spawn scrolls: %w", err)
 	}
+	for i := range scrolls {
+		result.Items = append(result.Items, &scrolls[i])
+	}
 
-	result.Weapons, err = s.spawnWeapons(roomsForSpawning, config.WeaponsQuntity, random)
+	weapons, err := s.spawnWeapons(roomsForSpawning, config.WeaponsQuntity, random)
 	if err != nil {
 		return nil, fmt.Errorf("failed to spawn weapons: %w", err)
+	}
+	for i := range weapons {
+		result.Items = append(result.Items, &weapons[i])
 	}
 
 	return result, nil

@@ -17,10 +17,7 @@ type Level struct {
 	// Сущности, хранящиеся непосредственно в уровне
 	Player  *entities.Player
 	Enemies []entities.Enemy
-	Foods   []items.Food
-	Elixirs []items.Elixir
-	Scrolls []items.Scroll
-	Weapons []items.Weapon
+	Items   []items.ItemLike // Все предметы хранятся здесь
 
 	// Метаданные
 	Number uint
@@ -68,10 +65,7 @@ func NewLevelWithComponents(
 		fieldRenderer: fieldRenderer,
 		fogOfWar:      NewFogOfWar(int(cfg.MapSize.Width), int(cfg.MapSize.Height)),
 		Enemies:       []entities.Enemy{},
-		Foods:         []items.Food{},
-		Elixirs:       []items.Elixir{},
-		Scrolls:       []items.Scroll{},
-		Weapons:       []items.Weapon{},
+		Items:         []items.ItemLike{},
 	}
 }
 
@@ -131,10 +125,7 @@ func (l *Level) generateEnvironment() error {
 		return err
 	}
 
-	l.Foods = spawned.Foods
-	l.Elixirs = spawned.Elixirs
-	l.Scrolls = spawned.Scrolls
-	l.Weapons = spawned.Weapons
+	l.Items = spawned.Items
 	l.Enemies = spawned.Enemies
 
 	return nil
@@ -274,45 +265,26 @@ func (l *Level) MakeCurrentField(w, h int) [][]common.GameEntityType {
 }
 
 // GetItemAtPosition возвращает предмет на позиции (если есть)
-func (l *Level) GetItemAtPosition(pos primitives.Point2D[int]) interface{} {
-	for i := range l.Foods {
-		if l.Foods[i].Item.Shape.Point == pos {
-			return &l.Foods[i]
-		}
-	}
-	for i := range l.Elixirs {
-		if l.Elixirs[i].Item.Shape.Point == pos {
-			return &l.Elixirs[i]
-		}
-	}
-	for i := range l.Scrolls {
-		if l.Scrolls[i].Item.Shape.Point == pos {
-			return &l.Scrolls[i]
-		}
-	}
-	for i := range l.Weapons {
-		if l.Weapons[i].Item.Shape.Point == pos {
-			return &l.Weapons[i]
+func (l *Level) GetItemAtPosition(pos primitives.Point2D[int]) items.ItemLike {
+	for _, item := range l.Items {
+		if item.GetPosition() == pos {
+			return item
 		}
 	}
 	return nil
 }
 
-// Удаление предметов по индексу
-func (l *Level) RemoveFood(index int) {
-	l.Foods = append(l.Foods[:index], l.Foods[index+1:]...)
-}
-func (l *Level) RemoveElixir(index int) {
-	l.Elixirs = append(l.Elixirs[:index], l.Elixirs[index+1:]...)
-}
-func (l *Level) RemoveScroll(index int) {
-	l.Scrolls = append(l.Scrolls[:index], l.Scrolls[index+1:]...)
-}
-func (l *Level) RemoveWeapon(index int) {
-	l.Weapons = append(l.Weapons[:index], l.Weapons[index+1:]...)
+// RemoveItem удаляет предмет из уровня
+func (l *Level) RemoveItem(item items.ItemLike) {
+	for i, it := range l.Items {
+		if it == item {
+			l.Items = append(l.Items[:i], l.Items[i+1:]...)
+			return
+		}
+	}
 }
 
-// AddWeapon добавляет оружие на уровень (например, при выбрасывании)
-func (l *Level) AddWeapon(weapon items.Weapon) {
-	l.Weapons = append(l.Weapons, weapon)
+// AddItem добавляет предмет на уровень (например, при выбрасывании)
+func (l *Level) AddItem(item items.ItemLike) {
+	l.Items = append(l.Items, item)
 }

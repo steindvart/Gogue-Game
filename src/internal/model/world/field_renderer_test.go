@@ -13,10 +13,7 @@ func TestDefaultFieldRenderer_RenderMap_EmptyLevel(t *testing.T) {
 	level := &Level{
 		Rooms:    []Room{},
 		Passages: []Passage{},
-		Foods:    []items.Food{},
-		Elixirs:  []items.Elixir{},
-		Scrolls:  []items.Scroll{},
-		Weapons:  []items.Weapon{},
+		Items:    []items.ItemLike{},
 		Enemies:  []entities.Enemy{},
 		Player:   nil,
 	}
@@ -54,10 +51,7 @@ func TestDefaultFieldRenderer_RenderSingleRoom(t *testing.T) {
 	level := &Level{
 		Rooms:    []Room{room},
 		Passages: []Passage{},
-		Foods:    []items.Food{},
-		Elixirs:  []items.Elixir{},
-		Scrolls:  []items.Scroll{},
-		Weapons:  []items.Weapon{},
+		Items:    []items.ItemLike{},
 		Enemies:  []entities.Enemy{},
 		Player:   nil,
 		FinishPortal: primitives.Box{
@@ -114,10 +108,7 @@ func TestDefaultFieldRenderer_RenderPassage(t *testing.T) {
 	level := &Level{
 		Rooms:    []Room{},
 		Passages: []Passage{passage},
-		Foods:    []items.Food{},
-		Elixirs:  []items.Elixir{},
-		Scrolls:  []items.Scroll{},
-		Weapons:  []items.Weapon{},
+		Items:    []items.ItemLike{},
 		Enemies:  []entities.Enemy{},
 		Player:   nil,
 		FinishPortal: primitives.Box{
@@ -158,10 +149,7 @@ func TestDefaultFieldRenderer_RenderPortal(t *testing.T) {
 	level := &Level{
 		Rooms:    []Room{room},
 		Passages: []Passage{},
-		Foods:    []items.Food{},
-		Elixirs:  []items.Elixir{},
-		Scrolls:  []items.Scroll{},
-		Weapons:  []items.Weapon{},
+		Items:    []items.ItemLike{},
 		Enemies:  []entities.Enemy{},
 		Player:   nil,
 		FinishPortal: primitives.Box{
@@ -224,10 +212,7 @@ func TestDefaultFieldRenderer_RenderItems(t *testing.T) {
 	level := &Level{
 		Rooms:    []Room{},
 		Passages: []Passage{},
-		Foods:    []items.Food{food},
-		Elixirs:  []items.Elixir{elixir},
-		Scrolls:  []items.Scroll{scroll},
-		Weapons:  []items.Weapon{weapon},
+		Items:    []items.ItemLike{&food, &elixir, &scroll, &weapon},
 		Enemies:  []entities.Enemy{},
 		Player:   nil,
 		FinishPortal: primitives.Box{
@@ -279,10 +264,7 @@ func TestDefaultFieldRenderer_RenderEnemies(t *testing.T) {
 	level := &Level{
 		Rooms:    []Room{},
 		Passages: []Passage{},
-		Foods:    []items.Food{},
-		Elixirs:  []items.Elixir{},
-		Scrolls:  []items.Scroll{},
-		Weapons:  []items.Weapon{},
+		Items:    []items.ItemLike{},
 		Enemies:  []entities.Enemy{zombie, vampire},
 		Player:   nil,
 		FinishPortal: primitives.Box{
@@ -313,10 +295,7 @@ func TestDefaultFieldRenderer_RenderPlayer(t *testing.T) {
 	level := &Level{
 		Rooms:    []Room{},
 		Passages: []Passage{},
-		Foods:    []items.Food{},
-		Elixirs:  []items.Elixir{},
-		Scrolls:  []items.Scroll{},
-		Weapons:  []items.Weapon{},
+		Items:    []items.ItemLike{},
 		Enemies:  []entities.Enemy{},
 		Player:   player,
 		FinishPortal: primitives.Box{
@@ -355,10 +334,7 @@ func TestDefaultFieldRenderer_PlayerOverlapsItem(t *testing.T) {
 	level := &Level{
 		Rooms:    []Room{},
 		Passages: []Passage{},
-		Foods:    []items.Food{food},
-		Elixirs:  []items.Elixir{},
-		Scrolls:  []items.Scroll{},
-		Weapons:  []items.Weapon{},
+		Items:    []items.ItemLike{&food},
 		Enemies:  []entities.Enemy{},
 		Player:   player,
 		FinishPortal: primitives.Box{
@@ -392,10 +368,7 @@ func TestDefaultFieldRenderer_BoundsChecking(t *testing.T) {
 	level := &Level{
 		Rooms:    []Room{},
 		Passages: []Passage{},
-		Foods:    []items.Food{food},
-		Elixirs:  []items.Elixir{},
-		Scrolls:  []items.Scroll{},
-		Weapons:  []items.Weapon{},
+		Items:    []items.ItemLike{&food},
 		Enemies:  []entities.Enemy{},
 		Player:   nil,
 		FinishPortal: primitives.Box{

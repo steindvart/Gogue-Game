@@ -24,10 +24,7 @@ type EntitySpawner interface {
 }
 
 type SpawnedEntities struct {
-	Foods   []items.Food
-	Elixirs []items.Elixir
-	Scrolls []items.Scroll
-	Weapons []items.Weapon
+	Items   []items.ItemLike
 	Enemies []entities.Enemy
 }
 
