@@ -35,11 +35,3 @@ func NewTreasureByConfig(rnd *utils.Random, box primitives.Box, cfg TreasureConf
 func (tr *Treasure) Take() int32 {
 	return tr.Value
 }
-
-func AsTreasure(item any) *Treasure {
-	s, ok := item.(*Treasure)
-	if ok {
-		return s
-	}
-	return nil
-}

@@ -37,11 +37,3 @@ func NewScrollByConfig(rnd utils.Randomizer, box primitives.Box, cfg ScrollConfi
 func (e *Scroll) Use() *primitives.Effect {
 	return e.Effect
 }
-
-func AsScroll(item any) *Scroll {
-	s, ok := item.(*Scroll)
-	if ok {
-		return s
-	}
-	return nil
-}

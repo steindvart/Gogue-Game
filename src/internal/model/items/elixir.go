@@ -44,11 +44,3 @@ func NewElixirByConfig(rnd utils.Randomizer, box primitives.Box, cfg ElixirConfi
 func (e *Elixir) Use() *primitives.Effect {
 	return e.Effect
 }
-
-func AsElixir(item any) *Elixir {
-	e, ok := item.(*Elixir)
-	if ok {
-		return e
-	}
-	return nil
-}

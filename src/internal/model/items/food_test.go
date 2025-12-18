@@ -408,83 +408,6 @@ func TestFood_NewFood_VariousPositions(t *testing.T) {
 	}
 }
 
-func TestFood_AsFood_ValidPointer(t *testing.T) {
-	input := &Food{
-		Item: &Item{
-			Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
-			Name:  "Test Food",
-		},
-		Effect: &primitives.Effect{
-			Attributes: primitives.Attributes{Health: 25},
-		},
-	}
-
-	result := AsFood(input)
-
-	if result == nil {
-		t.Fatal("Expected non-nil result, got nil")
-	}
-
-	if result.Effect.Attributes.Health != 25 {
-		t.Errorf("Expected Health 25, got %f", result.Effect.Attributes.Health)
-	}
-
-	if result != input {
-		t.Error("Expected same pointer to be returned")
-	}
-}
-
-func TestFood_AsFood_NonFoodTypeIsNil(t *testing.T) {
-	result := AsFood("not a food")
-
-	if result != nil {
-		t.Errorf("Expected nil for non-Food type, got %v", result)
-	}
-}
-
-func TestFood_AsFood_NilInputIsNil(t *testing.T) {
-	result := AsFood(nil)
-
-	if result != nil {
-		t.Errorf("Expected nil for nil input, got %v", result)
-	}
-}
-
-func TestFood_AsFood_DifferentStructTypeIsNil(t *testing.T) {
-	input := &Item{
-		Shape: primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 1}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
-		Name:  "Just an item",
-	}
-
-	result := AsFood(input)
-
-	if result != nil {
-		t.Errorf("Expected nil for Item type, got %v", result)
-	}
-}
-
-func TestFood_AsFood_ElixirTypeIsNil(t *testing.T) {
-	input := &Elixir{
-		Item: &Item{
-			Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
-			Name:  "Test Elixir",
-		},
-		Effect: &primitives.Effect{
-			Attributes: primitives.Attributes{Strength: 10},
-			Duration: primitives.EffectDuration{
-				Type:  primitives.EffectDurationTypeAllTemporary,
-				Steps: 20,
-			},
-		},
-	}
-
-	result := AsFood(input)
-
-	if result != nil {
-		t.Errorf("Expected nil for Elixir type, got %v", result)
-	}
-}
-
 // Benchmarks
 func BenchmarkFood_NewFoodBuiltin(b *testing.B) {
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
@@ -530,22 +453,5 @@ func BenchmarkFood_NewFoodByConfig(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		rng := utils.NewRandomWithSeed(int64(i))
 		_, _ = NewFoodByConfig(rng, box, config)
-	}
-}
-
-func BenchmarkFood_AsFood(b *testing.B) {
-	food := &Food{
-		Item: &Item{
-			Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
-			Name:  "Test Food",
-		},
-		Effect: &primitives.Effect{
-			Attributes: primitives.Attributes{Health: 25},
-		},
-	}
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		_ = AsFood(food)
 	}
 }

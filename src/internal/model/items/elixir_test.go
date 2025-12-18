@@ -410,67 +410,6 @@ func TestElixir_UseMultipleTimesIsOk(t *testing.T) {
 	}
 }
 
-func TestElixir_AsElixir_ValidPointer(t *testing.T) {
-	input := &Elixir{
-		Item: &Item{
-			Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
-			Name:  "Test Elixir",
-		},
-		Effect: &primitives.Effect{
-			Attributes: primitives.Attributes{Strength: 10},
-			Duration: primitives.EffectDuration{
-				Type:  primitives.EffectDurationTypeAllTemporary,
-				Steps: 20,
-			},
-		},
-	}
-
-	result := AsElixir(input)
-
-	if result == nil {
-		t.Fatal("Expected non-nil result, got nil")
-	}
-
-	if result.Effect.Attributes.Strength != 10 {
-		t.Errorf("Expected Strength 10, got %f", result.Effect.Attributes.Strength)
-	}
-	if result.Duration.Steps != 20 {
-		t.Errorf("Expected Duration 20, got %d", result.Duration.Steps)
-	}
-	if result != input {
-		t.Error("Expected same pointer to be returned")
-	}
-}
-
-func TestElixir_AsElixir_NonElixirTypeIsNil(t *testing.T) {
-	result := AsElixir("not an elixir")
-
-	if result != nil {
-		t.Errorf("Expected nil for non-Elixir type, got %v", result)
-	}
-}
-
-func TestElixir_AsElixir_NilInputIsNil(t *testing.T) {
-	result := AsElixir(nil)
-
-	if result != nil {
-		t.Errorf("Expected nil for nil input, got %v", result)
-	}
-}
-
-func TestElixir_AsElixir_DifferentStructTypeIsNil(t *testing.T) {
-	input := &Item{
-		Shape: primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 1}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
-		Name:  "Just an item",
-	}
-
-	result := AsElixir(input)
-
-	if result != nil {
-		t.Errorf("Expected nil for Item type, got %v", result)
-	}
-}
-
 // Benchmarks
 func BenchmarkElixir_NewElixir(b *testing.B) {
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}

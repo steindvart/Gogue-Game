@@ -33,11 +33,3 @@ func NewFoodByConfig(rnd utils.Randomizer, box primitives.Box, cfg FoodConfig) (
 		Attributes: cfg.GenerateAttributes(rnd),
 	}), nil
 }
-
-func AsFood(item any) *Food {
-	f, ok := item.(*Food)
-	if ok {
-		return f
-	}
-	return nil
-}
