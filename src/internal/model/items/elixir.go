@@ -14,8 +14,8 @@ type Elixir struct {
 func NewElixir(box primitives.Box, t ElixirType, e *primitives.Effect) *Elixir {
 	return &Elixir{
 		Item: &Item{
-			Shape: box,
-			Name:  string(t),
+			Box:  box,
+			Name: string(t),
 		},
 		Effect: e,
 		Type:   t,
@@ -43,12 +43,4 @@ func NewElixirByConfig(rnd utils.Randomizer, box primitives.Box, cfg ElixirConfi
 
 func (e *Elixir) Use() *primitives.Effect {
 	return e.Effect
-}
-
-func AsElixir(item any) *Elixir {
-	e, ok := item.(*Elixir)
-	if ok {
-		return e
-	}
-	return nil
 }

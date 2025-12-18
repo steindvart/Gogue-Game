@@ -13,7 +13,7 @@ type Weapon struct {
 
 func NewWeapon(box primitives.Box, t WeaponType, e *primitives.Effect) *Weapon {
 	return &Weapon{
-		Item:   &Item{Shape: box, Name: string(t)},
+		Item:   &Item{Box: box, Name: string(t)},
 		Effect: e,
 		Type:   t,
 	}
@@ -34,12 +34,4 @@ func NewWeaponByConfig(rnd utils.Randomizer, box primitives.Box, cfg WeaponConfi
 
 func (w *Weapon) Use() *primitives.Effect {
 	return w.Effect
-}
-
-func AsWeapon(item any) *Weapon {
-	w, ok := item.(*Weapon)
-	if ok {
-		return w
-	}
-	return nil
 }

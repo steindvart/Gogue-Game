@@ -115,14 +115,14 @@ const defaultItemsTestSeed int64 = 42
 // 	for _, tt := range tests {
 // 		t.Run(tt.name, func(t *testing.T) {
 // 			item := &Item{
-// 				Shape: primitives.Box{
+// 				Box: primitives.Box{
 // 					Point: primitives.Point2D[int]{X: 1, Y: 2},
 // 					Size:  primitives.Size2D[uint]{Height: 1, Width: 1},
 // 				},
 // 			}
 // 			items.Take()
-// 			if items.Shape != tt.want {
-// 				t.Errorf("Taken() = (%v), want (%v)", items.Shape, tt.want)
+// 			if items.Box != tt.want {
+// 				t.Errorf("Taken() = (%v), want (%v)", items.Box, tt.want)
 // 			}
 // 		})
 // 	}
@@ -144,11 +144,11 @@ const defaultItemsTestSeed int64 = 42
 // 	for _, tt := range tests {
 // 		t.Run(tt.name, func(t *testing.T) {
 // 			item := &Item{
-// 				Shape: primitives.Box{},
+// 				Box: primitives.Box{},
 // 			}
 // 			items.Drop(tt.box)
-// 			if items.Shape != tt.want {
-// 				t.Errorf("Dropped() = (%v), want (%v)", items.Shape, tt.want)
+// 			if items.Box != tt.want {
+// 				t.Errorf("Dropped() = (%v), want (%v)", items.Box, tt.want)
 // 			}
 // 		})
 // 	}

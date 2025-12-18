@@ -1,6 +1,7 @@
 package world
 
 import (
+	"gogue/internal/model/items"
 	"gogue/internal/model/primitives"
 	"math/rand"
 	"testing"
@@ -25,45 +26,43 @@ func TestRoomBasedEntitySpawner_SpawnEntities(t *testing.T) {
 		t.Fatalf("SpawnEntities failed: %v", err)
 	}
 
+	// Подсчитываем предметы по типам
+	foodCount, elixirCount, scrollCount, weaponCount := 0, 0, 0, 0
+	for _, item := range entities.Items {
+		switch item.(type) {
+		case *items.Food:
+			foodCount++
+		case *items.Elixir:
+			elixirCount++
+		case *items.Scroll:
+			scrollCount++
+		case *items.Weapon:
+			weaponCount++
+		}
+	}
+
 	// Проверяем что сущности созданы
-	if len(entities.Foods) != int(config.ItemCounts.FoodsQuntity) {
-		t.Errorf("Expected %d foods, got %d", config.ItemCounts.FoodsQuntity, len(entities.Foods))
+	if foodCount != int(config.ItemCounts.FoodsQuntity) {
+		t.Errorf("Expected %d foods, got %d", config.ItemCounts.FoodsQuntity, foodCount)
 	}
-	if len(entities.Elixirs) != int(config.ItemCounts.ElixirsQuntity) {
-		t.Errorf("Expected %d elixirs, got %d", config.ItemCounts.ElixirsQuntity, len(entities.Elixirs))
+	if elixirCount != int(config.ItemCounts.ElixirsQuntity) {
+		t.Errorf("Expected %d elixirs, got %d", config.ItemCounts.ElixirsQuntity, elixirCount)
 	}
-	if len(entities.Scrolls) != int(config.ItemCounts.ScrollsQuntity) {
-		t.Errorf("Expected %d scrolls, got %d", config.ItemCounts.ScrollsQuntity, len(entities.Scrolls))
+	if scrollCount != int(config.ItemCounts.ScrollsQuntity) {
+		t.Errorf("Expected %d scrolls, got %d", config.ItemCounts.ScrollsQuntity, scrollCount)
 	}
-	if len(entities.Weapons) != int(config.ItemCounts.WeaponsQuntity) {
-		t.Errorf("Expected %d weapons, got %d", config.ItemCounts.WeaponsQuntity, len(entities.Weapons))
+	if weaponCount != int(config.ItemCounts.WeaponsQuntity) {
+		t.Errorf("Expected %d weapons, got %d", config.ItemCounts.WeaponsQuntity, weaponCount)
 	}
 
 	// Проверяем что все позиции уникальны
 	positions := make(map[primitives.Point2D[int]]bool)
-	for _, food := range entities.Foods {
-		if positions[food.Shape.Point] {
-			t.Errorf("Duplicate position found for food: %+v", food.Shape.Point)
+	for _, item := range entities.Items {
+		pos := item.GetPosition()
+		if positions[pos] {
+			t.Errorf("Duplicate position found for item: %+v", pos)
 		}
-		positions[food.Shape.Point] = true
-	}
-	for _, elixir := range entities.Elixirs {
-		if positions[elixir.Shape.Point] {
-			t.Errorf("Duplicate position found for elixir: %+v", elixir.Shape.Point)
-		}
-		positions[elixir.Shape.Point] = true
-	}
-	for _, scroll := range entities.Scrolls {
-		if positions[scroll.Shape.Point] {
-			t.Errorf("Duplicate position found for scroll: %+v", scroll.Shape.Point)
-		}
-		positions[scroll.Shape.Point] = true
-	}
-	for _, weapon := range entities.Weapons {
-		if positions[weapon.Shape.Point] {
-			t.Errorf("Duplicate position found for weapon: %+v", weapon.Shape.Point)
-		}
-		positions[weapon.Shape.Point] = true
+		positions[pos] = true
 	}
 }
 
@@ -88,10 +87,10 @@ func TestRoomBasedEntitySpawner_SpawnEntities_InRoomBounds(t *testing.T) {
 	// Функция для проверки что точка находится в какой-то комнате
 	isInRoom := func(point primitives.Point2D[int]) bool {
 		for _, room := range rooms {
-			minX := room.Shape.Point.X
-			minY := room.Shape.Point.Y
-			maxX := room.Shape.Point.X + int(room.Shape.Size.Width)
-			maxY := room.Shape.Point.Y + int(room.Shape.Size.Height)
+			minX := room.Box.Point.X
+			minY := room.Box.Point.Y
+			maxX := room.Box.Point.X + int(room.Box.Size.Width)
+			maxY := room.Box.Point.Y + int(room.Box.Size.Height)
 
 			if point.X >= minX && point.X < maxX && point.Y >= minY && point.Y < maxY {
 				return true
@@ -101,24 +100,10 @@ func TestRoomBasedEntitySpawner_SpawnEntities_InRoomBounds(t *testing.T) {
 	}
 
 	// Проверяем все сущности
-	for i, food := range entities.Foods {
-		if !isInRoom(food.Shape.Point) {
-			t.Errorf("Food %d at %+v is not in any room", i, food.Shape.Point)
-		}
-	}
-	for i, elixir := range entities.Elixirs {
-		if !isInRoom(elixir.Shape.Point) {
-			t.Errorf("Elixir %d at %+v is not in any room", i, elixir.Shape.Point)
-		}
-	}
-	for i, scroll := range entities.Scrolls {
-		if !isInRoom(scroll.Shape.Point) {
-			t.Errorf("Scroll %d at %+v is not in any room", i, scroll.Shape.Point)
-		}
-	}
-	for i, weapon := range entities.Weapons {
-		if !isInRoom(weapon.Shape.Point) {
-			t.Errorf("Weapon %d at %+v is not in any room", i, weapon.Shape.Point)
+	for i, item := range entities.Items {
+		pos := item.GetPosition()
+		if !isInRoom(pos) {
+			t.Errorf("Item %d at %+v is not in any room", i, pos)
 		}
 	}
 }
@@ -155,33 +140,19 @@ func TestRoomBasedEntitySpawner_SpawnEntities_NoStartRoom(t *testing.T) {
 
 	// Функция для проверки что точка находится в стартовой комнате
 	isInStartRoom := func(point primitives.Point2D[int]) bool {
-		minX := startRoom.Shape.Point.X
-		minY := startRoom.Shape.Point.Y
-		maxX := startRoom.Shape.Point.X + int(startRoom.Shape.Size.Width)
-		maxY := startRoom.Shape.Point.Y + int(startRoom.Shape.Size.Height)
+		minX := startRoom.Box.Point.X
+		minY := startRoom.Box.Point.Y
+		maxX := startRoom.Box.Point.X + int(startRoom.Box.Size.Width)
+		maxY := startRoom.Box.Point.Y + int(startRoom.Box.Size.Height)
 
 		return point.X >= minX && point.X < maxX && point.Y >= minY && point.Y < maxY
 	}
 
 	// Проверяем что НИ ОДНА сущность не в стартовой комнате
-	for i, food := range entities.Foods {
-		if isInStartRoom(food.Shape.Point) {
-			t.Errorf("Food %d at %+v is in start room (should not be)", i, food.Shape.Point)
-		}
-	}
-	for i, elixir := range entities.Elixirs {
-		if isInStartRoom(elixir.Shape.Point) {
-			t.Errorf("Elixir %d at %+v is in start room (should not be)", i, elixir.Shape.Point)
-		}
-	}
-	for i, scroll := range entities.Scrolls {
-		if isInStartRoom(scroll.Shape.Point) {
-			t.Errorf("Scroll %d at %+v is in start room (should not be)", i, scroll.Shape.Point)
-		}
-	}
-	for i, weapon := range entities.Weapons {
-		if isInStartRoom(weapon.Shape.Point) {
-			t.Errorf("Weapon %d at %+v is in start room (should not be)", i, weapon.Shape.Point)
+	for i, item := range entities.Items {
+		pos := item.GetPosition()
+		if isInStartRoom(pos) {
+			t.Errorf("Item %d at %+v is in start room (should not be)", i, pos)
 		}
 	}
 }
@@ -221,16 +192,7 @@ func TestRoomBasedEntitySpawner_SpawnEntities_ZeroCounts(t *testing.T) {
 		t.Fatalf("SpawnEntities failed: %v", err)
 	}
 
-	if len(entities.Foods) != 0 {
-		t.Errorf("Expected 0 foods, got %d", len(entities.Foods))
-	}
-	if len(entities.Elixirs) != 0 {
-		t.Errorf("Expected 0 elixirs, got %d", len(entities.Elixirs))
-	}
-	if len(entities.Scrolls) != 0 {
-		t.Errorf("Expected 0 scrolls, got %d", len(entities.Scrolls))
-	}
-	if len(entities.Weapons) != 0 {
-		t.Errorf("Expected 0 weapons, got %d", len(entities.Weapons))
+	if len(entities.Items) != 0 {
+		t.Errorf("Expected 0 items, got %d", len(entities.Items))
 	}
 }

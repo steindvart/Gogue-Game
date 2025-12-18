@@ -13,7 +13,7 @@ type Food struct {
 
 func NewFood(box primitives.Box, t FoodType, e *primitives.Effect) *Food {
 	return &Food{
-		Item:   &Item{Shape: box, Name: string(t)},
+		Item:   &Item{Box: box, Name: string(t)},
 		Effect: e,
 		Type:   t,
 	}
@@ -32,12 +32,4 @@ func NewFoodByConfig(rnd utils.Randomizer, box primitives.Box, cfg FoodConfig) (
 	return NewFood(box, cfg.Type, &primitives.Effect{
 		Attributes: cfg.GenerateAttributes(rnd),
 	}), nil
-}
-
-func AsFood(item any) *Food {
-	f, ok := item.(*Food)
-	if ok {
-		return f
-	}
-	return nil
 }

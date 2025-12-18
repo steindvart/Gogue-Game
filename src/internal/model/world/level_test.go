@@ -57,17 +57,8 @@ func TestLevel_Generate(t *testing.T) {
 				if len(level.Rooms) == 0 {
 					t.Error("Expected rooms to be generated")
 				}
-				if len(level.Elixirs) == 0 {
+				if len(level.Items) == 0 {
 					t.Error("Expected elixirs to be generated")
-				}
-				if len(level.Scrolls) == 0 {
-					t.Error("Expected scrolls to be generated")
-				}
-				if len(level.Weapons) == 0 {
-					t.Error("Expected weapons to be generated")
-				}
-				if len(level.Foods) == 0 {
-					t.Error("Expected foods to be generated")
 				}
 				if level.Player == nil {
 					t.Error("Expected player to be generated")
@@ -90,63 +81,63 @@ func TestLevel_GenerateRooms_Deterministic(t *testing.T) {
 	wantRooms := []Room{
 		{
 			Type: RoomTypeOrdinary,
-			Shape: primitives.Box{
+			Box: primitives.Box{
 				Point: primitives.Point2D[int]{X: 8, Y: 3},
 				Size:  primitives.Size2D[uint]{Width: 10, Height: 3},
 			},
 		},
 		{
 			Type: RoomTypeOrdinary,
-			Shape: primitives.Box{
+			Box: primitives.Box{
 				Point: primitives.Point2D[int]{X: 44, Y: 1},
 				Size:  primitives.Size2D[uint]{Width: 16, Height: 8},
 			},
 		},
 		{
 			Type: RoomTypeOrdinary,
-			Shape: primitives.Box{
+			Box: primitives.Box{
 				Point: primitives.Point2D[int]{X: 61, Y: 3},
 				Size:  primitives.Size2D[uint]{Width: 26, Height: 6},
 			},
 		},
 		{
 			Type: RoomTypeOrdinary,
-			Shape: primitives.Box{
+			Box: primitives.Box{
 				Point: primitives.Point2D[int]{X: 1, Y: 11},
 				Size:  primitives.Size2D[uint]{Width: 9, Height: 8},
 			},
 		},
 		{
 			Type: RoomTypeOrdinary,
-			Shape: primitives.Box{
+			Box: primitives.Box{
 				Point: primitives.Point2D[int]{X: 40, Y: 13},
 				Size:  primitives.Size2D[uint]{Width: 20, Height: 3},
 			},
 		},
 		{
 			Type: RoomTypeFinish,
-			Shape: primitives.Box{
+			Box: primitives.Box{
 				Point: primitives.Point2D[int]{X: 63, Y: 14},
 				Size:  primitives.Size2D[uint]{Width: 5, Height: 3},
 			},
 		},
 		{
 			Type: RoomTypeOrdinary,
-			Shape: primitives.Box{
+			Box: primitives.Box{
 				Point: primitives.Point2D[int]{X: 10, Y: 24},
 				Size:  primitives.Size2D[uint]{Width: 7, Height: 3},
 			},
 		},
 		{
 			Type: RoomTypeStart,
-			Shape: primitives.Box{
+			Box: primitives.Box{
 				Point: primitives.Point2D[int]{X: 33, Y: 23},
 				Size:  primitives.Size2D[uint]{Width: 17, Height: 7},
 			},
 		},
 		{
 			Type: RoomTypeOrdinary,
-			Shape: primitives.Box{
+			Box: primitives.Box{
 				Point: primitives.Point2D[int]{X: 66, Y: 25},
 				Size:  primitives.Size2D[uint]{Width: 11, Height: 5},
 			},
@@ -176,8 +167,8 @@ func TestLevel_GenerateRooms_Deterministic(t *testing.T) {
 		if gotRoom.Type != wantRoom.Type {
 			t.Errorf("Room %d: expected Type %v, got %v", i, wantRoom.Type, gotRoom.Type)
 		}
-		if gotRoom.Shape != wantRoom.Shape {
-			t.Errorf("Room %d: expected Shape %+v, got %+v", i, wantRoom.Shape, gotRoom.Shape)
+		if gotRoom.Box != wantRoom.Box {
+			t.Errorf("Room %d: expected Box %+v, got %+v", i, wantRoom.Box, gotRoom.Box)
 		}
 	}
 }

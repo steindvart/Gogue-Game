@@ -15,7 +15,7 @@ const (
 )
 
 type Room struct {
-	Shape primitives.Box
+	primitives.Box
 	Type  RoomType
 	Doors []primitives.Point2D[int]
 
@@ -23,16 +23,16 @@ type Room struct {
 	occupiedPositions map[primitives.Point2D[int]]bool
 }
 
-func NewRoom(roomType RoomType, shape primitives.Box) *Room {
+func NewRoom(roomType RoomType, box primitives.Box) *Room {
 	const roomMinWidth = 3
 	const roomMinHeight = 3
 
-	if shape.Size.Width < roomMinWidth || shape.Size.Height < roomMinHeight {
-		shape.Size.Width = roomMinWidth
-		shape.Size.Height = roomMinHeight
+	if box.Size.Width < roomMinWidth || box.Size.Height < roomMinHeight {
+		box.Size.Width = roomMinWidth
+		box.Size.Height = roomMinHeight
 	}
 	return &Room{
-		Shape:             shape,
+		Box:               box,
 		Type:              roomType,
 		Doors:             []primitives.Point2D[int]{},
 		occupiedPositions: make(map[primitives.Point2D[int]]bool),
@@ -41,10 +41,10 @@ func NewRoom(roomType RoomType, shape primitives.Box) *Room {
 
 func (r *Room) GetRandomFreePosition(rand utils.Randomizer) (*primitives.Point2D[int], error) {
 	// Получаем все возможные точки внутри комнаты без границ
-	minX := r.Shape.Point.X + 1
-	minY := r.Shape.Point.Y + 1
-	width := r.Shape.Size.Width - 2
-	height := r.Shape.Size.Height - 2
+	minX := r.Box.Point.X + 1
+	minY := r.Box.Point.Y + 1
+	width := r.Box.Size.Width - 2
+	height := r.Box.Size.Height - 2
 
 	totalPossiblePoints := int(width) * int(height)
 
@@ -68,5 +68,5 @@ func (r *Room) MarkOccupied(pos primitives.Point2D[int]) {
 }
 
 func (r *Room) GetCountFreePosition() int {
-	return int(r.Shape.Size.Width*r.Shape.Size.Height) - len(r.occupiedPositions)
+	return int(r.Box.Size.Width*r.Box.Size.Height) - len(r.occupiedPositions)
 }

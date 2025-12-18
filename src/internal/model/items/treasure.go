@@ -13,7 +13,7 @@ type Treasure struct {
 
 func NewTreasure(box primitives.Box, t TreasureType, value int32) *Treasure {
 	return &Treasure{
-		Item:  &Item{Shape: box, Name: string(t)},
+		Item:  &Item{Box: box, Name: string(t)},
 		Type:  t,
 		Value: value,
 	}
@@ -34,12 +34,4 @@ func NewTreasureByConfig(rnd *utils.Random, box primitives.Box, cfg TreasureConf
 
 func (tr *Treasure) Take() int32 {
 	return tr.Value
-}
-
-func AsTreasure(item any) *Treasure {
-	s, ok := item.(*Treasure)
-	if ok {
-		return s
-	}
-	return nil
 }

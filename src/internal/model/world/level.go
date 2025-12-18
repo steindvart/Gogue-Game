@@ -3,7 +3,6 @@ package world
 import (
 	"gogue/internal/common"
 	"gogue/internal/model/entities"
-	"gogue/internal/model/items"
 	"gogue/internal/model/primitives"
 	"gogue/internal/utils"
 )
@@ -17,10 +16,7 @@ type Level struct {
 	// Сущности, хранящиеся непосредственно в уровне
 	Player  *entities.Player
 	Enemies []entities.Enemy
-	Foods   []items.Food
-	Elixirs []items.Elixir
-	Scrolls []items.Scroll
-	Weapons []items.Weapon
+	Items   []primitives.Positional2D[int]
 
 	// Метаданные
 	Number uint
@@ -68,10 +64,7 @@ func NewLevelWithComponents(
 		fieldRenderer: fieldRenderer,
 		fogOfWar:      NewFogOfWar(int(cfg.MapSize.Width), int(cfg.MapSize.Height)),
 		Enemies:       []entities.Enemy{},
-		Foods:         []items.Food{},
-		Elixirs:       []items.Elixir{},
-		Scrolls:       []items.Scroll{},
-		Weapons:       []items.Weapon{},
+		Items:         []primitives.Positional2D[int]{},
 	}
 }
 
@@ -131,10 +124,7 @@ func (l *Level) generateEnvironment() error {
 		return err
 	}
 
-	l.Foods = spawned.Foods
-	l.Elixirs = spawned.Elixirs
-	l.Scrolls = spawned.Scrolls
-	l.Weapons = spawned.Weapons
+	l.Items = spawned.Items
 	l.Enemies = spawned.Enemies
 
 	return nil
@@ -196,10 +186,10 @@ func isInSomeRoom(pos primitives.Point2D[int], rooms []Room) bool {
 }
 
 func isInRoom(pos primitives.Point2D[int], room Room) bool {
-	leftEndX := room.Shape.Point.X + 1
-	rightEndX := leftEndX + int(room.Shape.Size.Width) - 3
-	topEndY := room.Shape.Point.Y + 1
-	downEndY := topEndY + int(room.Shape.Size.Height) - 3
+	leftEndX := room.Box.Point.X + 1
+	rightEndX := leftEndX + int(room.Box.Size.Width) - 3
+	topEndY := room.Box.Point.Y + 1
+	downEndY := topEndY + int(room.Box.Size.Height) - 3
 
 	return (pos.X >= leftEndX && pos.X <= rightEndX) && (pos.Y >= topEndY && pos.Y <= downEndY)
 }
@@ -209,10 +199,10 @@ func checkCollisionWithRoomWall(pos primitives.Point2D[int], room Room) bool {
 		return false
 	}
 
-	leftEndX := room.Shape.Point.X
-	rightEndX := leftEndX + int(room.Shape.Size.Width)
-	topEndY := room.Shape.Point.Y
-	downEndY := topEndY + int(room.Shape.Size.Height)
+	leftEndX := room.Box.Point.X
+	rightEndX := leftEndX + int(room.Box.Size.Width)
+	topEndY := room.Box.Point.Y
+	downEndY := topEndY + int(room.Box.Size.Height)
 
 	if (pos.X == leftEndX || pos.X == rightEndX) || (pos.Y == topEndY || pos.Y == downEndY) {
 		return true
@@ -273,46 +263,24 @@ func (l *Level) MakeCurrentField(w, h int) [][]common.GameEntityType {
 	return l.fogOfWar.ApplyFogOfWar(fullField, l.Player.GetPosition(), l.Player.ViewRadius)
 }
 
-// GetItemAtPosition возвращает предмет на позиции (если есть)
-func (l *Level) GetItemAtPosition(pos primitives.Point2D[int]) interface{} {
-	for i := range l.Foods {
-		if l.Foods[i].Item.Shape.Point == pos {
-			return &l.Foods[i]
-		}
-	}
-	for i := range l.Elixirs {
-		if l.Elixirs[i].Item.Shape.Point == pos {
-			return &l.Elixirs[i]
-		}
-	}
-	for i := range l.Scrolls {
-		if l.Scrolls[i].Item.Shape.Point == pos {
-			return &l.Scrolls[i]
-		}
-	}
-	for i := range l.Weapons {
-		if l.Weapons[i].Item.Shape.Point == pos {
-			return &l.Weapons[i]
+func (l *Level) GetItemAtPosition(pos primitives.Point2D[int]) primitives.Positional2D[int] {
+	for _, item := range l.Items {
+		if item.GetPosition() == pos {
+			return item
 		}
 	}
 	return nil
 }
 
-// Удаление предметов по индексу
-func (l *Level) RemoveFood(index int) {
-	l.Foods = append(l.Foods[:index], l.Foods[index+1:]...)
-}
-func (l *Level) RemoveElixir(index int) {
-	l.Elixirs = append(l.Elixirs[:index], l.Elixirs[index+1:]...)
-}
-func (l *Level) RemoveScroll(index int) {
-	l.Scrolls = append(l.Scrolls[:index], l.Scrolls[index+1:]...)
-}
-func (l *Level) RemoveWeapon(index int) {
-	l.Weapons = append(l.Weapons[:index], l.Weapons[index+1:]...)
+func (l *Level) RemoveItem(item primitives.Positional2D[int]) {
+	for i, it := range l.Items {
+		if it == item {
+			l.Items = append(l.Items[:i], l.Items[i+1:]...)
+			return
+		}
+	}
 }
 
-// AddWeapon добавляет оружие на уровень (например, при выбрасывании)
-func (l *Level) AddWeapon(weapon items.Weapon) {
-	l.Weapons = append(l.Weapons, weapon)
+func (l *Level) AddItem(item primitives.Positional2D[int]) {
+	l.Items = append(l.Items, item)
 }

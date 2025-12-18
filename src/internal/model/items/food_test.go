@@ -75,8 +75,8 @@ func TestFood_NewFood_BuiltinConfig(t *testing.T) {
 			}
 
 			// Check box is correctly set
-			if food.Shape != box {
-				t.Errorf("Expected box %v, got %v", box, food.Shape)
+			if food.Box != box {
+				t.Errorf("Expected box %v, got %v", box, food.Box)
 			}
 
 			// Other attributes should be zero
@@ -195,8 +195,8 @@ func TestFood_NewFoodByConfig(t *testing.T) {
 			}
 
 			// Verify box is set correctly
-			if food.Shape != tt.box {
-				t.Errorf("Expected box %v, got %v", tt.box, food.Shape)
+			if food.Box != tt.box {
+				t.Errorf("Expected box %v, got %v", tt.box, food.Box)
 			}
 
 			// For fixed-value range, verify exact value
@@ -354,8 +354,8 @@ func TestFood_NewFood_ZeroSizedBoxIsOk(t *testing.T) {
 		t.Fatal("Expected valid food with zero-sized box")
 	}
 
-	if food.Shape != box {
-		t.Errorf("Expected box %v, got %v", box, food.Shape)
+	if food.Box != box {
+		t.Errorf("Expected box %v, got %v", box, food.Box)
 	}
 }
 
@@ -397,91 +397,14 @@ func TestFood_NewFood_VariousPositions(t *testing.T) {
 				t.Fatal("Expected valid food")
 			}
 
-			if food.Shape.Point != tt.position {
-				t.Errorf("Expected position %v, got %v", tt.position, food.Shape.Point)
+			if food.Box.Point != tt.position {
+				t.Errorf("Expected position %v, got %v", tt.position, food.Box.Point)
 			}
 
-			if food.Shape.Size != tt.size {
-				t.Errorf("Expected size %v, got %v", tt.size, food.Shape.Size)
+			if food.Box.Size != tt.size {
+				t.Errorf("Expected size %v, got %v", tt.size, food.Box.Size)
 			}
 		})
-	}
-}
-
-func TestFood_AsFood_ValidPointer(t *testing.T) {
-	input := &Food{
-		Item: &Item{
-			Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
-			Name:  "Test Food",
-		},
-		Effect: &primitives.Effect{
-			Attributes: primitives.Attributes{Health: 25},
-		},
-	}
-
-	result := AsFood(input)
-
-	if result == nil {
-		t.Fatal("Expected non-nil result, got nil")
-	}
-
-	if result.Effect.Attributes.Health != 25 {
-		t.Errorf("Expected Health 25, got %f", result.Effect.Attributes.Health)
-	}
-
-	if result != input {
-		t.Error("Expected same pointer to be returned")
-	}
-}
-
-func TestFood_AsFood_NonFoodTypeIsNil(t *testing.T) {
-	result := AsFood("not a food")
-
-	if result != nil {
-		t.Errorf("Expected nil for non-Food type, got %v", result)
-	}
-}
-
-func TestFood_AsFood_NilInputIsNil(t *testing.T) {
-	result := AsFood(nil)
-
-	if result != nil {
-		t.Errorf("Expected nil for nil input, got %v", result)
-	}
-}
-
-func TestFood_AsFood_DifferentStructTypeIsNil(t *testing.T) {
-	input := &Item{
-		Shape: primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 1}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
-		Name:  "Just an item",
-	}
-
-	result := AsFood(input)
-
-	if result != nil {
-		t.Errorf("Expected nil for Item type, got %v", result)
-	}
-}
-
-func TestFood_AsFood_ElixirTypeIsNil(t *testing.T) {
-	input := &Elixir{
-		Item: &Item{
-			Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
-			Name:  "Test Elixir",
-		},
-		Effect: &primitives.Effect{
-			Attributes: primitives.Attributes{Strength: 10},
-			Duration: primitives.EffectDuration{
-				Type:  primitives.EffectDurationTypeAllTemporary,
-				Steps: 20,
-			},
-		},
-	}
-
-	result := AsFood(input)
-
-	if result != nil {
-		t.Errorf("Expected nil for Elixir type, got %v", result)
 	}
 }
 
@@ -530,22 +453,5 @@ func BenchmarkFood_NewFoodByConfig(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		rng := utils.NewRandomWithSeed(int64(i))
 		_, _ = NewFoodByConfig(rng, box, config)
-	}
-}
-
-func BenchmarkFood_AsFood(b *testing.B) {
-	food := &Food{
-		Item: &Item{
-			Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
-			Name:  "Test Food",
-		},
-		Effect: &primitives.Effect{
-			Attributes: primitives.Attributes{Health: 25},
-		},
-	}
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		_ = AsFood(food)
 	}
 }

@@ -299,8 +299,8 @@ func TestWeapon_NewWeapon_ZeroSizedBoxIsOk(t *testing.T) {
 		t.Fatal("Expected valid weapon with zero-sized box")
 	}
 
-	if weapon.Shape != box {
-		t.Errorf("Expected box %v, got %v", box, weapon.Shape)
+	if weapon.Box != box {
+		t.Errorf("Expected box %v, got %v", box, weapon.Box)
 	}
 }
 
@@ -309,15 +309,15 @@ func TestWeapon_Drop(t *testing.T) {
 	initialBox := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 	weapon := NewWeaponBuiltin(rng, initialBox, WeaponTypeSword)
 
-	if weapon.Shape != initialBox {
-		t.Errorf("Expected initial box %v, got %v", initialBox, weapon.Shape)
+	if weapon.Box != initialBox {
+		t.Errorf("Expected initial box %v, got %v", initialBox, weapon.Box)
 	}
 
 	newPosition := primitives.Point2D[int]{X: 10, Y: 10}
 	resultBox := weapon.Drop(newPosition)
 
-	if weapon.Shape.Point != newPosition {
-		t.Errorf("Expected position to be updated to %v, got %v", newPosition, weapon.Shape.Point)
+	if weapon.Box.Point != newPosition {
+		t.Errorf("Expected position to be updated to %v, got %v", newPosition, weapon.Box.Point)
 	}
 
 	if resultBox.Point != newPosition {
@@ -389,63 +389,6 @@ func TestWeapon_UseMultipleTimesIsOk(t *testing.T) {
 	}
 }
 
-func TestWeapon_AsWeapon_ValidPointer(t *testing.T) {
-	input := &Weapon{
-		Item: &Item{
-			Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
-			Name:  "Test Weapon",
-		},
-		Effect: &primitives.Effect{
-			Attributes: primitives.Attributes{Strength: 15, Agility: -3},
-		},
-	}
-
-	result := AsWeapon(input)
-
-	if result == nil {
-		t.Fatal("Expected non-nil result, got nil")
-	}
-
-	if result.Effect.Attributes.Strength != 15 {
-		t.Errorf("Expected Strength 15, got %f", result.Effect.Attributes.Strength)
-	}
-	if result.Effect.Attributes.Agility != -3 {
-		t.Errorf("Expected Agility -3, got %f", result.Effect.Attributes.Agility)
-	}
-	if result != input {
-		t.Error("Expected same pointer to be returned")
-	}
-}
-
-func TestWeapon_AsWeapon_NonWeaponTypeIsNil(t *testing.T) {
-	result := AsWeapon("not a weapon")
-
-	if result != nil {
-		t.Errorf("Expected nil for non-Weapon type, got %v", result)
-	}
-}
-
-func TestWeapon_AsWeapon_NilInputIsNil(t *testing.T) {
-	result := AsWeapon(nil)
-
-	if result != nil {
-		t.Errorf("Expected nil for nil input, got %v", result)
-	}
-}
-
-func TestWeapon_AsWeapon_DifferentStructTypeIsNil(t *testing.T) {
-	input := &Item{
-		Shape: primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 1}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
-		Name:  "Just an item",
-	}
-
-	result := AsWeapon(input)
-
-	if result != nil {
-		t.Errorf("Expected nil for Item type, got %v", result)
-	}
-}
-
 // Benchmarks
 func BenchmarkWeapon_NewWeapon(b *testing.B) {
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
@@ -498,22 +441,5 @@ func BenchmarkWeapon_Use(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_ = weapon.Use()
-	}
-}
-
-func BenchmarkWeapon_AsWeapon(b *testing.B) {
-	weapon := &Weapon{
-		Item: &Item{
-			Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
-			Name:  "Test",
-		},
-		Effect: &primitives.Effect{
-			Attributes: primitives.Attributes{Strength: 10},
-		},
-	}
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		_ = AsWeapon(weapon)
 	}
 }

@@ -10,16 +10,16 @@ func (NotItemError) Error() string {
 	return "the provided value is not an item"
 }
 
-type Type interface {
-	Food | Elixir | Scroll | Weapon
+type Dropable interface {
+	Drop(position primitives.Point2D[int]) primitives.Box
 }
 
 type Item struct {
-	Shape primitives.Box
-	Name  string
+	primitives.Box
+	Name string
 }
 
 func (i *Item) Drop(position primitives.Point2D[int]) primitives.Box {
-	i.Shape.Point = position
-	return i.Shape
+	i.Box.Point = position
+	return i.Box
 }

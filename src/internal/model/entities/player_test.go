@@ -17,8 +17,8 @@ func TestPlayer_NewPlayer_BasicInit(t *testing.T) {
 	if p == nil || p.Character == nil {
 		t.Fatalf("NewPlayer should initialize Character, got: p=%v, Character=%v", p, p.Character)
 	}
-	if p.Shape != box { // Shape points to the same box pointer passed in
-		t.Errorf("Shape should reference provided box pointer; got %p want %p", p.Shape, box)
+	if p.Box != box { // Box points to the same box pointer passed in
+		t.Errorf("Box should reference provided box pointer; got %p want %p", p.Box, box)
 	}
 
 	// Default attributes

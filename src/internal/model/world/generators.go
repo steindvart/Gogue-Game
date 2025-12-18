@@ -2,7 +2,6 @@ package world
 
 import (
 	"gogue/internal/model/entities"
-	"gogue/internal/model/items"
 	"gogue/internal/model/primitives"
 	"gogue/internal/utils"
 )
@@ -24,10 +23,7 @@ type EntitySpawner interface {
 }
 
 type SpawnedEntities struct {
-	Foods   []items.Food
-	Elixirs []items.Elixir
-	Scrolls []items.Scroll
-	Weapons []items.Weapon
+	Items   []primitives.Positional2D[int]
 	Enemies []entities.Enemy
 }
 

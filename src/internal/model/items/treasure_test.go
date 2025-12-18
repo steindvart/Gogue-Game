@@ -65,8 +65,8 @@ func TestTreasure_NewTreasure_BuiltinConfig(t *testing.T) {
 			}
 
 			// Check box is correctly set
-			if treasure.Shape != box {
-				t.Errorf("Expected box %v, got %v", box, treasure.Shape)
+			if treasure.Box != box {
+				t.Errorf("Expected box %v, got %v", box, treasure.Box)
 			}
 
 			// Value should be positive
@@ -170,8 +170,8 @@ func TestTreasure_NewTreasureByConfig(t *testing.T) {
 			}
 
 			// Verify box is set correctly
-			if treasure.Shape != tt.box {
-				t.Errorf("Expected box %v, got %v", tt.box, treasure.Shape)
+			if treasure.Box != tt.box {
+				t.Errorf("Expected box %v, got %v", tt.box, treasure.Box)
 			}
 		})
 	}
@@ -334,8 +334,8 @@ func TestTreasure_NewTreasure_ZeroSizedBoxIsOk(t *testing.T) {
 		t.Fatal("Expected valid treasure with zero-sized box")
 	}
 
-	if treasure.Shape != box {
-		t.Errorf("Expected box %v, got %v", box, treasure.Shape)
+	if treasure.Box != box {
+		t.Errorf("Expected box %v, got %v", box, treasure.Box)
 	}
 }
 
@@ -377,12 +377,12 @@ func TestTreasure_NewTreasure_VariousPositions(t *testing.T) {
 				t.Fatal("Expected valid treasure")
 			}
 
-			if treasure.Shape.Point != tt.position {
-				t.Errorf("Expected position %v, got %v", tt.position, treasure.Shape.Point)
+			if treasure.Box.Point != tt.position {
+				t.Errorf("Expected position %v, got %v", tt.position, treasure.Box.Point)
 			}
 
-			if treasure.Shape.Size != tt.size {
-				t.Errorf("Expected size %v, got %v", tt.size, treasure.Shape.Size)
+			if treasure.Box.Size != tt.size {
+				t.Errorf("Expected size %v, got %v", tt.size, treasure.Box.Size)
 			}
 		})
 	}
@@ -450,117 +450,6 @@ func TestTreasure_TakeMultipleTimesIsOk(t *testing.T) {
 	}
 }
 
-func TestTreasure_AsTreasure_ValidPointer(t *testing.T) {
-	input := &Treasure{
-		Item: &Item{
-			Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
-			Name:  "Test Treasure",
-		},
-		Value: 100,
-	}
-
-	result := AsTreasure(input)
-
-	if result == nil {
-		t.Fatal("Expected non-nil result, got nil")
-	}
-
-	if result.Value != 100 {
-		t.Errorf("Expected Value 100, got %d", result.Value)
-	}
-
-	if result != input {
-		t.Error("Expected same pointer to be returned")
-	}
-}
-
-func TestTreasure_AsTreasure_NonTreasureTypeIsNil(t *testing.T) {
-	result := AsTreasure("not a treasure")
-
-	if result != nil {
-		t.Errorf("Expected nil for non-Treasure type, got %v", result)
-	}
-}
-
-func TestTreasure_AsTreasure_NilInputIsNil(t *testing.T) {
-	result := AsTreasure(nil)
-
-	if result != nil {
-		t.Errorf("Expected nil for nil input, got %v", result)
-	}
-}
-
-func TestTreasure_AsTreasure_DifferentStructTypeIsNil(t *testing.T) {
-	input := &Item{
-		Shape: primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 1}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
-		Name:  "Just an item",
-	}
-
-	result := AsTreasure(input)
-
-	if result != nil {
-		t.Errorf("Expected nil for Item type, got %v", result)
-	}
-}
-
-func TestTreasure_AsTreasure_ElixirTypeIsNil(t *testing.T) {
-	input := &Elixir{
-		Item: &Item{
-			Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
-			Name:  "Test Elixir",
-		},
-		Effect: &primitives.Effect{
-			Attributes: primitives.Attributes{Strength: 10},
-			Duration: primitives.EffectDuration{
-				Type:  primitives.EffectDurationTypeAllTemporary,
-				Steps: 20,
-			},
-		},
-	}
-
-	result := AsTreasure(input)
-
-	if result != nil {
-		t.Errorf("Expected nil for Elixir type, got %v", result)
-	}
-}
-
-func TestTreasure_AsTreasure_FoodTypeIsNil(t *testing.T) {
-	input := &Food{
-		Item: &Item{
-			Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
-			Name:  "Test Food",
-		},
-		Effect: &primitives.Effect{
-			Attributes: primitives.Attributes{Health: 25},
-		},
-	}
-
-	result := AsTreasure(input)
-
-	if result != nil {
-		t.Errorf("Expected nil for Food type, got %v", result)
-	}
-}
-
-func TestTreasure_AsTreasure_ScrollTypeIsNil(t *testing.T) {
-	input := &Scroll{
-		Item: &Item{
-			Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
-			Name:  "Test Scroll",
-		},
-		Effect: &primitives.Effect{
-			Attributes: primitives.Attributes{Strength: 5, Agility: 5, MaxHealth: 10},
-		},
-	}
-
-	result := AsTreasure(input)
-
-	if result != nil {
-		t.Errorf("Expected nil for Scroll type, got %v", result)
-	}
-}
-
 // Benchmarks
 func BenchmarkTreasure_NewTreasure(b *testing.B) {
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
@@ -617,20 +506,5 @@ func BenchmarkTreasure_Take(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_ = treasure.Take()
-	}
-}
-
-func BenchmarkTreasure_AsTreasure(b *testing.B) {
-	treasure := &Treasure{
-		Item: &Item{
-			Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
-			Name:  "Test Treasure",
-		},
-		Value: 100,
-	}
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		_ = AsTreasure(treasure)
 	}
 }
