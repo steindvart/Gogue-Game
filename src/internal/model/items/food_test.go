@@ -455,3 +455,16 @@ func BenchmarkFood_NewFoodByConfig(b *testing.B) {
 		_, _ = NewFoodByConfig(rng, box, config)
 	}
 }
+
+func TestFood_UseMultipleTimesIsOk(t *testing.T) {
+	rng := utils.NewRandomWithSeed(defaultFoodTestSeed)
+	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
+	food := NewFoodBuiltin(rng, box, FoodTypeBread)
+
+	effect1 := food.Use()
+	effect2 := food.Use()
+
+	if effect1.Attributes.Health != effect2.Attributes.Health {
+		t.Error("Use() should return consistent attributes on multiple calls")
+	}
+}

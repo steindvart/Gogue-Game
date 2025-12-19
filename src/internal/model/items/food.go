@@ -33,3 +33,7 @@ func NewFoodByConfig(rnd utils.Randomizer, box primitives.Box, cfg FoodConfig) (
 		Attributes: cfg.GenerateAttributes(rnd),
 	}), nil
 }
+
+func (f *Food) Use() *primitives.Effect {
+	return f.Effect
+}
