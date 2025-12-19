@@ -184,6 +184,7 @@ func (g *Game) renderField(field [][]common.GameEntityType) {
 	g.renderMarginsY(FieldMarginY)
 
 	for y := range field {
+		fmt.Fprintf(g.fieldPanel, "[%s:%s]", ColorWhite, ColorBlack)
 		g.renderMarginX(FieldMarginX)
 		g.renderRow(field, y)
 		g.resetColorAndNewLine()
