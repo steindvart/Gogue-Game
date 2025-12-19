@@ -98,11 +98,30 @@ func (g *Game) initInput() {
 		case action.Exit:
 			g.signal = signals.Stop
 			return nil
+		case action.Select:
+			g.handleSelectAction()
 		default:
 			return event
 		}
 		return nil
 	})
+}
+
+func (g *Game) handleSelectAction() {
+	if g.level.Player == nil {
+		return
+	}
+	pos := g.level.Player.GetPosition()
+
+	if g.level.CheckCollisionWithTeleport(pos) {
+		currentPlayer := g.level.Player
+		newLevel := g.level.CreateNextLevel()
+		if err := newLevel.GenerateWithExistingPlayer(currentPlayer); err != nil {
+			return
+		}
+		g.level = newLevel
+		return
+	}
 }
 
 func (g *Game) eventToAction(event *tcell.EventKey) action.Type {
@@ -137,6 +156,8 @@ func (g *Game) eventToAction(event *tcell.EventKey) action.Type {
 		return action.MoveLefLowerCorner
 	case 'n', 'т':
 		return action.MoveRightLowerCorner
+	case 'e', 'у':
+		return action.Select
 	}
 
 	return action.NoAction
