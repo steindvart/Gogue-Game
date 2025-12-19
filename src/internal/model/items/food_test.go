@@ -75,7 +75,7 @@ func TestFood_NewFood_BuiltinConfig(t *testing.T) {
 			}
 
 			// Check box is correctly set
-			if food.Box != box {
+			if *food.Box != box {
 				t.Errorf("Expected box %v, got %v", box, food.Box)
 			}
 
@@ -195,7 +195,7 @@ func TestFood_NewFoodByConfig(t *testing.T) {
 			}
 
 			// Verify box is set correctly
-			if food.Box != tt.box {
+			if *food.Box != tt.box {
 				t.Errorf("Expected box %v, got %v", tt.box, food.Box)
 			}
 
@@ -354,7 +354,7 @@ func TestFood_NewFood_ZeroSizedBoxIsOk(t *testing.T) {
 		t.Fatal("Expected valid food with zero-sized box")
 	}
 
-	if food.Box != box {
+	if *food.Box != box {
 		t.Errorf("Expected box %v, got %v", box, food.Box)
 	}
 }

@@ -13,7 +13,7 @@ type Treasure struct {
 
 func NewTreasure(box primitives.Box, t TreasureType, value int32) *Treasure {
 	return &Treasure{
-		Item:  &Item{Box: box, Name: string(t)},
+		Item:  &Item{Box: &box, Name: string(t)},
 		Type:  t,
 		Value: value,
 	}

@@ -101,10 +101,10 @@ func TestConnectionTreePassageGenerator_GeneratePassages_Connectivity(t *testing
 		doorTwoInRoom := false
 
 		for _, room := range rooms {
-			if isPointInOrOnBorder(passage.DoorOne, room.Box) {
+			if isPointInOrOnBorder(passage.DoorOne, *room.Box) {
 				doorOneInRoom = true
 			}
-			if isPointInOrOnBorder(passage.DoorTwo, room.Box) {
+			if isPointInOrOnBorder(passage.DoorTwo, *room.Box) {
 				doorTwoInRoom = true
 			}
 		}
@@ -133,14 +133,14 @@ func TestConnectionTreePassageGenerator_DoorPlacer(t *testing.T) {
 	placer := NewDoorPlacer()
 
 	room1 := Room{
-		Box: primitives.Box{
+		Box: &primitives.Box{
 			Point: primitives.Point2D[int]{X: 10, Y: 10},
 			Size:  primitives.Size2D[uint]{Width: 5, Height: 5},
 		},
 	}
 
 	room2 := Room{
-		Box: primitives.Box{
+		Box: &primitives.Box{
 			Point: primitives.Point2D[int]{X: 20, Y: 10},
 			Size:  primitives.Size2D[uint]{Width: 5, Height: 5},
 		},

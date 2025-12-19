@@ -11,14 +11,14 @@ import (
 const defaultPlayerTestSeed int64 = 42
 
 func TestPlayer_NewPlayer_BasicInit(t *testing.T) {
-	box := &primitives.Box{Point: primitives.Point2D[int]{X: 10, Y: 20}, Size: primitives.Size2D[uint]{Width: 2, Height: 3}}
+	box := primitives.Box{Point: primitives.Point2D[int]{X: 10, Y: 20}, Size: primitives.Size2D[uint]{Width: 2, Height: 3}}
 	p := NewPlayer(box)
 
 	if p == nil || p.Character == nil {
 		t.Fatalf("NewPlayer should initialize Character, got: p=%v, Character=%v", p, p.Character)
 	}
-	if p.Box != box { // Box points to the same box pointer passed in
-		t.Errorf("Box should reference provided box pointer; got %p want %p", p.Box, box)
+	if p.Box == &box {
+		t.Errorf("Box not should reference provided box pointer; got %p want %p", p.Box, &box)
 	}
 
 	// Default attributes
@@ -45,7 +45,7 @@ func TestPlayer_NewPlayer_BasicInit(t *testing.T) {
 }
 
 func TestPlayer_EquipWeapon_AppliesEffectAndStoresWeapon(t *testing.T) {
-	box := &primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
+	box := primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 	p := NewPlayer(box)
 	base := p.Attributes
 
@@ -72,7 +72,7 @@ func TestPlayer_EquipWeapon_AppliesEffectAndStoresWeapon(t *testing.T) {
 }
 
 func TestPlayer_EquipWeapon_NilIsNothing(t *testing.T) {
-	box := &primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
+	box := primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 	p := NewPlayer(box)
 	base := p.Attributes
 
@@ -116,7 +116,7 @@ func TestPlayer_EquipWeapon_NilIsNothing(t *testing.T) {
 }
 
 func TestPlayer_EquipWeapon_NoAddToBackpackIfPreviousWeaponIsNil(t *testing.T) {
-	box := &primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
+	box := primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 	p := NewPlayer(box)
 	base := p.Attributes
 
@@ -147,7 +147,7 @@ func TestPlayer_EquipWeapon_NoAddToBackpackIfPreviousWeaponIsNil(t *testing.T) {
 }
 
 func TestPlayer_EquipWeapon_MovePreviousWeaponToBackpack(t *testing.T) {
-	box := &primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
+	box := primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 	p := NewPlayer(box)
 	base := p.Attributes
 
@@ -187,7 +187,7 @@ func TestPlayer_EquipWeapon_MovePreviousWeaponToBackpack(t *testing.T) {
 }
 
 func TestPlayer_EquipWeapon_PreviousWeaponIsNotNilAndBackpackIsFull_IsError(t *testing.T) {
-	box := &primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
+	box := primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 	p := NewPlayer(box)
 
 	rnd1 := utils.NewRandomWithSeed(100)
@@ -217,7 +217,7 @@ func TestPlayer_EquipWeapon_PreviousWeaponIsNotNilAndBackpackIsFull_IsError(t *t
 }
 
 func TestPlayer_UnequipWeapon_RevertsEffectAndUnsetsWeapon(t *testing.T) {
-	box := &primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
+	box := primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 	p := NewPlayer(box)
 	base := p.Attributes
 
@@ -248,7 +248,7 @@ func TestPlayer_UnequipWeapon_RevertsEffectAndUnsetsWeapon(t *testing.T) {
 }
 
 func TestPlayer_UnequipWeapon_NoWeapon(t *testing.T) {
-	box := &primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
+	box := primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 	p := NewPlayer(box)
 	base := p.Attributes
 
@@ -264,7 +264,7 @@ func TestPlayer_UnequipWeapon_NoWeapon(t *testing.T) {
 
 // @todo - пока такое поведение, но в будущем нужно пересмотреть
 //func TestPlayer_EquipWeapon_Twice_StacksByDesign(t *testing.T) {
-//	box := &primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
+//	box := primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 //	p := NewPlayer(box)
 //	base := p.Attributes
 //
