@@ -10,6 +10,10 @@ func (NotItemError) Error() string {
 	return "the provided value is not an item"
 }
 
+type Usable interface {
+	Use() *primitives.Effect
+}
+
 type Dropable interface {
 	Drop(position primitives.Point2D[int]) primitives.Box
 }
