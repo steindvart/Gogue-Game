@@ -23,6 +23,8 @@ type Game struct {
 	level  *world.Level
 	view   *viewcli.Game
 	signal signals.Type
+
+	isPlayerReadyToInteract bool
 }
 
 func NewGame() (*Game, error) {
@@ -94,7 +96,21 @@ func (g *Game) initInput() {
 			action.MoveRightUpperCorner,
 			action.MoveLefLowerCorner,
 			action.MoveRightLowerCorner:
-			g.level.MovePlayerWithCheckCollision(movementRegistry[g.eventToAction(event)])
+			g.level.MovePlayerWithBorderControl(movementRegistry[g.eventToAction(event)])
+
+			switch g.level.GetEntityCollisionType(g.level.Player.GetPosition()) {
+			case world.CollisionTypeEnemy:
+				// @todo - обработка столкновения с врагом (атака на врага)
+			case world.CollisionTypeItem:
+				g.isPlayerReadyToInteract = true
+			case world.CollisionTypeNone:
+				g.isPlayerReadyToInteract = false
+			}
+		case action.Select:
+			if g.isPlayerReadyToInteract {
+				g.level.PlayerUseItemAtPosition(g.level.Player.GetPosition())
+				g.isPlayerReadyToInteract = false
+			}
 		case action.Exit:
 			g.signal = signals.Stop
 			return nil
@@ -137,6 +153,8 @@ func (g *Game) eventToAction(event *tcell.EventKey) action.Type {
 		return action.MoveLefLowerCorner
 	case 'n', 'т':
 		return action.MoveRightLowerCorner
+	case 'e', 'у':
+		return action.Select
 	}
 
 	return action.NoAction

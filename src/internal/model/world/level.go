@@ -3,6 +3,7 @@ package world
 import (
 	"gogue/internal/common"
 	"gogue/internal/model/entities"
+	"gogue/internal/model/items"
 	"gogue/internal/model/primitives"
 	"gogue/internal/utils"
 )
@@ -31,6 +32,15 @@ type Level struct {
 	fieldRenderer FieldRenderer
 	fogOfWar      *FogOfWar
 }
+
+type CollisionType int
+
+const (
+	CollisionTypeNone CollisionType = iota
+	CollisionTypeBorder
+	CollisionTypeEnemy
+	CollisionTypeItem
+)
 
 func NewLevelWithDefaults(random utils.Randomizer, mapSize primitives.Size2D[uint]) *Level {
 	cfg := DefaultLevelConfig(mapSize)
@@ -130,26 +140,33 @@ func (l *Level) generateEnvironment() error {
 	return nil
 }
 
-func (l *Level) MovePlayerWithCheckCollision(delta primitives.Point2D[int]) {
+func (l *Level) MovePlayerWithBorderControl(delta primitives.Point2D[int]) {
 	oldPlayerPos := l.Player.GetPosition()
 	l.Player.Move(delta)
 
-	if l.checkCollision(l.Player.GetPosition()) {
+	if l.haveCollisionWithBorders(l.Player.GetPosition()) {
 		l.Player.SetPosition(oldPlayerPos)
 	}
 }
 
-func (l *Level) checkCollision(pos primitives.Point2D[int]) bool {
+func (l *Level) GetEntityCollisionType(pos primitives.Point2D[int]) CollisionType {
+	if l.checkCollisionWithEnemy(pos) {
+		return CollisionTypeEnemy
+	}
+	if l.checkCollisionWithItem(pos) {
+		return CollisionTypeItem
+	}
+
+	return CollisionTypeNone
+}
+
+func (l *Level) haveCollisionWithBorders(pos primitives.Point2D[int]) bool {
 	if l.checkCollisionWithMapBorders(pos) {
 		return true
 	}
 	if l.checkCollisionWithRoomsWall(pos) {
 		return true
 	}
-	if l.checkCollisionWithEnemy(pos) {
-		return true
-	}
-
 	if !isInSomeRoom(pos, l.Rooms) && !l.checkCollisionWithPassages(pos) {
 		return true
 	}
@@ -249,6 +266,15 @@ func (l *Level) checkCollisionWithEnemy(pos primitives.Point2D[int]) bool {
 	return false
 }
 
+func (l *Level) checkCollisionWithItem(pos primitives.Point2D[int]) bool {
+	for _, item := range l.Items {
+		if pos == item.GetPosition() {
+			return true
+		}
+	}
+	return false
+}
+
 // MakeCurrentField создаёт двумерное представление карты уровня с учётом тумана войны
 func (l *Level) MakeCurrentField(w, h int) [][]common.GameEntityType {
 	// Сначала рендерим полное поле
@@ -261,6 +287,18 @@ func (l *Level) MakeCurrentField(w, h int) [][]common.GameEntityType {
 
 	// Фильтруем поле с учётом тумана войны и радиуса обзора игрока
 	return l.fogOfWar.ApplyFogOfWar(fullField, l.Player.GetPosition(), l.Player.ViewRadius)
+}
+
+func (l *Level) PlayerUseItemAtPosition(pos primitives.Point2D[int]) {
+	item := l.GetItemAtPosition(pos)
+	if item == nil {
+		return
+	}
+
+	if usableItem, ok := item.(items.Usable); ok {
+		l.Player.Character.Use(usableItem)
+		l.RemoveItem(item)
+	}
 }
 
 func (l *Level) GetItemAtPosition(pos primitives.Point2D[int]) primitives.Positional2D[int] {
