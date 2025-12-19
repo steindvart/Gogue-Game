@@ -277,18 +277,16 @@ func (l *Level) checkCollisionWithEnemy(pos primitives.Point2D[int]) bool {
 
 // MakeCurrentField создаёт двумерное представление карты уровня с учётом тумана войны
 func (l *Level) MakeCurrentField(w, h int) [][]common.GameEntityType {
-	return l.fieldRenderer.RenderField(w, h, l) // убрать дл я
-
 	// Сначала рендерим полное поле
-	//fullField := l.fieldRenderer.RenderField(w, h, l)
-	//
-	//// Если игрока нет, возвращаем пустое поле (всё скрыто туманом войны)
-	//if l.Player == nil {
-	//	return utils.CreateEmpty2DSlice[common.GameEntityType](h, w)
-	//}
-	//
-	//// Фильтруем поле с учётом тумана войны и радиуса обзора игрока
-	//return l.fogOfWar.ApplyFogOfWar(fullField, l.Player.GetPosition(), l.Player.ViewRadius)
+	fullField := l.fieldRenderer.RenderField(w, h, l)
+
+	// Если игрока нет, возвращаем пустое поле (всё скрыто туманом войны)
+	if l.Player == nil {
+		return utils.CreateEmpty2DSlice[common.GameEntityType](h, w)
+	}
+
+	// Фильтруем поле с учётом тумана войны и радиуса обзора игрока
+	return l.fogOfWar.ApplyFogOfWar(fullField, l.Player.GetPosition(), l.Player.ViewRadius)
 }
 
 // GetItemAtPosition возвращает предмет на позиции (если есть)
