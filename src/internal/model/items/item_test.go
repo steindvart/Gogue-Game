@@ -19,10 +19,22 @@ func TestItem_Drop(t *testing.T) {
 			wantPos:  primitives.Point2D[int]{X: 5, Y: 5},
 		},
 		{
-			name:     "Create, move and drop",
+			name:     "Create, move positive delta and drop",
 			startPos: primitives.Point2D[int]{X: 5, Y: 5},
 			delta:    primitives.Point2D[int]{X: 2, Y: 2},
 			wantPos:  primitives.Point2D[int]{X: 7, Y: 7},
+		},
+		{
+			name:     "Create, move negative delta and drop",
+			startPos: primitives.Point2D[int]{X: 5, Y: 5},
+			delta:    primitives.Point2D[int]{X: -2, Y: -2},
+			wantPos:  primitives.Point2D[int]{X: 3, Y: 3},
+		},
+		{
+			name:     "Create, move to negative position and drop",
+			startPos: primitives.Point2D[int]{X: 5, Y: 5},
+			delta:    primitives.Point2D[int]{X: -10, Y: -10},
+			wantPos:  primitives.Point2D[int]{X: -5, Y: -5},
 		},
 	}
 
