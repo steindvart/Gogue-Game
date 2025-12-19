@@ -6,6 +6,8 @@ import (
 	"testing"
 )
 
+const defaultScrollTestSeed int64 = 42
+
 func TestScroll_NewScroll_BuiltinConfig(t *testing.T) {
 	tests := []struct {
 		name         string
@@ -36,7 +38,7 @@ func TestScroll_NewScroll_BuiltinConfig(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
+			rng := utils.NewRandomWithSeed(defaultScrollTestSeed)
 			box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 
 			scroll := NewScrollBuiltin(rng, box, tt.scrollType)
@@ -100,7 +102,7 @@ func TestScroll_NewScrollByConfig(t *testing.T) {
 	}{
 		{
 			name: "Valid custom config with all attributes",
-			seed: defaultItemsTestSeed,
+			seed: defaultScrollTestSeed,
 			config: ScrollConfig{
 				Type:           "Custom Scroll",
 				StrengthRange:  primitives.AttributeRange{Min: 5, Max: 15},
@@ -113,7 +115,7 @@ func TestScroll_NewScrollByConfig(t *testing.T) {
 		},
 		{
 			name: "Valid config with single attribute",
-			seed: defaultItemsTestSeed,
+			seed: defaultScrollTestSeed,
 			config: ScrollConfig{
 				Type:           "Single Attribute Scroll",
 				StrengthRange:  primitives.AttributeRange{Min: 10, Max: 20},
@@ -126,7 +128,7 @@ func TestScroll_NewScrollByConfig(t *testing.T) {
 		},
 		{
 			name: "Valid config with negative values",
-			seed: defaultItemsTestSeed,
+			seed: defaultScrollTestSeed,
 			config: ScrollConfig{
 				Type:           "Curse Scroll",
 				StrengthRange:  primitives.AttributeRange{Min: -10, Max: -2},
@@ -139,7 +141,7 @@ func TestScroll_NewScrollByConfig(t *testing.T) {
 		},
 		{
 			name: "Invalid strength range returns error",
-			seed: defaultItemsTestSeed,
+			seed: defaultScrollTestSeed,
 			config: ScrollConfig{
 				Type:           "Invalid Scroll",
 				StrengthRange:  primitives.AttributeRange{Min: 50, Max: 10}, // Min > Max
@@ -152,7 +154,7 @@ func TestScroll_NewScrollByConfig(t *testing.T) {
 		},
 		{
 			name: "Invalid agility range returns error",
-			seed: defaultItemsTestSeed,
+			seed: defaultScrollTestSeed,
 			config: ScrollConfig{
 				Type:           "Invalid Scroll",
 				StrengthRange:  primitives.AttributeRange{Min: 0, Max: 10},
@@ -165,7 +167,7 @@ func TestScroll_NewScrollByConfig(t *testing.T) {
 		},
 		{
 			name: "Invalid MaxHealth range returns error",
-			seed: defaultItemsTestSeed,
+			seed: defaultScrollTestSeed,
 			config: ScrollConfig{
 				Type:           "Invalid Scroll",
 				StrengthRange:  primitives.AttributeRange{Min: 0, Max: 10},
@@ -252,7 +254,7 @@ func TestScroll_NewScrollByConfig_FixedValues(t *testing.T) {
 	}{
 		{
 			name: "Valid custom config with all fixed attributes",
-			seed: defaultItemsTestSeed,
+			seed: defaultScrollTestSeed,
 			config: ScrollConfig{
 				Type:           "Custom Scroll",
 				StrengthRange:  primitives.AttributeRange{Min: 5, Max: 5},
@@ -333,22 +335,22 @@ func TestScroll_NewScroll_Deterministic(t *testing.T) {
 	}{
 		{
 			name:       "Same seed produces same Strength scroll",
-			seed:       defaultItemsTestSeed,
+			seed:       defaultScrollTestSeed,
 			scrollType: ScrollTypeStrength,
 		},
 		{
 			name:       "Same seed produces same Agility scroll",
-			seed:       defaultItemsTestSeed,
+			seed:       defaultScrollTestSeed,
 			scrollType: ScrollTypeAgility,
 		},
 		{
 			name:       "Same seed produces same MaxHealth scroll",
-			seed:       defaultItemsTestSeed,
+			seed:       defaultScrollTestSeed,
 			scrollType: ScrollTypeMaxHealth,
 		},
 		{
 			name:       "Same seed produces same Mystery scroll",
-			seed:       defaultItemsTestSeed,
+			seed:       defaultScrollTestSeed,
 			scrollType: ScrollTypeMystery,
 		},
 	}
@@ -451,7 +453,7 @@ func TestScroll_NewScroll_Randomness(t *testing.T) {
 }
 
 func TestScroll_NewScroll_UnknownTypeDefaultsToMystery(t *testing.T) {
-	rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
+	rng := utils.NewRandomWithSeed(defaultScrollTestSeed)
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 
 	scroll := NewScrollBuiltin(rng, box, "Unknown Scroll Type")
@@ -474,7 +476,7 @@ func TestScroll_NewScroll_UnknownTypeDefaultsToMystery(t *testing.T) {
 }
 
 func TestScroll_NewScroll_ZeroSizedBoxIsOk(t *testing.T) {
-	rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
+	rng := utils.NewRandomWithSeed(defaultScrollTestSeed)
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 0, Height: 0}}
 	scroll := NewScrollBuiltin(rng, box, ScrollTypeStrength)
 
@@ -517,7 +519,7 @@ func TestScroll_NewScroll_VariousPositions(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
+			rng := utils.NewRandomWithSeed(defaultScrollTestSeed)
 			box := primitives.Box{Point: tt.position, Size: tt.size}
 			scroll := NewScrollBuiltin(rng, box, ScrollTypeAgility)
 
@@ -544,7 +546,7 @@ func TestScroll_Use(t *testing.T) {
 	}{
 		{
 			name:       "Use Strength scroll returns correct attributes",
-			seed:       defaultItemsTestSeed,
+			seed:       defaultScrollTestSeed,
 			scrollType: ScrollTypeStrength,
 		},
 		{
@@ -594,7 +596,7 @@ func TestScroll_Use(t *testing.T) {
 }
 
 func TestScroll_UseMultipleTimesIsOk(t *testing.T) {
-	rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
+	rng := utils.NewRandomWithSeed(defaultScrollTestSeed)
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 	scroll := NewScrollBuiltin(rng, box, ScrollTypeStrength)
 
@@ -663,7 +665,7 @@ func BenchmarkScroll_NewScrollByConfig(b *testing.B) {
 }
 
 func BenchmarkScroll_Use(b *testing.B) {
-	rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
+	rng := utils.NewRandomWithSeed(defaultScrollTestSeed)
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 	scroll := NewScrollBuiltin(rng, box, ScrollTypeStrength)
 
