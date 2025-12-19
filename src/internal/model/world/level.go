@@ -75,18 +75,6 @@ func NewLevelWithComponents(
 	}
 }
 
-func (l *Level) NextLevelWithComponents() *Level {
-	return NewLevelWithComponents(
-		l.random,
-		l.config,
-		NewGridRoomGenerator(),
-		NewConnectionTreePassageGenerator(),
-		NewRoomBasedEntitySpawner(),
-		NewStartRoomPlayerSpawner(),
-		NewDefaultFieldRenderer(),
-	)
-}
-
 // Generate генерирует геометрию, сущности и игрока
 func (l *Level) Generate() error {
 	err := l.generateEnvironment()
