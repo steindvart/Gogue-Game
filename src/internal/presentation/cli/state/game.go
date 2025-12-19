@@ -117,7 +117,7 @@ func (g *Game) handleSelectAction() {
 		currentPlayer := g.level.Player
 		newLevel := g.level.NextLevelWithComponents()
 		if err := newLevel.GenerateWithExistingPlayer(currentPlayer); err != nil {
-			return
+			panic("Generate new level ended with an error: " + err.Error())
 		}
 		g.level = newLevel
 		return
