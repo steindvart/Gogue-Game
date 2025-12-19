@@ -6,6 +6,8 @@ import (
 	"testing"
 )
 
+const defaultTreasureTestSeed int64 = 42
+
 func TestTreasure_NewTreasure_BuiltinConfig(t *testing.T) {
 	tests := []struct {
 		name         string
@@ -36,7 +38,7 @@ func TestTreasure_NewTreasure_BuiltinConfig(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
+			rng := utils.NewRandomWithSeed(defaultTreasureTestSeed)
 			box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 
 			treasure := NewTreasureBuiltin(rng, box, tt.treasureType)
@@ -87,7 +89,7 @@ func TestTreasure_NewTreasureByConfig(t *testing.T) {
 	}{
 		{
 			name: "Valid custom config",
-			seed: defaultItemsTestSeed,
+			seed: defaultTreasureTestSeed,
 			config: TreasureConfig{
 				Type:        "Custom Treasure",
 				ValueRange:  TreasureValueRange{Min: 100, Max: 500},
@@ -98,7 +100,7 @@ func TestTreasure_NewTreasureByConfig(t *testing.T) {
 		},
 		{
 			name: "Valid config with small range",
-			seed: defaultItemsTestSeed,
+			seed: defaultTreasureTestSeed,
 			config: TreasureConfig{
 				Type:        "Small Treasure",
 				ValueRange:  TreasureValueRange{Min: 1, Max: 10},
@@ -109,7 +111,7 @@ func TestTreasure_NewTreasureByConfig(t *testing.T) {
 		},
 		{
 			name: "Valid config with large range",
-			seed: defaultItemsTestSeed,
+			seed: defaultTreasureTestSeed,
 			config: TreasureConfig{
 				Type:        "Large Treasure",
 				ValueRange:  TreasureValueRange{Min: 1000, Max: 10000},
@@ -120,7 +122,7 @@ func TestTreasure_NewTreasureByConfig(t *testing.T) {
 		},
 		{
 			name: "Invalid value range returns error",
-			seed: defaultItemsTestSeed,
+			seed: defaultTreasureTestSeed,
 			config: TreasureConfig{
 				Type:        "Invalid Treasure",
 				ValueRange:  TreasureValueRange{Min: 500, Max: 10}, // Min > Max
@@ -209,22 +211,22 @@ func TestTreasure_NewTreasure_Deterministic(t *testing.T) {
 	}{
 		{
 			name:         "Same seed produces same Gold treasure",
-			seed:         defaultItemsTestSeed,
+			seed:         defaultTreasureTestSeed,
 			treasureType: TreasureTypeGold,
 		},
 		{
 			name:         "Same seed produces same Gem treasure",
-			seed:         defaultItemsTestSeed,
+			seed:         defaultTreasureTestSeed,
 			treasureType: TreasureTypeGem,
 		},
 		{
 			name:         "Same seed produces same Artifact treasure",
-			seed:         defaultItemsTestSeed,
+			seed:         defaultTreasureTestSeed,
 			treasureType: TreasureTypeArtifact,
 		},
 		{
 			name:         "Same seed produces same Mystery treasure",
-			seed:         defaultItemsTestSeed,
+			seed:         defaultTreasureTestSeed,
 			treasureType: TreasureTypeMystery,
 		},
 	}
@@ -304,7 +306,7 @@ func TestTreasure_NewTreasure_Randomness(t *testing.T) {
 }
 
 func TestTreasure_NewTreasure_UnknownTypeDefaultsToMystery(t *testing.T) {
-	rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
+	rng := utils.NewRandomWithSeed(defaultTreasureTestSeed)
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 
 	treasure := NewTreasureBuiltin(rng, box, "Unknown Treasure Type")
@@ -326,7 +328,7 @@ func TestTreasure_NewTreasure_UnknownTypeDefaultsToMystery(t *testing.T) {
 }
 
 func TestTreasure_NewTreasure_ZeroSizedBoxIsOk(t *testing.T) {
-	rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
+	rng := utils.NewRandomWithSeed(defaultTreasureTestSeed)
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 0, Height: 0}}
 	treasure := NewTreasureBuiltin(rng, box, TreasureTypeGold)
 
@@ -369,7 +371,7 @@ func TestTreasure_NewTreasure_VariousPositions(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
+			rng := utils.NewRandomWithSeed(defaultTreasureTestSeed)
 			box := primitives.Box{Point: tt.position, Size: tt.size}
 			treasure := NewTreasureBuiltin(rng, box, TreasureTypeGem)
 
@@ -396,7 +398,7 @@ func TestTreasure_Take(t *testing.T) {
 	}{
 		{
 			name:         "Take Gold treasure returns correct value",
-			seed:         defaultItemsTestSeed,
+			seed:         defaultTreasureTestSeed,
 			treasureType: TreasureTypeGold,
 		},
 		{
@@ -438,7 +440,7 @@ func TestTreasure_Take(t *testing.T) {
 }
 
 func TestTreasure_TakeMultipleTimesIsOk(t *testing.T) {
-	rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
+	rng := utils.NewRandomWithSeed(defaultTreasureTestSeed)
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 	treasure := NewTreasureBuiltin(rng, box, TreasureTypeGold)
 
@@ -499,7 +501,7 @@ func BenchmarkTreasure_NewTreasureByConfig(b *testing.B) {
 }
 
 func BenchmarkTreasure_Take(b *testing.B) {
-	rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
+	rng := utils.NewRandomWithSeed(defaultTreasureTestSeed)
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 	treasure := NewTreasureBuiltin(rng, box, TreasureTypeGold)
 

@@ -6,6 +6,8 @@ import (
 	"testing"
 )
 
+const defaultWeaponConfigTestSeed int64 = 42
+
 func TestGetWeaponConfig(t *testing.T) {
 	tests := []struct {
 		name              string
@@ -188,7 +190,7 @@ func TestWeaponConfig_GenerateAttributes(t *testing.T) {
 	}{
 		{
 			name: "Sword config generates deterministic attributes",
-			seed: defaultItemsTestSeed,
+			seed: defaultWeaponConfigTestSeed,
 			config: WeaponConfig{
 				Type:          WeaponTypeSword,
 				StrengthRange: primitives.AttributeRange{Min: 10, Max: 25},
@@ -376,7 +378,7 @@ func TestWeaponConfig_GenerateAttributes_FixedRanges(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
+			rng := utils.NewRandomWithSeed(defaultWeaponConfigTestSeed)
 			attrs := tt.config.GenerateAttributes(rng)
 
 			// Check if ranges are fixed

@@ -6,6 +6,8 @@ import (
 	"testing"
 )
 
+const defaultFoodConfigTestSeed int64 = 42
+
 func TestGetFoodConfig(t *testing.T) {
 	tests := []struct {
 		name            string
@@ -221,7 +223,7 @@ func TestFoodConfig_GenerateAttributes(t *testing.T) {
 	}{
 		{
 			name: "Potatoes config generates deterministic health",
-			seed: defaultItemsTestSeed,
+			seed: defaultFoodConfigTestSeed,
 			config: FoodConfig{
 				Type:        FoodTypePotatoes,
 				HealthRange: primitives.AttributeRange{Min: 1, Max: 10},

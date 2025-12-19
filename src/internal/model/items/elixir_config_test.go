@@ -6,6 +6,8 @@ import (
 	"testing"
 )
 
+const defaultElixirConfigTestSeed int64 = 42
+
 func TestGetElixirConfig(t *testing.T) {
 	tests := []struct {
 		name               string
@@ -202,7 +204,7 @@ func TestElixirConfig_GenerateAttributes(t *testing.T) {
 	}{
 		{
 			name: "Strength config generates deterministic attributes",
-			seed: defaultItemsTestSeed,
+			seed: defaultElixirConfigTestSeed,
 			config: ElixirConfig{
 				Type:          ElixirTypeStrength,
 				StrengthRange: primitives.AttributeRange{Min: 5, Max: 20},
@@ -258,7 +260,7 @@ func TestElixirConfig_GenerateDuration(t *testing.T) {
 	}{
 		{
 			name: "Standard duration range",
-			seed: defaultItemsTestSeed,
+			seed: defaultElixirConfigTestSeed,
 			config: ElixirConfig{
 				Type:               ElixirTypeStrength,
 				DurationStepsRange: defaultDurationRange,
