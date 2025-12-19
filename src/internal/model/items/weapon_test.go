@@ -299,7 +299,7 @@ func TestWeapon_NewWeapon_ZeroSizedBoxIsOk(t *testing.T) {
 		t.Fatal("Expected valid weapon with zero-sized box")
 	}
 
-	if weapon.Box != box {
+	if *weapon.Box != box {
 		t.Errorf("Expected box %v, got %v", box, weapon.Box)
 	}
 }
@@ -309,7 +309,7 @@ func TestWeapon_Drop(t *testing.T) {
 	initialBox := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 	weapon := NewWeaponBuiltin(rng, initialBox, WeaponTypeSword)
 
-	if weapon.Box != initialBox {
+	if *weapon.Box != initialBox {
 		t.Errorf("Expected initial box %v, got %v", initialBox, weapon.Box)
 	}
 

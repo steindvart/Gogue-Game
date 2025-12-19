@@ -41,7 +41,7 @@ func TestDefaultFieldRenderer_RenderSingleRoom(t *testing.T) {
 	renderer := NewDefaultFieldRenderer()
 
 	room := Room{
-		Box: primitives.Box{
+		Box: &primitives.Box{
 			Point: primitives.Point2D[int]{X: 2, Y: 2},
 			Size:  primitives.Size2D[uint]{Width: 5, Height: 4},
 		},
@@ -139,7 +139,7 @@ func TestDefaultFieldRenderer_RenderPortal(t *testing.T) {
 	renderer := NewDefaultFieldRenderer()
 
 	room := Room{
-		Box: primitives.Box{
+		Box: &primitives.Box{
 			Point: primitives.Point2D[int]{X: 1, Y: 1},
 			Size:  primitives.Size2D[uint]{Width: 5, Height: 5},
 		},
@@ -172,7 +172,7 @@ func TestDefaultFieldRenderer_RenderItems(t *testing.T) {
 	food := items.Food{
 		Type: items.FoodTypeBread,
 		Item: &items.Item{
-			Box: primitives.Box{
+			Box: &primitives.Box{
 				Point: primitives.Point2D[int]{X: 2, Y: 2},
 				Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
 			},
@@ -182,7 +182,7 @@ func TestDefaultFieldRenderer_RenderItems(t *testing.T) {
 	elixir := items.Elixir{
 		Type: items.ElixirTypeStrength,
 		Item: &items.Item{
-			Box: primitives.Box{
+			Box: &primitives.Box{
 				Point: primitives.Point2D[int]{X: 3, Y: 3},
 				Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
 			},
@@ -192,7 +192,7 @@ func TestDefaultFieldRenderer_RenderItems(t *testing.T) {
 	scroll := items.Scroll{
 		Type: items.ScrollTypeAgility,
 		Item: &items.Item{
-			Box: primitives.Box{
+			Box: &primitives.Box{
 				Point: primitives.Point2D[int]{X: 4, Y: 4},
 				Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
 			},
@@ -202,7 +202,7 @@ func TestDefaultFieldRenderer_RenderItems(t *testing.T) {
 	weapon := items.Weapon{
 		Type: items.WeaponTypeSword,
 		Item: &items.Item{
-			Box: primitives.Box{
+			Box: &primitives.Box{
 				Point: primitives.Point2D[int]{X: 5, Y: 5},
 				Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
 			},
@@ -287,7 +287,7 @@ func TestDefaultFieldRenderer_RenderEnemies(t *testing.T) {
 func TestDefaultFieldRenderer_RenderPlayer(t *testing.T) {
 	renderer := NewDefaultFieldRenderer()
 
-	player := entities.NewPlayer(&primitives.Box{
+	player := entities.NewPlayer(primitives.Box{
 		Point: primitives.Point2D[int]{X: 5, Y: 5},
 		Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
 	})
@@ -319,14 +319,14 @@ func TestDefaultFieldRenderer_PlayerOverlapsItem(t *testing.T) {
 	food := items.Food{
 		Type: items.FoodTypeBread,
 		Item: &items.Item{
-			Box: primitives.Box{
+			Box: &primitives.Box{
 				Point: primitives.Point2D[int]{X: 5, Y: 5},
 				Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
 			},
 		},
 	}
 
-	player := entities.NewPlayer(&primitives.Box{
+	player := entities.NewPlayer(primitives.Box{
 		Point: primitives.Point2D[int]{X: 5, Y: 5},
 		Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
 	})
@@ -358,7 +358,7 @@ func TestDefaultFieldRenderer_BoundsChecking(t *testing.T) {
 	food := items.Food{
 		Type: items.FoodTypeBread,
 		Item: &items.Item{
-			Box: primitives.Box{
+			Box: &primitives.Box{
 				Point: primitives.Point2D[int]{X: 15, Y: 15}, // За пределами карты 10x10
 				Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
 			},

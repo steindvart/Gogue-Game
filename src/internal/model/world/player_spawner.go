@@ -22,7 +22,7 @@ func (s *StartRoomPlayerSpawner) SpawnPlayer(
 		return nil, err
 	}
 
-	player := entities.NewPlayer(&primitives.Box{
+	player := entities.NewPlayer(primitives.Box{
 		Point: *startPos,
 		Size:  primitives.Size2D[uint]{Height: 1, Width: 1},
 	})

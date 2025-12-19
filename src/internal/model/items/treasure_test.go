@@ -65,7 +65,7 @@ func TestTreasure_NewTreasure_BuiltinConfig(t *testing.T) {
 			}
 
 			// Check box is correctly set
-			if treasure.Box != box {
+			if *treasure.Box != box {
 				t.Errorf("Expected box %v, got %v", box, treasure.Box)
 			}
 
@@ -170,7 +170,7 @@ func TestTreasure_NewTreasureByConfig(t *testing.T) {
 			}
 
 			// Verify box is set correctly
-			if treasure.Box != tt.box {
+			if *treasure.Box != tt.box {
 				t.Errorf("Expected box %v, got %v", tt.box, treasure.Box)
 			}
 		})
@@ -334,7 +334,7 @@ func TestTreasure_NewTreasure_ZeroSizedBoxIsOk(t *testing.T) {
 		t.Fatal("Expected valid treasure with zero-sized box")
 	}
 
-	if treasure.Box != box {
+	if *treasure.Box != box {
 		t.Errorf("Expected box %v, got %v", box, treasure.Box)
 	}
 }

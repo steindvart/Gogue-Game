@@ -78,7 +78,7 @@ func TestScroll_NewScroll_BuiltinConfig(t *testing.T) {
 			}
 
 			// Check box is correctly set
-			if scroll.Box != box {
+			if *scroll.Box != box {
 				t.Errorf("Expected box %v, got %v", box, scroll.Box)
 			}
 
@@ -230,7 +230,7 @@ func TestScroll_NewScrollByConfig(t *testing.T) {
 			}
 
 			// Verify box is set correctly
-			if scroll.Box != tt.box {
+			if *scroll.Box != tt.box {
 				t.Errorf("Expected box %v, got %v", tt.box, scroll.Box)
 			}
 
@@ -313,7 +313,7 @@ func TestScroll_NewScrollByConfig_FixedValues(t *testing.T) {
 			}
 
 			// Verify box is set correctly
-			if scroll.Box != tt.box {
+			if *scroll.Box != tt.box {
 				t.Errorf("Expected box %v, got %v", tt.box, scroll.Box)
 			}
 
@@ -482,7 +482,7 @@ func TestScroll_NewScroll_ZeroSizedBoxIsOk(t *testing.T) {
 		t.Fatal("Expected valid scroll with zero-sized box")
 	}
 
-	if scroll.Box != box {
+	if *scroll.Box != box {
 		t.Errorf("Expected box %v, got %v", box, scroll.Box)
 	}
 }

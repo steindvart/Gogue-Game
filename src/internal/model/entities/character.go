@@ -1,6 +1,7 @@
 package entities
 
 import (
+	"gogue/internal/model/items"
 	"gogue/internal/model/primitives"
 	"gogue/internal/utils"
 )
@@ -46,11 +47,7 @@ func (c *Character) Attack() float64 {
 	return c.Attributes.Strength
 }
 
-type Usable interface {
-	Use() *primitives.Effect
-}
-
-func (c *Character) Use(usable Usable) {
+func (c *Character) Use(usable items.Usable) {
 	c.ApplyEffect(usable.Use())
 }
 

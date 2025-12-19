@@ -13,5 +13,7 @@ const (
 	MoveLefLowerCorner
 	MoveRightLowerCorner
 	Select
+	Use
+	Take
 	Exit
 )
