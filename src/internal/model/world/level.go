@@ -130,6 +130,10 @@ func (l *Level) generateEnvironment() error {
 	return nil
 }
 
+func (l *Level) CheckCollisionWithTeleport(delta primitives.Point2D[int]) bool {
+	return delta == l.FinishPortal.Point
+}
+
 func (l *Level) MovePlayerWithCheckCollision(delta primitives.Point2D[int]) {
 	oldPlayerPos := l.Player.GetPosition()
 	l.Player.Move(delta)
