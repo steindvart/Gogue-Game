@@ -114,11 +114,26 @@ func (g *Game) initInput() {
 		case action.Exit:
 			g.signal = signals.Stop
 			return nil
+		case action.Select:
+			g.handleSelectAction()
 		default:
 			return event
 		}
 		return nil
 	})
+}
+
+func (g *Game) handleSelectAction() {
+	if g.level.Player == nil {
+		return
+	}
+
+	if g.level.CheckCollisionWithTeleport(g.level.Player.GetPosition()) {
+		if err := g.level.GenerateWithExistingPlayer(g.level.Player); err != nil {
+			panic("Generate new level ended with an error: " + err.Error())
+		}
+		return
+	}
 }
 
 func (g *Game) eventToAction(event *tcell.EventKey) action.Type {

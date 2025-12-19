@@ -40,6 +40,7 @@ const (
 	CollisionTypeBorder
 	CollisionTypeEnemy
 	CollisionTypeItem
+	CollisionTypeTeleport
 )
 
 func NewLevelWithDefaults(random utils.Randomizer, mapSize primitives.Size2D[uint]) *Level {
@@ -144,37 +145,40 @@ func (l *Level) MovePlayerWithBorderControl(delta primitives.Point2D[int]) {
 	oldPlayerPos := l.Player.GetPosition()
 	l.Player.Move(delta)
 
-	if l.haveCollisionWithBorders(l.Player.GetPosition()) {
+	if l.isCollisionWithBorders(l.Player.GetPosition()) {
 		l.Player.SetPosition(oldPlayerPos)
 	}
 }
 
-func (l *Level) GetEntityCollisionType(pos primitives.Point2D[int]) CollisionType {
-	if l.checkCollisionWithEnemy(pos) {
+func (l *Level) ChechEntityCollisionType(pos primitives.Point2D[int]) CollisionType {
+	if l.isCollisionWithEnemy(pos) {
 		return CollisionTypeEnemy
 	}
-	if l.checkCollisionWithItem(pos) {
+	if l.isCollisionWithItem(pos) {
 		return CollisionTypeItem
+	}
+	if l.isCollisionWithTeleport(pos) {
+		return CollisionTypeTeleport
 	}
 
 	return CollisionTypeNone
 }
 
-func (l *Level) haveCollisionWithBorders(pos primitives.Point2D[int]) bool {
-	if l.checkCollisionWithMapBorders(pos) {
+func (l *Level) isCollisionWithBorders(pos primitives.Point2D[int]) bool {
+	if l.isCollisionWithMapBorders(pos) {
 		return true
 	}
-	if l.checkCollisionWithRoomsWall(pos) {
+	if l.isCollisionWithRoomsWall(pos) {
 		return true
 	}
-	if !isInSomeRoom(pos, l.Rooms) && !l.checkCollisionWithPassages(pos) {
+	if !isInSomeRoom(pos, l.Rooms) && !l.isCollisionWithPassages(pos) {
 		return true
 	}
 
 	return false
 }
 
-func (l *Level) checkCollisionWithMapBorders(pos primitives.Point2D[int]) bool {
+func (l *Level) isCollisionWithMapBorders(pos primitives.Point2D[int]) bool {
 	if pos.X < 0 || pos.Y < 0 {
 		return true
 	}
@@ -184,9 +188,9 @@ func (l *Level) checkCollisionWithMapBorders(pos primitives.Point2D[int]) bool {
 	return false
 }
 
-func (l *Level) checkCollisionWithRoomsWall(pos primitives.Point2D[int]) bool {
+func (l *Level) isCollisionWithRoomsWall(pos primitives.Point2D[int]) bool {
 	for _, room := range l.Rooms {
-		if isInRoom(pos, room) && checkCollisionWithRoomWall(pos, room) {
+		if isInRoom(pos, room) && isCollisionWithRoomWall(pos, room) {
 			return true
 		}
 	}
@@ -211,8 +215,8 @@ func isInRoom(pos primitives.Point2D[int], room Room) bool {
 	return (pos.X >= leftEndX && pos.X <= rightEndX) && (pos.Y >= topEndY && pos.Y <= downEndY)
 }
 
-func checkCollisionWithRoomWall(pos primitives.Point2D[int], room Room) bool {
-	if checkCollisionWithDoors(pos, room.Doors) {
+func isCollisionWithRoomWall(pos primitives.Point2D[int], room Room) bool {
+	if isCollisionWithDoors(pos, room.Doors) {
 		return false
 	}
 
@@ -227,7 +231,7 @@ func checkCollisionWithRoomWall(pos primitives.Point2D[int], room Room) bool {
 	return false
 }
 
-func checkCollisionWithDoors(pos primitives.Point2D[int], doors []primitives.Point2D[int]) bool {
+func isCollisionWithDoors(pos primitives.Point2D[int], doors []primitives.Point2D[int]) bool {
 	for _, door := range doors {
 		if pos == door {
 			return true
@@ -236,7 +240,7 @@ func checkCollisionWithDoors(pos primitives.Point2D[int], doors []primitives.Poi
 	return false
 }
 
-func (l *Level) checkCollisionWithPassages(newPos primitives.Point2D[int]) bool {
+func (l *Level) isCollisionWithPassages(newPos primitives.Point2D[int]) bool {
 	for _, passage := range l.Passages {
 		if isInPassage(newPos, passage) {
 			return true
@@ -257,7 +261,11 @@ func isInPassage(pos primitives.Point2D[int], passage Passage) bool {
 	return false
 }
 
-func (l *Level) checkCollisionWithEnemy(pos primitives.Point2D[int]) bool {
+func (l *Level) isCollisionWithTeleport(delta primitives.Point2D[int]) bool {
+	return delta == l.FinishPortal.Point
+}
+
+func (l *Level) isCollisionWithEnemy(pos primitives.Point2D[int]) bool {
 	for _, enemy := range l.Enemies {
 		if pos == enemy.GetPosition() {
 			return true
@@ -266,7 +274,7 @@ func (l *Level) checkCollisionWithEnemy(pos primitives.Point2D[int]) bool {
 	return false
 }
 
-func (l *Level) checkCollisionWithItem(pos primitives.Point2D[int]) bool {
+func (l *Level) isCollisionWithItem(pos primitives.Point2D[int]) bool {
 	for _, item := range l.Items {
 		if pos == item.GetPosition() {
 			return true
