@@ -3,7 +3,6 @@ package world
 import (
 	"errors"
 	"fmt"
-	"gogue/internal/model/entities"
 	"gogue/internal/model/primitives"
 	"gogue/internal/utils"
 	"math"
@@ -11,17 +10,14 @@ import (
 )
 
 const (
-	RoomMinWidth                   = 3
-	RoomMinHeight                  = 3
-	RoomMaxWidth                   = 200
-	RoomMaxHeight                  = 150
-	MinRoomPadding                 = 1
-	MaxExtraPassageCount           = 2
-	numberXYSections               = 3
-	roomsCount                     = 9
-	maxEnemiesPerRoom              = 2
-	levelUpdateDifficulty          = 10
-	monsterUpdatePercentDifficulty = 2
+	RoomMinWidth         = 3
+	RoomMinHeight        = 3
+	RoomMaxWidth         = 200
+	RoomMaxHeight        = 150
+	MinRoomPadding       = 1
+	MaxExtraPassageCount = 2
+	numberXYSections     = 3
+	roomsCount           = 9
 )
 
 var gridNeighborsRooms = [][]int{
@@ -78,8 +74,6 @@ func (l *Level) GenerateLevel(sizeMap primitives.Size2D[uint]) error {
 	if err != nil {
 		return err
 	}
-
-	l.GenerateEnemies()
 
 	return nil
 }
@@ -231,82 +225,6 @@ func (l *Level) GetStartPositionForPlayer() (*primitives.Point2D[int], error) {
 	}
 
 	return nil, fmt.Errorf("starting room was not found")
-}
-
-func (l *Level) GenerateEnemies() {
-	maxEnemies := maxEnemiesPerRoom + int(l.Number)/levelUpdateDifficulty
-
-	for _, room := range l.Rooms {
-		if room.Type == RoomTypeStart {
-			continue
-		}
-
-		enemiesNum := l.random.Intn(maxEnemies + 1)
-		for range enemiesNum {
-
-			for {
-				box := l.generateEntityCoords(&room)
-				if !room.checkBoxOccupied(box) {
-					enemyType := entities.EnemyType(l.random.Intn(entities.EnemyTypesNum))
-					l.generateEnemyData(enemyType, &room, box)
-					break
-				}
-			}
-		}
-	}
-}
-
-func (l *Level) generateEnemyData(et entities.EnemyType, r *Room, b *primitives.Box) {
-	difficultyUpdate := float64(monsterUpdatePercentDifficulty * l.Number) / 100.0
-	var ptr *entities.Character
-
-	switch et {
-	case entities.EnemyTypeZombie:
-		z := entities.NewZombie(*b)
-		r.Zombies = append(r.Zombies, *z)
-
-		ptr = &z.Enemy.Character
-	case entities.EnemyTypeVampire:
-		v := entities.NewVampire(*b)
-		r.Vampires = append(r.Vampires, *v)
-
-		ptr = &v.Enemy.Character
-	case entities.EnemyTypeGhost:
-		g := entities.NewGhost(*b)
-		r.Ghosts = append(r.Ghosts, *g)
-
-		ptr = &g.Enemy.Character
-	case entities.EnemyTypeOgre:
-		o := entities.NewOgre(*b)
-		r.Ogres = append(r.Ogres, *o)
-
-		ptr = &o.Enemy.Character
-	case entities.EnemyTypeSnakeMage:
-		sm := entities.NewSnakeMage(*b)
-		r.SnakeMages = append(r.SnakeMages, *sm)
-
-		ptr = &sm.Enemy.Character
-	}
-
-	ptr.Attributes.Agility += ptr.Attributes.Agility * difficultyUpdate
-	ptr.Attributes.Health += ptr.Attributes.Health * difficultyUpdate
-	ptr.Attributes.MaxHealth += ptr.Attributes.MaxHealth * difficultyUpdate
-	ptr.Attributes.Strength += ptr.Attributes.Strength * difficultyUpdate
-}
-
-func (l *Level) generateEntityCoords(r *Room) *primitives.Box {
-	upperLeftX := r.Shape.Point.X + 1
-	upperLeftY := r.Shape.Point.Y + 1
-
-	bottomRightX := r.Shape.Point.X + int(r.Shape.Size.Width) - 2
-	bottomRightY := r.Shape.Point.Y + int(r.Shape.Size.Height) - 2
-
-	return &primitives.Box{
-		Point: primitives.Point2D[int]{
-			X: utils.RandomIntInRange(l.random, upperLeftX, bottomRightX),
-			Y: utils.RandomIntInRange(l.random, upperLeftY, bottomRightY),
-		},
-	}
 }
 
 func generateSpanningTree(startRoom int, random utils.RandomSource) ([][2]int, error) {

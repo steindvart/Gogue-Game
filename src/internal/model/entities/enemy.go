@@ -2,11 +2,7 @@ package entities
 
 import "gogue/internal/model/primitives"
 
-const (
-	EnemyTypesNum = 5
-)
-
-type EnemyType uint
+type EnemyType float64
 
 const (
 	EnemyTypeZombie EnemyType = iota
@@ -16,7 +12,7 @@ const (
 	EnemyTypeSnakeMage
 )
 
-type Direction uint
+type Direction float64
 
 const (
 	DirectionForward Direction = iota
@@ -30,7 +26,7 @@ const (
 	DirectionStop
 )
 
-type AttributeRate uint
+type AttributeRate float64
 
 const (
 	AttributeRateLow      AttributeRate = 25
@@ -39,7 +35,7 @@ const (
 	AttributeRateVeryHigh AttributeRate = 100
 )
 
-type HostilityRadius uint
+type HostilityRadius float64
 
 const (
 	HostilityRadiusLow     HostilityRadius = 2

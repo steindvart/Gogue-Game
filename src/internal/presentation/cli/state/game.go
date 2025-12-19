@@ -148,6 +148,50 @@ func (g *Game) makeField(w, h int) [][]common.EntityType {
 		field[y] = make([]common.EntityType, w)
 	}
 
+	// Добавлено в качестве примера, потом надо будет убрать
+	g.level.Rooms[0].Enemies = []entities.Enemy{
+		{
+			Type: entities.EnemyType(entities.EnemyTypeZombie),
+			Character: entities.Character{
+				Shape: primitives.Box{
+					Point: primitives.Point2D[int]{X: 6, Y: 6},
+				},
+			},
+		},
+		{
+			Type: entities.EnemyType(entities.EnemyTypeVampire),
+			Character: entities.Character{
+				Shape: primitives.Box{
+					Point: primitives.Point2D[int]{X: 6, Y: 7},
+				},
+			},
+		},
+		{
+			Type: entities.EnemyType(entities.EnemyTypeGhost),
+			Character: entities.Character{
+				Shape: primitives.Box{
+					Point: primitives.Point2D[int]{X: 6, Y: 8},
+				},
+			},
+		},
+		{
+			Type: entities.EnemyType(entities.EnemyTypeOgre),
+			Character: entities.Character{
+				Shape: primitives.Box{
+					Point: primitives.Point2D[int]{X: 6, Y: 9},
+				},
+			},
+		},
+		{
+			Type: entities.EnemyType(entities.EnemyTypeSnakeMage),
+			Character: entities.Character{
+				Shape: primitives.Box{
+					Point: primitives.Point2D[int]{X: 6, Y: 10},
+				},
+			},
+		},
+	}
+
 	for _, room := range g.level.Rooms {
 		g.putRoom(room, g.level.FinishPortal, field)
 	}
