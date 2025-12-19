@@ -113,8 +113,7 @@ func (g *Game) handleSelectAction() {
 	}
 
 	if g.level.CheckCollisionWithTeleport(g.level.Player.GetPosition()) {
-		currentPlayer := g.level.Player
-		if err := g.level.GenerateWithExistingPlayer(currentPlayer); err != nil {
+		if err := g.level.GenerateWithExistingPlayer(g.level.Player); err != nil {
 			panic("Generate new level ended with an error: " + err.Error())
 		}
 		return
