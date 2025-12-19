@@ -150,7 +150,7 @@ func (l *Level) MovePlayerWithBorderControl(delta primitives.Point2D[int]) {
 	}
 }
 
-func (l *Level) ChechEntityCollisionType(pos primitives.Point2D[int]) CollisionType {
+func (l *Level) CheckEntityCollision(pos primitives.Point2D[int]) CollisionType {
 	if l.isCollisionWithEnemy(pos) {
 		return CollisionTypeEnemy
 	}
