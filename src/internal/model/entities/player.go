@@ -6,83 +6,18 @@ import (
 )
 
 type Player struct {
-	Character      Character
+	*Character
+	*items.Backpack
+	*items.Weapon
 	Experience     uint
 	CharacterLevel uint
-	Backpack       *items.Backpack
-	Weapon         *items.Weapon
+	ViewRadius     int
 }
 
-func (p *Player) IsAlive() bool {
-	return p.Character.IsAlive()
-}
-
-func (p *Player) Move(delta primitives.Point2D[int]) {
-	p.Character.Move(delta)
-}
-
-func (p *Player) TakeDamage(damage float64) {
-	p.Character.TakeDamage(damage)
-}
-
-func (p *Player) Heal(amount float64) {
-	p.Character.Heal(amount)
-}
-
-func (p *Player) Attack() float64 {
-	damage := 0.0
-	if p.Weapon != nil {
-		damage += p.Weapon.AffectedAttributes.Strength
-	}
-
-	damage += p.Character.Attack()
-	return damage
-}
-
-func (p *Player) CheckEvasion() bool {
-	return p.Character.CheckEvasion()
-}
-
-// func (p *Player) TakeTreasure(t *items.Treasure) {
-// 	p.Backpack.AddTreasure(t)
-// }
-
-// func (p *Player) TakeItemToBackpack(item any) error {
-// 	return p.Backpack.AddItem(item)
-// }
-
-// func (p *Player) DropItemFromBackpack(item any) error {
-// 	return p.Backpack.RemoveItem(item, p.Character.Shape)
-// }
-
-// func (p *Player) UseItem(item any) error {
-// 	if w := AsWeapon(item); w != nil {
-// 		err := p.Backpack.weaponIsInBackpack(w)
-// 		if err != nil {
-// 			return err
-// 		}
-
-// 		if p.Weapon != nil && p.Weapon != w {
-// 			_ = p.Backpack.RemoveItem(p.Weapon, p.Character.Shape)
-// 		}
-
-// 		items.Use(p)
-// 		return nil
-// 	}
-
-// 	err := p.Backpack.RemoveItem(item, p.Character.Shape)
-// 	if err == nil {
-// 		items.Use(p)
-// 		return nil
-// 	}
-
-// 	return err
-// }
-
-func NewPlayer(box primitives.Box) *Player {
+func NewPlayer(box *primitives.Box) *Player {
 	return &Player{
-		Character: Character{
-			Shape: box,
+		Character: &Character{
+			Box: box,
 			Attributes: primitives.Attributes{
 				Health:    100,
 				MaxHealth: 100,
@@ -92,7 +27,43 @@ func NewPlayer(box primitives.Box) *Player {
 		},
 		Experience:     0,
 		CharacterLevel: 1,
+		ViewRadius:     3,
 		Backpack:       items.NewBackpack(),
 		Weapon:         nil,
 	}
+}
+
+func (p *Player) EquipWeapon(w *items.Weapon) error {
+	if w == nil {
+		return nil
+	}
+
+	// Если уже есть экипированный предмет, пытаемся положить его в рюкзак.
+	if p.Weapon != nil {
+		if p.Backpack.IsFull() {
+			return items.BackpackIsFullError{}
+		}
+
+		previousWeapon := p.UnequipWeapon()
+		err := p.Backpack.AddItem(previousWeapon)
+		if err != nil {
+			return err
+		}
+	}
+
+	p.Weapon = w
+	p.Character.Use(w)
+
+	return nil
+}
+
+func (p *Player) UnequipWeapon() *items.Weapon {
+	w := p.Weapon
+	if w != nil {
+		p.ApplyEffect(&primitives.Effect{
+			Attributes: primitives.Inverse(w.Effect.Attributes),
+		})
+		p.Weapon = nil
+	}
+	return w
 }

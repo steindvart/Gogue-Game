@@ -7,42 +7,29 @@ import (
 
 type Food struct {
 	*Item
-	Type               FoodType
-	AffectedAttributes primitives.Attributes
+	*primitives.Effect
+	Type FoodType
 }
 
-func NewFood(rnd *utils.RandomGenerator, box primitives.Box, t FoodType) *Food {
-	cfg := GetFoodConfig(t)
-
+func NewFood(box primitives.Box, t FoodType, e *primitives.Effect) *Food {
 	return &Food{
-		Item: &Item{
-			Shape: box,
-			Name:  string(cfg.Type),
-		},
-		Type:               t,
-		AffectedAttributes: cfg.GenerateAttributes(rnd),
+		Item:   &Item{Box: box, Name: string(t)},
+		Effect: e,
+		Type:   t,
 	}
 }
 
-func NewFoodByConfig(rnd *utils.RandomGenerator, box primitives.Box, cfg FoodConfig) (*Food, error) {
+func NewFoodBuiltin(rnd utils.Randomizer, box primitives.Box, t FoodType) *Food {
+	f, _ := NewFoodByConfig(rnd, box, GetFoodConfig(t))
+	return f
+}
+
+func NewFoodByConfig(rnd utils.Randomizer, box primitives.Box, cfg FoodConfig) (*Food, error) {
 	if err := cfg.Validate(); err != nil {
 		return nil, err
 	}
 
-	return &Food{
-		Item: &Item{
-			Shape: box,
-			Name:  string(cfg.Type),
-		},
-		Type:               FoodTypeCustom,
-		AffectedAttributes: cfg.GenerateAttributes(rnd),
-	}, nil
-}
-
-func AsFood(item any) *Food {
-	f, ok := item.(*Food)
-	if ok {
-		return f
-	}
-	return nil
+	return NewFood(box, cfg.Type, &primitives.Effect{
+		Attributes: cfg.GenerateAttributes(rnd),
+	}), nil
 }

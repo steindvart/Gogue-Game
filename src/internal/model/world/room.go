@@ -1,9 +1,9 @@
 package world
 
 import (
-	"gogue/internal/model/entities"
-	"gogue/internal/model/items"
+	"errors"
 	"gogue/internal/model/primitives"
+	"gogue/internal/utils"
 )
 
 type RoomType uint
@@ -15,23 +15,58 @@ const (
 )
 
 type Room struct {
-	Shape   primitives.Box
-	Type    RoomType
-	Foods   []items.Food
-	Elixirs []items.Elixir
-	Scrolls []items.Scroll
-	Weapons []items.Weapon
-	Enemies []entities.Enemy
+	primitives.Box
+	Type  RoomType
+	Doors []primitives.Point2D[int]
+
+	// occupiedPositions используется только во время генерации для отслеживания занятых позиций
+	occupiedPositions map[primitives.Point2D[int]]bool
 }
 
-func NewRoom(roomType RoomType, shape primitives.Box) *Room {
-	return &Room{
-		Shape:   shape,
-		Type:    roomType,
-		Foods:   []items.Food{},
-		Elixirs: []items.Elixir{},
-		Scrolls: []items.Scroll{},
-		Weapons: []items.Weapon{},
-		Enemies: []entities.Enemy{},
+func NewRoom(roomType RoomType, box primitives.Box) *Room {
+	const roomMinWidth = 3
+	const roomMinHeight = 3
+
+	if box.Size.Width < roomMinWidth || box.Size.Height < roomMinHeight {
+		box.Size.Width = roomMinWidth
+		box.Size.Height = roomMinHeight
 	}
+	return &Room{
+		Box:               box,
+		Type:              roomType,
+		Doors:             []primitives.Point2D[int]{},
+		occupiedPositions: make(map[primitives.Point2D[int]]bool),
+	}
+}
+
+func (r *Room) GetRandomFreePosition(rand utils.Randomizer) (*primitives.Point2D[int], error) {
+	// Получаем все возможные точки внутри комнаты без границ
+	minX := r.Box.Point.X + 1
+	minY := r.Box.Point.Y + 1
+	width := r.Box.Size.Width - 2
+	height := r.Box.Size.Height - 2
+
+	totalPossiblePoints := int(width) * int(height)
+
+	for attempt := 0; attempt < totalPossiblePoints; attempt++ {
+		pos := primitives.Point2D[int]{
+			X: minX + rand.Intn(int(width)),
+			Y: minY + rand.Intn(int(height)),
+		}
+
+		if !r.occupiedPositions[pos] {
+			r.occupiedPositions[pos] = true
+			return &pos, nil
+		}
+	}
+
+	return nil, errors.New("no available positions in room")
+}
+
+func (r *Room) MarkOccupied(pos primitives.Point2D[int]) {
+	r.occupiedPositions[pos] = true
+}
+
+func (r *Room) GetCountFreePosition() int {
+	return int(r.Box.Size.Width*r.Box.Size.Height) - len(r.occupiedPositions)
 }

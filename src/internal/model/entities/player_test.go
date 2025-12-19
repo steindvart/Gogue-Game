@@ -1,1809 +1,289 @@
 package entities
 
-// import (
-// 	"errors"
-// 	"gogue/internal/model/entity/primitive"
-// 	"reflect"
-// 	"testing"
-// 	"time"
-// )
+import (
+	"testing"
 
-// func TestPlayer_IsAlive(t *testing.T) {
-// 	tests := []struct {
-// 		name   string
-// 		health float64
-// 		want   bool
-// 	}{
-// 		{
-// 			name:   "alive",
-// 			health: 10,
-// 			want:   true,
-// 		},
-// 		{
-// 			name:   "dead",
-// 			health: 0,
-// 			want:   false,
-// 		},
-// 		{
-// 			name:   "negative health",
-// 			health: -5,
-// 			want:   false,
-// 		},
-// 	}
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			p := &Player{Character: Character{Health: tt.health}}
-// 			got := p.IsAlive()
-// 			if got != tt.want {
-// 				t.Errorf("IsAlive() = %v, want %v", got, tt.want)
-// 			}
-// 		})
-// 	}
-// }
+	"gogue/internal/model/items"
+	"gogue/internal/model/primitives"
+	"gogue/internal/utils"
+)
 
-// func TestPlayer_Move(t *testing.T) {
-// 	tests := []struct {
-// 		name  string
-// 		start primitives.Point2D[int]
-// 		delta primitives.Point2D[int]
-// 		want  primitives.Point2D[int]
-// 	}{
-// 		{
-// 			name:  "move positive",
-// 			start: primitives.Point2D[int]{X: 0, Y: 0},
-// 			delta: primitives.Point2D[int]{X: 2, Y: 3},
-// 			want:  primitives.Point2D[int]{X: 2, Y: 3},
-// 		},
-// 		{
-// 			name:  "move negative",
-// 			start: primitives.Point2D[int]{X: 5, Y: 5},
-// 			delta: primitives.Point2D[int]{X: -2, Y: -3},
-// 			want:  primitives.Point2D[int]{X: 3, Y: 2},
-// 		},
-// 		{
-// 			name:  "move zero",
-// 			start: primitives.Point2D[int]{X: 1, Y: 1},
-// 			delta: primitives.Point2D[int]{X: 0, Y: 0},
-// 			want:  primitives.Point2D[int]{X: 1, Y: 1},
-// 		},
-// 	}
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			p := &Player{Character: Character{Shape: primitives.Box{Point: tt.start}}}
-// 			p.Move(tt.delta)
-// 			if p.Character.Shape.Point != tt.want {
-// 				t.Errorf("Move() = (%v), want (%v)", p.Character.Shape.Point, tt.want)
-// 			}
-// 		})
-// 	}
-// }
+const defaultPlayerTestSeed int64 = 42
 
-// func TestPlayer_TakeDamage(t *testing.T) {
-// 	tests := []struct {
-// 		name   string
-// 		health float64
-// 		damage float64
-// 		want   float64
-// 	}{
-// 		{
-// 			name:   "normal damage",
-// 			health: 10,
-// 			damage: 4,
-// 			want:   6,
-// 		},
-// 		{
-// 			name:   "overkill",
-// 			health: 5,
-// 			damage: 10,
-// 			want:   0,
-// 		},
-// 		{
-// 			name:   "zero damage",
-// 			health: 7,
-// 			damage: 0,
-// 			want:   7,
-// 		},
-// 	}
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			p := &Player{Character: Character{Health: tt.health}}
-// 			p.TakeDamage(tt.damage)
-// 			if p.Character.Health != tt.want {
-// 				t.Errorf("TakeDamage() = %v, want %v", p.Character.Health, tt.want)
-// 			}
-// 		})
-// 	}
-// }
+func TestPlayer_NewPlayer_BasicInit(t *testing.T) {
+	box := &primitives.Box{Point: primitives.Point2D[int]{X: 10, Y: 20}, Size: primitives.Size2D[uint]{Width: 2, Height: 3}}
+	p := NewPlayer(box)
 
-// func TestPlayer_Heal(t *testing.T) {
-// 	tests := []struct {
-// 		name      string
-// 		health    float64
-// 		maxHealth float64
-// 		heal      float64
-// 		want      float64
-// 	}{
-// 		{
-// 			name:      "normal heal",
-// 			health:    5,
-// 			maxHealth: 10,
-// 			heal:      3,
-// 			want:      8,
-// 		},
-// 		{
-// 			name:      "overheal",
-// 			health:    8,
-// 			maxHealth: 10,
-// 			heal:      5,
-// 			want:      10,
-// 		},
-// 		{
-// 			name:      "zero heal",
-// 			health:    7,
-// 			maxHealth: 10,
-// 			heal:      0,
-// 			want:      7,
-// 		},
-// 	}
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			p := &Player{Character: Character{Health: tt.health, MaxHealth: tt.maxHealth}}
-// 			p.Heal(tt.heal)
-// 			if p.Character.Health != tt.want {
-// 				t.Errorf("Heal() = %v, want %v", p.Character.Health, tt.want)
-// 			}
-// 		})
-// 	}
-// }
+	if p == nil || p.Character == nil {
+		t.Fatalf("NewPlayer should initialize Character, got: p=%v, Character=%v", p, p.Character)
+	}
+	if p.Box != box { // Box points to the same box pointer passed in
+		t.Errorf("Box should reference provided box pointer; got %p want %p", p.Box, box)
+	}
 
-// func TestPlayer_Attack(t *testing.T) {
-// 	tests := []struct {
-// 		name     string
-// 		strength uint
-// 		want     uint
-// 	}{
-// 		{
-// 			name:     "normal attack",
-// 			strength: 7,
-// 			want:     7,
-// 		},
-// 		{
-// 			name:     "zero strength",
-// 			strength: 0,
-// 			want:     0,
-// 		},
-// 		{
-// 			name:     "high strength",
-// 			strength: 100,
-// 			want:     100,
-// 		},
-// 	}
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			p := &Player{Character: Character{Strength: tt.strength}}
-// 			got := p.Attack()
-// 			if got != tt.want {
-// 				t.Errorf("Attack() = %v, want %v", got, tt.want)
-// 			}
-// 		})
-// 	}
-// }
+	// Default attributes
+	if p.Attributes.Health != 100 || p.Attributes.MaxHealth != 100 || p.Attributes.Strength != 10 || p.Attributes.Agility != 5 {
+		t.Errorf("Unexpected default attributes: got (H %.1f/MH %.1f, S %.1f, A %.1f)", p.Attributes.Health, p.Attributes.MaxHealth, p.Attributes.Strength, p.Attributes.Agility)
+	}
 
-// func TestPlayer_AttackWithWeapon(t *testing.T) {
-// 	tests := []struct {
-// 		name   string
-// 		weapon *Weapon
-// 		want   uint
-// 	}{
-// 		{
-// 			name: "damage 0",
-// 			weapon: &Weapon{
-// 				Item: Item{
-// 					Shape: primitives.Box{},
-// 					Name:  "Awkward Weapon",
-// 				},
-// 				Damage: 0,
-// 			},
-// 			want: uint(AttributeRateAverage),
-// 		},
-// 		{
-// 			name: "damage 10",
-// 			weapon: &Weapon{
-// 				Item: Item{
-// 					Shape: primitives.Box{},
-// 					Name:  "Awkward Weapon",
-// 				},
-// 				Damage: 10,
-// 			},
-// 			want: uint(AttributeRateAverage) + 10,
-// 		},
-// 		{
-// 			name: "damage 50",
-// 			weapon: &Weapon{
-// 				Item: Item{
-// 					Shape: primitives.Box{},
-// 					Name:  "Awkward Weapon",
-// 				},
-// 				Damage: 50,
-// 			},
-// 			want: uint(AttributeRateAverage) + 50,
-// 		},
-// 	}
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			p := NewPlayer(primitives.Box{})
-// 			p.Weapon = tt.weapon
+	// Backpack, Weapon, progression
+	if p.Backpack == nil {
+		t.Fatalf("Backpack must be initialized")
+	}
+	if !p.Backpack.IsEmpty() || p.Backpack.ItemsNum != 0 {
+		t.Errorf("Backpack should be empty on init; got items=%d", p.Backpack.ItemsNum)
+	}
+	if p.Weapon != nil {
+		t.Errorf("Weapon should be nil on init")
+	}
+	if p.Experience != 0 {
+		t.Errorf("Experience should start at 0, got %d", p.Experience)
+	}
+	if p.CharacterLevel != 1 {
+		t.Errorf("CharacterLevel should start at 1, got %d", p.CharacterLevel)
+	}
+}
 
-// 			got := p.Attack()
-// 			if got != tt.want {
-// 				t.Errorf("Attack() = %v, want %v", got, tt.want)
-// 			}
-// 		})
-// 	}
-// }
+func TestPlayer_EquipWeapon_AppliesEffectAndStoresWeapon(t *testing.T) {
+	box := &primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
+	p := NewPlayer(box)
+	base := p.Attributes
 
-// func TestPlayer_CheckEvasion(t *testing.T) {
-// 	tests := []struct {
-// 		name         string
-// 		agility      uint
-// 		wantAllFalse bool
-// 		wantHighRate bool
-// 	}{
-// 		{
-// 			name:         "zero agility",
-// 			agility:      0,
-// 			wantAllFalse: true,
-// 			wantHighRate: false,
-// 		},
-// 		{
-// 			name:         "high agility",
-// 			agility:      1000,
-// 			wantAllFalse: false,
-// 			wantHighRate: true,
-// 		},
-// 	}
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			p := &Player{Character: Character{Agility: tt.agility}}
-// 			tries := 1000
-// 			count := 0
-// 			for i := 0; i < tries; i++ {
-// 				if p.CheckEvasion() {
-// 					count++
-// 				}
-// 			}
-// 			if tt.wantAllFalse && count != 0 {
-// 				t.Errorf("CheckEvasion() with agility 0 should always be false, got %d/%d", count, tries)
-// 			}
-// 			if tt.wantHighRate && count < tries/2 {
-// 				t.Errorf("CheckEvasion() with high agility should be high rate, got %d/%d", count, tries)
-// 			}
-// 			if count == tries {
-// 				t.Errorf("CheckEvasion() should never be 100%%")
-// 			}
-// 		})
-// 	}
-// }
+	rnd := utils.NewRandomWithSeed(defaultPlayerTestSeed)
+	w := items.NewWeaponBuiltin(rnd, primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 1}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}, items.WeaponTypeSword)
+	if w == nil || w.Effect == nil {
+		t.Fatalf("Weapon or its effect/attributes should be initialized")
+	}
+	delta := w.Effect.Attributes
 
-// func TestPlayer_TakeTreasure(t *testing.T) {
-// 	tests := []struct {
-// 		name     string
-// 		treasure Treasure
-// 		want     uint
-// 	}{
-// 		{
-// 			name: "take treasure cost 10",
-// 			treasure: Treasure{
-// 				Shape: primitives.Box{},
-// 				Name:  "Gold",
-// 				Value: 10,
-// 			},
-// 			want: 10,
-// 		},
-// 		{
-// 			name: "take treasure cost 0",
-// 			treasure: Treasure{
-// 				Shape: primitives.Box{},
-// 				Name:  "Gold",
-// 				Value: 0,
-// 			},
-// 			want: 0,
-// 		},
-// 	}
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			p := NewPlayer(primitives.Box{})
+	err := p.EquipWeapon(w)
+	if err != nil {
+		t.Fatalf("EquipWeapon returned unexpected error: %v", err)
+	}
 
-// 			p.TakeTreasure(&tt.treasure)
-// 			got := p.Backpack.Treasures
-// 			if got != tt.want {
-// 				t.Errorf("TakeTreasure(): Backpack Treasures got %v, want %v", got, tt.want)
-// 			}
-// 		})
-// 	}
-// }
+	if p.Weapon != w {
+		t.Errorf("EquipWeapon should set current weapon")
+	}
 
-// func TestPlayer_TakeItem(t *testing.T) {
-// 	tests := []struct {
-// 		name         string
-// 		items        []ItemLike
-// 		wantBackpack Backpack
-// 		want         []error
-// 	}{
-// 		{
-// 			name: "take elixir",
-// 			items: []ItemLike{
-// 				&Elixir{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Elixir",
-// 					},
-// 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitives.Attributes{
-// 						MaxHealth: 1,
-// 						Agility:   0,
-// 						Strength:  0,
-// 					},
-// 					Increment: 10,
-// 				},
-// 			},
-// 			wantBackpack: Backpack{
-// 				Capacity: BackpackDefaultCapacity,
-// 				ItemsNum: 1,
-// 				Elixirs: map[string][]Elixir{
-// 					"Awkward Elixir": {
-// 						Elixir{
-// 							Item: Item{
-// 								Shape: primitives.Box{},
-// 								Name:  "Awkward Elixir",
-// 							},
-// 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitives.Attributes{
-// 								MaxHealth: 1,
-// 								Agility:   0,
-// 								Strength:  0,
-// 							},
-// 							Increment: 10,
-// 						},
-// 					},
-// 				},
-// 				Scrolls:   map[string][]Scroll{},
-// 				Foods:     map[string][]Food{},
-// 				Weapons:   map[string][]Weapon{},
-// 				Treasures: 0,
-// 			},
-// 			want: []error{nil},
-// 		},
-// 		{
-// 			name: "take nine elixirs",
-// 			items: []ItemLike{
-// 				&Elixir{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Elixir",
-// 					},
-// 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitives.Attributes{
-// 						MaxHealth: 1,
-// 						Agility:   0,
-// 						Strength:  0,
-// 					},
-// 					Increment: 10,
-// 				},
-// 				&Elixir{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Elixir",
-// 					},
-// 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitives.Attributes{
-// 						MaxHealth: 1,
-// 						Agility:   0,
-// 						Strength:  0,
-// 					},
-// 					Increment: 10,
-// 				},
-// 				&Elixir{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Elixir",
-// 					},
-// 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitives.Attributes{
-// 						MaxHealth: 1,
-// 						Agility:   0,
-// 						Strength:  0,
-// 					},
-// 					Increment: 10,
-// 				},
-// 				&Elixir{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Elixir",
-// 					},
-// 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitives.Attributes{
-// 						MaxHealth: 1,
-// 						Agility:   0,
-// 						Strength:  0,
-// 					},
-// 					Increment: 10,
-// 				},
-// 				&Elixir{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Elixir",
-// 					},
-// 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitives.Attributes{
-// 						MaxHealth: 1,
-// 						Agility:   0,
-// 						Strength:  0,
-// 					},
-// 					Increment: 10,
-// 				},
-// 				&Elixir{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Elixir",
-// 					},
-// 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitives.Attributes{
-// 						MaxHealth: 1,
-// 						Agility:   0,
-// 						Strength:  0,
-// 					},
-// 					Increment: 10,
-// 				},
-// 				&Elixir{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Elixir",
-// 					},
-// 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitives.Attributes{
-// 						MaxHealth: 1,
-// 						Agility:   0,
-// 						Strength:  0,
-// 					},
-// 					Increment: 10,
-// 				},
-// 				&Elixir{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Elixir",
-// 					},
-// 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitives.Attributes{
-// 						MaxHealth: 1,
-// 						Agility:   0,
-// 						Strength:  0,
-// 					},
-// 					Increment: 10,
-// 				},
-// 				&Elixir{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Elixir",
-// 					},
-// 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitives.Attributes{
-// 						MaxHealth: 1,
-// 						Agility:   0,
-// 						Strength:  0,
-// 					},
-// 					Increment: 10,
-// 				},
-// 			},
-// 			wantBackpack: Backpack{
-// 				Capacity: BackpackDefaultCapacity,
-// 				ItemsNum: 9,
-// 				Elixirs: map[string][]Elixir{
-// 					"Awkward Elixir": {
-// 						Elixir{
-// 							Item: Item{
-// 								Shape: primitives.Box{},
-// 								Name:  "Awkward Elixir",
-// 							},
-// 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitives.Attributes{
-// 								MaxHealth: 1,
-// 								Agility:   0,
-// 								Strength:  0,
-// 							},
-// 							Increment: 10,
-// 						},
-// 						Elixir{
-// 							Item: Item{
-// 								Shape: primitives.Box{},
-// 								Name:  "Awkward Elixir",
-// 							},
-// 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitives.Attributes{
-// 								MaxHealth: 1,
-// 								Agility:   0,
-// 								Strength:  0,
-// 							},
-// 							Increment: 10,
-// 						},
-// 						Elixir{
-// 							Item: Item{
-// 								Shape: primitives.Box{},
-// 								Name:  "Awkward Elixir",
-// 							},
-// 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitives.Attributes{
-// 								MaxHealth: 1,
-// 								Agility:   0,
-// 								Strength:  0,
-// 							},
-// 							Increment: 10,
-// 						},
-// 						Elixir{
-// 							Item: Item{
-// 								Shape: primitives.Box{},
-// 								Name:  "Awkward Elixir",
-// 							},
-// 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitives.Attributes{
-// 								MaxHealth: 1,
-// 								Agility:   0,
-// 								Strength:  0,
-// 							},
-// 							Increment: 10,
-// 						},
-// 						Elixir{
-// 							Item: Item{
-// 								Shape: primitives.Box{},
-// 								Name:  "Awkward Elixir",
-// 							},
-// 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitives.Attributes{
-// 								MaxHealth: 1,
-// 								Agility:   0,
-// 								Strength:  0,
-// 							},
-// 							Increment: 10,
-// 						},
-// 						Elixir{
-// 							Item: Item{
-// 								Shape: primitives.Box{},
-// 								Name:  "Awkward Elixir",
-// 							},
-// 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitives.Attributes{
-// 								MaxHealth: 1,
-// 								Agility:   0,
-// 								Strength:  0,
-// 							},
-// 							Increment: 10,
-// 						},
-// 						Elixir{
-// 							Item: Item{
-// 								Shape: primitives.Box{},
-// 								Name:  "Awkward Elixir",
-// 							},
-// 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitives.Attributes{
-// 								MaxHealth: 1,
-// 								Agility:   0,
-// 								Strength:  0,
-// 							},
-// 							Increment: 10,
-// 						},
-// 						Elixir{
-// 							Item: Item{
-// 								Shape: primitives.Box{},
-// 								Name:  "Awkward Elixir",
-// 							},
-// 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitives.Attributes{
-// 								MaxHealth: 1,
-// 								Agility:   0,
-// 								Strength:  0,
-// 							},
-// 							Increment: 10,
-// 						},
-// 						Elixir{
-// 							Item: Item{
-// 								Shape: primitives.Box{},
-// 								Name:  "Awkward Elixir",
-// 							},
-// 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitives.Attributes{
-// 								MaxHealth: 1,
-// 								Agility:   0,
-// 								Strength:  0,
-// 							},
-// 							Increment: 10,
-// 						},
-// 					},
-// 				},
-// 				Scrolls:   map[string][]Scroll{},
-// 				Foods:     map[string][]Food{},
-// 				Weapons:   map[string][]Weapon{},
-// 				Treasures: 0,
-// 			},
-// 			want: []error{nil, nil, nil, nil, nil, nil, nil, nil, nil},
-// 		},
-// 		{
-// 			name: "take ten elixirs",
-// 			items: []ItemLike{
-// 				&Elixir{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Elixir",
-// 					},
-// 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitives.Attributes{
-// 						MaxHealth: 1,
-// 						Agility:   0,
-// 						Strength:  0,
-// 					},
-// 					Increment: 10,
-// 				},
-// 				&Elixir{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Elixir",
-// 					},
-// 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitives.Attributes{
-// 						MaxHealth: 1,
-// 						Agility:   0,
-// 						Strength:  0,
-// 					},
-// 					Increment: 10,
-// 				},
-// 				&Elixir{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Elixir",
-// 					},
-// 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitives.Attributes{
-// 						MaxHealth: 1,
-// 						Agility:   0,
-// 						Strength:  0,
-// 					},
-// 					Increment: 10,
-// 				},
-// 				&Elixir{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Elixir",
-// 					},
-// 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitives.Attributes{
-// 						MaxHealth: 1,
-// 						Agility:   0,
-// 						Strength:  0,
-// 					},
-// 					Increment: 10,
-// 				},
-// 				&Elixir{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Elixir",
-// 					},
-// 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitives.Attributes{
-// 						MaxHealth: 1,
-// 						Agility:   0,
-// 						Strength:  0,
-// 					},
-// 					Increment: 10,
-// 				},
-// 				&Elixir{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Elixir",
-// 					},
-// 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitives.Attributes{
-// 						MaxHealth: 1,
-// 						Agility:   0,
-// 						Strength:  0,
-// 					},
-// 					Increment: 10,
-// 				},
-// 				&Elixir{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Elixir",
-// 					},
-// 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitives.Attributes{
-// 						MaxHealth: 1,
-// 						Agility:   0,
-// 						Strength:  0,
-// 					},
-// 					Increment: 10,
-// 				},
-// 				&Elixir{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Elixir",
-// 					},
-// 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitives.Attributes{
-// 						MaxHealth: 1,
-// 						Agility:   0,
-// 						Strength:  0,
-// 					},
-// 					Increment: 10,
-// 				},
-// 				&Elixir{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Elixir",
-// 					},
-// 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitives.Attributes{
-// 						MaxHealth: 1,
-// 						Agility:   0,
-// 						Strength:  0,
-// 					},
-// 					Increment: 10,
-// 				},
-// 				&Elixir{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Elixir",
-// 					},
-// 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitives.Attributes{
-// 						MaxHealth: 1,
-// 						Agility:   0,
-// 						Strength:  0,
-// 					},
-// 					Increment: 10,
-// 				},
-// 			},
-// 			wantBackpack: Backpack{
-// 				Capacity: BackpackDefaultCapacity,
-// 				ItemsNum: 9,
-// 				Elixirs: map[string][]Elixir{
-// 					"Awkward Elixir": {
-// 						Elixir{
-// 							Item: Item{
-// 								Shape: primitives.Box{},
-// 								Name:  "Awkward Elixir",
-// 							},
-// 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitives.Attributes{
-// 								MaxHealth: 1,
-// 								Agility:   0,
-// 								Strength:  0,
-// 							},
-// 							Increment: 10,
-// 						},
-// 						Elixir{
-// 							Item: Item{
-// 								Shape: primitives.Box{},
-// 								Name:  "Awkward Elixir",
-// 							},
-// 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitives.Attributes{
-// 								MaxHealth: 1,
-// 								Agility:   0,
-// 								Strength:  0,
-// 							},
-// 							Increment: 10,
-// 						},
-// 						Elixir{
-// 							Item: Item{
-// 								Shape: primitives.Box{},
-// 								Name:  "Awkward Elixir",
-// 							},
-// 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitives.Attributes{
-// 								MaxHealth: 1,
-// 								Agility:   0,
-// 								Strength:  0,
-// 							},
-// 							Increment: 10,
-// 						},
-// 						Elixir{
-// 							Item: Item{
-// 								Shape: primitives.Box{},
-// 								Name:  "Awkward Elixir",
-// 							},
-// 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitives.Attributes{
-// 								MaxHealth: 1,
-// 								Agility:   0,
-// 								Strength:  0,
-// 							},
-// 							Increment: 10,
-// 						},
-// 						Elixir{
-// 							Item: Item{
-// 								Shape: primitives.Box{},
-// 								Name:  "Awkward Elixir",
-// 							},
-// 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitives.Attributes{
-// 								MaxHealth: 1,
-// 								Agility:   0,
-// 								Strength:  0,
-// 							},
-// 							Increment: 10,
-// 						},
-// 						Elixir{
-// 							Item: Item{
-// 								Shape: primitives.Box{},
-// 								Name:  "Awkward Elixir",
-// 							},
-// 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitives.Attributes{
-// 								MaxHealth: 1,
-// 								Agility:   0,
-// 								Strength:  0,
-// 							},
-// 							Increment: 10,
-// 						},
-// 						Elixir{
-// 							Item: Item{
-// 								Shape: primitives.Box{},
-// 								Name:  "Awkward Elixir",
-// 							},
-// 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitives.Attributes{
-// 								MaxHealth: 1,
-// 								Agility:   0,
-// 								Strength:  0,
-// 							},
-// 							Increment: 10,
-// 						},
-// 						Elixir{
-// 							Item: Item{
-// 								Shape: primitives.Box{},
-// 								Name:  "Awkward Elixir",
-// 							},
-// 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitives.Attributes{
-// 								MaxHealth: 1,
-// 								Agility:   0,
-// 								Strength:  0,
-// 							},
-// 							Increment: 10,
-// 						},
-// 						Elixir{
-// 							Item: Item{
-// 								Shape: primitives.Box{},
-// 								Name:  "Awkward Elixir",
-// 							},
-// 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitives.Attributes{
-// 								MaxHealth: 1,
-// 								Agility:   0,
-// 								Strength:  0,
-// 							},
-// 							Increment: 10,
-// 						},
-// 					},
-// 				},
-// 				Scrolls:   map[string][]Scroll{},
-// 				Foods:     map[string][]Food{},
-// 				Weapons:   map[string][]Weapon{},
-// 				Treasures: 0,
-// 			},
-// 			want: []error{nil, nil, nil, nil, nil, nil, nil, nil, nil, BackpackIsFullError{}},
-// 		},
-// 	}
+	// Attributes should be increased by weapon effect
+	if p.Attributes.Strength != base.Strength+delta.Strength || p.Attributes.Agility != base.Agility+delta.Agility {
+		t.Errorf("Attributes not updated by weapon: got (S %.1f, A %.1f) want (S %.1f, A %.1f)", p.Attributes.Strength, p.Attributes.Agility, base.Strength+delta.Strength, base.Agility+delta.Agility)
+	}
+}
 
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			p := NewPlayer(primitives.Box{})
-// 			for idx := range tt.items {
-// 				err := p.TakeItem(tt.items[idx])
-// 				errWant := tt.want[idx]
+func TestPlayer_EquipWeapon_NilIsNothing(t *testing.T) {
+	box := &primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
+	p := NewPlayer(box)
+	base := p.Attributes
 
-// 				if !errors.Is(err, errWant) {
-// 					t.Errorf("TakeItem() = %#v, want %#v", err, errWant)
-// 				}
-// 			}
+	err := p.EquipWeapon(nil)
+	if err != nil {
+		t.Fatalf("EquipWeapon returned unexpected error: %v", err)
+	}
 
-// 			if !reflect.DeepEqual(*p.Backpack, tt.wantBackpack) {
-// 				t.Errorf("TakeItem(): Backpack got %#v, want %#v", *p.Backpack, tt.wantBackpack)
-// 			}
+	if p.Weapon != nil {
+		t.Errorf("Weapon should remain nil when equipping nil")
+	}
 
-// 		})
-// 	}
-// }
+	if p.Attributes.Strength != base.Strength || p.Attributes.Agility != base.Agility {
+		t.Errorf("Attributes should not change when equipping nil: got (S %.1f, A %.1f) want (S %.1f, A %.1f)", p.Attributes.Strength, p.Attributes.Agility, base.Strength, base.Agility)
+	}
 
-// func TestPlayer_DropItem(t *testing.T) {
-// 	tests := []struct {
-// 		name         string
-// 		items        []ItemLike
-// 		item         ItemLike
-// 		wantBackpack Backpack
-// 		want         error
-// 	}{
-// 		{
-// 			name:  "drop elixir from empty backpack",
-// 			items: []ItemLike{},
-// 			item: &Elixir{
-// 				Item: Item{
-// 					Shape: primitives.Box{},
-// 					Name:  "Awkward Elixir",
-// 				},
-// 				EffectDuration: time.Minute,
-// 				AffectedAttribute: primitives.Attributes{
-// 					MaxHealth: 1,
-// 					Agility:   0,
-// 					Strength:  0,
-// 				},
-// 				Increment: 10,
-// 			},
-// 			wantBackpack: Backpack{
-// 				Capacity:  BackpackDefaultCapacity,
-// 				ItemsNum:  0,
-// 				Elixirs:   map[string][]Elixir{},
-// 				Scrolls:   map[string][]Scroll{},
-// 				Foods:     map[string][]Food{},
-// 				Weapons:   map[string][]Weapon{},
-// 				Treasures: 0,
-// 			},
-// 			want: ItemIsNotInBackpackError{},
-// 		},
-// 		{
-// 			name: "drop elixir",
-// 			items: []ItemLike{
-// 				&Elixir{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Elixir",
-// 					},
-// 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitives.Attributes{
-// 						MaxHealth: 1,
-// 						Agility:   0,
-// 						Strength:  0,
-// 					},
-// 					Increment: 10,
-// 				},
-// 				&Elixir{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Elixir",
-// 					},
-// 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitives.Attributes{
-// 						MaxHealth: 1,
-// 						Agility:   0,
-// 						Strength:  0,
-// 					},
-// 					Increment: 10,
-// 				},
-// 				&Elixir{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Elixir",
-// 					},
-// 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitives.Attributes{
-// 						MaxHealth: 1,
-// 						Agility:   0,
-// 						Strength:  0,
-// 					},
-// 					Increment: 10,
-// 				},
-// 			},
-// 			item: &Elixir{
-// 				Item: Item{
-// 					Shape: primitives.Box{},
-// 					Name:  "Awkward Elixir",
-// 				},
-// 				EffectDuration: time.Minute,
-// 				AffectedAttribute: primitives.Attributes{
-// 					MaxHealth: 1,
-// 					Agility:   0,
-// 					Strength:  0,
-// 				},
-// 				Increment: 10,
-// 			},
-// 			wantBackpack: Backpack{
-// 				Capacity: BackpackDefaultCapacity,
-// 				ItemsNum: 2,
-// 				Elixirs: map[string][]Elixir{
-// 					"Awkward Elixir": {
-// 						Elixir{
-// 							Item: Item{
-// 								Shape: primitives.Box{},
-// 								Name:  "Awkward Elixir",
-// 							},
-// 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitives.Attributes{
-// 								MaxHealth: 1,
-// 								Agility:   0,
-// 								Strength:  0,
-// 							},
-// 							Increment: 10,
-// 						},
-// 						Elixir{
-// 							Item: Item{
-// 								Shape: primitives.Box{},
-// 								Name:  "Awkward Elixir",
-// 							},
-// 							EffectDuration: time.Minute,
-// 							AffectedAttribute: primitives.Attributes{
-// 								MaxHealth: 1,
-// 								Agility:   0,
-// 								Strength:  0,
-// 							},
-// 							Increment: 10,
-// 						},
-// 					},
-// 				},
-// 				Scrolls:   map[string][]Scroll{},
-// 				Foods:     map[string][]Food{},
-// 				Weapons:   map[string][]Weapon{},
-// 				Treasures: 0,
-// 			},
-// 			want: nil,
-// 		},
-// 	}
+	rnd := utils.NewRandomWithSeed(defaultPlayerTestSeed)
+	w := items.NewWeaponBuiltin(rnd, primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 1}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}, items.WeaponTypeSword)
+	if w == nil || w.Effect == nil {
+		t.Fatalf("Weapon or its effect/attributes should be initialized")
+	}
+	delta := w.Effect.Attributes
 
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			p := NewPlayer(primitives.Box{})
+	err = p.EquipWeapon(w)
+	if err != nil {
+		t.Fatalf("EquipWeapon returned unexpected error: %v", err)
+	}
+	err = p.EquipWeapon(nil) // Equip nil after valid weapon
+	if err != nil {
+		t.Fatalf("EquipWeapon returned unexpected error: %v", err)
+	}
 
-// 			for idx := range tt.items {
-// 				_ = p.Backpack.AddItem(tt.items[idx])
-// 			}
+	if p.Weapon != w {
+		t.Errorf("Weapon should remain unchanged when equipping nil")
+	}
 
-// 			got := p.DropItem(tt.item)
+	// Attributes should remain as after valid equip
+	if p.Attributes.Strength != base.Strength+delta.Strength || p.Attributes.Agility != base.Agility+delta.Agility {
+		t.Errorf("Attributes should remain unchanged when equipping nil: got (S %.1f, A %.1f) want (S %.1f, A %.1f)", p.Attributes.Strength, p.Attributes.Agility, base.Strength+delta.Strength, base.Agility+delta.Agility)
+	}
+}
 
-// 			if !errors.Is(got, tt.want) {
-// 				t.Errorf("DropItem() = %#v, want %#v", got, tt.want)
-// 			}
+func TestPlayer_EquipWeapon_NoAddToBackpackIfPreviousWeaponIsNil(t *testing.T) {
+	box := &primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
+	p := NewPlayer(box)
+	base := p.Attributes
 
-// 			if !reflect.DeepEqual(*p.Backpack, tt.wantBackpack) {
-// 				t.Errorf("DropItem(): Backpack got %#v, want %#v", *p.Backpack, tt.wantBackpack)
-// 			}
-// 		})
-// 	}
-// }
+	if p.Weapon != nil {
+		t.Fatalf("Precondition failed: expected no weapon equipped")
+	}
 
-// func TestPlayer_UseItem(t *testing.T) {
-// 	tests := []struct {
-// 		name       string
-// 		items      []ItemLike
-// 		item       ItemLike
-// 		wantPlayer Player
-// 		wantError  error
-// 	}{
-// 		{
-// 			name:  "use elixir, which is not in backpack",
-// 			items: []ItemLike{},
-// 			item: &Elixir{
-// 				Item: Item{
-// 					Shape: primitives.Box{},
-// 					Name:  "Awkward Elixir",
-// 				},
-// 				EffectDuration: time.Minute,
-// 				AffectedAttribute: primitives.Attributes{
-// 					MaxHealth: 1,
-// 					Agility:   0,
-// 					Strength:  0,
-// 				},
-// 				Increment: 10,
-// 			},
-// 			wantPlayer: Player{
-// 				Character: Character{
-// 					Shape:     primitives.Box{},
-// 					Health:    float64(AttributeRateAverage),
-// 					MaxHealth: float64(AttributeRateAverage),
-// 					Strength:  uint(AttributeRateAverage),
-// 					Agility:   uint(AttributeRateAverage),
-// 				},
-// 				Experience:     0,
-// 				CharacterLevel: 1,
-// 				Backpack:       NewBackpack(),
-// 				Weapon:         nil,
-// 			},
-// 			wantError: ItemIsNotInBackpackError{},
-// 		},
-// 		{
-// 			name: "use elixir",
-// 			items: []ItemLike{
-// 				&Elixir{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Elixir",
-// 					},
-// 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitives.Attributes{
-// 						MaxHealth: 1,
-// 						Agility:   0,
-// 						Strength:  0,
-// 					},
-// 					Increment: 10,
-// 				},
-// 			},
-// 			item: &Elixir{
-// 				Item: Item{
-// 					Shape: primitives.Box{},
-// 					Name:  "Awkward Elixir",
-// 				},
-// 				EffectDuration: time.Minute,
-// 				AffectedAttribute: primitives.Attributes{
-// 					MaxHealth: 1,
-// 					Agility:   0,
-// 					Strength:  0,
-// 				},
-// 				Increment: 10,
-// 			},
-// 			wantPlayer: Player{
-// 				Character: Character{
-// 					Shape:     primitives.Box{},
-// 					Health:    float64(AttributeRateAverage),
-// 					MaxHealth: float64(AttributeRateAverage) + float64(10),
-// 					Strength:  uint(AttributeRateAverage),
-// 					Agility:   uint(AttributeRateAverage),
-// 				},
-// 				Experience:     0,
-// 				CharacterLevel: 1,
-// 				Backpack:       NewBackpack(),
-// 				Weapon:         nil,
-// 			},
-// 			wantError: nil,
-// 		},
-// 		{
-// 			name: "use scroll",
-// 			items: []ItemLike{
-// 				&Scroll{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Scroll",
-// 					},
-// 					AffectedAttribute: primitives.Attributes{
-// 						MaxHealth: 0,
-// 						Agility:   1,
-// 						Strength:  0,
-// 					},
-// 					Increment: 10,
-// 				},
-// 			},
-// 			item: &Scroll{
-// 				Item: Item{
-// 					Shape: primitives.Box{},
-// 					Name:  "Awkward Scroll",
-// 				},
-// 				AffectedAttribute: primitives.Attributes{
-// 					MaxHealth: 0,
-// 					Agility:   1,
-// 					Strength:  0,
-// 				},
-// 				Increment: 10,
-// 			},
-// 			wantPlayer: Player{
-// 				Character: Character{
-// 					Shape:     primitives.Box{},
-// 					Health:    float64(AttributeRateAverage),
-// 					MaxHealth: float64(AttributeRateAverage),
-// 					Strength:  uint(AttributeRateAverage),
-// 					Agility:   uint(AttributeRateAverage) + 10,
-// 				},
-// 				Experience:     0,
-// 				CharacterLevel: 1,
-// 				Backpack:       NewBackpack(),
-// 				Weapon:         nil,
-// 			},
-// 			wantError: nil,
-// 		},
-// 		{
-// 			name: "use food",
-// 			items: []ItemLike{
-// 				&Food{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Food",
-// 					},
-// 					HealthRegeneration: 15,
-// 				},
-// 			},
-// 			item: &Food{
-// 				Item: Item{
-// 					Shape: primitives.Box{},
-// 					Name:  "Awkward Food",
-// 				},
-// 				HealthRegeneration: 15,
-// 			},
-// 			wantPlayer: Player{
-// 				Character: Character{
-// 					Shape:     primitives.Box{},
-// 					Health:    float64(AttributeRateAverage) + float64(15),
-// 					MaxHealth: float64(AttributeRateAverage),
-// 					Strength:  uint(AttributeRateAverage),
-// 					Agility:   uint(AttributeRateAverage),
-// 				},
-// 				Experience:     0,
-// 				CharacterLevel: 1,
-// 				Backpack:       NewBackpack(),
-// 				Weapon:         nil,
-// 			},
-// 			wantError: nil,
-// 		},
-// 	}
+	rnd1 := utils.NewRandomWithSeed(100)
+	w1 := items.NewWeaponBuiltin(rnd1, primitives.Box{}, items.WeaponTypeDagger)
+	delta := w1.Effect.Attributes
+	err := p.EquipWeapon(w1)
+	if err != nil {
+		t.Fatalf("EquipWeapon returned unexpected error: %v", err)
+	}
 
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			p := NewPlayer(primitives.Box{})
+	if p.Weapon != w1 {
+		t.Errorf("Expected weapon reference to point to last equipped weapon")
+	}
 
-// 			for idx := range tt.items {
-// 				_ = p.Backpack.AddItem(tt.items[idx])
-// 			}
+	if p.Attributes.Strength != base.Strength+delta.Strength || p.Attributes.Agility != base.Agility+delta.Agility {
+		t.Errorf("Attributes should reflect last equipped weapon only: got (S %.1f, A %.1f) want (S %.1f, A %.1f)", p.Attributes.Strength, p.Attributes.Agility, base.Strength+delta.Strength, base.Agility+delta.Agility)
+	}
 
-// 			gotErr := p.UseItem(tt.item)
+	// Проверяем что рюкзак пуст в случае экипировки на пустой слот
+	if !p.Backpack.IsEmpty() || p.Backpack.ItemsNum != 0 {
+		t.Fatalf("Expected backpack to have 0 items after equipping weapon on free weapon slot, got %d items", p.Backpack.ItemsNum)
+	}
+}
 
-// 			time.Sleep(1 * time.Millisecond)
+func TestPlayer_EquipWeapon_MovePreviousWeaponToBackpack(t *testing.T) {
+	box := &primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
+	p := NewPlayer(box)
+	base := p.Attributes
 
-// 			if !errors.Is(gotErr, tt.wantError) {
-// 				t.Errorf("UseItem(): error got %#v, want %#v", gotErr, tt.wantError)
-// 			}
+	rnd1 := utils.NewRandomWithSeed(100)
+	w1 := items.NewWeaponBuiltin(rnd1, primitives.Box{}, items.WeaponTypeDagger)
+	delta := w1.Effect.Attributes
+	err := p.EquipWeapon(w1)
+	if err != nil {
+		t.Fatalf("EquipWeapon returned unexpected error: %v", err)
+	}
 
-// 			if !reflect.DeepEqual(*p, tt.wantPlayer) {
-// 				t.Errorf("UseItem(): Player got %#v, want %#v", *p, tt.wantPlayer)
-// 			}
-// 		})
-// 	}
-// }
+	rnd2 := utils.NewRandomWithSeed(200)
+	w2 := items.NewWeaponBuiltin(rnd2, primitives.Box{}, items.WeaponTypeAxe)
+	delta = w2.Effect.Attributes
+	err = p.EquipWeapon(w2)
+	if err != nil {
+		t.Fatalf("EquipWeapon returned unexpected error: %v", err)
+	}
 
-// func TestPlayer_UseWeapon(t *testing.T) {
-// 	tests := []struct {
-// 		name             string
-// 		weapons          []ItemLike
-// 		currentWeaponIdx int
-// 		useWeaponIdx     int
-// 		wantPlayer       Player
-// 		wantErr          error
-// 	}{
-// 		{
-// 			name: "use first weapon with current weapon nil",
-// 			weapons: []ItemLike{
-// 				&Weapon{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Weapon 1",
-// 					},
-// 					Damage: 1,
-// 				},
-// 				&Weapon{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Weapon 2",
-// 					},
-// 					Damage: 10,
-// 				},
-// 				&Weapon{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Weapon 3",
-// 					},
-// 					Damage: 50,
-// 				},
-// 			},
-// 			currentWeaponIdx: -1,
-// 			useWeaponIdx:     0,
-// 			wantPlayer: Player{
-// 				Character: Character{
-// 					Shape:     primitives.Box{},
-// 					Health:    float64(AttributeRateAverage),
-// 					MaxHealth: float64(AttributeRateAverage),
-// 					Strength:  uint(AttributeRateAverage),
-// 					Agility:   uint(AttributeRateAverage),
-// 				},
-// 				Experience:     0,
-// 				CharacterLevel: 1,
-// 				Backpack:       NewBackpack(),
-// 				Weapon:         nil,
-// 			},
-// 			wantErr: nil,
-// 		},
-// 		{
-// 			name: "use second weapon with current weapon nil",
-// 			weapons: []ItemLike{
-// 				&Weapon{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Weapon 1",
-// 					},
-// 					Damage: 1,
-// 				},
-// 				&Weapon{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Weapon 2",
-// 					},
-// 					Damage: 10,
-// 				},
-// 				&Weapon{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Weapon 3",
-// 					},
-// 					Damage: 50,
-// 				},
-// 			},
-// 			currentWeaponIdx: -1,
-// 			useWeaponIdx:     1,
-// 			wantPlayer: Player{
-// 				Character: Character{
-// 					Shape:     primitives.Box{},
-// 					Health:    float64(AttributeRateAverage),
-// 					MaxHealth: float64(AttributeRateAverage),
-// 					Strength:  uint(AttributeRateAverage),
-// 					Agility:   uint(AttributeRateAverage),
-// 				},
-// 				Experience:     0,
-// 				CharacterLevel: 1,
-// 				Backpack:       NewBackpack(),
-// 				Weapon:         nil,
-// 			},
-// 			wantErr: nil,
-// 		},
-// 		{
-// 			name: "use first weapon with current weapon third",
-// 			weapons: []ItemLike{
-// 				&Weapon{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Weapon 1",
-// 					},
-// 					Damage: 1,
-// 				},
-// 				&Weapon{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Weapon 2",
-// 					},
-// 					Damage: 10,
-// 				},
-// 				&Weapon{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Weapon 3",
-// 					},
-// 					Damage: 50,
-// 				},
-// 			},
-// 			currentWeaponIdx: 2,
-// 			useWeaponIdx:     0,
-// 			wantPlayer: Player{
-// 				Character: Character{
-// 					Shape:     primitives.Box{},
-// 					Health:    float64(AttributeRateAverage),
-// 					MaxHealth: float64(AttributeRateAverage),
-// 					Strength:  uint(AttributeRateAverage),
-// 					Agility:   uint(AttributeRateAverage),
-// 				},
-// 				Experience:     0,
-// 				CharacterLevel: 1,
-// 				Backpack:       NewBackpack(),
-// 				Weapon:         nil,
-// 			},
-// 			wantErr: nil,
-// 		},
-// 		{
-// 			name: "use second weapon with current weapon third",
-// 			weapons: []ItemLike{
-// 				&Weapon{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Weapon 1",
-// 					},
-// 					Damage: 1,
-// 				},
-// 				&Weapon{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Weapon 2",
-// 					},
-// 					Damage: 10,
-// 				},
-// 				&Weapon{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Weapon 3",
-// 					},
-// 					Damage: 50,
-// 				},
-// 			},
-// 			currentWeaponIdx: 2,
-// 			useWeaponIdx:     1,
-// 			wantPlayer: Player{
-// 				Character: Character{
-// 					Shape:     primitives.Box{},
-// 					Health:    float64(AttributeRateAverage),
-// 					MaxHealth: float64(AttributeRateAverage),
-// 					Strength:  uint(AttributeRateAverage),
-// 					Agility:   uint(AttributeRateAverage),
-// 				},
-// 				Experience:     0,
-// 				CharacterLevel: 1,
-// 				Backpack:       NewBackpack(),
-// 				Weapon:         nil,
-// 			},
-// 			wantErr: nil,
-// 		},
-// 		{
-// 			name: "use third weapon with current weapon third",
-// 			weapons: []ItemLike{
-// 				&Weapon{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Weapon 1",
-// 					},
-// 					Damage: 1,
-// 				},
-// 				&Weapon{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Weapon 2",
-// 					},
-// 					Damage: 10,
-// 				},
-// 				&Weapon{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Weapon 3",
-// 					},
-// 					Damage: 50,
-// 				},
-// 			},
-// 			currentWeaponIdx: 2,
-// 			useWeaponIdx:     2,
-// 			wantPlayer: Player{
-// 				Character: Character{
-// 					Shape:     primitives.Box{},
-// 					Health:    float64(AttributeRateAverage),
-// 					MaxHealth: float64(AttributeRateAverage),
-// 					Strength:  uint(AttributeRateAverage),
-// 					Agility:   uint(AttributeRateAverage),
-// 				},
-// 				Experience:     0,
-// 				CharacterLevel: 1,
-// 				Backpack:       NewBackpack(),
-// 				Weapon:         nil,
-// 			},
-// 			wantErr: nil,
-// 		},
-// 	}
+	if p.Weapon != w2 {
+		t.Errorf("Expected weapon reference to point to last equipped weapon")
+	}
 
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			p := NewPlayer(primitives.Box{})
+	if p.Attributes.Strength != base.Strength+delta.Strength || p.Attributes.Agility != base.Agility+delta.Agility {
+		t.Errorf("Attributes should reflect last equipped weapon only: got (S %.1f, A %.1f) want (S %.1f, A %.1f)", p.Attributes.Strength, p.Attributes.Agility, base.Strength+delta.Strength, base.Agility+delta.Agility)
+	}
 
-// 			for idx := range tt.weapons {
-// 				_ = p.Backpack.AddItem(tt.weapons[idx])
+	// Проверяем что первый предмет теперь в рюкзаке
+	if p.Backpack.IsEmpty() || p.Backpack.ItemsNum != 1 {
+		t.Fatalf("Expected backpack to have 1 item after equipping second weapon, got %d items", p.Backpack.ItemsNum)
+	}
 
-// 				if tt.useWeaponIdx != tt.currentWeaponIdx && idx != tt.currentWeaponIdx || tt.useWeaponIdx == tt.currentWeaponIdx {
-// 					_ = tt.wantPlayer.Backpack.AddItem(tt.weapons[idx])
-// 				}
-// 			}
+	wInBackpack, ok := p.Backpack.Weapons.Front().Value.(*items.Weapon)
+	if !ok || wInBackpack != w1 {
+		t.Errorf("Expected first equipped weapon to be in backpack, got %v", wInBackpack)
+	}
+}
 
-// 			if tt.currentWeaponIdx != -1 {
-// 				p.Weapon = &p.Backpack.Weapons[tt.weapons[tt.currentWeaponIdx].(*Weapon).Item.Name][0]
-// 			}
-// 			tt.wantPlayer.Weapon = &tt.wantPlayer.Backpack.Weapons[tt.weapons[tt.useWeaponIdx].(*Weapon).Item.Name][0]
+func TestPlayer_EquipWeapon_PreviousWeaponIsNotNilAndBackpackIsFull_IsError(t *testing.T) {
+	box := &primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
+	p := NewPlayer(box)
 
-// 			gotErr := p.UseItem(&p.Backpack.Weapons[tt.weapons[tt.useWeaponIdx].(*Weapon).Item.Name][0])
+	rnd1 := utils.NewRandomWithSeed(100)
+	w1 := items.NewWeaponBuiltin(rnd1, primitives.Box{}, items.WeaponTypeDagger)
+	err := p.EquipWeapon(w1)
+	if err != nil {
+		t.Fatalf("EquipWeapon returned unexpected error: %v", err)
+	}
 
-// 			if !errors.Is(gotErr, tt.wantErr) {
-// 				t.Errorf("UseItem(): error got %#v, want %#v", gotErr, tt.wantErr)
-// 			}
+	p.Backpack.Capacity = 0 // Уменьшаем вместимость рюкзака для теста
 
-// 			if !reflect.DeepEqual(*p, tt.wantPlayer) {
-// 				t.Errorf("UseItem(): Player got %#v, want %#v", *p, tt.wantPlayer)
-// 			}
-// 		})
-// 	}
-// }
+	rnd2 := utils.NewRandomWithSeed(200)
+	w2 := items.NewWeaponBuiltin(rnd2, primitives.Box{}, items.WeaponTypeAxe)
+	err = p.EquipWeapon(w2)
+	if err == nil {
+		t.Fatalf("Expected error when equipping weapon with full backpack, got nil")
+	}
 
-// func TestPlayer_GetItemsListAndUseItem(t *testing.T) {
-// 	tests := []struct {
-// 		name       string
-// 		items      []ItemLike
-// 		wantPlayer Player
-// 		wantError  error
-// 	}{
-// 		{
-// 			name: "get and use elixir",
-// 			items: []ItemLike{
-// 				&Elixir{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Elixir",
-// 					},
-// 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitives.Attributes{
-// 						MaxHealth: 1,
-// 						Agility:   0,
-// 						Strength:  0,
-// 					},
-// 					Increment: 10,
-// 				},
-// 			},
-// 			wantPlayer: Player{
-// 				Character: Character{
-// 					Shape:     primitives.Box{},
-// 					Health:    float64(AttributeRateAverage),
-// 					MaxHealth: float64(AttributeRateAverage) + float64(10),
-// 					Strength:  uint(AttributeRateAverage),
-// 					Agility:   uint(AttributeRateAverage),
-// 				},
-// 				Experience:     0,
-// 				CharacterLevel: 1,
-// 				Backpack:       NewBackpack(),
-// 				Weapon:         nil,
-// 			},
-// 			wantError: nil,
-// 		},
-// 		{
-// 			name: "get and use scroll",
-// 			items: []ItemLike{
-// 				&Scroll{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Scroll",
-// 					},
-// 					AffectedAttribute: primitives.Attributes{
-// 						MaxHealth: 0,
-// 						Agility:   1,
-// 						Strength:  0,
-// 					},
-// 					Increment: 10,
-// 				},
-// 			},
-// 			wantPlayer: Player{
-// 				Character: Character{
-// 					Shape:     primitives.Box{},
-// 					Health:    float64(AttributeRateAverage),
-// 					MaxHealth: float64(AttributeRateAverage),
-// 					Strength:  uint(AttributeRateAverage),
-// 					Agility:   uint(AttributeRateAverage) + 10,
-// 				},
-// 				Experience:     0,
-// 				CharacterLevel: 1,
-// 				Backpack:       NewBackpack(),
-// 				Weapon:         nil,
-// 			},
-// 			wantError: nil,
-// 		},
-// 		{
-// 			name: "get and use food",
-// 			items: []ItemLike{
-// 				&Food{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Food",
-// 					},
-// 					HealthRegeneration: 15,
-// 				},
-// 			},
-// 			wantPlayer: Player{
-// 				Character: Character{
-// 					Shape:     primitives.Box{},
-// 					Health:    float64(AttributeRateAverage) + float64(15),
-// 					MaxHealth: float64(AttributeRateAverage),
-// 					Strength:  uint(AttributeRateAverage),
-// 					Agility:   uint(AttributeRateAverage),
-// 				},
-// 				Experience:     0,
-// 				CharacterLevel: 1,
-// 				Backpack:       NewBackpack(),
-// 				Weapon:         nil,
-// 			},
-// 			wantError: nil,
-// 		},
-// 	}
+	if p.Weapon != w1 {
+		t.Errorf("Weapon should remain unchanged after failed equip attempt")
+	}
 
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			p := NewPlayer(primitives.Box{})
+	// Проверяем что рюкзак остался с 0 предметов
+	if !p.Backpack.IsEmpty() || p.Backpack.ItemsNum != 0 {
+		t.Fatalf("Expected backpack to have 0 items after failed equip attempt, got %d items", p.Backpack.ItemsNum)
+	}
+}
 
-// 			for idx := range tt.items {
-// 				_ = p.Backpack.AddItem(tt.items[idx])
-// 			}
+func TestPlayer_UnequipWeapon_RevertsEffectAndUnsetsWeapon(t *testing.T) {
+	box := &primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
+	p := NewPlayer(box)
+	base := p.Attributes
 
-// 			l := p.Backpack.GetItemsList()
+	rnd := utils.NewRandomWithSeed(defaultPlayerTestSeed)
+	w := items.NewWeaponBuiltin(rnd, primitives.Box{Point: primitives.Point2D[int]{X: 2, Y: 2}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}, items.WeaponTypeDagger)
+	delta := w.Effect.Attributes
 
-// 			gotErr := p.UseItem(l[0].Item)
+	err := p.EquipWeapon(w)
+	if err != nil {
+		t.Fatalf("EquipWeapon returned unexpected error: %v", err)
+	}
 
-// 			time.Sleep(1 * time.Millisecond)
+	if p.Attributes.Strength != base.Strength+delta.Strength || p.Attributes.Agility != base.Agility+delta.Agility {
+		t.Fatalf("Precondition failed after equip: got (S %.1f, A %.1f)", p.Attributes.Strength, p.Attributes.Agility)
+	}
 
-// 			if !errors.Is(gotErr, tt.wantError) {
-// 				t.Errorf("UseItem(): error got %#v, want %#v", gotErr, tt.wantError)
-// 			}
+	ret := p.UnequipWeapon()
+	if ret != w {
+		t.Errorf("UnequipWeapon should return previously equipped weapon")
+	}
+	if p.Weapon != nil {
+		t.Errorf("Weapon should be nil after unequip")
+	}
+	// Attributes should be reverted to base
+	if p.Attributes.Strength != base.Strength || p.Attributes.Agility != base.Agility {
+		t.Errorf("Attributes should revert after unequip: got (S %.1f, A %.1f) want (S %.1f, A %.1f)", p.Attributes.Strength, p.Attributes.Agility, base.Strength, base.Agility)
+	}
+}
 
-// 			if !reflect.DeepEqual(*p, tt.wantPlayer) {
-// 				t.Errorf("UseItem(): Player got %#v, want %#v", *p, tt.wantPlayer)
-// 			}
-// 		})
-// 	}
-// }
+func TestPlayer_UnequipWeapon_NoWeapon(t *testing.T) {
+	box := &primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
+	p := NewPlayer(box)
+	base := p.Attributes
 
-// func TestPlayer_GetItemsListAndDropItem(t *testing.T) {
-// 	tests := []struct {
-// 		name       string
-// 		items      []ItemLike
-// 		wantPlayer Player
-// 		wantError  error
-// 	}{
-// 		{
-// 			name: "get and drop elixir",
-// 			items: []ItemLike{
-// 				&Elixir{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Elixir",
-// 					},
-// 					EffectDuration: time.Minute,
-// 					AffectedAttribute: primitives.Attributes{
-// 						MaxHealth: 1,
-// 						Agility:   0,
-// 						Strength:  0,
-// 					},
-// 					Increment: 10,
-// 				},
-// 			},
-// 			wantPlayer: Player{
-// 				Character: Character{
-// 					Shape:     primitives.Box{},
-// 					Health:    float64(AttributeRateAverage),
-// 					MaxHealth: float64(AttributeRateAverage),
-// 					Strength:  uint(AttributeRateAverage),
-// 					Agility:   uint(AttributeRateAverage),
-// 				},
-// 				Experience:     0,
-// 				CharacterLevel: 1,
-// 				Backpack:       NewBackpack(),
-// 				Weapon:         nil,
-// 			},
-// 			wantError: nil,
-// 		},
-// 		{
-// 			name: "get and drop scroll",
-// 			items: []ItemLike{
-// 				&Scroll{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Scroll",
-// 					},
-// 					AffectedAttribute: primitives.Attributes{
-// 						MaxHealth: 0,
-// 						Agility:   1,
-// 						Strength:  0,
-// 					},
-// 					Increment: 10,
-// 				},
-// 			},
-// 			wantPlayer: Player{
-// 				Character: Character{
-// 					Shape:     primitives.Box{},
-// 					Health:    float64(AttributeRateAverage),
-// 					MaxHealth: float64(AttributeRateAverage),
-// 					Strength:  uint(AttributeRateAverage),
-// 					Agility:   uint(AttributeRateAverage),
-// 				},
-// 				Experience:     0,
-// 				CharacterLevel: 1,
-// 				Backpack:       NewBackpack(),
-// 				Weapon:         nil,
-// 			},
-// 			wantError: nil,
-// 		},
-// 		{
-// 			name: "get and drop food",
-// 			items: []ItemLike{
-// 				&Food{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Food",
-// 					},
-// 					HealthRegeneration: 15,
-// 				},
-// 			},
-// 			wantPlayer: Player{
-// 				Character: Character{
-// 					Shape:     primitives.Box{},
-// 					Health:    float64(AttributeRateAverage),
-// 					MaxHealth: float64(AttributeRateAverage),
-// 					Strength:  uint(AttributeRateAverage),
-// 					Agility:   uint(AttributeRateAverage),
-// 				},
-// 				Experience:     0,
-// 				CharacterLevel: 1,
-// 				Backpack:       NewBackpack(),
-// 				Weapon:         nil,
-// 			},
-// 			wantError: nil,
-// 		},
-// 		{
-// 			name: "get and drop weapon",
-// 			items: []ItemLike{
-// 				&Weapon{
-// 					Item: Item{
-// 						Shape: primitives.Box{},
-// 						Name:  "Awkward Weapon",
-// 					},
-// 					Damage: 10,
-// 				},
-// 			},
-// 			wantPlayer: Player{
-// 				Character: Character{
-// 					Shape:     primitives.Box{},
-// 					Health:    float64(AttributeRateAverage),
-// 					MaxHealth: float64(AttributeRateAverage),
-// 					Strength:  uint(AttributeRateAverage),
-// 					Agility:   uint(AttributeRateAverage),
-// 				},
-// 				Experience:     0,
-// 				CharacterLevel: 1,
-// 				Backpack:       NewBackpack(),
-// 				Weapon:         nil,
-// 			},
-// 			wantError: nil,
-// 		},
-// 	}
+	ret := p.UnequipWeapon()
+	if ret != nil {
+		t.Errorf("UnequipWeapon should return nil when no weapon equipped")
+	}
+	// Nothing should change
+	if p.Attributes != base {
+		t.Errorf("Attributes should not change when unequipping without weapon")
+	}
+}
 
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			p := NewPlayer(primitives.Box{})
-
-// 			for idx := range tt.items {
-// 				_ = p.Backpack.AddItem(tt.items[idx])
-// 			}
-
-// 			l := p.Backpack.GetItemsList()
-
-// 			gotErr := p.DropItem(l[0].Item)
-
-// 			if !errors.Is(gotErr, tt.wantError) {
-// 				t.Errorf("UseItem(): error got %#v, want %#v", gotErr, tt.wantError)
-// 			}
-
-// 			if !reflect.DeepEqual(*p, tt.wantPlayer) {
-// 				t.Errorf("UseItem(): Player got %#v, want %#v", *p, tt.wantPlayer)
-// 			}
-// 		})
-// 	}
-// }
-
-// func TestNewPlayer(t *testing.T) {
-// 	tests := []struct {
-// 		name string
-// 		box  primitives.Box
-// 		want *Player
-// 	}{
-// 		{
-// 			name: "player constructor",
-// 			box:  primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 2}},
-// 			want: &Player{
-// 				Character: Character{
-// 					Shape:     primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 2}, Size: primitives.Size2D[uint]{Height: 1, Width: 2}},
-// 					Health:    float64(AttributeRateAverage),
-// 					MaxHealth: float64(AttributeRateAverage),
-// 					Strength:  uint(AttributeRateAverage),
-// 					Agility:   uint(AttributeRateAverage),
-// 				},
-// 				Experience:     0,
-// 				CharacterLevel: 1,
-// 				Backpack:       NewBackpack(),
-// 				Weapon:         nil,
-// 			},
-// 		},
-// 	}
-
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			got := NewPlayer(tt.box)
-// 			if !reflect.DeepEqual(got, tt.want) {
-// 				t.Errorf("NewPlayer() = %#v, want %#v", got, tt.want)
-// 			}
-// 		})
-// 	}
-// }
+// @todo - пока такое поведение, но в будущем нужно пересмотреть
+//func TestPlayer_EquipWeapon_Twice_StacksByDesign(t *testing.T) {
+//	box := &primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
+//	p := NewPlayer(box)
+//	base := p.Attributes
+//
+//	rnd1 := utils.NewRandomWithSeed(100)
+//	w1 := items.NewWeaponBuiltin(rnd1, primitives.Box{}, items.WeaponTypeDagger)
+//	d1 := w1.Effect.Attributes
+//	p.EquipWeapon(w1)
+//
+//	rnd2 := utils.NewRandomWithSeed(200)
+//	w2 := items.NewWeaponBuiltin(rnd2, primitives.Box{}, items.WeaponTypeAxe)
+//	d2 := w2.Effect.Attributes
+//	p.EquipWeapon(w2)
+//
+//	// Last equipped weapon reference is stored
+//	if p.Weapon != w2 {
+//		t.Errorf("Expected weapon reference to point to last equipped weapon")
+//	}
+//	// Attributes include both effects
+//	if p.Attributes.Strength != base.Strength+d1.Strength+d2.Strength || p.Attributes.Agility != base.Agility+d1.Agility+d2.Agility {
+//		t.Errorf("Attributes should stack with multiple equips: got (S %.1f, A %.1f) want (S %.1f, A %.1f)", p.Attributes.Strength, p.Attributes.Agility, base.Strength+d1.Strength+d2.Strength, base.Agility+d1.Agility+d2.Agility)
+//	}
+//}

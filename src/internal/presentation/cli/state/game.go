@@ -1,8 +1,6 @@
 package state
 
 import (
-	"gogue/internal/common"
-	"gogue/internal/model/entities"
 	"gogue/internal/model/primitives"
 	"gogue/internal/model/signals"
 	"gogue/internal/model/world"
@@ -16,8 +14,12 @@ import (
 	"github.com/rivo/tview"
 )
 
+const (
+	MapHeight = 30
+	MapWidth  = 90
+)
+
 type Game struct {
-	player *entities.Player
 	level  *world.Level
 	view   *viewcli.Game
 	signal signals.Type
@@ -25,73 +27,82 @@ type Game struct {
 
 func NewGame() (*Game, error) {
 	source := rand.New(rand.NewSource(time.Now().UnixNano()))
-	level := world.NewLevel(source)
-
-	err := level.GenerateLevel(primitives.Size2D[uint]{Height: 30, Width: 90})
-	if err != nil {
-		return nil, err
-	}
-
-	playerStartPoint, err := level.GetStartPositionForPlayer()
-	if err != nil {
-		return nil, err
-	}
-	player := entities.NewPlayer(primitives.Box{
-		Point: *playerStartPoint,
-		Size:  primitives.Size2D[uint]{Height: 1, Width: 1},
-	})
-
-	gameView := viewcli.NewGame()
 
 	game := Game{
-		player: player,
-		level:  level,
-		view:   gameView,
+		level: world.NewLevelWithDefaults(source, primitives.Size2D[uint]{Height: MapHeight, Width: MapWidth}),
+		view:  viewcli.NewGame(),
 	}
 
-	game.view.SetDrawFunc(func(screen tcell.Screen, x, y, width, height int) (int, int, int, int) {
-		// -2: учёт рамки
-		fw, fh := width-2, height-2
-		field := game.makeField(fw, fh)
-		game.view.SetFieldToScreen(screen, field, x+1, y+1)
-		return x, y, width, height
-	})
+	err := game.level.Generate()
+	if err != nil {
+		return nil, err
+	}
 
-	game.view.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		switch game.eventToAction(event) {
-		case action.MoveUp:
-			game.player.Character.Shape.Move(primitives.Point2D[int]{X: 0, Y: -1})
-			return nil
-		case action.MoveDown:
-			game.player.Character.Shape.Move(primitives.Point2D[int]{X: 0, Y: 1})
-			return nil
-		case action.MoveLeft:
-			game.player.Character.Shape.Move(primitives.Point2D[int]{X: -1, Y: 0})
-			return nil
-		case action.MoveRight:
-			game.player.Character.Shape.Move(primitives.Point2D[int]{X: 1, Y: 0})
-			return nil
-		case action.MoveLeftUpperCorner:
-			game.player.Character.Shape.Move(primitives.Point2D[int]{X: -1, Y: -1})
-			return nil
-		case action.MoveRightUpperCorner:
-			game.player.Character.Shape.Move(primitives.Point2D[int]{X: 1, Y: -1})
-			return nil
-		case action.MoveLefLowerCorner:
-			game.player.Character.Shape.Move(primitives.Point2D[int]{X: -1, Y: 1})
-			return nil
-		case action.MoveRightLowerCorner:
-			game.player.Character.Shape.Move(primitives.Point2D[int]{X: 1, Y: 1})
-			return nil
+	game.updateGameView()
+	game.initInput()
+
+	return &game, nil
+}
+
+func (g *Game) updateGameView() {
+	g.view.UpdateGameField(g.level.MakeCurrentField(MapWidth, MapHeight))
+
+	player := g.level.Player
+	if player != nil {
+		g.view.UpdatePlayerInfo(&viewcli.PlayerInfo{
+			Health:           player.Attributes.Health,
+			MaxHealth:        player.Attributes.MaxHealth,
+			Strength:         player.Attributes.Strength,
+			Agility:          player.Attributes.Agility,
+			TemporaryEffects: g.convertEffectsToView(player.TemporaryEffects),
+		})
+	}
+}
+
+func (g *Game) convertEffectsToView(effects []*primitives.Effect) []viewcli.EffectInfo {
+	viewEffects := make([]viewcli.EffectInfo, 0, len(effects))
+	for _, effect := range effects {
+		viewEffects = append(viewEffects, viewcli.EffectInfo{
+			DurationSteps:  int(effect.Duration.Steps),
+			HealthModify:   effect.Attributes.Health,
+			StrengthModify: effect.Attributes.Strength,
+			AgilityModify:  effect.Attributes.Agility,
+		})
+	}
+	return viewEffects
+}
+
+func (g *Game) initInput() {
+	movementRegistry := map[action.Type]primitives.Point2D[int]{
+		action.MoveUp:               {X: 0, Y: -1},
+		action.MoveDown:             {X: 0, Y: 1},
+		action.MoveLeft:             {X: -1, Y: 0},
+		action.MoveRight:            {X: 1, Y: 0},
+		action.MoveLeftUpperCorner:  {X: -1, Y: -1},
+		action.MoveRightUpperCorner: {X: 1, Y: -1},
+		action.MoveLefLowerCorner:   {X: -1, Y: 1},
+		action.MoveRightLowerCorner: {X: 1, Y: 1},
+	}
+
+	g.view.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		switch g.eventToAction(event) {
+		case action.MoveUp,
+			action.MoveDown,
+			action.MoveLeft,
+			action.MoveRight,
+			action.MoveLeftUpperCorner,
+			action.MoveRightUpperCorner,
+			action.MoveLefLowerCorner,
+			action.MoveRightLowerCorner:
+			g.level.MovePlayerWithCheckCollision(movementRegistry[g.eventToAction(event)])
 		case action.Exit:
-			game.signal = signals.Stop
+			g.signal = signals.Stop
 			return nil
 		default:
 			return event
 		}
+		return nil
 	})
-
-	return &game, nil
 }
 
 func (g *Game) eventToAction(event *tcell.EventKey) action.Type {
@@ -132,134 +143,13 @@ func (g *Game) eventToAction(event *tcell.EventKey) action.Type {
 }
 
 func (g *Game) Update(float64) signals.Type {
-	// Нет lastField, всё строится на лету
+	g.updateGameView()
+
 	sig := g.signal
 	g.signal = signals.NoSignal
 	return sig
 }
 
 func (g *Game) Primitive() tview.Primitive {
-	return g.view
-}
-
-func (g *Game) makeField(w, h int) [][]common.EntityType {
-	field := make([][]common.EntityType, h)
-	for y := range field {
-		field[y] = make([]common.EntityType, w)
-	}
-
-	// Добавлено в качестве примера, потом надо будет убрать
-	g.level.Rooms[0].Enemies = []entities.Enemy{
-		{
-			Type: entities.EnemyType(entities.EnemyTypeZombie),
-			Character: entities.Character{
-				Shape: primitives.Box{
-					Point: primitives.Point2D[int]{X: 6, Y: 6},
-				},
-			},
-		},
-		{
-			Type: entities.EnemyType(entities.EnemyTypeVampire),
-			Character: entities.Character{
-				Shape: primitives.Box{
-					Point: primitives.Point2D[int]{X: 6, Y: 7},
-				},
-			},
-		},
-		{
-			Type: entities.EnemyType(entities.EnemyTypeGhost),
-			Character: entities.Character{
-				Shape: primitives.Box{
-					Point: primitives.Point2D[int]{X: 6, Y: 8},
-				},
-			},
-		},
-		{
-			Type: entities.EnemyType(entities.EnemyTypeOgre),
-			Character: entities.Character{
-				Shape: primitives.Box{
-					Point: primitives.Point2D[int]{X: 6, Y: 9},
-				},
-			},
-		},
-		{
-			Type: entities.EnemyType(entities.EnemyTypeSnakeMage),
-			Character: entities.Character{
-				Shape: primitives.Box{
-					Point: primitives.Point2D[int]{X: 6, Y: 10},
-				},
-			},
-		},
-	}
-
-	for _, room := range g.level.Rooms {
-		g.putRoom(room, g.level.FinishPortal, field)
-	}
-
-	for _, passages := range g.level.Passages {
-		g.putPassage(passages, field)
-	}
-
-	for _, room := range g.level.Rooms {
-		g.putEnemies(room, field)
-	}
-
-	px := g.player.Character.Shape.Point.X
-	py := g.player.Character.Shape.Point.Y
-	if py >= 0 && py < h && px >= 0 && px < w {
-		field[py][px] = common.EntityTypePlayer
-	}
-
-	return field
-}
-
-func (g *Game) putEnemies(room world.Room, field [][]common.EntityType) {
-	var et common.EntityType
-
-	for _, e := range room.Enemies {
-		switch e.Type {
-		case entities.EnemyTypeZombie:
-			et = common.EntityTypeZombie
-		case entities.EnemyTypeVampire:
-			et = common.EntityTypeVampire
-		case entities.EnemyTypeGhost:
-			et = common.EntityTypeGhost
-		case entities.EnemyTypeOgre:
-			et = common.EntityTypeOgre
-		case entities.EnemyTypeSnakeMage:
-			et = common.EntityTypeSnakeMage
-		}
-
-		ex := e.Character.Shape.Point.X
-		ey := e.Character.Shape.Point.Y
-
-		h := len(field)
-		w := len(field[0])
-		if ey >= 0 && ey < h && ex >= 0 && ex < w {
-			field[ey][ex] = et
-		}
-	}
-}
-
-// Тут можно класть только lvl, так как room я получаю из него же шагом выше, а могу и тут
-func (g *Game) putRoom(room world.Room, finishPortal primitives.Box, field [][]common.EntityType) {
-	for column := room.Shape.Point.X; column < room.Shape.Point.X+int(room.Shape.Size.Width); column++ {
-		field[room.Shape.Point.Y][column] = common.EntityTypeHorizontalWall
-		field[room.Shape.Point.Y+int(room.Shape.Size.Height)][column] = common.EntityTypeHorizontalWall
-	}
-
-	for row := room.Shape.Point.Y; row < room.Shape.Point.Y+int(room.Shape.Size.Height); row++ {
-		field[row][room.Shape.Point.X] = common.EntityTypeVerticalWall
-		field[row][room.Shape.Point.X+int(room.Shape.Size.Width)] = common.EntityTypeVerticalWall
-	}
-
-	field[finishPortal.Point.Y][finishPortal.Point.X] = common.EntityTypePortal
-}
-
-func (g *Game) putPassage(passage world.Passage, field [][]common.EntityType) {
-	for i := 0; i < len(passage.Passage); i++ {
-		field[passage.Passage[i].Y][passage.Passage[i].X] = common.EntityTypePassage
-	}
-	field[passage.DoorOne.Y][passage.DoorOne.X] = common.EntityTypeDoorOne
-	field[passage.DoorTwo.Y][passage.DoorTwo.X] = common.EntityTypeDoorTwo
+	return g.view.GetContainer()
 }

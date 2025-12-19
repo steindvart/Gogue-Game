@@ -1,11 +1,13 @@
 package primitives
 
-type Number interface {
-	int | int8 | int16 | int32 | int64 | float32 | float64 | uint | uint8 | uint16 | uint32 | uint64
+import "gogue/internal/utils"
+
+type Point2D[T utils.Number] struct {
+	X, Y T
 }
 
-type Point2D[T Number] struct {
-	X, Y T
+type Positional2D[T utils.Number] interface {
+	GetPosition() Point2D[T]
 }
 
 func (p *Point2D[T]) Move(delta Point2D[T]) {
@@ -13,7 +15,7 @@ func (p *Point2D[T]) Move(delta Point2D[T]) {
 	p.Y += delta.Y
 }
 
-type Size2D[T Number] struct {
+type Size2D[T utils.Number] struct {
 	Height, Width T
 }
 
@@ -24,4 +26,8 @@ type Box struct {
 
 func (b *Box) Move(delta Point2D[int]) {
 	b.Point.Move(delta)
+}
+
+func (b *Box) GetPosition() Point2D[int] {
+	return b.Point
 }

@@ -7,46 +7,33 @@ import (
 
 type Scroll struct {
 	*Item
-	Type               ScrollType
-	AffectedAttributes primitives.Attributes
+	*primitives.Effect
+	Type ScrollType
 }
 
-func NewScroll(rnd *utils.RandomGenerator, box primitives.Box, t ScrollType) *Scroll {
-	cfg := GetScrollConfig(t)
-
+func NewScroll(box primitives.Box, t ScrollType, e *primitives.Effect) *Scroll {
 	return &Scroll{
-		Item: &Item{
-			Shape: box,
-			Name:  string(cfg.Type),
-		},
-		Type:               t,
-		AffectedAttributes: cfg.GenerateAttributes(rnd),
+		Item:   &Item{Box: box, Name: string(t)},
+		Effect: e,
+		Type:   t,
 	}
 }
 
-func NewScrollByConfig(rnd *utils.RandomGenerator, box primitives.Box, cfg ScrollConfig) (*Scroll, error) {
+func NewScrollBuiltin(rnd utils.Randomizer, box primitives.Box, t ScrollType) *Scroll {
+	s, _ := NewScrollByConfig(rnd, box, GetScrollConfig(t))
+	return s
+}
+
+func NewScrollByConfig(rnd utils.Randomizer, box primitives.Box, cfg ScrollConfig) (*Scroll, error) {
 	if err := cfg.Validate(); err != nil {
 		return nil, err
 	}
 
-	return &Scroll{
-		Item: &Item{
-			Shape: box,
-			Name:  string(cfg.Type),
-		},
-		Type:               ScrollTypeCustom,
-		AffectedAttributes: cfg.GenerateAttributes(rnd),
-	}, nil
+	return NewScroll(box, cfg.Type, &primitives.Effect{
+		Attributes: cfg.GenerateAttributes(rnd),
+	}), nil
 }
 
-func (e *Scroll) Use() primitives.Attributes {
-	return e.AffectedAttributes
-}
-
-func AsScroll(item any) *Scroll {
-	s, ok := item.(*Scroll)
-	if ok {
-		return s
-	}
-	return nil
+func (e *Scroll) Use() *primitives.Effect {
+	return e.Effect
 }

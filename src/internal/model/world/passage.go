@@ -7,12 +7,12 @@ import (
 )
 
 type Passage struct {
+	Way     []primitives.Point2D[int]
 	DoorOne primitives.Point2D[int]
-	Passage []primitives.Point2D[int]
 	DoorTwo primitives.Point2D[int]
 }
 
-func NewPassageOnX(doorOne primitives.Point2D[int], doorTwo primitives.Point2D[int], random utils.RandomSource) (*Passage, error) {
+func NewPassageOnX(doorOne primitives.Point2D[int], doorTwo primitives.Point2D[int], random utils.Randomizer) (*Passage, error) {
 	if doorOne.X == doorTwo.X {
 		return nil, errors.New("doors cannot be positioned on the same x axis")
 	}
@@ -58,10 +58,10 @@ func NewPassageOnX(doorOne primitives.Point2D[int], doorTwo primitives.Point2D[i
 		passage = append(passage, primitives.Point2D[int]{X: lastElement.X + 1, Y: lastElement.Y})
 	}
 
-	return &Passage{DoorOne: doorOne, Passage: passage, DoorTwo: doorTwo}, nil
+	return &Passage{DoorOne: doorOne, Way: passage, DoorTwo: doorTwo}, nil
 }
 
-func NewPassageOnY(doorOne primitives.Point2D[int], doorTwo primitives.Point2D[int], random utils.RandomSource) (*Passage, error) {
+func NewPassageOnY(doorOne primitives.Point2D[int], doorTwo primitives.Point2D[int], random utils.Randomizer) (*Passage, error) {
 	if doorOne.Y == doorTwo.Y {
 		return nil, errors.New("doors cannot be positioned on the same y axis")
 	}
@@ -107,5 +107,5 @@ func NewPassageOnY(doorOne primitives.Point2D[int], doorTwo primitives.Point2D[i
 		passage = append(passage, primitives.Point2D[int]{X: lastElement.X, Y: lastElement.Y + 1})
 	}
 
-	return &Passage{DoorOne: doorOne, Passage: passage, DoorTwo: doorTwo}, nil
+	return &Passage{DoorOne: doorOne, Way: passage, DoorTwo: doorTwo}, nil
 }

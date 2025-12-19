@@ -8,44 +8,58 @@ import (
 
 func TestGetElixirConfig(t *testing.T) {
 	tests := []struct {
-		name              string
-		elixirType        ElixirType
-		wantType          ElixirType
-		wantStrengthRange primitives.AttributeRange
-		wantAgilityRange  primitives.AttributeRange
-		wantDurationRange ElixirDurationStepsRange
+		name               string
+		elixirType         ElixirType
+		wantType           ElixirType
+		wantStrengthRange  primitives.AttributeRange
+		wantAgilityRange   primitives.AttributeRange
+		wantMaxHealthRange primitives.AttributeRange
+		wantDurationRange  ElixirDurationStepsRange
 	}{
 		{
-			name:              "Get Strength config",
-			elixirType:        ElixirTypeStrength,
-			wantType:          ElixirTypeStrength,
-			wantStrengthRange: primitives.AttributeRange{Min: 5, Max: 20},
-			wantAgilityRange:  primitives.AttributeRange{Min: 0, Max: 0},
-			wantDurationRange: defaultDurationRange,
+			name:               "Get Strength config",
+			elixirType:         ElixirTypeStrength,
+			wantType:           ElixirTypeStrength,
+			wantStrengthRange:  primitives.AttributeRange{Min: 5, Max: 20},
+			wantAgilityRange:   primitives.AttributeRange{Min: 0, Max: 0},
+			wantMaxHealthRange: primitives.AttributeRange{Min: 0, Max: 0},
+			wantDurationRange:  defaultDurationRange,
 		},
 		{
-			name:              "Get Agility config",
-			elixirType:        ElixirTypeAgility,
-			wantType:          ElixirTypeAgility,
-			wantStrengthRange: primitives.AttributeRange{Min: 0, Max: 0},
-			wantAgilityRange:  primitives.AttributeRange{Min: 5, Max: 20},
-			wantDurationRange: defaultDurationRange,
+			name:               "Get Agility config",
+			elixirType:         ElixirTypeAgility,
+			wantType:           ElixirTypeAgility,
+			wantStrengthRange:  primitives.AttributeRange{Min: 0, Max: 0},
+			wantAgilityRange:   primitives.AttributeRange{Min: 5, Max: 20},
+			wantMaxHealthRange: primitives.AttributeRange{Min: 0, Max: 0},
+			wantDurationRange:  defaultDurationRange,
 		},
 		{
-			name:              "Get Dwarfism config - negative strength",
-			elixirType:        ElixirTypeDwarfism,
-			wantType:          ElixirTypeDwarfism,
-			wantStrengthRange: primitives.AttributeRange{Min: -10, Max: -2},
-			wantAgilityRange:  primitives.AttributeRange{Min: 10, Max: 30},
-			wantDurationRange: defaultDurationRange,
+			name:               "Get Dwarfism config - negative strength",
+			elixirType:         ElixirTypeDwarfism,
+			wantType:           ElixirTypeDwarfism,
+			wantStrengthRange:  primitives.AttributeRange{Min: -10, Max: -2},
+			wantAgilityRange:   primitives.AttributeRange{Min: 10, Max: 30},
+			wantMaxHealthRange: primitives.AttributeRange{Min: 0, Max: 0},
+			wantDurationRange:  defaultDurationRange,
 		},
 		{
-			name:              "Get Giantism config - negative agility",
-			elixirType:        ElixirTypeGiantism,
-			wantType:          ElixirTypeGiantism,
-			wantStrengthRange: primitives.AttributeRange{Min: 10, Max: 30},
-			wantAgilityRange:  primitives.AttributeRange{Min: -10, Max: -2},
-			wantDurationRange: defaultDurationRange,
+			name:               "Get Giantism config - negative agility",
+			elixirType:         ElixirTypeGiantism,
+			wantType:           ElixirTypeGiantism,
+			wantStrengthRange:  primitives.AttributeRange{Min: 10, Max: 30},
+			wantAgilityRange:   primitives.AttributeRange{Min: -10, Max: -2},
+			wantMaxHealthRange: primitives.AttributeRange{Min: 0, Max: 0},
+			wantDurationRange:  defaultDurationRange,
+		},
+		{
+			name:               "Get MaxHealth config - positive MaxHealth",
+			elixirType:         ElixirMaxHealth,
+			wantType:           ElixirMaxHealth,
+			wantStrengthRange:  primitives.AttributeRange{Min: 0, Max: 0},
+			wantAgilityRange:   primitives.AttributeRange{Min: 0, Max: 0},
+			wantMaxHealthRange: primitives.AttributeRange{Min: 20, Max: 50},
+			wantDurationRange:  defaultDurationRange,
 		},
 		{
 			name:              "Get Mystery config - all attributes",
@@ -56,12 +70,13 @@ func TestGetElixirConfig(t *testing.T) {
 			wantDurationRange: defaultDurationRange,
 		},
 		{
-			name:              "Unknown type returns Mystery",
-			elixirType:        "Unknown Elixir",
-			wantType:          ElixirTypeMystery,
-			wantStrengthRange: primitives.AttributeRange{Min: -20, Max: 30},
-			wantAgilityRange:  primitives.AttributeRange{Min: -20, Max: 30},
-			wantDurationRange: defaultDurationRange,
+			name:               "Unknown type returns Mystery",
+			elixirType:         "Unknown Elixir",
+			wantType:           ElixirTypeMystery,
+			wantStrengthRange:  primitives.AttributeRange{Min: -20, Max: 30},
+			wantAgilityRange:   primitives.AttributeRange{Min: -20, Max: 30},
+			wantMaxHealthRange: primitives.AttributeRange{Min: -30, Max: 70},
+			wantDurationRange:  defaultDurationRange,
 		},
 	}
 
@@ -208,10 +223,10 @@ func TestElixirConfig_GenerateAttributes(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Generate twice with same seed
-			rng1 := utils.NewRandomGeneratorWithSeed(tt.seed)
+			rng1 := utils.NewRandomWithSeed(tt.seed)
 			attrs1 := tt.config.GenerateAttributes(rng1)
 
-			rng2 := utils.NewRandomGeneratorWithSeed(tt.seed)
+			rng2 := utils.NewRandomWithSeed(tt.seed)
 			attrs2 := tt.config.GenerateAttributes(rng2)
 
 			// Should be deterministic
@@ -270,10 +285,10 @@ func TestElixirConfig_GenerateDuration(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Generate twice with same seed
-			rng1 := utils.NewRandomGeneratorWithSeed(tt.seed)
+			rng1 := utils.NewRandomWithSeed(tt.seed)
 			duration1 := tt.config.GenerateDuration(rng1)
 
-			rng2 := utils.NewRandomGeneratorWithSeed(tt.seed)
+			rng2 := utils.NewRandomWithSeed(tt.seed)
 			duration2 := tt.config.GenerateDuration(rng2)
 
 			// Should be deterministic
@@ -302,7 +317,7 @@ func TestElixirConfig_GenerateAttributes_Randomness(t *testing.T) {
 	iterations := 50
 
 	for i := 0; i < iterations; i++ {
-		rng := utils.NewRandomGeneratorWithSeed(int64(i))
+		rng := utils.NewRandomWithSeed(int64(i))
 		attrs := config.GenerateAttributes(rng)
 		strengthValues[attrs.Strength] = true
 		agilityValues[attrs.Agility] = true
@@ -327,7 +342,7 @@ func TestElixirConfig_GenerateDuration_Randomness(t *testing.T) {
 	iterations := 50
 
 	for i := 0; i < iterations; i++ {
-		rng := utils.NewRandomGeneratorWithSeed(int64(i))
+		rng := utils.NewRandomWithSeed(int64(i))
 		duration := config.GenerateDuration(rng)
 		durationValues[duration] = true
 	}

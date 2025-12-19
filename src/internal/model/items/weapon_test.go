@@ -46,10 +46,10 @@ func TestWeapon_NewWeapon_BuiltinConfig(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			rng := utils.NewRandomGeneratorWithSeed(defaultItemsTestSeed)
+			rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
 			box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 
-			weapon := NewWeapon(rng, box, tt.weaponType)
+			weapon := NewWeaponBuiltin(rng, box, tt.weaponType)
 
 			if weapon == nil {
 				t.Fatal("Expected valid weapon, got nil")
@@ -65,16 +65,16 @@ func TestWeapon_NewWeapon_BuiltinConfig(t *testing.T) {
 
 			// Verify attributes match the config's ranges
 			config := GetWeaponConfig(tt.weaponType)
-			if weapon.AffectedAttributes.Strength < config.StrengthRange.Min ||
-				weapon.AffectedAttributes.Strength > config.StrengthRange.Max {
+			if weapon.Effect.Attributes.Strength < config.StrengthRange.Min ||
+				weapon.Effect.Attributes.Strength > config.StrengthRange.Max {
 				t.Errorf("Strength out of config range: got %.2f, want [%.2f, %.2f]",
-					weapon.AffectedAttributes.Strength, config.StrengthRange.Min, config.StrengthRange.Max)
+					weapon.Effect.Attributes.Strength, config.StrengthRange.Min, config.StrengthRange.Max)
 			}
 
-			if weapon.AffectedAttributes.Agility < config.AgilityRange.Min ||
-				weapon.AffectedAttributes.Agility > config.AgilityRange.Max {
+			if weapon.Effect.Attributes.Agility < config.AgilityRange.Min ||
+				weapon.Effect.Attributes.Agility > config.AgilityRange.Max {
 				t.Errorf("Agility out of config range: got %.2f, want [%.2f, %.2f]",
-					weapon.AffectedAttributes.Agility, config.AgilityRange.Min, config.AgilityRange.Max)
+					weapon.Effect.Attributes.Agility, config.AgilityRange.Min, config.AgilityRange.Max)
 			}
 
 			if weapon.Name != string(config.Type) {
@@ -144,7 +144,7 @@ func TestWeapon_NewWeapon_CustomConfig(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			rng := utils.NewRandomGeneratorWithSeed(tt.seed)
+			rng := utils.NewRandomWithSeed(tt.seed)
 			weapon, err := NewWeaponByConfig(rng, tt.box, tt.config)
 
 			if tt.wantError {
@@ -165,21 +165,21 @@ func TestWeapon_NewWeapon_CustomConfig(t *testing.T) {
 				t.Fatal("Expected valid weapon, got nil")
 			}
 
-			if weapon.Type != WeaponTypeCustom {
-				t.Errorf("Expected type %q, got %q", WeaponTypeCustom, weapon.Type)
+			if weapon.Type != tt.config.Type {
+				t.Errorf("Expected type %q, got %q", tt.config.Type, weapon.Type)
 			}
 
 			// Verify attributes are within config ranges
-			if weapon.AffectedAttributes.Strength < tt.config.StrengthRange.Min ||
-				weapon.AffectedAttributes.Strength > tt.config.StrengthRange.Max {
+			if weapon.Effect.Attributes.Strength < tt.config.StrengthRange.Min ||
+				weapon.Effect.Attributes.Strength > tt.config.StrengthRange.Max {
 				t.Errorf("Strength out of range: got %.2f, want [%.2f, %.2f]",
-					weapon.AffectedAttributes.Strength, tt.config.StrengthRange.Min, tt.config.StrengthRange.Max)
+					weapon.Effect.Attributes.Strength, tt.config.StrengthRange.Min, tt.config.StrengthRange.Max)
 			}
 
-			if weapon.AffectedAttributes.Agility < tt.config.AgilityRange.Min ||
-				weapon.AffectedAttributes.Agility > tt.config.AgilityRange.Max {
+			if weapon.Effect.Attributes.Agility < tt.config.AgilityRange.Min ||
+				weapon.Effect.Attributes.Agility > tt.config.AgilityRange.Max {
 				t.Errorf("Agility out of range: got %.2f, want [%.2f, %.2f]",
-					weapon.AffectedAttributes.Agility, tt.config.AgilityRange.Min, tt.config.AgilityRange.Max)
+					weapon.Effect.Attributes.Agility, tt.config.AgilityRange.Min, tt.config.AgilityRange.Max)
 			}
 
 			// Verify name matches config type
@@ -218,20 +218,20 @@ func TestWeapon_NewWeapon_Determinism(t *testing.T) {
 			box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 
 			// Create first weapon
-			rng1 := utils.NewRandomGeneratorWithSeed(tt.seed)
-			weapon1 := NewWeapon(rng1, box, tt.weaponType)
+			rng1 := utils.NewRandomWithSeed(tt.seed)
+			weapon1 := NewWeaponBuiltin(rng1, box, tt.weaponType)
 
 			// Create second weapon with same seed
-			rng2 := utils.NewRandomGeneratorWithSeed(tt.seed)
-			weapon2 := NewWeapon(rng2, box, tt.weaponType)
+			rng2 := utils.NewRandomWithSeed(tt.seed)
+			weapon2 := NewWeaponBuiltin(rng2, box, tt.weaponType)
 
 			// Verify they are identical
-			if weapon1.AffectedAttributes.Strength != weapon2.AffectedAttributes.Strength {
-				t.Errorf("Strength mismatch: %f != %f", weapon1.AffectedAttributes.Strength, weapon2.AffectedAttributes.Strength)
+			if weapon1.Effect.Attributes.Strength != weapon2.Effect.Attributes.Strength {
+				t.Errorf("Strength mismatch: %f != %f", weapon1.Effect.Attributes.Strength, weapon2.Effect.Attributes.Strength)
 			}
 
-			if weapon1.AffectedAttributes.Agility != weapon2.AffectedAttributes.Agility {
-				t.Errorf("Agility mismatch: %f != %f", weapon1.AffectedAttributes.Agility, weapon2.AffectedAttributes.Agility)
+			if weapon1.Effect.Attributes.Agility != weapon2.Effect.Attributes.Agility {
+				t.Errorf("Agility mismatch: %f != %f", weapon1.Effect.Attributes.Agility, weapon2.Effect.Attributes.Agility)
 			}
 		})
 	}
@@ -263,11 +263,11 @@ func TestWeapon_NewWeapon_Randomness(t *testing.T) {
 
 			// Generate multiple weapons with different seeds
 			for i := 0; i < tt.iterations; i++ {
-				rng := utils.NewRandomGeneratorWithSeed(int64(i))
-				weapon := NewWeapon(rng, box, tt.weaponType)
+				rng := utils.NewRandomWithSeed(int64(i))
+				weapon := NewWeaponBuiltin(rng, box, tt.weaponType)
 
-				strengthValues[weapon.AffectedAttributes.Strength] = true
-				agilityValues[weapon.AffectedAttributes.Agility] = true
+				strengthValues[weapon.Effect.Attributes.Strength] = true
+				agilityValues[weapon.Effect.Attributes.Agility] = true
 			}
 
 			// Check that we got varied values (at least 5 different values)
@@ -291,33 +291,33 @@ func TestWeapon_NewWeapon_Randomness(t *testing.T) {
 }
 
 func TestWeapon_NewWeapon_ZeroSizedBoxIsOk(t *testing.T) {
-	rng := utils.NewRandomGeneratorWithSeed(defaultItemsTestSeed)
+	rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 0, Height: 0}}
-	weapon := NewWeapon(rng, box, WeaponTypeSword)
+	weapon := NewWeaponBuiltin(rng, box, WeaponTypeSword)
 
 	if weapon == nil {
 		t.Fatal("Expected valid weapon with zero-sized box")
 	}
 
-	if weapon.Shape != box {
-		t.Errorf("Expected box %v, got %v", box, weapon.Shape)
+	if weapon.Box != box {
+		t.Errorf("Expected box %v, got %v", box, weapon.Box)
 	}
 }
 
 func TestWeapon_Drop(t *testing.T) {
-	rng := utils.NewRandomGeneratorWithSeed(defaultItemsTestSeed)
+	rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
 	initialBox := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
-	weapon := NewWeapon(rng, initialBox, WeaponTypeSword)
+	weapon := NewWeaponBuiltin(rng, initialBox, WeaponTypeSword)
 
-	if weapon.Shape != initialBox {
-		t.Errorf("Expected initial box %v, got %v", initialBox, weapon.Shape)
+	if weapon.Box != initialBox {
+		t.Errorf("Expected initial box %v, got %v", initialBox, weapon.Box)
 	}
 
 	newPosition := primitives.Point2D[int]{X: 10, Y: 10}
 	resultBox := weapon.Drop(newPosition)
 
-	if weapon.Shape.Point != newPosition {
-		t.Errorf("Expected position to be updated to %v, got %v", newPosition, weapon.Shape.Point)
+	if weapon.Box.Point != newPosition {
+		t.Errorf("Expected position to be updated to %v, got %v", newPosition, weapon.Box.Point)
 	}
 
 	if resultBox.Point != newPosition {
@@ -355,92 +355,37 @@ func TestWeapon_Use(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			rng := utils.NewRandomGeneratorWithSeed(tt.seed)
+			rng := utils.NewRandomWithSeed(tt.seed)
 			box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
-			weapon := NewWeapon(rng, box, tt.weaponType)
+			weapon := NewWeaponBuiltin(rng, box, tt.weaponType)
 
-			attrs := weapon.Use()
+			effect := weapon.Use()
 
 			// Verify returned attributes match stored attributes
-			if attrs.Strength != weapon.AffectedAttributes.Strength {
-				t.Errorf("Expected strength %.2f, got %.2f", weapon.AffectedAttributes.Strength, attrs.Strength)
+			if effect.Attributes.Strength != weapon.Effect.Attributes.Strength {
+				t.Errorf("Expected strength %.2f, got %.2f", weapon.Effect.Attributes.Strength, effect.Attributes.Strength)
 			}
 
-			if attrs.Agility != weapon.AffectedAttributes.Agility {
-				t.Errorf("Expected agility %.2f, got %.2f", weapon.AffectedAttributes.Agility, attrs.Agility)
+			if effect.Attributes.Agility != weapon.Effect.Attributes.Agility {
+				t.Errorf("Expected agility %.2f, got %.2f", weapon.Effect.Attributes.Agility, effect.Attributes.Agility)
 			}
 		})
 	}
 }
 
 func TestWeapon_UseMultipleTimesIsOk(t *testing.T) {
-	rng := utils.NewRandomGeneratorWithSeed(defaultItemsTestSeed)
+	rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
-	weapon := NewWeapon(rng, box, WeaponTypeSword)
+	weapon := NewWeaponBuiltin(rng, box, WeaponTypeSword)
 
-	attrs1 := weapon.Use()
-	attrs2 := weapon.Use()
+	effect1 := weapon.Use()
+	effect2 := weapon.Use()
 
-	if attrs1.Strength != attrs2.Strength {
+	if effect1.Attributes.Strength != effect2.Attributes.Strength {
 		t.Error("Use() should return consistent attributes on multiple calls")
 	}
-	if attrs1.Agility != attrs2.Agility {
+	if effect1.Attributes.Agility != effect2.Attributes.Agility {
 		t.Error("Use() should return consistent attributes on multiple calls")
-	}
-}
-
-func TestWeapon_AsWeapon_ValidPointer(t *testing.T) {
-	input := &Weapon{
-		Item: &Item{
-			Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
-			Name:  "Test Weapon",
-		},
-		AffectedAttributes: primitives.Attributes{Strength: 15, Agility: -3},
-	}
-
-	result := AsWeapon(input)
-
-	if result == nil {
-		t.Fatal("Expected non-nil result, got nil")
-	}
-
-	if result.AffectedAttributes.Strength != 15 {
-		t.Errorf("Expected Strength 15, got %f", result.AffectedAttributes.Strength)
-	}
-	if result.AffectedAttributes.Agility != -3 {
-		t.Errorf("Expected Agility -3, got %f", result.AffectedAttributes.Agility)
-	}
-	if result != input {
-		t.Error("Expected same pointer to be returned")
-	}
-}
-
-func TestWeapon_AsWeapon_NonWeaponTypeIsNil(t *testing.T) {
-	result := AsWeapon("not a weapon")
-
-	if result != nil {
-		t.Errorf("Expected nil for non-Weapon type, got %v", result)
-	}
-}
-
-func TestWeapon_AsWeapon_NilInputIsNil(t *testing.T) {
-	result := AsWeapon(nil)
-
-	if result != nil {
-		t.Errorf("Expected nil for nil input, got %v", result)
-	}
-}
-
-func TestWeapon_AsWeapon_DifferentStructTypeIsNil(t *testing.T) {
-	input := &Item{
-		Shape: primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 1}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
-		Name:  "Just an item",
-	}
-
-	result := AsWeapon(input)
-
-	if result != nil {
-		t.Errorf("Expected nil for Item type, got %v", result)
 	}
 }
 
@@ -450,29 +395,29 @@ func BenchmarkWeapon_NewWeapon(b *testing.B) {
 
 	b.Run("Sword", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			rng := utils.NewRandomGeneratorWithSeed(int64(i))
-			_ = NewWeapon(rng, box, WeaponTypeSword)
+			rng := utils.NewRandomWithSeed(int64(i))
+			_ = NewWeaponBuiltin(rng, box, WeaponTypeSword)
 		}
 	})
 
 	b.Run("Dagger", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			rng := utils.NewRandomGeneratorWithSeed(int64(i))
-			_ = NewWeapon(rng, box, WeaponTypeDagger)
+			rng := utils.NewRandomWithSeed(int64(i))
+			_ = NewWeaponBuiltin(rng, box, WeaponTypeDagger)
 		}
 	})
 
 	b.Run("Maul", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			rng := utils.NewRandomGeneratorWithSeed(int64(i))
-			_ = NewWeapon(rng, box, WeaponTypeMaul)
+			rng := utils.NewRandomWithSeed(int64(i))
+			_ = NewWeaponBuiltin(rng, box, WeaponTypeMaul)
 		}
 	})
 
 	b.Run("Mystery", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			rng := utils.NewRandomGeneratorWithSeed(int64(i))
-			_ = NewWeapon(rng, box, WeaponTypeMystery)
+			rng := utils.NewRandomWithSeed(int64(i))
+			_ = NewWeaponBuiltin(rng, box, WeaponTypeMystery)
 		}
 	})
 }
@@ -483,33 +428,18 @@ func BenchmarkWeapon_NewWeaponByConfig(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		rng := utils.NewRandomGeneratorWithSeed(int64(i))
+		rng := utils.NewRandomWithSeed(int64(i))
 		_, _ = NewWeaponByConfig(rng, box, config)
 	}
 }
 
 func BenchmarkWeapon_Use(b *testing.B) {
-	rng := utils.NewRandomGeneratorWithSeed(defaultItemsTestSeed)
+	rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
-	weapon := NewWeapon(rng, box, WeaponTypeSword)
+	weapon := NewWeaponBuiltin(rng, box, WeaponTypeSword)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_ = weapon.Use()
-	}
-}
-
-func BenchmarkWeapon_AsWeapon(b *testing.B) {
-	weapon := &Weapon{
-		Item: &Item{
-			Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
-			Name:  "Test",
-		},
-		AffectedAttributes: primitives.Attributes{Strength: 10},
-	}
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		_ = AsWeapon(weapon)
 	}
 }

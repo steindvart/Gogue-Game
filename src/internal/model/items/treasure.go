@@ -11,42 +11,27 @@ type Treasure struct {
 	Value int32
 }
 
-func NewTreasure(rnd *utils.RandomGenerator, box primitives.Box, t TreasureType) *Treasure {
-	cfg := GetTreasureConfig(t)
-
+func NewTreasure(box primitives.Box, t TreasureType, value int32) *Treasure {
 	return &Treasure{
-		Item: &Item{
-			Shape: box,
-			Name:  string(cfg.Type),
-		},
+		Item:  &Item{Box: box, Name: string(t)},
 		Type:  t,
-		Value: cfg.GenerateValue(rnd),
+		Value: value,
 	}
 }
 
-func NewTreasureByConfig(rnd *utils.RandomGenerator, box primitives.Box, cfg TreasureConfig) (*Treasure, error) {
+func NewTreasureBuiltin(rnd *utils.Random, box primitives.Box, t TreasureType) *Treasure {
+	treasure, _ := NewTreasureByConfig(rnd, box, GetTreasureConfig(t))
+	return treasure
+}
+
+func NewTreasureByConfig(rnd *utils.Random, box primitives.Box, cfg TreasureConfig) (*Treasure, error) {
 	if err := cfg.Validate(); err != nil {
 		return nil, err
 	}
 
-	return &Treasure{
-		Item: &Item{
-			Shape: box,
-			Name:  string(cfg.Type),
-		},
-		Type:  TreasureTypeCustom,
-		Value: cfg.GenerateValue(rnd),
-	}, nil
+	return NewTreasure(box, cfg.Type, cfg.GenerateValue(rnd)), nil
 }
 
 func (tr *Treasure) Take() int32 {
 	return tr.Value
-}
-
-func AsTreasure(item any) *Treasure {
-	s, ok := item.(*Treasure)
-	if ok {
-		return s
-	}
-	return nil
 }

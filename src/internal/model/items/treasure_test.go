@@ -36,10 +36,10 @@ func TestTreasure_NewTreasure_BuiltinConfig(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			rng := utils.NewRandomGeneratorWithSeed(defaultItemsTestSeed)
+			rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
 			box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 
-			treasure := NewTreasure(rng, box, tt.treasureType)
+			treasure := NewTreasureBuiltin(rng, box, tt.treasureType)
 
 			if treasure == nil {
 				t.Fatal("Expected valid treasure, got nil")
@@ -65,8 +65,8 @@ func TestTreasure_NewTreasure_BuiltinConfig(t *testing.T) {
 			}
 
 			// Check box is correctly set
-			if treasure.Shape != box {
-				t.Errorf("Expected box %v, got %v", box, treasure.Shape)
+			if treasure.Box != box {
+				t.Errorf("Expected box %v, got %v", box, treasure.Box)
 			}
 
 			// Value should be positive
@@ -133,7 +133,7 @@ func TestTreasure_NewTreasureByConfig(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			rng := utils.NewRandomGeneratorWithSeed(tt.seed)
+			rng := utils.NewRandomWithSeed(tt.seed)
 			treasure, err := NewTreasureByConfig(rng, tt.box, tt.config)
 
 			if tt.wantError {
@@ -154,8 +154,8 @@ func TestTreasure_NewTreasureByConfig(t *testing.T) {
 				t.Fatal("Expected valid treasure, got nil")
 			}
 
-			if treasure.Type != TreasureTypeCustom {
-				t.Errorf("Expected type %q, got %q", TreasureTypeCustom, treasure.Type)
+			if treasure.Type != tt.config.Type {
+				t.Errorf("Expected type %q, got %q", tt.config.Type, treasure.Type)
 			}
 
 			// Verify value is within config range
@@ -170,8 +170,8 @@ func TestTreasure_NewTreasureByConfig(t *testing.T) {
 			}
 
 			// Verify box is set correctly
-			if treasure.Shape != tt.box {
-				t.Errorf("Expected box %v, got %v", tt.box, treasure.Shape)
+			if treasure.Box != tt.box {
+				t.Errorf("Expected box %v, got %v", tt.box, treasure.Box)
 			}
 		})
 	}
@@ -188,7 +188,7 @@ func TestTreasure_NewTreasureByConfig_FixedValue(t *testing.T) {
 	iterations := 20
 
 	for i := 0; i < iterations; i++ {
-		rng := utils.NewRandomGeneratorWithSeed(int64(i))
+		rng := utils.NewRandomWithSeed(int64(i))
 		treasure, err := NewTreasureByConfig(rng, box, config)
 
 		if err != nil {
@@ -234,12 +234,12 @@ func TestTreasure_NewTreasure_Deterministic(t *testing.T) {
 			box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 
 			// Create first treasure
-			rng1 := utils.NewRandomGeneratorWithSeed(tt.seed)
-			treasure1 := NewTreasure(rng1, box, tt.treasureType)
+			rng1 := utils.NewRandomWithSeed(tt.seed)
+			treasure1 := NewTreasureBuiltin(rng1, box, tt.treasureType)
 
 			// Create second treasure with same seed
-			rng2 := utils.NewRandomGeneratorWithSeed(tt.seed)
-			treasure2 := NewTreasure(rng2, box, tt.treasureType)
+			rng2 := utils.NewRandomWithSeed(tt.seed)
+			treasure2 := NewTreasureBuiltin(rng2, box, tt.treasureType)
 
 			// Verify they are identical
 			if treasure1.Value != treasure2.Value {
@@ -283,8 +283,8 @@ func TestTreasure_NewTreasure_Randomness(t *testing.T) {
 
 			// Generate multiple treasures with different seeds
 			for i := 0; i < tt.iterations; i++ {
-				rng := utils.NewRandomGeneratorWithSeed(int64(i))
-				treasure := NewTreasure(rng, box, tt.treasureType)
+				rng := utils.NewRandomWithSeed(int64(i))
+				treasure := NewTreasureBuiltin(rng, box, tt.treasureType)
 				values[treasure.Value] = true
 			}
 
@@ -304,10 +304,10 @@ func TestTreasure_NewTreasure_Randomness(t *testing.T) {
 }
 
 func TestTreasure_NewTreasure_UnknownTypeDefaultsToMystery(t *testing.T) {
-	rng := utils.NewRandomGeneratorWithSeed(defaultItemsTestSeed)
+	rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 
-	treasure := NewTreasure(rng, box, "Unknown Treasure Type")
+	treasure := NewTreasureBuiltin(rng, box, "Unknown Treasure Type")
 
 	if treasure == nil {
 		t.Fatal("Expected valid treasure, got nil")
@@ -326,16 +326,16 @@ func TestTreasure_NewTreasure_UnknownTypeDefaultsToMystery(t *testing.T) {
 }
 
 func TestTreasure_NewTreasure_ZeroSizedBoxIsOk(t *testing.T) {
-	rng := utils.NewRandomGeneratorWithSeed(defaultItemsTestSeed)
+	rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 0, Height: 0}}
-	treasure := NewTreasure(rng, box, TreasureTypeGold)
+	treasure := NewTreasureBuiltin(rng, box, TreasureTypeGold)
 
 	if treasure == nil {
 		t.Fatal("Expected valid treasure with zero-sized box")
 	}
 
-	if treasure.Shape != box {
-		t.Errorf("Expected box %v, got %v", box, treasure.Shape)
+	if treasure.Box != box {
+		t.Errorf("Expected box %v, got %v", box, treasure.Box)
 	}
 }
 
@@ -369,20 +369,20 @@ func TestTreasure_NewTreasure_VariousPositions(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			rng := utils.NewRandomGeneratorWithSeed(defaultItemsTestSeed)
+			rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
 			box := primitives.Box{Point: tt.position, Size: tt.size}
-			treasure := NewTreasure(rng, box, TreasureTypeGem)
+			treasure := NewTreasureBuiltin(rng, box, TreasureTypeGem)
 
 			if treasure == nil {
 				t.Fatal("Expected valid treasure")
 			}
 
-			if treasure.Shape.Point != tt.position {
-				t.Errorf("Expected position %v, got %v", tt.position, treasure.Shape.Point)
+			if treasure.Box.Point != tt.position {
+				t.Errorf("Expected position %v, got %v", tt.position, treasure.Box.Point)
 			}
 
-			if treasure.Shape.Size != tt.size {
-				t.Errorf("Expected size %v, got %v", tt.size, treasure.Shape.Size)
+			if treasure.Box.Size != tt.size {
+				t.Errorf("Expected size %v, got %v", tt.size, treasure.Box.Size)
 			}
 		})
 	}
@@ -418,9 +418,9 @@ func TestTreasure_Take(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			rng := utils.NewRandomGeneratorWithSeed(tt.seed)
+			rng := utils.NewRandomWithSeed(tt.seed)
 			box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
-			treasure := NewTreasure(rng, box, tt.treasureType)
+			treasure := NewTreasureBuiltin(rng, box, tt.treasureType)
 
 			value := treasure.Take()
 
@@ -438,9 +438,9 @@ func TestTreasure_Take(t *testing.T) {
 }
 
 func TestTreasure_TakeMultipleTimesIsOk(t *testing.T) {
-	rng := utils.NewRandomGeneratorWithSeed(defaultItemsTestSeed)
+	rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
-	treasure := NewTreasure(rng, box, TreasureTypeGold)
+	treasure := NewTreasureBuiltin(rng, box, TreasureTypeGold)
 
 	value1 := treasure.Take()
 	value2 := treasure.Take()
@@ -450,137 +450,35 @@ func TestTreasure_TakeMultipleTimesIsOk(t *testing.T) {
 	}
 }
 
-func TestTreasure_AsTreasure_ValidPointer(t *testing.T) {
-	input := &Treasure{
-		Item: &Item{
-			Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
-			Name:  "Test Treasure",
-		},
-		Value: 100,
-	}
-
-	result := AsTreasure(input)
-
-	if result == nil {
-		t.Fatal("Expected non-nil result, got nil")
-	}
-
-	if result.Value != 100 {
-		t.Errorf("Expected Value 100, got %d", result.Value)
-	}
-
-	if result != input {
-		t.Error("Expected same pointer to be returned")
-	}
-}
-
-func TestTreasure_AsTreasure_NonTreasureTypeIsNil(t *testing.T) {
-	result := AsTreasure("not a treasure")
-
-	if result != nil {
-		t.Errorf("Expected nil for non-Treasure type, got %v", result)
-	}
-}
-
-func TestTreasure_AsTreasure_NilInputIsNil(t *testing.T) {
-	result := AsTreasure(nil)
-
-	if result != nil {
-		t.Errorf("Expected nil for nil input, got %v", result)
-	}
-}
-
-func TestTreasure_AsTreasure_DifferentStructTypeIsNil(t *testing.T) {
-	input := &Item{
-		Shape: primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 1}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
-		Name:  "Just an item",
-	}
-
-	result := AsTreasure(input)
-
-	if result != nil {
-		t.Errorf("Expected nil for Item type, got %v", result)
-	}
-}
-
-func TestTreasure_AsTreasure_ElixirTypeIsNil(t *testing.T) {
-	input := &Elixir{
-		Item: &Item{
-			Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
-			Name:  "Test Elixir",
-		},
-		AffectedAttributes: primitives.Attributes{Strength: 10},
-		EffectDuration:     20,
-	}
-
-	result := AsTreasure(input)
-
-	if result != nil {
-		t.Errorf("Expected nil for Elixir type, got %v", result)
-	}
-}
-
-func TestTreasure_AsTreasure_FoodTypeIsNil(t *testing.T) {
-	input := &Food{
-		Item: &Item{
-			Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
-			Name:  "Test Food",
-		},
-		AffectedAttributes: primitives.Attributes{Health: 25},
-	}
-
-	result := AsTreasure(input)
-
-	if result != nil {
-		t.Errorf("Expected nil for Food type, got %v", result)
-	}
-}
-
-func TestTreasure_AsTreasure_ScrollTypeIsNil(t *testing.T) {
-	input := &Scroll{
-		Item: &Item{
-			Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
-			Name:  "Test Scroll",
-		},
-		AffectedAttributes: primitives.Attributes{Strength: 5, Agility: 5, MaxHealth: 10},
-	}
-
-	result := AsTreasure(input)
-
-	if result != nil {
-		t.Errorf("Expected nil for Scroll type, got %v", result)
-	}
-}
-
 // Benchmarks
 func BenchmarkTreasure_NewTreasure(b *testing.B) {
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 
 	b.Run("Gold", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			rng := utils.NewRandomGeneratorWithSeed(int64(i))
-			_ = NewTreasure(rng, box, TreasureTypeGold)
+			rng := utils.NewRandomWithSeed(int64(i))
+			_ = NewTreasureBuiltin(rng, box, TreasureTypeGold)
 		}
 	})
 
 	b.Run("Gem", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			rng := utils.NewRandomGeneratorWithSeed(int64(i))
-			_ = NewTreasure(rng, box, TreasureTypeGem)
+			rng := utils.NewRandomWithSeed(int64(i))
+			_ = NewTreasureBuiltin(rng, box, TreasureTypeGem)
 		}
 	})
 
 	b.Run("Artifact", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			rng := utils.NewRandomGeneratorWithSeed(int64(i))
-			_ = NewTreasure(rng, box, TreasureTypeArtifact)
+			rng := utils.NewRandomWithSeed(int64(i))
+			_ = NewTreasureBuiltin(rng, box, TreasureTypeArtifact)
 		}
 	})
 
 	b.Run("Mystery", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			rng := utils.NewRandomGeneratorWithSeed(int64(i))
-			_ = NewTreasure(rng, box, TreasureTypeMystery)
+			rng := utils.NewRandomWithSeed(int64(i))
+			_ = NewTreasureBuiltin(rng, box, TreasureTypeMystery)
 		}
 	})
 }
@@ -595,33 +493,18 @@ func BenchmarkTreasure_NewTreasureByConfig(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		rng := utils.NewRandomGeneratorWithSeed(int64(i))
+		rng := utils.NewRandomWithSeed(int64(i))
 		_, _ = NewTreasureByConfig(rng, box, config)
 	}
 }
 
 func BenchmarkTreasure_Take(b *testing.B) {
-	rng := utils.NewRandomGeneratorWithSeed(defaultItemsTestSeed)
+	rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
-	treasure := NewTreasure(rng, box, TreasureTypeGold)
+	treasure := NewTreasureBuiltin(rng, box, TreasureTypeGold)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_ = treasure.Take()
-	}
-}
-
-func BenchmarkTreasure_AsTreasure(b *testing.B) {
-	treasure := &Treasure{
-		Item: &Item{
-			Shape: primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
-			Name:  "Test Treasure",
-		},
-		Value: 100,
-	}
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		_ = AsTreasure(treasure)
 	}
 }
