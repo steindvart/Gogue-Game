@@ -457,7 +457,7 @@ func BenchmarkFood_NewFoodByConfig(b *testing.B) {
 }
 
 func TestFood_UseMultipleTimesIsOk(t *testing.T) {
-	rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
+	rng := utils.NewRandomWithSeed(defaultFoodTestSeed)
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 	food := NewFoodBuiltin(rng, box, FoodTypeBread)
 
