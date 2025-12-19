@@ -6,6 +6,8 @@ import (
 	"testing"
 )
 
+const defaultScrollConfigTestSeed int64 = 42
+
 func TestGetScrollConfig(t *testing.T) {
 	tests := []struct {
 		name               string
@@ -265,7 +267,7 @@ func TestScrollConfig_GenerateAttributes(t *testing.T) {
 	}{
 		{
 			name: "Strength config generates deterministic attributes",
-			seed: defaultItemsTestSeed,
+			seed: defaultScrollConfigTestSeed,
 			config: ScrollConfig{
 				Type:           ScrollTypeStrength,
 				StrengthRange:  primitives.AttributeRange{Min: 1, Max: 10},

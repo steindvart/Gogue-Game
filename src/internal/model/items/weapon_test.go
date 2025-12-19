@@ -6,6 +6,8 @@ import (
 	"testing"
 )
 
+const defaultWeaponTestSeed int64 = 42
+
 func TestWeapon_NewWeapon_BuiltinConfig(t *testing.T) {
 	tests := []struct {
 		name         string
@@ -46,7 +48,7 @@ func TestWeapon_NewWeapon_BuiltinConfig(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
+			rng := utils.NewRandomWithSeed(defaultWeaponTestSeed)
 			box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 
 			weapon := NewWeaponBuiltin(rng, box, tt.weaponType)
@@ -94,7 +96,7 @@ func TestWeapon_NewWeapon_CustomConfig(t *testing.T) {
 	}{
 		{
 			name: "Valid custom config",
-			seed: defaultItemsTestSeed,
+			seed: defaultWeaponTestSeed,
 			config: WeaponConfig{
 				Type:          "Custom Weapon",
 				StrengthRange: primitives.AttributeRange{Min: 10, Max: 50},
@@ -118,7 +120,7 @@ func TestWeapon_NewWeapon_CustomConfig(t *testing.T) {
 		},
 		{
 			name: "Invalid strength range returns error",
-			seed: defaultItemsTestSeed,
+			seed: defaultWeaponTestSeed,
 			config: WeaponConfig{
 				Type:          "Invalid Weapon",
 				StrengthRange: primitives.AttributeRange{Min: 50, Max: 10}, // Min > Max
@@ -130,7 +132,7 @@ func TestWeapon_NewWeapon_CustomConfig(t *testing.T) {
 		},
 		{
 			name: "Invalid agility range returns error",
-			seed: defaultItemsTestSeed,
+			seed: defaultWeaponTestSeed,
 			config: WeaponConfig{
 				Type:          "Invalid Weapon",
 				StrengthRange: primitives.AttributeRange{Min: 0, Max: 10},
@@ -198,17 +200,17 @@ func TestWeapon_NewWeapon_Determinism(t *testing.T) {
 	}{
 		{
 			name:       "Same seed produces same Sword weapon",
-			seed:       defaultItemsTestSeed,
+			seed:       defaultWeaponTestSeed,
 			weaponType: WeaponTypeSword,
 		},
 		{
 			name:       "Same seed produces same Dagger weapon",
-			seed:       defaultItemsTestSeed,
+			seed:       defaultWeaponTestSeed,
 			weaponType: WeaponTypeDagger,
 		},
 		{
 			name:       "Same seed produces same Mystery weapon",
-			seed:       defaultItemsTestSeed,
+			seed:       defaultWeaponTestSeed,
 			weaponType: WeaponTypeMystery,
 		},
 	}
@@ -291,7 +293,7 @@ func TestWeapon_NewWeapon_Randomness(t *testing.T) {
 }
 
 func TestWeapon_NewWeapon_ZeroSizedBoxIsOk(t *testing.T) {
-	rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
+	rng := utils.NewRandomWithSeed(defaultWeaponTestSeed)
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 0, Height: 0}}
 	weapon := NewWeaponBuiltin(rng, box, WeaponTypeSword)
 
@@ -305,7 +307,7 @@ func TestWeapon_NewWeapon_ZeroSizedBoxIsOk(t *testing.T) {
 }
 
 func TestWeapon_Drop(t *testing.T) {
-	rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
+	rng := utils.NewRandomWithSeed(defaultWeaponTestSeed)
 	initialBox := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 	weapon := NewWeaponBuiltin(rng, initialBox, WeaponTypeSword)
 
@@ -333,7 +335,7 @@ func TestWeapon_Use(t *testing.T) {
 	}{
 		{
 			name:       "Use Sword weapon returns correct attributes",
-			seed:       defaultItemsTestSeed,
+			seed:       defaultWeaponTestSeed,
 			weaponType: WeaponTypeSword,
 		},
 		{
@@ -374,7 +376,7 @@ func TestWeapon_Use(t *testing.T) {
 }
 
 func TestWeapon_UseMultipleTimesIsOk(t *testing.T) {
-	rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
+	rng := utils.NewRandomWithSeed(defaultWeaponTestSeed)
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 	weapon := NewWeaponBuiltin(rng, box, WeaponTypeSword)
 
@@ -434,7 +436,7 @@ func BenchmarkWeapon_NewWeaponByConfig(b *testing.B) {
 }
 
 func BenchmarkWeapon_Use(b *testing.B) {
-	rng := utils.NewRandomWithSeed(defaultItemsTestSeed)
+	rng := utils.NewRandomWithSeed(defaultWeaponTestSeed)
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 	weapon := NewWeaponBuiltin(rng, box, WeaponTypeSword)
 

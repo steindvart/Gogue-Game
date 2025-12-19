@@ -5,6 +5,8 @@ import (
 	"testing"
 )
 
+const defaultTreasureConfigTestSeed int64 = 42
+
 func TestGetTreasureConfig(t *testing.T) {
 	tests := []struct {
 		name           string
@@ -209,7 +211,7 @@ func TestTreasureConfig_GenerateValue(t *testing.T) {
 	}{
 		{
 			name: "Gold config generates deterministic value",
-			seed: defaultItemsTestSeed,
+			seed: defaultTreasureConfigTestSeed,
 			config: TreasureConfig{
 				Type:       TreasureTypeGold,
 				ValueRange: TreasureValueRange{Min: 5, Max: 20},
