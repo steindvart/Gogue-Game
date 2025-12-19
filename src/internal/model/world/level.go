@@ -75,6 +75,18 @@ func NewLevelWithComponents(
 	}
 }
 
+func (l *Level) NextLevelWithComponents() *Level {
+	return NewLevelWithComponents(
+		l.random,
+		l.config,
+		NewGridRoomGenerator(),
+		NewConnectionTreePassageGenerator(),
+		NewRoomBasedEntitySpawner(),
+		NewStartRoomPlayerSpawner(),
+		NewDefaultFieldRenderer(),
+	)
+}
+
 // Generate генерирует геометрию, сущности и игрока
 func (l *Level) Generate() error {
 	err := l.generateEnvironment()
@@ -138,18 +150,6 @@ func (l *Level) generateEnvironment() error {
 	l.Enemies = spawned.Enemies
 
 	return nil
-}
-
-func (l *Level) CreateNextLevel() *Level {
-	return NewLevelWithComponents(
-		l.random,
-		l.config,
-		NewGridRoomGenerator(),
-		NewConnectionTreePassageGenerator(),
-		NewRoomBasedEntitySpawner(),
-		NewStartRoomPlayerSpawner(),
-		NewDefaultFieldRenderer(),
-	)
 }
 
 func (l *Level) CheckCollisionWithTeleport(delta primitives.Point2D[int]) bool {

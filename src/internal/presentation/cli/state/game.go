@@ -115,7 +115,7 @@ func (g *Game) handleSelectAction() {
 
 	if g.level.CheckCollisionWithTeleport(pos) {
 		currentPlayer := g.level.Player
-		newLevel := g.level.CreateNextLevel()
+		newLevel := g.level.NextLevelWithComponents()
 		if err := newLevel.GenerateWithExistingPlayer(currentPlayer); err != nil {
 			return
 		}
