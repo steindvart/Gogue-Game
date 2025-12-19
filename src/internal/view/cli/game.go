@@ -184,6 +184,8 @@ func (g *Game) renderField(field [][]common.GameEntityType) {
 	g.renderMarginsY(FieldMarginY)
 
 	for y := range field {
+   	        // Заливка дефолтными цветами для предотвращения проблемы
+    		// с отсутствием сброса цвета фона от предыдущей заливки пикселя
 		fmt.Fprintf(g.fieldPanel, "[%s:%s]", ColorWhite, ColorBlack)
 		g.renderMarginX(FieldMarginX)
 		g.renderRow(field, y)
