@@ -25,8 +25,8 @@ func TestCharacter_NewCharacter_BasicInit(t *testing.T) {
 	if *c.Box != box {
 		t.Errorf("Box mismatch: got %+v want %+v", *c.Box, box)
 	}
-	if c.Attributes != attrs {
-		t.Errorf("Attributes mismatch: got %+v want %+v", c.Attributes, attrs)
+	if c.Attributes == &attrs {
+		t.Errorf("Attributes pointers must not match: got %p want %p", c.Attributes, &attrs)
 	}
 	if c.TemporaryEffects != nil {
 		// In this project we expect nil slice on init (len is 0 anyway)
