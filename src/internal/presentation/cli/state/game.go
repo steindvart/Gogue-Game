@@ -75,6 +75,10 @@ func (g *Game) convertEffectsToView(effects []*primitives.Effect) []viewcli.Effe
 }
 
 func (g *Game) initInput() {
+	g.view.SetInputCapture(g.handleEvent)
+}
+
+func (g *Game) handleEvent(event *tcell.EventKey) *tcell.EventKey {
 	movementRegistry := map[action.Type]primitives.Point2D[int]{
 		action.MoveUp:               {X: 0, Y: -1},
 		action.MoveDown:             {X: 0, Y: 1},
@@ -86,36 +90,35 @@ func (g *Game) initInput() {
 		action.MoveRightLowerCorner: {X: 1, Y: 1},
 	}
 
-	g.view.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		switch g.eventToAction(event) {
-		case action.MoveUp,
-			action.MoveDown,
-			action.MoveLeft,
-			action.MoveRight,
-			action.MoveLeftUpperCorner,
-			action.MoveRightUpperCorner,
-			action.MoveLefLowerCorner,
-			action.MoveRightLowerCorner:
-			g.level.MovePlayerWithBorderControl(movementRegistry[g.eventToAction(event)])
+	switch g.eventToAction(event) {
+	case action.MoveUp,
+		action.MoveDown,
+		action.MoveLeft,
+		action.MoveRight,
+		action.MoveLeftUpperCorner,
+		action.MoveRightUpperCorner,
+		action.MoveLefLowerCorner,
+		action.MoveRightLowerCorner:
+		g.level.MovePlayerWithBorderControl(movementRegistry[g.eventToAction(event)])
 
-			switch g.level.CheckEntityCollision(g.level.Player.GetPosition()) {
-			case world.CollisionTypeEnemy:
-				// @todo - обработка столкновения с врагом (атака на врага)
-			case world.CollisionTypeItem, world.CollisionTypeTeleport:
-				g.isPlayerReadyToInteract = true
-			case world.CollisionTypeNone:
-				g.isPlayerReadyToInteract = false
-			}
-		case action.Select:
-			g.handleSelectAction()
-		case action.Exit:
-			g.signal = signals.Stop
-			return nil
-		default:
-			return event
+		switch g.level.CheckEntityCollision(g.level.Player.GetPosition()) {
+		case world.CollisionTypeEnemy:
+			// @todo - обработка столкновения с врагом (атака на врага)
+		case world.CollisionTypeItem, world.CollisionTypeTeleport:
+			g.isPlayerReadyToInteract = true
+		case world.CollisionTypeNone:
+			g.isPlayerReadyToInteract = false
 		}
+	case action.Select:
+		g.handleSelectAction()
+	case action.Exit:
+		g.signal = signals.Stop
 		return nil
-	})
+	default:
+		return event
+	}
+	return nil
+
 }
 
 func (g *Game) handleSelectAction() {
