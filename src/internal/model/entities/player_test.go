@@ -47,7 +47,7 @@ func TestPlayer_NewPlayer_BasicInit(t *testing.T) {
 func TestPlayer_EquipWeapon_AppliesEffectAndStoresWeapon(t *testing.T) {
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 	p := NewPlayer(box)
-	base := p.Attributes
+	base := *p.Attributes
 
 	rnd := utils.NewRandomWithSeed(defaultPlayerTestSeed)
 	w := items.NewWeaponBuiltin(rnd, primitives.Box{Point: primitives.Point2D[int]{X: 1, Y: 1}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}, items.WeaponTypeSword)
@@ -74,7 +74,7 @@ func TestPlayer_EquipWeapon_AppliesEffectAndStoresWeapon(t *testing.T) {
 func TestPlayer_EquipWeapon_NilIsNothing(t *testing.T) {
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 	p := NewPlayer(box)
-	base := p.Attributes
+	base := *p.Attributes
 
 	err := p.EquipWeapon(nil)
 	if err != nil {
@@ -118,7 +118,7 @@ func TestPlayer_EquipWeapon_NilIsNothing(t *testing.T) {
 func TestPlayer_EquipWeapon_NoAddToBackpackIfPreviousWeaponIsNil(t *testing.T) {
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 	p := NewPlayer(box)
-	base := p.Attributes
+	base := *p.Attributes
 
 	if p.Weapon != nil {
 		t.Fatalf("Precondition failed: expected no weapon equipped")
@@ -149,7 +149,7 @@ func TestPlayer_EquipWeapon_NoAddToBackpackIfPreviousWeaponIsNil(t *testing.T) {
 func TestPlayer_EquipWeapon_MovePreviousWeaponToBackpack(t *testing.T) {
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 	p := NewPlayer(box)
-	base := p.Attributes
+	base := *p.Attributes
 
 	rnd1 := utils.NewRandomWithSeed(100)
 	w1 := items.NewWeaponBuiltin(rnd1, primitives.Box{}, items.WeaponTypeDagger)
@@ -219,7 +219,7 @@ func TestPlayer_EquipWeapon_PreviousWeaponIsNotNilAndBackpackIsFull_IsError(t *t
 func TestPlayer_UnequipWeapon_RevertsEffectAndUnsetsWeapon(t *testing.T) {
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
 	p := NewPlayer(box)
-	base := p.Attributes
+	base := *p.Attributes
 
 	rnd := utils.NewRandomWithSeed(defaultPlayerTestSeed)
 	w := items.NewWeaponBuiltin(rnd, primitives.Box{Point: primitives.Point2D[int]{X: 2, Y: 2}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}, items.WeaponTypeDagger)

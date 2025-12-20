@@ -7,15 +7,15 @@ import (
 )
 
 type Character struct {
-	Box              *primitives.Box
-	Attributes       primitives.Attributes
+	*primitives.Box
+	*primitives.Attributes
 	TemporaryEffects []*primitives.Effect
 }
 
 func NewCharacter(box primitives.Box, attrs primitives.Attributes) *Character {
 	return &Character{
 		Box:              &box,
-		Attributes:       attrs,
+		Attributes:       &attrs,
 		TemporaryEffects: nil,
 	}
 }
@@ -30,10 +30,6 @@ func (c *Character) SetPosition(pos primitives.Point2D[int]) {
 
 func (c *Character) IsAlive() bool {
 	return c.Attributes.Health > 0
-}
-
-func (c *Character) Move(delta primitives.Point2D[int]) {
-	c.Box.Move(delta)
 }
 
 func (c *Character) TakeDamage(damage float64) {
