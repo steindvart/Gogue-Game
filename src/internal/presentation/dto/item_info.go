@@ -74,6 +74,6 @@ func convertEffectToEffectInfo(effect *primitives.Effect) *EffectInfo {
 		HealthModify:    effect.Attributes.Health,
 		StrengthModify:  effect.Attributes.Strength,
 		AgilityModify:   effect.Attributes.Agility,
-		DurationSteps:   int(effect.Duration.Steps),
+		DurationSteps:   int(effect.Duration.Turns),
 	}
 }

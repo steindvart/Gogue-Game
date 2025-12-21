@@ -66,7 +66,7 @@ func (g *Game) convertEffectsToView(effects []*primitives.Effect) []viewcli.Effe
 	viewEffects := make([]viewcli.EffectInfo, 0, len(effects))
 	for _, effect := range effects {
 		viewEffects = append(viewEffects, viewcli.EffectInfo{
-			DurationSteps:  int(effect.Duration.Steps),
+			DurationSteps:  int(effect.Duration.Turns),
 			HealthModify:   effect.Attributes.Health,
 			StrengthModify: effect.Attributes.Strength,
 			AgilityModify:  effect.Attributes.Agility,

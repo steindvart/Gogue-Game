@@ -202,7 +202,7 @@ func (g *Game) updateEffectsPanel(effects []EffectInfo) {
 }
 
 func (g *Game) renderEffect(effect *EffectInfo) {
-	fmt.Fprintf(g.effectsPanel, "[%s::b]Duration:[-:-:-] %d steps\n", ColorEffects, effect.DurationSteps)
+	fmt.Fprintf(g.effectsPanel, "[%s::b]Duration:[-:-:-] %d turns\n", ColorEffects, effect.DurationSteps)
 	fmt.Fprintf(g.effectsPanel, "  HP:  %+6.1f\n", effect.HealthModify)
 	fmt.Fprintf(g.effectsPanel, "  STR: %+6.1f\n", effect.StrengthModify)
 	fmt.Fprintf(g.effectsPanel, "  AGI: %+6.1f\n", effect.AgilityModify)
@@ -238,7 +238,7 @@ func (g *Game) renderItemInfo() {
 	} else {
 		// Для остальных предметов показываем эффекты
 		if g.currentItemInfo.DurationSteps > 0 {
-			fmt.Fprintf(g.statsPanel, " Duration: %d steps\n", g.currentItemInfo.DurationSteps)
+			fmt.Fprintf(g.statsPanel, " Duration: %d turns\n", g.currentItemInfo.DurationSteps)
 		}
 		if g.currentItemInfo.MaxHealthModify != 0 {
 			fmt.Fprintf(g.statsPanel, "  Max HP:  %+.1f\n", g.currentItemInfo.MaxHealthModify)

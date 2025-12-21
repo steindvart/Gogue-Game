@@ -171,7 +171,7 @@ func TestCharacter_ApplyEffect_AllPermanent_ClampsHealth(t *testing.T) {
 		primitives.Attributes{MaxHealth: maxHealth, Health: 50, Strength: 10, Agility: 5},
 	)
 	e := &primitives.Effect{
-		Duration:   primitives.EffectDuration{Type: primitives.EffectDurationTypeAllPermanent, Steps: 0},
+		Duration:   primitives.EffectDuration{Type: primitives.EffectDurationTypeAllPermanent, Turns: 0},
 		Attributes: primitives.Attributes{Health: maxHealth, Strength: 5, Agility: 3},
 	}
 
@@ -203,7 +203,7 @@ func TestCharacter_ApplyEffect_AllTemporary_TracksAndMutates(t *testing.T) {
 		primitives.Attributes{MaxHealth: maxHealth, Health: 40, Strength: 2, Agility: 1},
 	)
 	e := &primitives.Effect{
-		Duration:   primitives.EffectDuration{Type: primitives.EffectDurationTypeAllTemporary, Steps: 5},
+		Duration:   primitives.EffectDuration{Type: primitives.EffectDurationTypeAllTemporary, Turns: 5},
 		Attributes: primitives.Attributes{Health: 70, Strength: 5, Agility: 3},
 	}
 
@@ -221,8 +221,8 @@ func TestCharacter_ApplyEffect_AllTemporary_TracksAndMutates(t *testing.T) {
 
 	// Partial processing should not remove effect
 	c.ProcessTemporaryEffects(3)
-	if e.Duration.Steps != 2 {
-		t.Errorf("Steps should be reduced to 2, got %d", e.Duration.Steps)
+	if e.Duration.Turns != 2 {
+		t.Errorf("Steps should be reduced to 2, got %d", e.Duration.Turns)
 	}
 	if len(c.TemporaryEffects) != 1 {
 		t.Fatalf("Effect should still be tracked, got len=%d", len(c.TemporaryEffects))
@@ -236,7 +236,7 @@ func TestCharacter_ApplyEffect_MaxHealthIncrease_AdjustsCurrentHealth(t *testing
 	)
 
 	e := &primitives.Effect{
-		Duration:   primitives.EffectDuration{Type: primitives.EffectDurationTypeAllPermanent, Steps: 0},
+		Duration:   primitives.EffectDuration{Type: primitives.EffectDurationTypeAllPermanent, Turns: 0},
 		Attributes: primitives.Attributes{MaxHealth: 20},
 	}
 
@@ -257,7 +257,7 @@ func TestCharacter_ApplyEffect_MaxHealthDecrease_HealthClampedToOne(t *testing.T
 	)
 
 	e := &primitives.Effect{
-		Duration:   primitives.EffectDuration{Type: primitives.EffectDurationTypeAllPermanent, Steps: 0},
+		Duration:   primitives.EffectDuration{Type: primitives.EffectDurationTypeAllPermanent, Turns: 0},
 		Attributes: primitives.Attributes{MaxHealth: -20},
 	}
 
@@ -278,7 +278,7 @@ func TestCharacter_ProcessTemporaryEffects_MaxHealthPermamentAffectHealth(t *tes
 	)
 
 	e := &primitives.Effect{
-		Duration:   primitives.EffectDuration{Type: primitives.EffectDurationTypeAllTemporaryHealPermanent, Steps: 3},
+		Duration:   primitives.EffectDuration{Type: primitives.EffectDurationTypeAllTemporaryHealPermanent, Turns: 3},
 		Attributes: primitives.Attributes{MaxHealth: 20},
 	}
 
@@ -315,7 +315,7 @@ func TestCharacter_ProcessTemporaryEffects_MaxHealthTemporaryAffectHealth(t *tes
 	)
 
 	e := &primitives.Effect{
-		Duration:   primitives.EffectDuration{Type: primitives.EffectDurationTypeAllTemporary, Steps: 3},
+		Duration:   primitives.EffectDuration{Type: primitives.EffectDurationTypeAllTemporary, Turns: 3},
 		Attributes: primitives.Attributes{MaxHealth: 20},
 	}
 
@@ -351,7 +351,7 @@ func TestCharacter_ProcessTemporaryEffects_ExpiresAndRollsBack(t *testing.T) {
 		primitives.Attributes{MaxHealth: 100, Health: 50, Strength: 10, Agility: 1},
 	)
 	e := &primitives.Effect{
-		Duration:   primitives.EffectDuration{Type: primitives.EffectDurationTypeAllTemporary, Steps: 2},
+		Duration:   primitives.EffectDuration{Type: primitives.EffectDurationTypeAllTemporary, Turns: 2},
 		Attributes: primitives.Attributes{Health: 20, Strength: 5, Agility: 3},
 	}
 
@@ -376,7 +376,7 @@ func TestCharacter_RemoveTemporaryEffect_HealPermanent_OthersRevert(t *testing.T
 		primitives.Attributes{MaxHealth: 100, Health: 40, Agility: 2, Strength: 3},
 	)
 	e := &primitives.Effect{
-		Duration:   primitives.EffectDuration{Type: primitives.EffectDurationTypeAllTemporaryHealPermanent, Steps: 5},
+		Duration:   primitives.EffectDuration{Type: primitives.EffectDurationTypeAllTemporaryHealPermanent, Turns: 5},
 		Attributes: primitives.Attributes{Health: 30, Strength: 7, Agility: 11},
 	}
 
@@ -406,7 +406,7 @@ func TestCharacter_RemoveTemporaryEffect_NilIsNothing(t *testing.T) {
 		primitives.Attributes{MaxHealth: 100, Health: 40, Agility: 2, Strength: 3},
 	)
 	e := &primitives.Effect{
-		Duration:   primitives.EffectDuration{Type: primitives.EffectDurationTypeAllTemporaryHealPermanent, Steps: 5},
+		Duration:   primitives.EffectDuration{Type: primitives.EffectDurationTypeAllTemporaryHealPermanent, Turns: 5},
 		Attributes: primitives.Attributes{Health: 30, Strength: 7, Agility: 11},
 	}
 
@@ -429,11 +429,11 @@ func TestCharacter_ProcessTemporaryEffects_MultipleExpire(t *testing.T) {
 		primitives.Attributes{MaxHealth: 100, Health: 10, Agility: 0, Strength: 0},
 	)
 	e1 := &primitives.Effect{
-		Duration:   primitives.EffectDuration{Type: primitives.EffectDurationTypeAllTemporary, Steps: 1},
+		Duration:   primitives.EffectDuration{Type: primitives.EffectDurationTypeAllTemporary, Turns: 1},
 		Attributes: primitives.Attributes{Health: 10, Strength: 5},
 	}
 	e2 := &primitives.Effect{
-		Duration:   primitives.EffectDuration{Type: primitives.EffectDurationTypeAllTemporary, Steps: 1},
+		Duration:   primitives.EffectDuration{Type: primitives.EffectDurationTypeAllTemporary, Turns: 1},
 		Attributes: primitives.Attributes{Health: 20, Agility: 7},
 	}
 
@@ -550,7 +550,7 @@ func TestCharacter_Use_WithMockUsable(t *testing.T) {
 			},
 			effectDuration: primitives.EffectDuration{
 				Type:  primitives.EffectDurationTypeAllPermanent,
-				Steps: 0,
+				Turns: 0,
 			},
 			wantHealth:     70,
 			wantStr:        15,
@@ -569,7 +569,7 @@ func TestCharacter_Use_WithMockUsable(t *testing.T) {
 			},
 			effectDuration: primitives.EffectDuration{
 				Type:  primitives.EffectDurationTypeAllTemporary,
-				Steps: 5,
+				Turns: 5,
 			},
 			wantHealth:     40,
 			wantStr:        12,
@@ -588,7 +588,7 @@ func TestCharacter_Use_WithMockUsable(t *testing.T) {
 			},
 			effectDuration: primitives.EffectDuration{
 				Type:  primitives.EffectDurationTypeAllTemporaryHealPermanent,
-				Steps: 3,
+				Turns: 3,
 			},
 			wantHealth:     70,
 			wantStr:        15,
@@ -607,7 +607,7 @@ func TestCharacter_Use_WithMockUsable(t *testing.T) {
 			},
 			effectDuration: primitives.EffectDuration{
 				Type:  primitives.EffectDurationTypeAllPermanent,
-				Steps: 0,
+				Turns: 0,
 			},
 			wantHealth:     100, // Зажато до MaxHealth
 			wantStr:        10,
@@ -804,7 +804,7 @@ func TestCharacter_Use_MultipleUsables(t *testing.T) {
 		effect: &primitives.Effect{
 			Duration: primitives.EffectDuration{
 				Type:  primitives.EffectDurationTypeAllTemporary,
-				Steps: 5,
+				Turns: 5,
 			},
 			Attributes: primitives.Attributes{
 				Health:   20,
@@ -819,7 +819,7 @@ func TestCharacter_Use_MultipleUsables(t *testing.T) {
 		effect: &primitives.Effect{
 			Duration: primitives.EffectDuration{
 				Type:  primitives.EffectDurationTypeAllTemporary,
-				Steps: 3,
+				Turns: 3,
 			},
 			Attributes: primitives.Attributes{
 				Health:   10,
@@ -872,7 +872,7 @@ func TestCharacter_Use_EffectInteractionWithProcessing(t *testing.T) {
 		effect: &primitives.Effect{
 			Duration: primitives.EffectDuration{
 				Type:  primitives.EffectDurationTypeAllTemporary,
-				Steps: 3,
+				Turns: 3,
 			},
 			Attributes: primitives.Attributes{
 				Health:   20,
@@ -976,7 +976,7 @@ func TestCharacter_Use_ZeroEffect(t *testing.T) {
 		effect: &primitives.Effect{
 			Duration: primitives.EffectDuration{
 				Type:  primitives.EffectDurationTypeAllPermanent,
-				Steps: 0,
+				Turns: 0,
 			},
 			Attributes: primitives.Attributes{
 				Health:   0,
@@ -1024,7 +1024,7 @@ func TestCharacter_Use_LowHealthScenario(t *testing.T) {
 		effect: &primitives.Effect{
 			Duration: primitives.EffectDuration{
 				Type:  primitives.EffectDurationTypeAllPermanent,
-				Steps: 0,
+				Turns: 0,
 			},
 			Attributes: primitives.Attributes{
 				Health:   50,
@@ -1067,7 +1067,7 @@ func TestCharacter_Use_NegativeEffects(t *testing.T) {
 		effect: &primitives.Effect{
 			Duration: primitives.EffectDuration{
 				Type:  primitives.EffectDurationTypeAllTemporary,
-				Steps: 2,
+				Turns: 2,
 			},
 			Attributes: primitives.Attributes{
 				Health:   30,
