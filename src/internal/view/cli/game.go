@@ -214,16 +214,16 @@ func (g *Game) renderItemInfo() {
 			fmt.Fprintf(g.statsPanel, " Duration: %d steps\n", g.currentItemInfo.DurationSteps)
 		}
 		if g.currentItemInfo.MaxHealthModify != 0 {
-			fmt.Fprintf(g.statsPanel, "  Max HP:  %+6.1f\n", g.currentItemInfo.MaxHealthModify)
+			fmt.Fprintf(g.statsPanel, "  Max HP:  %+.1f\n", g.currentItemInfo.MaxHealthModify)
 		}
 		if g.currentItemInfo.HealthModify != 0 {
-			fmt.Fprintf(g.statsPanel, "  HP:  %+6.1f\n", g.currentItemInfo.HealthModify)
+			fmt.Fprintf(g.statsPanel, "  HP:  %+8.1f\n", g.currentItemInfo.HealthModify)
 		}
 		if g.currentItemInfo.StrengthModify != 0 {
-			fmt.Fprintf(g.statsPanel, "  STR: %+6.1f\n", g.currentItemInfo.StrengthModify)
+			fmt.Fprintf(g.statsPanel, "  STR: %+8.1f\n", g.currentItemInfo.StrengthModify)
 		}
 		if g.currentItemInfo.AgilityModify != 0 {
-			fmt.Fprintf(g.statsPanel, "  AGI: %+6.1f\n", g.currentItemInfo.AgilityModify)
+			fmt.Fprintf(g.statsPanel, "  AGI: %+8.1f\n", g.currentItemInfo.AgilityModify)
 		}
 	}
 
