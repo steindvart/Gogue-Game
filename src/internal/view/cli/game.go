@@ -21,6 +21,7 @@ const (
 	ColorBlack   = "#000000"
 	ColorWhite   = "#FFFFFF"
 	ColorSkyBlue = "#87CEEB"
+	ColorAqua    = "#0194A7"
 
 	// Цвета игрока
 	ColorPlayer = "#FFD700" // Gold
@@ -188,7 +189,7 @@ func (g *Game) updateEffectsPanel(effects []dto.EffectInfo) {
 
 func printEffect(view *tview.TextView, effect *dto.EffectInfo) {
 	if effect.DurationSteps > 0 {
-		fmt.Fprintf(view, " Duration: %d steps\n", effect.DurationSteps)
+		fmt.Fprintf(view, " [%s::b]Duration:[-:-:-] %d steps\n", ColorAqua, effect.DurationSteps)
 	}
 	if effect.MaxHealthModify != 0 {
 		fmt.Fprintf(view, "  Max HP:  %+.1f\n", effect.MaxHealthModify)
