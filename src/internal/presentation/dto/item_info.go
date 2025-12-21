@@ -5,14 +5,6 @@ import (
 	"gogue/internal/model/primitives"
 )
 
-type EffectInfo struct {
-	MaxHealthModify float64
-	HealthModify    float64
-	StrengthModify  float64
-	AgilityModify   float64
-	DurationSteps   int
-}
-
 type ItemInfo struct {
 	*EffectInfo
 	Name          string
@@ -22,7 +14,7 @@ type ItemInfo struct {
 	TreasureValue int32
 }
 
-func GetItemInfo(item primitives.Positional2D[int]) *ItemInfo {
+func ConvertPositionalItemToDto(item primitives.Positional2D[int]) *ItemInfo {
 	if item == nil {
 		return nil
 	}
@@ -33,22 +25,22 @@ func GetItemInfo(item primitives.Positional2D[int]) *ItemInfo {
 	case *items.Food:
 		info.Name = typedItem.Name
 		info.Type = "Food"
-		info.EffectInfo = convertEffectToEffectInfo(typedItem.Effect)
+		info.EffectInfo = ConvertEffectToDto(typedItem.Effect)
 
 	case *items.Elixir:
 		info.Name = typedItem.Name
 		info.Type = "Elixir"
-		info.EffectInfo = convertEffectToEffectInfo(typedItem.Effect)
+		info.EffectInfo = ConvertEffectToDto(typedItem.Effect)
 
 	case *items.Scroll:
 		info.Name = typedItem.Name
 		info.Type = "Scroll"
-		info.EffectInfo = convertEffectToEffectInfo(typedItem.Effect)
+		info.EffectInfo = ConvertEffectToDto(typedItem.Effect)
 
 	case *items.Weapon:
 		info.Name = typedItem.Name
 		info.Type = "Weapon"
-		info.EffectInfo = convertEffectToEffectInfo(typedItem.Effect)
+		info.EffectInfo = ConvertEffectToDto(typedItem.Effect)
 
 	case *items.Treasure:
 		info.Name = typedItem.Name
@@ -62,18 +54,4 @@ func GetItemInfo(item primitives.Positional2D[int]) *ItemInfo {
 	_, info.CanTake = item.(items.Takable)
 
 	return info
-}
-
-func convertEffectToEffectInfo(effect *primitives.Effect) *EffectInfo {
-	if effect == nil {
-		return nil
-	}
-
-	return &EffectInfo{
-		MaxHealthModify: effect.Attributes.MaxHealth,
-		HealthModify:    effect.Attributes.Health,
-		StrengthModify:  effect.Attributes.Strength,
-		AgilityModify:   effect.Attributes.Agility,
-		DurationSteps:   int(effect.Duration.Turns),
-	}
 }
