@@ -106,15 +106,15 @@ func (g *Game) handleEvent(event *tcell.EventKey) *tcell.EventKey {
 		case world.CollisionTypeEnemy:
 			// @todo - обработка столкновения с врагом (атака на врага)
 			g.isPlayerReadyToInteract = false
-		case world.CollisionTypeItem, world.CollisionTypeTeleport:
+		case world.CollisionTypeItem:
 			g.isPlayerReadyToInteract = true
-			// Обновляем информацию о предмете для отображения
-			if g.level.CheckEntityCollision(g.level.Player.GetPosition()) == world.CollisionTypeItem {
-				g.updateItemInfo(g.level.Player.GetPosition())
-			}
+			g.updateItemInfo(g.level.Player.GetPosition())
+		case world.CollisionTypeTeleport:
+			g.isPlayerReadyToInteract = true
+			g.view.SetIsOnPortal(true)
 		case world.CollisionTypeNone:
 			g.isPlayerReadyToInteract = false
-			g.view.UpdateItemInfo(nil)
+			g.resetInteraction()
 		}
 	case action.Select:
 		g.handleSelectAction()
@@ -128,6 +128,11 @@ func (g *Game) handleEvent(event *tcell.EventKey) *tcell.EventKey {
 
 }
 
+func (g *Game) resetInteraction() {
+	g.isPlayerReadyToInteract = false
+	g.view.ResetInteraction()
+}
+
 func (g *Game) handleSelectAction() {
 	if g.level.Player == nil {
 		return
@@ -139,12 +144,13 @@ func (g *Game) handleSelectAction() {
 		switch g.level.CheckEntityCollision(pos) {
 		case world.CollisionTypeItem:
 			g.level.PlayerUseItemAtPosition(pos)
-			g.updateItemInfo(pos)
 		case world.CollisionTypeTeleport:
 			if err := g.level.GenerateWithExistingPlayer(g.level.Player); err != nil {
 				panic("an error occurred when generating next level: " + err.Error())
 			}
 		}
+
+		g.resetInteraction()
 	}
 }
 

@@ -18,8 +18,9 @@ const (
 
 const (
 	// Общие цвета
-	ColorBlack = "#000000" // Black
-	ColorWhite = "#FFFFFF" // White
+	ColorBlack   = "#000000"
+	ColorWhite   = "#FFFFFF"
+	ColorSkyBlue = "#87CEEB"
 
 	// Цвета игрока
 	ColorPlayer = "#FFD700" // Gold
@@ -27,7 +28,7 @@ const (
 	// Цвета стен и структур
 	ColorWall    = "#808080" // Gray
 	ColorFloor   = "#808080" // Gray
-	ColorPassage = "#C0C0C0" // Silber
+	ColorPassage = "#C0C0C0" // Silver
 	ColorPortal  = "#FF00FF" // Purple
 
 	// Цвета врагов
@@ -47,7 +48,7 @@ const (
 	ColorHP       = "#FFD700" // Gold
 	ColorStrength = "#FF6347" // Tomato
 	ColorAgility  = "#90EE90" // Light green
-	ColorEffects  = "#87CEEB" // Sky blue
+	ColorEffects  = ColorSkyBlue
 )
 
 type EffectInfo struct {
@@ -72,8 +73,8 @@ type Game struct {
 	effectsPanel *tview.TextView
 	fieldPanel   *tview.TextView
 
-	// Кэшируем информацию о текущем предмете
 	currentItemInfo *dto.ItemInfo
+	isOnPortal      bool
 }
 
 func NewGame() *Game {
@@ -146,6 +147,15 @@ func (g *Game) UpdatePlayerInfo(info *PlayerInfo) {
 	g.updateEffectsPanel(info.TemporaryEffects)
 }
 
+func (g *Game) ResetInteraction() {
+	g.UpdateItemInfo(nil)
+	g.SetIsOnPortal(false)
+}
+
+func (g *Game) SetIsOnPortal(val bool) {
+	g.isOnPortal = val
+}
+
 func (g *Game) UpdateItemInfo(info *dto.ItemInfo) {
 	g.currentItemInfo = info
 }
@@ -157,9 +167,26 @@ func (g *Game) updateStatsPanel(info *PlayerInfo) {
 	fmt.Fprintf(g.statsPanel, " [%s::b]Strength:[-:-:-] %.f\n", ColorStrength, info.Strength)
 	fmt.Fprintf(g.statsPanel, " [%s::b]Agility:[-:-:-]  %.f\n", ColorAgility, info.Agility)
 
+	g.updateInteractionInfo()
+}
+
+func (g *Game) updateInteractionInfo() {
 	if g.currentItemInfo != nil {
 		g.renderItemInfo()
 	}
+
+	if g.isOnPortal {
+		printInteractPortalInfo(g.statsPanel)
+	}
+}
+
+func printInteractPortalInfo(view *tview.TextView) {
+	fmt.Fprintln(view)
+	fmt.Fprintln(view, "───────────────────────────────────")
+	fmt.Fprintf(view, " [%s::b]You are on the portal\n to the next level.\n[-:-:-]", ColorSkyBlue)
+	fmt.Fprintln(view)
+	printInteractionTips(view, true, false)
+	fmt.Fprintf(view, " [%s::i]You can't go back...\n[-:-:-]", ColorSkyBlue)
 }
 
 func (g *Game) updateEffectsPanel(effects []EffectInfo) {
@@ -228,13 +255,16 @@ func (g *Game) renderItemInfo() {
 	}
 
 	fmt.Fprintln(g.statsPanel)
-	// Показываем подсказки о действиях
-	if g.currentItemInfo.CanUse && g.currentItemInfo.CanTake {
-		fmt.Fprintf(g.statsPanel, " [green]Use 'e' / Take 'r'[-]\n")
-	} else if g.currentItemInfo.CanUse {
-		fmt.Fprintf(g.statsPanel, " [green]Use 'e'[-]\n")
-	} else if g.currentItemInfo.CanTake {
-		fmt.Fprintf(g.statsPanel, " [green]Take 'r'[-]\n")
+	printInteractionTips(g.statsPanel, g.currentItemInfo.CanUse, g.currentItemInfo.CanTake)
+}
+
+func printInteractionTips(view *tview.TextView, canUse, canTake bool) {
+	if canUse && canTake {
+		fmt.Fprintf(view, " [green]Use 'e' / Take 'r'[-]\n")
+	} else if canUse {
+		fmt.Fprintf(view, " [green]Use 'e'[-]\n")
+	} else if canTake {
+		fmt.Fprintf(view, " [green]Take 'r'[-]\n")
 	}
 }
 
@@ -255,7 +285,7 @@ func (g *Game) renderField(field [][]common.GameEntityType) {
 	for y := range field {
 		g.renderMarginX(FieldMarginX)
 		g.renderRow(field, y)
-		g.resetColorAndNewLine()
+		g.resetColorWithNewLine()
 	}
 }
 
@@ -276,7 +306,7 @@ func (g *Game) renderRow(field [][]common.GameEntityType, y int) {
 	}
 }
 
-func (g *Game) resetColorAndNewLine() {
+func (g *Game) resetColorWithNewLine() {
 	fmt.Fprintf(g.fieldPanel, "[-:-:-]\n")
 }
 
