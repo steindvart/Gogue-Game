@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"gogue/internal/common"
+	"gogue/internal/presentation/dto"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -70,6 +71,9 @@ type Game struct {
 	statsPanel   *tview.TextView
 	effectsPanel *tview.TextView
 	fieldPanel   *tview.TextView
+
+	// Кэшируем информацию о текущем предмете
+	currentItemInfo *dto.ItemInfo
 }
 
 func NewGame() *Game {
@@ -142,12 +146,20 @@ func (g *Game) UpdatePlayerInfo(info *PlayerInfo) {
 	g.updateEffectsPanel(info.TemporaryEffects)
 }
 
+func (g *Game) UpdateItemInfo(info *dto.ItemInfo) {
+	g.currentItemInfo = info
+}
+
 func (g *Game) updateStatsPanel(info *PlayerInfo) {
 	g.statsPanel.Clear()
 	fmt.Fprintln(g.statsPanel)
 	fmt.Fprintf(g.statsPanel, " [%s::b]HP:[-:-:-]       %.f/%-.f\n", ColorHP, info.Health, info.MaxHealth)
 	fmt.Fprintf(g.statsPanel, " [%s::b]Strength:[-:-:-] %.f\n", ColorStrength, info.Strength)
 	fmt.Fprintf(g.statsPanel, " [%s::b]Agility:[-:-:-]  %.f\n", ColorAgility, info.Agility)
+
+	if g.currentItemInfo != nil {
+		g.renderItemInfo()
+	}
 }
 
 func (g *Game) updateEffectsPanel(effects []EffectInfo) {
@@ -167,6 +179,35 @@ func (g *Game) renderEffect(effect *EffectInfo) {
 	fmt.Fprintf(g.effectsPanel, "  HP:  %+6.1f\n", effect.HealthModify)
 	fmt.Fprintf(g.effectsPanel, "  STR: %+6.1f\n", effect.StrengthModify)
 	fmt.Fprintf(g.effectsPanel, "  AGI: %+6.1f\n", effect.AgilityModify)
+}
+
+func (g *Game) renderItemInfo() {
+	fmt.Fprintln(g.statsPanel)
+	fmt.Fprintln(g.statsPanel, "───────────────────────────────────")
+	fmt.Fprintf(g.statsPanel, " [yellow::b]ITEM: %s[-:-:-]\n", g.currentItemInfo.Name)
+
+	// Для сокровищ показываем только стоимость
+	if g.currentItemInfo.CanTake && !g.currentItemInfo.CanUse {
+		fmt.Fprintf(g.statsPanel, " Value: %d\n", g.currentItemInfo.TreasureValue)
+	} else {
+		// Для остальных предметов показываем эффекты
+		if g.currentItemInfo.DurationSteps > 0 {
+			fmt.Fprintf(g.statsPanel, " Duration: %d steps\n", g.currentItemInfo.DurationSteps)
+		}
+		fmt.Fprintf(g.statsPanel, "  HP:  %+6.1f\n", g.currentItemInfo.HealthModify)
+		fmt.Fprintf(g.statsPanel, "  STR: %+6.1f\n", g.currentItemInfo.StrengthModify)
+		fmt.Fprintf(g.statsPanel, "  AGI: %+6.1f\n", g.currentItemInfo.AgilityModify)
+	}
+
+	fmt.Fprintln(g.statsPanel)
+	// Показываем подсказки о действиях
+	if g.currentItemInfo.CanUse && g.currentItemInfo.CanTake {
+		fmt.Fprintf(g.statsPanel, " [green]Use 'e' / Take 'r'[-]\n")
+	} else if g.currentItemInfo.CanUse {
+		fmt.Fprintf(g.statsPanel, " [green]Use 'e'[-]\n")
+	} else if g.currentItemInfo.CanTake {
+		fmt.Fprintf(g.statsPanel, " [green]Take 'r'[-]\n")
+	}
 }
 
 func (g *Game) UpdateGameField(field [][]common.GameEntityType) {

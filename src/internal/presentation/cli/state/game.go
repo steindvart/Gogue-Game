@@ -5,6 +5,7 @@ import (
 	"gogue/internal/model/signals"
 	"gogue/internal/model/world"
 	"gogue/internal/presentation/action"
+	"gogue/internal/presentation/dto"
 	viewcli "gogue/internal/view/cli"
 	"math/rand"
 	"time"
@@ -104,10 +105,16 @@ func (g *Game) handleEvent(event *tcell.EventKey) *tcell.EventKey {
 		switch g.level.CheckEntityCollision(g.level.Player.GetPosition()) {
 		case world.CollisionTypeEnemy:
 			// @todo - обработка столкновения с врагом (атака на врага)
+			g.isPlayerReadyToInteract = false
 		case world.CollisionTypeItem, world.CollisionTypeTeleport:
 			g.isPlayerReadyToInteract = true
+			// Обновляем информацию о предмете для отображения
+			if g.level.CheckEntityCollision(g.level.Player.GetPosition()) == world.CollisionTypeItem {
+				g.updateItemInfo(g.level.Player.GetPosition())
+			}
 		case world.CollisionTypeNone:
 			g.isPlayerReadyToInteract = false
+			g.view.UpdateItemInfo(nil)
 		}
 	case action.Select:
 		g.handleSelectAction()
@@ -132,6 +139,7 @@ func (g *Game) handleSelectAction() {
 		switch g.level.CheckEntityCollision(pos) {
 		case world.CollisionTypeItem:
 			g.level.PlayerUseItemAtPosition(pos)
+			g.updateItemInfo(pos)
 		case world.CollisionTypeTeleport:
 			if err := g.level.GenerateWithExistingPlayer(g.level.Player); err != nil {
 				panic("an error occurred when generating next level: " + err.Error())
@@ -177,6 +185,12 @@ func (g *Game) eventToAction(event *tcell.EventKey) action.Type {
 	}
 
 	return action.NoAction
+}
+
+func (g *Game) updateItemInfo(pos primitives.Point2D[int]) {
+	item := g.level.GetItemAtPosition(pos)
+	itemInfo := dto.GetItemInfo(item)
+	g.view.UpdateItemInfo(itemInfo)
 }
 
 func (g *Game) Update(float64) signals.Type {
