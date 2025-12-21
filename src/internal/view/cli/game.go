@@ -160,7 +160,6 @@ func (g *Game) setupLayout() {
 func (g *Game) initializeLegend() {
 	g.legendPanel.Clear()
 
-	// Управление
 	fmt.Fprintf(g.legendPanel, " [%s::b]CONTROLS:[-:-:-]\n", ColorSkyBlue)
 	fmt.Fprintln(g.legendPanel, " ↑←↓→ or 'WASD' - Move")
 	fmt.Fprintln(g.legendPanel, " E - Use item")
@@ -168,13 +167,11 @@ func (g *Game) initializeLegend() {
 	fmt.Fprintln(g.legendPanel, " ESC - Exit game")
 	fmt.Fprintln(g.legendPanel)
 
-	// Обозначения
 	fmt.Fprintf(g.legendPanel, " [%s::b]SYMBOLS:[-:-:-]\n", ColorSkyBlue)
 	fmt.Fprintf(g.legendPanel, " [%s]☿[-] - Player\n", ColorPlayer)
 	fmt.Fprintf(g.legendPanel, " [%s]@[-] - Portal\n", ColorPortal)
 	fmt.Fprintln(g.legendPanel)
 
-	// Враги
 	fmt.Fprintf(g.legendPanel, " [%s::b]ENEMIES:[-:-:-]\n", ColorSkyBlue)
 	fmt.Fprintf(g.legendPanel, " [%s]Z[-] - Zombie\n", ColorZombie)
 	fmt.Fprintf(g.legendPanel, " [%s]V[-] - Vampire\n", ColorVampire)
@@ -183,7 +180,6 @@ func (g *Game) initializeLegend() {
 	fmt.Fprintf(g.legendPanel, " [%s]S[-] - Snake Mage\n", ColorSnakeMage)
 	fmt.Fprintln(g.legendPanel)
 
-	// Предметы
 	fmt.Fprintf(g.legendPanel, " [%s::b]ITEMS:[-:-:-]\n", ColorSkyBlue)
 	fmt.Fprintf(g.legendPanel, " [%s]ð[-] - Food\n", ColorFood)
 	fmt.Fprintf(g.legendPanel, " [%s]¶[-] - Elixir\n", ColorElixir)
