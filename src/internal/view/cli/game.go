@@ -235,7 +235,7 @@ func (g *Game) updateEffectsPanel(effects []dto.EffectInfo) {
 	}
 }
 
-func (g *Game) renderEffect(effect *EffectInfo) {
+func (g *Game) renderEffect(effect *dto.EffectInfo) {
 	fmt.Fprintf(g.effectsPanel, "[%s::b]Duration:[-:-:-] %d turns\n", ColorEffects, effect.DurationSteps)
 	fmt.Fprintf(g.effectsPanel, "  HP:  %+6.1f\n", effect.HealthModify)
 	fmt.Fprintf(g.effectsPanel, "  STR: %+6.1f\n", effect.StrengthModify)
