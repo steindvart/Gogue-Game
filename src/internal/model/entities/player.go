@@ -18,7 +18,7 @@ func NewPlayer(box primitives.Box) *Player {
 	return &Player{
 		Character: &Character{
 			Box: &box,
-			Attributes: primitives.Attributes{
+			Attributes: &primitives.Attributes{
 				Health:    100,
 				MaxHealth: 100,
 				Strength:  10,
