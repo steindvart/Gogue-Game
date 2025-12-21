@@ -51,21 +51,6 @@ const (
 	ColorEffects  = ColorSkyBlue
 )
 
-type EffectInfo struct {
-	DurationSteps  int
-	HealthModify   float64
-	StrengthModify float64
-	AgilityModify  float64
-}
-
-type PlayerInfo struct {
-	Health           float64
-	MaxHealth        float64
-	Strength         float64
-	Agility          float64
-	TemporaryEffects []EffectInfo
-}
-
 type Game struct {
 	container      *tview.Flex
 	leftInfoPanel  *tview.Flex // Контейнер для statsPanel и effectsPanel
@@ -191,7 +176,7 @@ func (g *Game) GetRootPrimitive() *tview.Flex {
 	return g.container
 }
 
-func (g *Game) UpdatePlayerInfo(info *PlayerInfo) {
+func (g *Game) UpdatePlayerInfo(info *dto.PlayerInfo) {
 	g.updateStatsPanel(info)
 	g.updateEffectsPanel(info.TemporaryEffects)
 }
@@ -209,7 +194,7 @@ func (g *Game) UpdateItemInfo(info *dto.ItemInfo) {
 	g.currentItemInfo = info
 }
 
-func (g *Game) updateStatsPanel(info *PlayerInfo) {
+func (g *Game) updateStatsPanel(info *dto.PlayerInfo) {
 	g.statsPanel.Clear()
 	fmt.Fprintln(g.statsPanel)
 	fmt.Fprintf(g.statsPanel, " [%s::b]HP:[-:-:-]       %.f/%-.f\n", ColorHP, info.Health, info.MaxHealth)
@@ -238,7 +223,7 @@ func printInteractPortalInfo(view *tview.TextView) {
 	fmt.Fprintf(view, " [%s::i]You can't go back...\n[-:-:-]", ColorSkyBlue)
 }
 
-func (g *Game) updateEffectsPanel(effects []EffectInfo) {
+func (g *Game) updateEffectsPanel(effects []dto.EffectInfo) {
 	g.effectsPanel.Clear()
 	fmt.Fprintf(g.effectsPanel, " [%s::b]ACTIVE EFFECTS:[-:-:-] (%d)\n\n", ColorEffects, len(effects))
 
@@ -250,7 +235,7 @@ func (g *Game) updateEffectsPanel(effects []EffectInfo) {
 	}
 }
 
-func (g *Game) renderEffect(effect *EffectInfo) {
+func (g *Game) renderEffect(effect *dto.EffectInfo) {
 	fmt.Fprintf(g.effectsPanel, "[%s::b]Duration:[-:-:-] %d steps\n", ColorEffects, effect.DurationSteps)
 	fmt.Fprintf(g.effectsPanel, "  HP:  %+6.1f\n", effect.HealthModify)
 	fmt.Fprintf(g.effectsPanel, "  STR: %+6.1f\n", effect.StrengthModify)
