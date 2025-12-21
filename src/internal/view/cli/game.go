@@ -73,8 +73,8 @@ type Game struct {
 	effectsPanel *tview.TextView
 	fieldPanel   *tview.TextView
 
-	currentItemInfo *dto.ItemInfo
-	isOnPortal      bool
+	currentItemInfo  *dto.ItemInfo
+	playerIsOnPortal bool
 }
 
 func NewGame() *Game {
@@ -138,7 +138,7 @@ func (g *Game) setupLayout() {
 		SetBackgroundColor(tcell.ColorBlack)
 }
 
-func (g *Game) GetContainer() *tview.Flex {
+func (g *Game) GetRootPrimitive() *tview.Flex {
 	return g.container
 }
 
@@ -149,11 +149,11 @@ func (g *Game) UpdatePlayerInfo(info *PlayerInfo) {
 
 func (g *Game) ResetInteraction() {
 	g.UpdateItemInfo(nil)
-	g.SetIsOnPortal(false)
+	g.SetPlayerIsOnPortal(false)
 }
 
-func (g *Game) SetIsOnPortal(val bool) {
-	g.isOnPortal = val
+func (g *Game) SetPlayerIsOnPortal(val bool) {
+	g.playerIsOnPortal = val
 }
 
 func (g *Game) UpdateItemInfo(info *dto.ItemInfo) {
@@ -175,7 +175,7 @@ func (g *Game) updateInteractionInfo() {
 		g.renderItemInfo()
 	}
 
-	if g.isOnPortal {
+	if g.playerIsOnPortal {
 		printInteractPortalInfo(g.statsPanel)
 	}
 }

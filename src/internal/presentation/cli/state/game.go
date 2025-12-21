@@ -111,7 +111,7 @@ func (g *Game) handleEvent(event *tcell.EventKey) *tcell.EventKey {
 			g.updateItemInfo(g.level.Player.GetPosition())
 		case world.CollisionTypeTeleport:
 			g.isPlayerReadyToInteract = true
-			g.view.SetIsOnPortal(true)
+			g.view.SetPlayerIsOnPortal(true)
 		case world.CollisionTypeNone:
 			g.isPlayerReadyToInteract = false
 			g.resetInteraction()
@@ -208,5 +208,5 @@ func (g *Game) Update(float64) signals.Type {
 }
 
 func (g *Game) Primitive() tview.Primitive {
-	return g.view.GetContainer()
+	return g.view.GetRootPrimitive()
 }
