@@ -39,8 +39,8 @@ func TestPlayer_NewPlayer_BasicInit(t *testing.T) {
 	if p.Experience != 0 {
 		t.Errorf("Experience should start at 0, got %d", p.Experience)
 	}
-	if p.CharacterLevel != 1 {
-		t.Errorf("CharacterLevel should start at 1, got %d", p.CharacterLevel)
+	if p.Level != 1 {
+		t.Errorf("CharacterLevel should start at 1, got %d", p.Level)
 	}
 }
 

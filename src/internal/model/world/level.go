@@ -79,6 +79,11 @@ func NewLevelWithComponents(
 	}
 }
 
+func (l *Level) ProcessTurns(turns uint32) {
+	l.Player.ProcessTurns(turns)
+	// @todo - движение врагов и их взаимодействие с миром (хождение по миру, агрессия и нападение на игрока)
+}
+
 // Generate генерирует геометрию, сущности и игрока
 func (l *Level) Generate() error {
 	err := l.generateEnvironment()

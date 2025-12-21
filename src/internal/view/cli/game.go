@@ -13,7 +13,7 @@ const (
 	MaxPanelHeight    = 40
 	MaxInfoPanelWidth = 40
 	FieldMarginY      = 3
-	FieldMarginX      = 31
+	FieldMarginX      = 17
 )
 
 const (
@@ -53,11 +53,13 @@ const (
 )
 
 type Game struct {
-	container    *tview.Flex
-	infoPanel    *tview.Flex // Контейнер для statsPanel и effectsPanel
-	statsPanel   *tview.TextView
-	effectsPanel *tview.TextView
-	fieldPanel   *tview.TextView
+	container      *tview.Flex
+	leftInfoPanel  *tview.Flex // Контейнер для statsPanel и effectsPanel
+	statsPanel     *tview.TextView
+	effectsPanel   *tview.TextView
+	rightInfoPanel *tview.Flex // Контейнер для legendPanel
+	legendPanel    *tview.TextView
+	fieldPanel     *tview.TextView
 
 	currentItemInfo  *dto.ItemInfo
 	playerIsOnPortal bool
@@ -65,11 +67,13 @@ type Game struct {
 
 func NewGame() *Game {
 	game := &Game{
-		container:    tview.NewFlex(),
-		infoPanel:    tview.NewFlex(),
-		statsPanel:   tview.NewTextView(),
-		effectsPanel: tview.NewTextView(),
-		fieldPanel:   tview.NewTextView(),
+		container:      tview.NewFlex(),
+		rightInfoPanel: tview.NewFlex(),
+		statsPanel:     tview.NewTextView(),
+		effectsPanel:   tview.NewTextView(),
+		leftInfoPanel:  tview.NewFlex(),
+		legendPanel:    tview.NewTextView(),
+		fieldPanel:     tview.NewTextView(),
 	}
 
 	game.setupPanels()
@@ -91,10 +95,22 @@ func (g *Game) setupPanels() {
 		SetTitle("Effects").
 		SetBackgroundColor(tcell.ColorBlack)
 
-	g.infoPanel.
+	g.legendPanel.
+		SetDynamicColors(true).
+		SetBorder(true).
+		SetTitle("Legend").
+		SetBackgroundColor(tcell.ColorBlack)
+
+	// Левая панель: Stats + Effects
+	g.leftInfoPanel.
 		SetDirection(tview.FlexRow).
 		AddItem(g.statsPanel, 0, 1, false).
 		AddItem(g.effectsPanel, 0, 1, false).
+		SetBackgroundColor(tcell.ColorBlack)
+
+	g.rightInfoPanel.
+		SetDirection(tview.FlexRow).
+		AddItem(g.legendPanel, 0, 1, false).
 		SetBackgroundColor(tcell.ColorBlack)
 
 	g.fieldPanel.
@@ -103,14 +119,17 @@ func (g *Game) setupPanels() {
 		SetBorder(true).
 		SetTitle("Game").
 		SetBackgroundColor(tcell.ColorBlack)
+
+	g.initializeLegend()
 }
 
 func (g *Game) setupLayout() {
-	// Горизонтальная компоновка: информационная панель + игровое поле
+	// Горизонтальная компоновка: левая панель + игровое поле + правая панель (легенда)
 	horizontalFlex := tview.NewFlex().
 		SetDirection(tview.FlexColumn).
-		AddItem(g.infoPanel, MaxInfoPanelWidth, 0, false).
-		AddItem(g.fieldPanel, 0, 1, true)
+		AddItem(g.leftInfoPanel, MaxInfoPanelWidth, 0, false).
+		AddItem(g.fieldPanel, 0, 1, true).
+		AddItem(g.rightInfoPanel, MaxInfoPanelWidth, 0, false)
 	horizontalFlex.SetBackgroundColor(tcell.ColorBlack)
 
 	// Пустой бокс для нижнего отступа
@@ -122,6 +141,36 @@ func (g *Game) setupLayout() {
 		AddItem(horizontalFlex, MaxPanelHeight, 0, true).
 		AddItem(gapBox, 0, 1, false).
 		SetBackgroundColor(tcell.ColorBlack)
+}
+
+func (g *Game) initializeLegend() {
+	g.legendPanel.Clear()
+
+	fmt.Fprintf(g.legendPanel, " [%s::b]CONTROLS:[-:-:-]\n", ColorSkyBlue)
+	fmt.Fprintln(g.legendPanel, " ↑←↓→ or 'WASD' - Move")
+	fmt.Fprintln(g.legendPanel, " E - Use item")
+	fmt.Fprintln(g.legendPanel, " R - Take item")
+	fmt.Fprintln(g.legendPanel, " ESC - Exit game")
+	fmt.Fprintln(g.legendPanel)
+
+	fmt.Fprintf(g.legendPanel, " [%s::b]SYMBOLS:[-:-:-]\n", ColorSkyBlue)
+	fmt.Fprintf(g.legendPanel, " [%s]☿[-] - Player\n", ColorPlayer)
+	fmt.Fprintf(g.legendPanel, " [%s]@[-] - Portal\n", ColorPortal)
+	fmt.Fprintln(g.legendPanel)
+
+	fmt.Fprintf(g.legendPanel, " [%s::b]ENEMIES:[-:-:-]\n", ColorSkyBlue)
+	fmt.Fprintf(g.legendPanel, " [%s]Z[-] - Zombie\n", ColorZombie)
+	fmt.Fprintf(g.legendPanel, " [%s]V[-] - Vampire\n", ColorVampire)
+	fmt.Fprintf(g.legendPanel, " [%s]G[-] - Ghost\n", ColorGhost)
+	fmt.Fprintf(g.legendPanel, " [%s]O[-] - Ogre\n", ColorOgre)
+	fmt.Fprintf(g.legendPanel, " [%s]S[-] - Snake Mage\n", ColorSnakeMage)
+	fmt.Fprintln(g.legendPanel)
+
+	fmt.Fprintf(g.legendPanel, " [%s::b]ITEMS:[-:-:-]\n", ColorSkyBlue)
+	fmt.Fprintf(g.legendPanel, " [%s]ð[-] - Food\n", ColorFood)
+	fmt.Fprintf(g.legendPanel, " [%s]¶[-] - Elixir\n", ColorElixir)
+	fmt.Fprintf(g.legendPanel, " [%s]![-] - Scroll\n", ColorScroll)
+	fmt.Fprintf(g.legendPanel, " [%s]ƒ[-] - Weapon\n", ColorWeapon)
 }
 
 func (g *Game) GetRootPrimitive() *tview.Flex {
