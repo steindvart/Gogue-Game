@@ -97,6 +97,8 @@ func (g *Game) handleEvent(event *tcell.EventKey) *tcell.EventKey {
 			g.isPlayerReadyToInteract = false
 			g.resetInteraction()
 		}
+
+		g.level.ProcessTurns(1)
 	case action.Select:
 		g.handleSelectAction()
 	case action.Exit:

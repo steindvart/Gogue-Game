@@ -35,7 +35,7 @@ func NewElixirByConfig(rnd utils.Randomizer, box primitives.Box, cfg ElixirConfi
 	return NewElixir(box, cfg.Type, &primitives.Effect{
 		Duration: primitives.EffectDuration{
 			Type:  primitives.EffectDurationTypeAllTemporaryHealPermanent,
-			Steps: cfg.GenerateDuration(rnd),
+			Turns: cfg.GenerateDuration(rnd),
 		},
 		Attributes: cfg.GenerateAttributes(rnd),
 	}), nil

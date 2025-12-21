@@ -79,10 +79,10 @@ func TestElixir_NewElixir_BuiltinConfig(t *testing.T) {
 					elixir.Effect.Attributes.Agility, config.AgilityRange.Min, config.AgilityRange.Max)
 			}
 
-			if elixir.Duration.Steps < config.DurationStepsRange.Min ||
-				elixir.Duration.Steps > config.DurationStepsRange.Max {
+			if elixir.Duration.Turns < config.DurationStepsRange.Min ||
+				elixir.Duration.Turns > config.DurationStepsRange.Max {
 				t.Errorf("Duration out of config range: got %d, want [%d, %d]",
-					elixir.Duration.Steps, config.DurationStepsRange.Min, config.DurationStepsRange.Max)
+					elixir.Duration.Turns, config.DurationStepsRange.Min, config.DurationStepsRange.Max)
 			}
 
 			if elixir.Name != string(config.Type) {
@@ -194,10 +194,10 @@ func TestElixir_NewElixir_CustomConfig(t *testing.T) {
 					elixir.Effect.Attributes.Agility, tt.config.AgilityRange.Min, tt.config.AgilityRange.Max)
 			}
 
-			if elixir.Duration.Steps < tt.config.DurationStepsRange.Min ||
-				elixir.Duration.Steps > tt.config.DurationStepsRange.Max {
+			if elixir.Duration.Turns < tt.config.DurationStepsRange.Min ||
+				elixir.Duration.Turns > tt.config.DurationStepsRange.Max {
 				t.Errorf("Duration out of range: got %d, want [%d, %d]",
-					elixir.Duration.Steps, tt.config.DurationStepsRange.Min, tt.config.DurationStepsRange.Max)
+					elixir.Duration.Turns, tt.config.DurationStepsRange.Min, tt.config.DurationStepsRange.Max)
 			}
 
 			// Verify name matches config type
@@ -252,8 +252,8 @@ func TestElixir_NewElixir_NoRandom(t *testing.T) {
 				t.Errorf("Agility mismatch: %f != %f", elixir1.Effect.Attributes.Agility, elixir2.Effect.Attributes.Agility)
 			}
 
-			if elixir1.Duration.Steps != elixir2.Duration.Steps {
-				t.Errorf("Duration mismatch: %d != %d", elixir1.Duration.Steps, elixir2.Duration.Steps)
+			if elixir1.Duration.Turns != elixir2.Duration.Turns {
+				t.Errorf("Duration mismatch: %d != %d", elixir1.Duration.Turns, elixir2.Duration.Turns)
 			}
 		})
 	}
@@ -291,7 +291,7 @@ func TestElixir_NewElixir_Randomness(t *testing.T) {
 
 				strengthValues[elixir.Effect.Attributes.Strength] = true
 				agilityValues[elixir.Effect.Attributes.Agility] = true
-				durationValues[elixir.Duration.Steps] = true
+				durationValues[elixir.Duration.Turns] = true
 			}
 
 			// Check that we got varied values (at least 5 different values)

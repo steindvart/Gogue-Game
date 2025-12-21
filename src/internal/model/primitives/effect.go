@@ -10,7 +10,7 @@ const (
 
 type EffectDuration struct {
 	Type  EffectDurationType
-	Steps uint32
+	Turns uint32
 }
 
 type Effect struct {
