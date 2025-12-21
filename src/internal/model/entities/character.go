@@ -47,12 +47,16 @@ func (c *Character) Use(usable items.Usable) {
 	c.ApplyEffect(usable.Use())
 }
 
-func (c *Character) ProcessTemporaryEffects(steps uint32) {
+func (c *Character) ProcessTurns(turns uint32) {
+	c.ProcessTemporaryEffects(turns)
+}
+
+func (c *Character) ProcessTemporaryEffects(turns uint32) {
 	// Важно начинать с конца среза, чтобы при удалении не сбивался индекс.
 	for i := len(c.TemporaryEffects) - 1; i >= 0; i-- {
 		e := c.TemporaryEffects[i]
-		if e.Duration.Steps > steps {
-			e.Duration.Steps -= steps
+		if e.Duration.Steps > turns {
+			e.Duration.Steps -= turns
 		} else {
 			e.Duration.Steps = 0
 		}

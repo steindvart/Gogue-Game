@@ -9,9 +9,9 @@ type Player struct {
 	*Character
 	*items.Backpack
 	*items.Weapon
-	Experience     uint
-	CharacterLevel uint
-	ViewRadius     int
+	Experience uint
+	Level      uint
+	ViewRadius int
 }
 
 func NewPlayer(box primitives.Box) *Player {
@@ -25,11 +25,11 @@ func NewPlayer(box primitives.Box) *Player {
 				Agility:   5,
 			},
 		},
-		Experience:     0,
-		CharacterLevel: 1,
-		ViewRadius:     3,
-		Backpack:       items.NewBackpack(),
-		Weapon:         nil,
+		Experience: 0,
+		Level:      1,
+		ViewRadius: 3,
+		Backpack:   items.NewBackpack(),
+		Weapon:     nil,
 	}
 }
 
