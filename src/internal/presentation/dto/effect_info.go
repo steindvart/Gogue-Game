@@ -18,10 +18,11 @@ func ConvertEffectToDto(effect *primitives.Effect) *EffectInfo {
 	}
 
 	return &EffectInfo{
-		DurationSteps:  int(effect.Duration.Turns),
-		HealthModify:   effect.Attributes.Health,
-		StrengthModify: effect.Attributes.Strength,
-		AgilityModify:  effect.Attributes.Agility,
+		DurationSteps:   int(effect.Duration.Turns),
+		MaxHealthModify: effect.Attributes.MaxHealth,
+		HealthModify:    effect.Attributes.Health,
+		StrengthModify:  effect.Attributes.Strength,
+		AgilityModify:   effect.Attributes.Agility,
 	}
 }
 
