@@ -5,6 +5,7 @@ import (
 	"gogue/internal/model/signals"
 	"gogue/internal/model/world"
 	"gogue/internal/presentation/action"
+	"gogue/internal/presentation/dto"
 	viewcli "gogue/internal/view/cli"
 	"math/rand"
 	"time"
@@ -75,6 +76,10 @@ func (g *Game) convertEffectsToView(effects []*primitives.Effect) []viewcli.Effe
 }
 
 func (g *Game) initInput() {
+	g.view.SetInputCapture(g.handleEvent)
+}
+
+func (g *Game) handleEvent(event *tcell.EventKey) *tcell.EventKey {
 	movementRegistry := map[action.Type]primitives.Point2D[int]{
 		action.MoveUp:               {X: 0, Y: -1},
 		action.MoveDown:             {X: 0, Y: 1},
@@ -86,36 +91,46 @@ func (g *Game) initInput() {
 		action.MoveRightLowerCorner: {X: 1, Y: 1},
 	}
 
-	g.view.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		switch g.eventToAction(event) {
-		case action.MoveUp,
-			action.MoveDown,
-			action.MoveLeft,
-			action.MoveRight,
-			action.MoveLeftUpperCorner,
-			action.MoveRightUpperCorner,
-			action.MoveLefLowerCorner,
-			action.MoveRightLowerCorner:
-			g.level.MovePlayerWithBorderControl(movementRegistry[g.eventToAction(event)])
+	switch g.eventToAction(event) {
+	case action.MoveUp,
+		action.MoveDown,
+		action.MoveLeft,
+		action.MoveRight,
+		action.MoveLeftUpperCorner,
+		action.MoveRightUpperCorner,
+		action.MoveLefLowerCorner,
+		action.MoveRightLowerCorner:
+		g.level.MovePlayerWithBorderControl(movementRegistry[g.eventToAction(event)])
 
-			switch g.level.CheckEntityCollision(g.level.Player.GetPosition()) {
-			case world.CollisionTypeEnemy:
-				// @todo - обработка столкновения с врагом (атака на врага)
-			case world.CollisionTypeItem, world.CollisionTypeTeleport:
-				g.isPlayerReadyToInteract = true
-			case world.CollisionTypeNone:
-				g.isPlayerReadyToInteract = false
-			}
-		case action.Select:
-			g.handleSelectAction()
-		case action.Exit:
-			g.signal = signals.Stop
-			return nil
-		default:
-			return event
+		switch g.level.CheckEntityCollision(g.level.Player.GetPosition()) {
+		case world.CollisionTypeEnemy:
+			// @todo - обработка столкновения с врагом (атака на врага)
+			g.isPlayerReadyToInteract = false
+		case world.CollisionTypeItem:
+			g.isPlayerReadyToInteract = true
+			g.updateItemInfo(g.level.Player.GetPosition())
+		case world.CollisionTypeTeleport:
+			g.isPlayerReadyToInteract = true
+			g.view.SetPlayerIsOnPortal(true)
+		case world.CollisionTypeNone:
+			g.isPlayerReadyToInteract = false
+			g.resetInteraction()
 		}
+	case action.Select:
+		g.handleSelectAction()
+	case action.Exit:
+		g.signal = signals.Stop
 		return nil
-	})
+	default:
+		return event
+	}
+	return nil
+
+}
+
+func (g *Game) resetInteraction() {
+	g.isPlayerReadyToInteract = false
+	g.view.ResetInteraction()
 }
 
 func (g *Game) handleSelectAction() {
@@ -134,6 +149,8 @@ func (g *Game) handleSelectAction() {
 				panic("an error occurred when generating next level: " + err.Error())
 			}
 		}
+
+		g.resetInteraction()
 	}
 }
 
@@ -176,6 +193,12 @@ func (g *Game) eventToAction(event *tcell.EventKey) action.Type {
 	return action.NoAction
 }
 
+func (g *Game) updateItemInfo(pos primitives.Point2D[int]) {
+	item := g.level.GetItemAtPosition(pos)
+	itemInfo := dto.GetItemInfo(item)
+	g.view.UpdateItemInfo(itemInfo)
+}
+
 func (g *Game) Update(float64) signals.Type {
 	g.updateGameView()
 
@@ -185,5 +208,5 @@ func (g *Game) Update(float64) signals.Type {
 }
 
 func (g *Game) Primitive() tview.Primitive {
-	return g.view.GetContainer()
+	return g.view.GetRootPrimitive()
 }

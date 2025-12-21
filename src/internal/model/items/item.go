@@ -14,6 +14,10 @@ type Usable interface {
 	Use() *primitives.Effect
 }
 
+type Takable interface {
+	Take() int32
+}
+
 type Dropable interface {
 	Drop(position primitives.Point2D[int]) primitives.Box
 }
