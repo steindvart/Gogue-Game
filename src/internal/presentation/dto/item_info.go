@@ -5,16 +5,21 @@ import (
 	"gogue/internal/model/primitives"
 )
 
+type EffectInfo struct {
+	MaxHealthModify float64
+	HealthModify    float64
+	StrengthModify  float64
+	AgilityModify   float64
+	DurationSteps   int
+}
+
 type ItemInfo struct {
-	Name           string
-	Type           string
-	HealthModify   float64
-	StrengthModify float64
-	AgilityModify  float64
-	DurationSteps  int
-	CanUse         bool
-	CanTake        bool
-	TreasureValue  int32
+	*EffectInfo
+	Name          string
+	Type          string
+	CanUse        bool
+	CanTake       bool
+	TreasureValue int32
 }
 
 func GetItemInfo(item primitives.Positional2D[int]) *ItemInfo {
@@ -24,71 +29,51 @@ func GetItemInfo(item primitives.Positional2D[int]) *ItemInfo {
 
 	info := &ItemInfo{}
 
-	if baseItem, ok := item.(items.Item); ok {
-		info.Name = baseItem.Name
-	}
-
-	// Определяем тип предмета и заполняем соответствующую информацию
 	switch typedItem := item.(type) {
 	case *items.Food:
 		info.Name = typedItem.Name
 		info.Type = "Food"
-		if typedItem.Effect != nil {
-			info.HealthModify = typedItem.Effect.Attributes.Health
-			info.StrengthModify = typedItem.Effect.Attributes.Strength
-			info.AgilityModify = typedItem.Effect.Attributes.Agility
-			info.DurationSteps = int(typedItem.Effect.Duration.Steps)
-		}
-		info.CanUse = true
-		info.CanTake = false
+		info.EffectInfo = convertEffectToEffectInfo(typedItem.Effect)
 
 	case *items.Elixir:
 		info.Name = typedItem.Name
 		info.Type = "Elixir"
-		if typedItem.Effect != nil {
-			info.HealthModify = typedItem.Effect.Attributes.Health
-			info.StrengthModify = typedItem.Effect.Attributes.Strength
-			info.AgilityModify = typedItem.Effect.Attributes.Agility
-			info.DurationSteps = int(typedItem.Effect.Duration.Steps)
-		}
-		info.CanUse = true
-		info.CanTake = false
+		info.EffectInfo = convertEffectToEffectInfo(typedItem.Effect)
 
 	case *items.Scroll:
 		info.Name = typedItem.Name
 		info.Type = "Scroll"
-		if typedItem.Effect != nil {
-			info.HealthModify = typedItem.Effect.Attributes.Health
-			info.StrengthModify = typedItem.Effect.Attributes.Strength
-			info.AgilityModify = typedItem.Effect.Attributes.Agility
-			info.DurationSteps = 0 // Свитки действуют мгновенно
-		}
-		info.CanUse = true
-		info.CanTake = false
+		info.EffectInfo = convertEffectToEffectInfo(typedItem.Effect)
 
 	case *items.Weapon:
 		info.Name = typedItem.Name
 		info.Type = "Weapon"
-		if typedItem.Effect != nil {
-			info.HealthModify = typedItem.Effect.Attributes.Health
-			info.StrengthModify = typedItem.Effect.Attributes.Strength
-			info.AgilityModify = typedItem.Effect.Attributes.Agility
-			info.DurationSteps = 0 // Оружие действует постоянно после подбора
-		}
-		info.CanUse = true
-		info.CanTake = true
+		info.EffectInfo = convertEffectToEffectInfo(typedItem.Effect)
 
 	case *items.Treasure:
 		info.Name = typedItem.Name
 		info.Type = "Treasure"
-		info.TreasureValue = typedItem.Value
-		info.CanUse = false
-		info.CanTake = true
-
+		info.EffectInfo = nil
 	default:
-		// Неизвестный тип предмета
 		return nil
 	}
 
+	_, info.CanUse = item.(items.Usable)
+	_, info.CanTake = item.(items.Takable)
+
 	return info
+}
+
+func convertEffectToEffectInfo(effect *primitives.Effect) *EffectInfo {
+	if effect == nil {
+		return nil
+	}
+
+	return &EffectInfo{
+		MaxHealthModify: effect.Attributes.MaxHealth,
+		HealthModify:    effect.Attributes.Health,
+		StrengthModify:  effect.Attributes.Strength,
+		AgilityModify:   effect.Attributes.Agility,
+		DurationSteps:   int(effect.Duration.Steps),
+	}
 }
