@@ -184,7 +184,26 @@ func (g *Game) renderEffect(effect *EffectInfo) {
 func (g *Game) renderItemInfo() {
 	fmt.Fprintln(g.statsPanel)
 	fmt.Fprintln(g.statsPanel, "───────────────────────────────────")
-	fmt.Fprintf(g.statsPanel, " [yellow::b]ITEM: %s[-:-:-]\n", g.currentItemInfo.Name)
+	fmt.Fprintf(g.statsPanel, " [yellow::b]ITEM: [-:-:-]")
+
+	var color string
+	switch g.currentItemInfo.Type {
+	case "Food":
+		color = ColorFood
+	case "Elixir":
+		color = ColorElixir
+	case "Scroll":
+		color = ColorScroll
+	case "Weapon":
+		color = ColorWeapon
+	case "Treasure":
+		// @todo - добавить сокровище как предмет на карте
+		// color = ColorTreasure
+	default:
+		color = ColorWhite
+	}
+
+	fmt.Fprintf(g.statsPanel, "[%s::b]%s %s[-:-:-]\n", color, g.currentItemInfo.Type, g.currentItemInfo.Name)
 
 	// Для сокровищ показываем только стоимость
 	if g.currentItemInfo.CanTake && !g.currentItemInfo.CanUse {
@@ -194,9 +213,18 @@ func (g *Game) renderItemInfo() {
 		if g.currentItemInfo.DurationSteps > 0 {
 			fmt.Fprintf(g.statsPanel, " Duration: %d steps\n", g.currentItemInfo.DurationSteps)
 		}
-		fmt.Fprintf(g.statsPanel, "  HP:  %+6.1f\n", g.currentItemInfo.HealthModify)
-		fmt.Fprintf(g.statsPanel, "  STR: %+6.1f\n", g.currentItemInfo.StrengthModify)
-		fmt.Fprintf(g.statsPanel, "  AGI: %+6.1f\n", g.currentItemInfo.AgilityModify)
+		if g.currentItemInfo.MaxHealthModify != 0 {
+			fmt.Fprintf(g.statsPanel, "  Max HP:  %+6.1f\n", g.currentItemInfo.MaxHealthModify)
+		}
+		if g.currentItemInfo.HealthModify != 0 {
+			fmt.Fprintf(g.statsPanel, "  HP:  %+6.1f\n", g.currentItemInfo.HealthModify)
+		}
+		if g.currentItemInfo.StrengthModify != 0 {
+			fmt.Fprintf(g.statsPanel, "  STR: %+6.1f\n", g.currentItemInfo.StrengthModify)
+		}
+		if g.currentItemInfo.AgilityModify != 0 {
+			fmt.Fprintf(g.statsPanel, "  AGI: %+6.1f\n", g.currentItemInfo.AgilityModify)
+		}
 	}
 
 	fmt.Fprintln(g.statsPanel)
@@ -225,10 +253,6 @@ func (g *Game) renderField(field [][]common.GameEntityType) {
 	g.renderMarginsY(FieldMarginY)
 
 	for y := range field {
-		// Заливка дефолтными цветами для предотвращения проблемы
-		// с отсутствием сброса цвета фона от предыдущей заливки пикселя. Не удалять!
-		fmt.Fprintf(g.fieldPanel, "[%s:%s]", ColorWhite, ColorBlack)
-
 		g.renderMarginX(FieldMarginX)
 		g.renderRow(field, y)
 		g.resetColorAndNewLine()
@@ -247,13 +271,13 @@ func (g *Game) renderRow(field [][]common.GameEntityType, y int) {
 
 		// @todo - сделать разные фоны для разных типов поверхностей
 		// @todo - сделать так, чтобы цвет фона зависел от типа поверхности под объектом (разделить поле на два слоя?)
-		// Формат с фоном: [foreground:background]char
-		fmt.Fprintf(g.fieldPanel, "[%s:%s]%c", colorFg, colorBg, ch)
+		// Полный формат: [foreground:background:modifier]char
+		fmt.Fprintf(g.fieldPanel, "[%s:%s:-]%c", colorFg, colorBg, ch)
 	}
 }
 
 func (g *Game) resetColorAndNewLine() {
-	fmt.Fprintf(g.fieldPanel, "[-]\n")
+	fmt.Fprintf(g.fieldPanel, "[-:-:-]\n")
 }
 
 func (g *Game) getCellAppearance(entityType common.GameEntityType) (rune, string, string) {
