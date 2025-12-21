@@ -13,7 +13,7 @@ const (
 	MaxPanelHeight    = 40
 	MaxInfoPanelWidth = 40
 	FieldMarginY      = 3
-	FieldMarginX      = 31
+	FieldMarginX      = 17
 )
 
 const (
@@ -67,12 +67,13 @@ type PlayerInfo struct {
 }
 
 type Game struct {
-	container    *tview.Flex
-	infoPanel    *tview.Flex // Контейнер для statsPanel и effectsPanel
-	statsPanel   *tview.TextView
-	effectsPanel *tview.TextView
-	legendPanel  *tview.TextView
-	fieldPanel   *tview.TextView
+	container      *tview.Flex
+	leftInfoPanel  *tview.Flex // Контейнер для statsPanel и effectsPanel
+	statsPanel     *tview.TextView
+	effectsPanel   *tview.TextView
+	rightInfoPanel *tview.Flex // Контейнер для legendPanel
+	legendPanel    *tview.TextView
+	fieldPanel     *tview.TextView
 
 	currentItemInfo  *dto.ItemInfo
 	playerIsOnPortal bool
@@ -80,12 +81,13 @@ type Game struct {
 
 func NewGame() *Game {
 	game := &Game{
-		container:    tview.NewFlex(),
-		infoPanel:    tview.NewFlex(),
-		statsPanel:   tview.NewTextView(),
-		effectsPanel: tview.NewTextView(),
-		legendPanel:  tview.NewTextView(),
-		fieldPanel:   tview.NewTextView(),
+		container:      tview.NewFlex(),
+		rightInfoPanel: tview.NewFlex(),
+		statsPanel:     tview.NewTextView(),
+		effectsPanel:   tview.NewTextView(),
+		leftInfoPanel:  tview.NewFlex(),
+		legendPanel:    tview.NewTextView(),
+		fieldPanel:     tview.NewTextView(),
 	}
 
 	game.setupPanels()
@@ -113,10 +115,15 @@ func (g *Game) setupPanels() {
 		SetTitle("Legend").
 		SetBackgroundColor(tcell.ColorBlack)
 
-	g.infoPanel.
+	// Левая панель: Stats + Effects
+	g.leftInfoPanel.
 		SetDirection(tview.FlexRow).
 		AddItem(g.statsPanel, 0, 1, false).
 		AddItem(g.effectsPanel, 0, 1, false).
+		SetBackgroundColor(tcell.ColorBlack)
+
+	g.rightInfoPanel.
+		SetDirection(tview.FlexRow).
 		AddItem(g.legendPanel, 0, 1, false).
 		SetBackgroundColor(tcell.ColorBlack)
 
@@ -131,11 +138,12 @@ func (g *Game) setupPanels() {
 }
 
 func (g *Game) setupLayout() {
-	// Горизонтальная компоновка: информационная панель + игровое поле
+	// Горизонтальная компоновка: левая панель + игровое поле + правая панель (легенда)
 	horizontalFlex := tview.NewFlex().
 		SetDirection(tview.FlexColumn).
-		AddItem(g.infoPanel, MaxInfoPanelWidth, 0, false).
-		AddItem(g.fieldPanel, 0, 1, true)
+		AddItem(g.leftInfoPanel, MaxInfoPanelWidth, 0, false).
+		AddItem(g.fieldPanel, 0, 1, true).
+		AddItem(g.rightInfoPanel, MaxInfoPanelWidth, 0, false)
 	horizontalFlex.SetBackgroundColor(tcell.ColorBlack)
 
 	// Пустой бокс для нижнего отступа
@@ -154,7 +162,7 @@ func (g *Game) initializeLegend() {
 
 	// Управление
 	fmt.Fprintf(g.legendPanel, " [%s::b]CONTROLS:[-:-:-]\n", ColorSkyBlue)
-	fmt.Fprintln(g.legendPanel, " ↑←↓→ or WASD - Move")
+	fmt.Fprintln(g.legendPanel, " ↑←↓→ or 'WASD' - Move")
 	fmt.Fprintln(g.legendPanel, " E - Use item")
 	fmt.Fprintln(g.legendPanel, " R - Take item")
 	fmt.Fprintln(g.legendPanel, " ESC - Exit game")
