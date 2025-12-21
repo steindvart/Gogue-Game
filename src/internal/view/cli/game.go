@@ -182,15 +182,26 @@ func (g *Game) updateEffectsPanel(effects []dto.EffectInfo) {
 		if i > 0 {
 			fmt.Fprintln(g.effectsPanel, "───────────────────────────────────")
 		}
-		g.renderEffect(&effect)
+		printEffect(g.effectsPanel, &effect)
 	}
 }
 
-func (g *Game) renderEffect(effect *dto.EffectInfo) {
-	fmt.Fprintf(g.effectsPanel, "[%s::b]Duration:[-:-:-] %d steps\n", ColorEffects, effect.DurationSteps)
-	fmt.Fprintf(g.effectsPanel, "  HP:  %+6.1f\n", effect.HealthModify)
-	fmt.Fprintf(g.effectsPanel, "  STR: %+6.1f\n", effect.StrengthModify)
-	fmt.Fprintf(g.effectsPanel, "  AGI: %+6.1f\n", effect.AgilityModify)
+func printEffect(view *tview.TextView, effect *dto.EffectInfo) {
+	if effect.DurationSteps > 0 {
+		fmt.Fprintf(view, " Duration: %d steps\n", effect.DurationSteps)
+	}
+	if effect.MaxHealthModify != 0 {
+		fmt.Fprintf(view, "  Max HP:  %+.1f\n", effect.MaxHealthModify)
+	}
+	if effect.HealthModify != 0 {
+		fmt.Fprintf(view, "  HP:  %+8.1f\n", effect.HealthModify)
+	}
+	if effect.StrengthModify != 0 {
+		fmt.Fprintf(view, "  STR: %+8.1f\n", effect.StrengthModify)
+	}
+	if effect.AgilityModify != 0 {
+		fmt.Fprintf(view, "  AGI: %+8.1f\n", effect.AgilityModify)
+	}
 }
 
 func (g *Game) renderItemInfo() {
@@ -222,21 +233,7 @@ func (g *Game) renderItemInfo() {
 		fmt.Fprintf(g.statsPanel, " Value: %d\n", g.currentItemInfo.TreasureValue)
 	} else {
 		// Для остальных предметов показываем эффекты
-		if g.currentItemInfo.DurationSteps > 0 {
-			fmt.Fprintf(g.statsPanel, " Duration: %d steps\n", g.currentItemInfo.DurationSteps)
-		}
-		if g.currentItemInfo.MaxHealthModify != 0 {
-			fmt.Fprintf(g.statsPanel, "  Max HP:  %+.1f\n", g.currentItemInfo.MaxHealthModify)
-		}
-		if g.currentItemInfo.HealthModify != 0 {
-			fmt.Fprintf(g.statsPanel, "  HP:  %+8.1f\n", g.currentItemInfo.HealthModify)
-		}
-		if g.currentItemInfo.StrengthModify != 0 {
-			fmt.Fprintf(g.statsPanel, "  STR: %+8.1f\n", g.currentItemInfo.StrengthModify)
-		}
-		if g.currentItemInfo.AgilityModify != 0 {
-			fmt.Fprintf(g.statsPanel, "  AGI: %+8.1f\n", g.currentItemInfo.AgilityModify)
-		}
+		printEffect(g.statsPanel, g.currentItemInfo.EffectInfo)
 	}
 
 	fmt.Fprintln(g.statsPanel)
