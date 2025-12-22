@@ -236,8 +236,9 @@ func (g *Game) updateEffectsPanel(effects []dto.EffectInfo) {
 		return sortedEffects[i].DurationSteps < sortedEffects[j].DurationSteps
 	})
 
-	if len(sortedEffects) >= 3 {
-		sortedEffects = sortedEffects[:3]
+	const maxEffectsInPanel = 3
+	if len(sortedEffects) >= maxEffectsInPanel {
+		sortedEffects = sortedEffects[:maxEffectsInPanel]
 	}
 
 	for i, effect := range sortedEffects {
