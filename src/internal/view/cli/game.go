@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"gogue/internal/common"
 	"gogue/internal/presentation/dto"
-	"sort"
+	"slices"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -229,25 +229,25 @@ func (g *Game) updateEffectsPanel(effects []dto.EffectInfo) {
 	g.effectsPanel.Clear()
 	fmt.Fprintf(g.effectsPanel, " [%s::b]ACTIVE EFFECTS:[-:-:-] (%d)\n\n", ColorEffects, len(effects))
 
-	sortedEffects := make([]dto.EffectInfo, len(effects))
-	for i, effect := range effects {
-		sortedEffects[i] = effect
-	}
-
-	sort.Slice(sortedEffects, func(i, j int) bool {
-		return sortedEffects[i].DurationSteps < sortedEffects[j].DurationSteps
+	slices.SortFunc(effects, func(a, b dto.EffectInfo) int {
+		switch {
+		case a.DurationSteps > b.DurationSteps:
+			return 1
+		case a.DurationSteps < b.DurationSteps:
+			return -1
+		default:
+			return 0
+		}
 	})
 
-	if len(sortedEffects) < 3 {
-		sortedEffects = sortedEffects
-	} else {
-		sortedEffects = sortedEffects[:3]
-	}
-
-	for i, effect := range sortedEffects {
+	for i, effect := range effects {
 		if i > 0 {
 			fmt.Fprintln(g.effectsPanel, "───────────────────────────────────")
 		}
+		if i >= 3 {
+			break
+		}
+
 		printEffect(g.effectsPanel, &effect)
 	}
 }
