@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gogue/internal/common"
 	"gogue/internal/presentation/dto"
+	"strings"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -14,6 +15,8 @@ const (
 	MaxInfoPanelWidth = 40
 	FieldMarginY      = 3
 	FieldMarginX      = 17
+
+	MaxBackpackItemsNum = 9
 )
 
 const (
@@ -52,28 +55,53 @@ const (
 	ColorEffects  = ColorSkyBlue
 )
 
+type SecondInfoViewMode int
+
+const (
+	SecondInfoViewModeEffects SecondInfoViewMode = iota
+	SecondInfoViewModeBackpack
+)
+
+type BackpackTab int
+
+const (
+	BackpackTabWeapons BackpackTab = iota
+	BackpackTabFood
+	BackpackTabElixirs
+	BackpackTabScrolls
+)
+
 type Game struct {
 	container      *tview.Flex
-	leftInfoPanel  *tview.Flex // Контейнер для statsPanel и effectsPanel
+	leftInfoPanel  *tview.Flex // Контейнер для statsPanel и effectsPanel/backpackPanel
 	statsPanel     *tview.TextView
 	effectsPanel   *tview.TextView
+	backpackPanel  *tview.TextView
 	rightInfoPanel *tview.Flex // Контейнер для legendPanel
 	legendPanel    *tview.TextView
 	fieldPanel     *tview.TextView
 
 	currentItemInfo  *dto.ItemInfo
 	playerIsOnPortal bool
+
+	// Состояние рюкзака
+	secondInfoViewMode SecondInfoViewMode
+	currentTab         BackpackTab
+	playerBackpackInfo *dto.BackpackInfo
 }
 
 func NewGame() *Game {
 	game := &Game{
-		container:      tview.NewFlex(),
-		rightInfoPanel: tview.NewFlex(),
-		statsPanel:     tview.NewTextView(),
-		effectsPanel:   tview.NewTextView(),
-		leftInfoPanel:  tview.NewFlex(),
-		legendPanel:    tview.NewTextView(),
-		fieldPanel:     tview.NewTextView(),
+		container:          tview.NewFlex(),
+		rightInfoPanel:     tview.NewFlex(),
+		statsPanel:         tview.NewTextView(),
+		effectsPanel:       tview.NewTextView(),
+		backpackPanel:      tview.NewTextView(),
+		leftInfoPanel:      tview.NewFlex(),
+		legendPanel:        tview.NewTextView(),
+		fieldPanel:         tview.NewTextView(),
+		secondInfoViewMode: SecondInfoViewModeEffects,
+		currentTab:         BackpackTabWeapons,
 	}
 
 	game.setupPanels()
@@ -92,7 +120,13 @@ func (g *Game) setupPanels() {
 	g.effectsPanel.
 		SetDynamicColors(true).
 		SetBorder(true).
-		SetTitle("Effects").
+		SetTitle("Effects (switch 'b')").
+		SetBackgroundColor(tcell.ColorBlack)
+
+	g.backpackPanel.
+		SetDynamicColors(true).
+		SetBorder(true).
+		SetTitle("Backpack (switch 'b')").
 		SetBackgroundColor(tcell.ColorBlack)
 
 	g.legendPanel.
@@ -101,7 +135,7 @@ func (g *Game) setupPanels() {
 		SetTitle("Legend").
 		SetBackgroundColor(tcell.ColorBlack)
 
-	// Левая панель: Stats + Effects
+	// Левая панель: Stats + Effects/Backpack
 	g.leftInfoPanel.
 		SetDirection(tview.FlexRow).
 		AddItem(g.statsPanel, 0, 1, false).
@@ -150,6 +184,9 @@ func (g *Game) initializeLegend() {
 	fmt.Fprintln(g.legendPanel, " ↑←↓→ or 'WASD' - Move")
 	fmt.Fprintln(g.legendPanel, " E - Use item")
 	fmt.Fprintln(g.legendPanel, " R - Take item")
+	fmt.Fprintln(g.legendPanel, " B - Toggle Backpack")
+	fmt.Fprintln(g.legendPanel, " Z/X/C/V - Tabs")
+	fmt.Fprintln(g.legendPanel, " 0-9 - Select item")
 	fmt.Fprintln(g.legendPanel, " ESC - Exit game")
 	fmt.Fprintln(g.legendPanel)
 
@@ -382,4 +419,157 @@ func (g *Game) getCellAppearance(entityType common.GameEntityType) (rune, string
 
 func (g *Game) SetInputCapture(capture func(event *tcell.EventKey) *tcell.EventKey) {
 	g.container.SetInputCapture(capture)
+}
+
+func (g *Game) UpdateBackpackInfo(backpack *dto.BackpackInfo) {
+	g.playerBackpackInfo = backpack
+	g.updateBackpackPanel()
+}
+
+func (g *Game) ToggleViewMode() {
+	if g.secondInfoViewMode == SecondInfoViewModeEffects {
+		g.secondInfoViewMode = SecondInfoViewModeBackpack
+		g.switchToBackpackPanel()
+	} else {
+		g.secondInfoViewMode = SecondInfoViewModeEffects
+		g.switchToEffectsPanel()
+	}
+}
+
+func (g *Game) switchToBackpackPanel() {
+	g.leftInfoPanel.RemoveItem(g.effectsPanel)
+	g.leftInfoPanel.AddItem(g.backpackPanel, 0, 1, false)
+	g.updateBackpackPanel()
+}
+
+func (g *Game) switchToEffectsPanel() {
+	g.leftInfoPanel.RemoveItem(g.backpackPanel)
+	g.leftInfoPanel.AddItem(g.effectsPanel, 0, 1, false)
+}
+
+func (g *Game) SetBackpackTab(tab BackpackTab) {
+	g.currentTab = tab
+	if g.secondInfoViewMode == SecondInfoViewModeBackpack {
+		g.updateBackpackPanel()
+	}
+}
+
+func (g *Game) GetCurrentBackpackTab() BackpackTab {
+	return g.currentTab
+}
+
+func (g *Game) updateBackpackPanel() {
+	g.backpackPanel.Clear()
+
+	if g.playerBackpackInfo == nil {
+		fmt.Fprintf(g.backpackPanel, " [%s::b]BACKPACK IS EMPTY[-:-:-]\n", ColorSkyBlue)
+		return
+	}
+
+	// Отображаем заголовок с текущей вкладкой
+	var tabName string
+	var items []*dto.ItemInfo
+
+	switch g.currentTab {
+	case BackpackTabWeapons:
+		tabName = "WEAPONS"
+		items = g.playerBackpackInfo.Weapons
+	case BackpackTabFood:
+		tabName = "FOOD"
+		items = g.playerBackpackInfo.Foods
+	case BackpackTabElixirs:
+		tabName = "ELIXIRS"
+		items = g.playerBackpackInfo.Elixirs
+	case BackpackTabScrolls:
+		tabName = "SCROLLS"
+		items = g.playerBackpackInfo.Scrolls
+	}
+
+	fmt.Fprintf(g.backpackPanel, " [%s::b]%s:[-:-:-] (%d/%d)\n", ColorSkyBlue, tabName, g.playerBackpackInfo.ItemsNum, g.playerBackpackInfo.Capacity)
+	fmt.Fprintln(g.backpackPanel)
+
+	// Отображаем список предметов
+	if len(items) == 0 {
+		if g.currentTab == BackpackTabWeapons {
+			fmt.Fprintf(g.backpackPanel, " 0: [%s::i]put current weapon to backpack[-:-:-]\n\n", ColorSkyBlue)
+		}
+		fmt.Fprintf(g.backpackPanel, " [%s::i]No items in this category[-:-:-]\n", ColorSkyBlue)
+	} else {
+		g.renderBackpackItems(items)
+	}
+}
+
+func (g *Game) renderBackpackItems(items []*dto.ItemInfo) {
+	startIndex := 0
+	if g.currentTab == BackpackTabWeapons {
+		startIndex = 0 // Для оружия отображаем 0-9
+	} else {
+		startIndex = 1 // Для остальных предметов 1-9
+	}
+
+	for i, item := range items {
+		if i == 0 {
+			fmt.Fprintf(g.backpackPanel, " %d: [-:-:i]put current weapon to backpack[-:-:-]\n", i)
+			continue
+		}
+
+		if i >= MaxBackpackItemsNum {
+			break
+		}
+
+		num := startIndex + i
+		icon, color := g.getItemIconAndColor(item.Type)
+
+		// Отображаем номер, иконку, тип и название
+		fmt.Fprintf(g.backpackPanel, " %d: [%s]%c %s %s[-:-:-]\n", num, color, icon, item.Type, item.Name)
+
+		// Отображаем эффекты предмета
+		if item.EffectInfo != nil {
+			g.getShortEffectInfoAsStrings(item.EffectInfo)
+		}
+
+		if i < len(items)-1 {
+			effects := g.getShortEffectInfoAsStrings(item.EffectInfo)
+			if len(effects) > 0 {
+				fmt.Fprintf(g.backpackPanel, "(%s)\n", strings.Join(effects, ", "))
+			}
+		}
+	}
+}
+
+func (g *Game) getItemIconAndColor(itemType string) (rune, string) {
+	switch itemType {
+	case "Weapon":
+		return 'ƒ', ColorWeapon
+	case "Food":
+		return 'ð', ColorFood
+	case "Elixir":
+		return '¶', ColorElixir
+	case "Scroll":
+		return '!', ColorScroll
+	default:
+		return '?', ColorWhite
+	}
+}
+
+func (g *Game) getShortEffectInfoAsStrings(effect *dto.EffectInfo) []string {
+	var effects []string
+
+	if effect.DurationSteps > 0 {
+		effects = append(effects, fmt.Sprintf("Dur: %d", effect.DurationSteps))
+	}
+	if effect.MaxHealthModify != 0 {
+		effects = append(effects, fmt.Sprintf("Max HP: %+.0f", effect.MaxHealthModify))
+	}
+	if effect.HealthModify != 0 {
+		effects = append(effects, fmt.Sprintf("HP: %+.0f", effect.HealthModify))
+	}
+	if effect.StrengthModify != 0 {
+		effects = append(effects, fmt.Sprintf("STR: %+.0f", effect.StrengthModify))
+	}
+	if effect.AgilityModify != 0 {
+		effects = append(effects, fmt.Sprintf("AGI: %+.0f", effect.AgilityModify))
+	}
+
+	return effects
 }

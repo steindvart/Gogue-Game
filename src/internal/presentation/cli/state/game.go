@@ -1,6 +1,7 @@
 package state
 
 import (
+	"gogue/internal/model/items"
 	"gogue/internal/model/primitives"
 	"gogue/internal/model/signals"
 	"gogue/internal/model/world"
@@ -53,6 +54,7 @@ func (g *Game) updateGameView() {
 	player := g.level.Player
 	if player != nil {
 		g.view.UpdatePlayerInfo(dto.ConvertPlayerToDto(g.level.Player))
+		g.updateBackpackInfo()
 	}
 }
 
@@ -101,6 +103,20 @@ func (g *Game) handleEvent(event *tcell.EventKey) *tcell.EventKey {
 		g.level.ProcessTurns(1)
 	case action.Select:
 		g.handleSelectAction()
+	case action.ToggleBackpack:
+		g.view.ToggleViewMode()
+	case action.OpenWeaponsTab:
+		g.view.SetBackpackTab(viewcli.BackpackTabWeapons)
+	case action.OpenFoodTab:
+		g.view.SetBackpackTab(viewcli.BackpackTabFood)
+	case action.OpenElixirsTab:
+		g.view.SetBackpackTab(viewcli.BackpackTabElixirs)
+	case action.OpenScrollsTab:
+		g.view.SetBackpackTab(viewcli.BackpackTabScrolls)
+	case action.Num0, action.Num1, action.Num2, action.Num3,
+		action.Num4, action.Num5, action.Num6, action.Num7,
+		action.Num8, action.Num9:
+		g.handleItemSelection(g.eventToAction(event))
 	case action.Exit:
 		g.signal = signals.Stop
 		return nil
@@ -166,11 +182,39 @@ func (g *Game) eventToAction(event *tcell.EventKey) action.Type {
 	case 'u', 'г':
 		return action.MoveRightUpperCorner
 	case 'b', 'и':
-		return action.MoveLefLowerCorner
+		return action.ToggleBackpack
 	case 'n', 'т':
 		return action.MoveRightLowerCorner
 	case 'e', 'у':
 		return action.Select
+	case 'z', 'я':
+		return action.OpenWeaponsTab
+	case 'x', 'ч':
+		return action.OpenFoodTab
+	case 'c', 'с':
+		return action.OpenElixirsTab
+	case 'v', 'м':
+		return action.OpenScrollsTab
+	case '0':
+		return action.Num0
+	case '1':
+		return action.Num1
+	case '2':
+		return action.Num2
+	case '3':
+		return action.Num3
+	case '4':
+		return action.Num4
+	case '5':
+		return action.Num5
+	case '6':
+		return action.Num6
+	case '7':
+		return action.Num7
+	case '8':
+		return action.Num8
+	case '9':
+		return action.Num9
 	}
 
 	return action.NoAction
@@ -178,6 +222,101 @@ func (g *Game) eventToAction(event *tcell.EventKey) action.Type {
 
 func (g *Game) updateItemInfo(pos primitives.Point2D[int]) {
 	g.view.UpdateItemInfo(dto.ConvertPositionalItemToDto(g.level.GetItemAtPosition(pos)))
+}
+
+func (g *Game) updateBackpackInfo() {
+	if g.level.Player != nil && g.level.Player.Backpack != nil {
+		g.view.UpdateBackpackInfo(dto.ConvertBackpackToDto(g.level.Player.Backpack))
+	}
+}
+
+// handleItemSelection обрабатывает выбор предмета из рюкзака
+func (g *Game) handleItemSelection(actionType action.Type) {
+	if g.level.Player == nil || g.level.Player.Backpack == nil {
+		return
+	}
+
+	// Определяем индекс выбранного предмета
+	itemIndex := int(actionType - action.Num0)
+
+	// Получаем сам предмет из рюкзака игрока
+	var selectedItem any
+
+	// Нужно получить сам предмет из рюкзака игрока, а не из DTO
+	switch g.view.GetCurrentBackpackTab() {
+	case viewcli.BackpackTabWeapons:
+		// Для оружия индекс 0-9
+		if itemIndex < 0 || itemIndex >= g.level.Player.Backpack.Weapons.Len() {
+			return
+		}
+		// Получаем элемент из списка
+		i := 0
+		for elem := g.level.Player.Backpack.Weapons.Front(); elem != nil; elem = elem.Next() {
+			if i == itemIndex {
+				selectedItem = elem.Value
+				break
+			}
+			i++
+		}
+
+	case viewcli.BackpackTabFood:
+		// Для еды индекс 1-9, поэтому нужно сместить
+		actualIndex := itemIndex - 1
+		if actualIndex < 0 || actualIndex >= g.level.Player.Backpack.Foods.Len() {
+			return
+		}
+		i := 0
+		for elem := g.level.Player.Backpack.Foods.Front(); elem != nil; elem = elem.Next() {
+			if i == actualIndex {
+				selectedItem = elem.Value
+				break
+			}
+			i++
+		}
+
+	case viewcli.BackpackTabElixirs:
+		actualIndex := itemIndex - 1
+		if actualIndex < 0 || actualIndex >= g.level.Player.Backpack.Elixirs.Len() {
+			return
+		}
+		i := 0
+		for elem := g.level.Player.Backpack.Elixirs.Front(); elem != nil; elem = elem.Next() {
+			if i == actualIndex {
+				selectedItem = elem.Value
+				break
+			}
+			i++
+		}
+
+	case viewcli.BackpackTabScrolls:
+		actualIndex := itemIndex - 1
+		if actualIndex < 0 || actualIndex >= g.level.Player.Backpack.Scrolls.Len() {
+			return
+		}
+		i := 0
+		for elem := g.level.Player.Backpack.Scrolls.Front(); elem != nil; elem = elem.Next() {
+			if i == actualIndex {
+				selectedItem = elem.Value
+				break
+			}
+			i++
+		}
+	}
+
+	if selectedItem == nil {
+		return
+	}
+
+	// Используем предмет из рюкзака
+	if usableItem, ok := selectedItem.(items.Usable); ok {
+		g.level.Player.Character.Use(usableItem)
+	}
+
+	// Удаляем предмет из рюкзака
+	_ = g.level.Player.Backpack.RemoveItem(selectedItem)
+
+	// Обновляем информацию о рюкзаке
+	g.updateBackpackInfo()
 }
 
 func (g *Game) Update(float64) signals.Type {
