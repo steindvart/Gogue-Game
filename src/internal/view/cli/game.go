@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gogue/internal/common"
 	"gogue/internal/presentation/dto"
+	"sort"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -12,6 +13,7 @@ import (
 const (
 	MaxPanelHeight    = 40
 	MaxInfoPanelWidth = 40
+	MaxEffectsToShow  = 3
 	FieldMarginY      = 3
 	FieldMarginX      = 17
 )
@@ -228,7 +230,18 @@ func (g *Game) updateEffectsPanel(effects []dto.EffectInfo) {
 	g.effectsPanel.Clear()
 	fmt.Fprintf(g.effectsPanel, " [%s::b]ACTIVE EFFECTS:[-:-:-] (%d)\n\n", ColorEffects, len(effects))
 
-	for i, effect := range effects {
+	sortedEffects := make([]dto.EffectInfo, len(effects))
+	copy(sortedEffects, effects)
+
+	sort.Slice(sortedEffects, func(i, j int) bool {
+		return sortedEffects[i].DurationSteps < sortedEffects[j].DurationSteps
+	})
+
+	if len(sortedEffects) >= MaxEffectsToShow {
+		sortedEffects = sortedEffects[:MaxEffectsToShow]
+	}
+
+	for i, effect := range sortedEffects {
 		if i > 0 {
 			fmt.Fprintln(g.effectsPanel, "───────────────────────────────────")
 		}
