@@ -13,6 +13,7 @@ import (
 const (
 	MaxPanelHeight    = 40
 	MaxInfoPanelWidth = 40
+	MaxEffectsToShow  = 3
 	FieldMarginY      = 3
 	FieldMarginX      = 17
 )
@@ -236,9 +237,8 @@ func (g *Game) updateEffectsPanel(effects []dto.EffectInfo) {
 		return sortedEffects[i].DurationSteps < sortedEffects[j].DurationSteps
 	})
 
-	const maxEffectsInPanel = 3
-	if len(sortedEffects) >= maxEffectsInPanel {
-		sortedEffects = sortedEffects[:maxEffectsInPanel]
+	if len(sortedEffects) >= MaxEffectsToShow {
+		sortedEffects = sortedEffects[:MaxEffectsToShow]
 	}
 
 	for i, effect := range sortedEffects {
