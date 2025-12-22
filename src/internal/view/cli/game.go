@@ -230,9 +230,7 @@ func (g *Game) updateEffectsPanel(effects []dto.EffectInfo) {
 	fmt.Fprintf(g.effectsPanel, " [%s::b]ACTIVE EFFECTS:[-:-:-] (%d)\n\n", ColorEffects, len(effects))
 
 	sortedEffects := make([]dto.EffectInfo, len(effects))
-	for i, effect := range effects {
-		sortedEffects[i] = effect
-	}
+	copy(sortedEffects, effects)
 
 	sort.Slice(sortedEffects, func(i, j int) bool {
 		return sortedEffects[i].DurationSteps < sortedEffects[j].DurationSteps
