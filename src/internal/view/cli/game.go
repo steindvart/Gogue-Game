@@ -13,6 +13,7 @@ import (
 const (
 	MaxPanelHeight    = 40
 	MaxInfoPanelWidth = 40
+	MaxEffectsToShow  = 3
 	FieldMarginY      = 3
 	FieldMarginX      = 17
 )
@@ -244,7 +245,7 @@ func (g *Game) updateEffectsPanel(effects []dto.EffectInfo) {
 		if i > 0 {
 			fmt.Fprintln(g.effectsPanel, "───────────────────────────────────")
 		}
-		if i >= 3 {
+		if i >= MaxEffectsToShow {
 			break
 		}
 
