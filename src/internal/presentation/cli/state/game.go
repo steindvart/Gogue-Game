@@ -181,6 +181,7 @@ func (g *Game) handleTakeAction() {
 		case world.CollisionTypeItem:
 			if err := g.level.PlayerTakeItemAtPosition(pos); err != nil {
 				// @todo - вывод сообщения об ошибке в view
+				_ = sendBackpackErrorToView(1, 1)
 				return
 			}
 		}
@@ -280,6 +281,7 @@ func (g *Game) handleItemSelection(actionType action.Type) {
 		if itemIndex == 0 {
 			if err := g.level.Player.DropEquipWeaponToBackpack(); err != nil {
 				// @todo - вывод сообщения об ошибке в view
+				_ = sendBackpackErrorToView(1, 1)
 			}
 			g.updateBackpackInfo()
 			return
@@ -306,6 +308,7 @@ func (g *Game) handleItemSelection(actionType action.Type) {
 
 	if err := g.level.Player.UseItemFromBackpack(selectedItem); err != nil {
 		// @todo - вывод сообщения об ошибке в view
+		_ = sendBackpackErrorToView(1, 1)
 	}
 
 	g.updateBackpackInfo()
@@ -321,4 +324,9 @@ func (g *Game) Update(float64) signals.Type {
 
 func (g *Game) Primitive() tview.Primitive {
 	return g.view.GetRootPrimitive()
+}
+
+// @todo - вывод сообщения об ошибке в view
+func sendBackpackErrorToView(a, b int) int {
+	return a + b
 }
