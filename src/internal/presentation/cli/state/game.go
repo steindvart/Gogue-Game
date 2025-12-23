@@ -177,7 +177,9 @@ func (g *Game) handleTakeAction() {
 
 		switch g.level.CheckEntityCollision(pos) {
 		case world.CollisionTypeItem:
-			g.level.PlayerTakeItemAtPosition(pos)
+			if err := g.level.PlayerTakeItemAtPosition(pos); err != nil {
+
+			}
 		}
 
 		g.resetInteraction()
