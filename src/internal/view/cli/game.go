@@ -22,6 +22,24 @@ const (
 )
 
 const (
+	// Символы игровых сущностей
+	SymbolPlayer    = '☿'
+	SymbolPortal    = '@'
+	SymbolFloor     = '.'
+	SymbolEmpty     = ' '
+	SymbolZombie    = 'Z'
+	SymbolVampire   = 'V'
+	SymbolGhost     = 'G'
+	SymbolOgre      = 'O'
+	SymbolSnakeMage = 'S'
+	SymbolFood      = 'ð'
+	SymbolElixir    = '¶'
+	SymbolScroll    = '!'
+	SymbolWeapon    = 'ƒ'
+	SymbolUnknown   = '?'
+)
+
+const (
 	// Базовые цвета
 	colorBlack      = "#000000"
 	colorWhite      = "#FFFFFF"
@@ -210,23 +228,23 @@ func (g *Game) initializeLegend() {
 	fmt.Fprintln(g.legendPanel)
 
 	fmt.Fprintf(g.legendPanel, " [%s::b]SYMBOLS:[-:-:-]\n", colorSkyBlue)
-	fmt.Fprintf(g.legendPanel, " [%s]☿[-] - Player\n", ColorPlayer)
-	fmt.Fprintf(g.legendPanel, " [%s]@[-] - Portal\n", ColorPortal)
+	fmt.Fprintf(g.legendPanel, " [%s]%c[-] - Player\n", ColorPlayer, SymbolPlayer)
+	fmt.Fprintf(g.legendPanel, " [%s]%c[-] - Portal\n", ColorPortal, SymbolPortal)
 	fmt.Fprintln(g.legendPanel)
 
 	fmt.Fprintf(g.legendPanel, " [%s::b]ENEMIES:[-:-:-]\n", colorSkyBlue)
-	fmt.Fprintf(g.legendPanel, " [%s]Z[-] - Zombie\n", ColorZombie)
-	fmt.Fprintf(g.legendPanel, " [%s]V[-] - Vampire\n", ColorVampire)
-	fmt.Fprintf(g.legendPanel, " [%s]G[-] - Ghost\n", ColorGhost)
-	fmt.Fprintf(g.legendPanel, " [%s]O[-] - Ogre\n", ColorOgre)
-	fmt.Fprintf(g.legendPanel, " [%s]S[-] - Snake Mage\n", ColorSnakeMage)
+	fmt.Fprintf(g.legendPanel, " [%s]%c[-] - Zombie\n", ColorZombie, SymbolZombie)
+	fmt.Fprintf(g.legendPanel, " [%s]%c[-] - Vampire\n", ColorVampire, SymbolVampire)
+	fmt.Fprintf(g.legendPanel, " [%s]%c[-] - Ghost\n", ColorGhost, SymbolGhost)
+	fmt.Fprintf(g.legendPanel, " [%s]%c[-] - Ogre\n", ColorOgre, SymbolOgre)
+	fmt.Fprintf(g.legendPanel, " [%s]%c[-] - Snake Mage\n", ColorSnakeMage, SymbolSnakeMage)
 	fmt.Fprintln(g.legendPanel)
 
 	fmt.Fprintf(g.legendPanel, " [%s::b]ITEMS:[-:-:-]\n", colorSkyBlue)
-	fmt.Fprintf(g.legendPanel, " [%s]ð[-] - Food\n", ColorFood)
-	fmt.Fprintf(g.legendPanel, " [%s]¶[-] - Elixir\n", ColorElixir)
-	fmt.Fprintf(g.legendPanel, " [%s]![-] - Scroll\n", ColorScroll)
-	fmt.Fprintf(g.legendPanel, " [%s]ƒ[-] - Weapon\n", ColorWeapon)
+	fmt.Fprintf(g.legendPanel, " [%s]%c[-] - Food\n", ColorFood, SymbolFood)
+	fmt.Fprintf(g.legendPanel, " [%s]%c[-] - Elixir\n", ColorElixir, SymbolElixir)
+	fmt.Fprintf(g.legendPanel, " [%s]%c[-] - Scroll\n", ColorScroll, SymbolScroll)
+	fmt.Fprintf(g.legendPanel, " [%s]%c[-] - Weapon\n", ColorWeapon, SymbolWeapon)
 }
 
 func (g *Game) GetRootPrimitive() *tview.Flex {
@@ -412,38 +430,38 @@ func (g *Game) resetColorWithNewLine() {
 func (g *Game) getCellAppearance(entityType common.GameEntityType) (rune, string, string) {
 	switch entityType {
 	case common.EntityTypePlayer:
-		return '☿', ColorPlayer, colorBlack
+		return SymbolPlayer, ColorPlayer, colorBlack
 	case common.WorldTypeWall:
-		return ' ', ColorWall, ColorWall
+		return SymbolEmpty, ColorWall, ColorWall
 	case common.WorldTypeRoomFloor:
-		return '.', ColorFloor, colorBlack
+		return SymbolFloor, ColorFloor, colorBlack
 	case common.WorldTypePortal:
-		return '@', ColorPortal, colorBlack
+		return SymbolPortal, ColorPortal, colorBlack
 	case common.WorldTypePassage, common.WorldTypeDoor:
-		return ' ', ColorPassage, ColorPassage
+		return SymbolEmpty, ColorPassage, ColorPassage
 	case common.EntityTypeZombie:
-		return 'Z', ColorZombie, colorBlack
+		return SymbolZombie, ColorZombie, colorBlack
 	case common.EntityTypeVampire:
-		return 'V', ColorVampire, colorBlack
+		return SymbolVampire, ColorVampire, colorBlack
 	case common.EntityTypeGhost:
-		return 'G', ColorGhost, colorBlack
+		return SymbolGhost, ColorGhost, colorBlack
 	case common.EntityTypeOgre:
-		return 'O', ColorOgre, colorBlack
+		return SymbolOgre, ColorOgre, colorBlack
 	case common.EntityTypeSnakeMage:
-		return 'S', ColorSnakeMage, colorBlack
+		return SymbolSnakeMage, ColorSnakeMage, colorBlack
 	case common.FoodTypePotatoes, common.FoodTypeBread, common.FoodTypeMeat,
 		common.FoodTypeMistery, common.FoodTypeBeer:
-		return 'ð', ColorFood, colorBlack
+		return SymbolFood, ColorFood, colorBlack
 	case common.ElixirTypeStrength, common.ElixirTypeAgility, common.ElixirTypeDwarfism,
 		common.ElixirTypeGiantism, common.ElixirTypeMystery:
-		return '¶', ColorElixir, colorBlack
+		return SymbolElixir, ColorElixir, colorBlack
 	case common.ScrollTypeStrength, common.ScrollTypeAgility, common.ScrollTypeUltimate,
 		common.ScrollTypeMaxHealth, common.ScrollTypeMystery:
-		return '!', ColorScroll, colorBlack
+		return SymbolScroll, ColorScroll, colorBlack
 	case common.Weapon:
-		return 'ƒ', ColorWeapon, colorBlack
+		return SymbolWeapon, ColorWeapon, colorBlack
 	default:
-		return ' ', colorWhite, colorBlack
+		return SymbolEmpty, colorWhite, colorBlack
 	}
 }
 
@@ -570,15 +588,15 @@ func (g *Game) renderBackpackItems(items []*dto.ItemInfo) {
 func (g *Game) getItemIconAndColor(itemType string) (rune, string) {
 	switch itemType {
 	case "Weapon":
-		return 'ƒ', ColorWeapon
+		return SymbolWeapon, ColorWeapon
 	case "Food":
-		return 'ð', ColorFood
+		return SymbolFood, ColorFood
 	case "Elixir":
-		return '¶', ColorElixir
+		return SymbolElixir, ColorElixir
 	case "Scroll":
-		return '!', ColorScroll
+		return SymbolScroll, ColorScroll
 	default:
-		return '?', colorWhite
+		return SymbolUnknown, colorWhite
 	}
 }
 
