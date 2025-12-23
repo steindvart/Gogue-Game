@@ -48,6 +48,7 @@ const (
 	ColorWeapon = "#4169E1" // Royal blue
 
 	// Цвета текста (для информационной панели)
+	ColorLevel    = "#9999FF"
 	ColorHP       = "#FFD700" // Gold
 	ColorStrength = "#FF6347" // Tomato
 	ColorAgility  = "#90EE90" // Light green
@@ -200,6 +201,7 @@ func (g *Game) UpdateItemInfo(info *dto.ItemInfo) {
 func (g *Game) updateStatsPanel(info *dto.PlayerInfo) {
 	g.statsPanel.Clear()
 	fmt.Fprintln(g.statsPanel)
+	fmt.Fprintf(g.statsPanel, " [%s::b]Level:[-:-:-]    %d\n", ColorLevel, info.LevelNumber)
 	fmt.Fprintf(g.statsPanel, " [%s::b]HP:[-:-:-]       %.f/%-.f\n", ColorHP, info.Health, info.MaxHealth)
 	fmt.Fprintf(g.statsPanel, " [%s::b]Strength:[-:-:-] %.f\n", ColorStrength, info.Strength)
 	fmt.Fprintf(g.statsPanel, " [%s::b]Agility:[-:-:-]  %.f\n", ColorAgility, info.Agility)

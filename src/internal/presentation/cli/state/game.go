@@ -52,7 +52,7 @@ func (g *Game) updateGameView() {
 
 	player := g.level.Player
 	if player != nil {
-		g.view.UpdatePlayerInfo(dto.ConvertPlayerToDto(g.level.Player))
+		g.view.UpdatePlayerInfo(dto.ConvertPlayerToDto(g.level.Player, g.level))
 	}
 }
 
@@ -128,8 +128,14 @@ func (g *Game) handleSelectAction() {
 		case world.CollisionTypeItem:
 			g.level.PlayerUseItemAtPosition(pos)
 		case world.CollisionTypeTeleport:
-			if err := g.level.GenerateWithExistingPlayer(g.level.Player); err != nil {
-				panic("an error occurred when generating next level: " + err.Error())
+			const maxLevelNumber = 21
+			if g.level.Number <= maxLevelNumber {
+				if err := g.level.GenerateWithExistingPlayer(g.level.Player); err != nil {
+					panic("an error occurred when generating next level: " + err.Error())
+				}
+			} else {
+				// @todo сделать победное окошко. Пока что будет как будто esc
+				g.signal = signals.Stop
 			}
 		}
 

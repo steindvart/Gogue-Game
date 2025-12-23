@@ -37,7 +37,6 @@ type CollisionType int
 
 const (
 	CollisionTypeNone CollisionType = iota
-	CollisionTypeBorder
 	CollisionTypeEnemy
 	CollisionTypeItem
 	CollisionTypeTeleport
@@ -45,9 +44,11 @@ const (
 
 func NewLevelWithDefaults(random utils.Randomizer, mapSize primitives.Size2D[uint]) *Level {
 	cfg := DefaultLevelConfig(mapSize)
+	levelNumber := 1
 	return NewLevelWithComponents(
 		random,
 		cfg,
+		uint(levelNumber),
 		NewGridRoomGenerator(),
 		NewConnectionTreePassageGenerator(),
 		NewRoomBasedEntitySpawner(),
@@ -59,6 +60,7 @@ func NewLevelWithDefaults(random utils.Randomizer, mapSize primitives.Size2D[uin
 func NewLevelWithComponents(
 	random utils.Randomizer,
 	cfg LevelConfig,
+	levelNumber uint,
 	roomGen RoomGenerator,
 	passageGen PassageGenerator,
 	entitySpawner EntitySpawner,
@@ -72,6 +74,7 @@ func NewLevelWithComponents(
 		passageGen:    passageGen,
 		entitySpawner: entitySpawner,
 		playerSpawner: playerSpawner,
+		Number:        levelNumber,
 		fieldRenderer: fieldRenderer,
 		fogOfWar:      NewFogOfWar(int(cfg.MapSize.Width), int(cfg.MapSize.Height)),
 		Enemies:       []entities.Enemy{},
@@ -107,6 +110,7 @@ func (l *Level) GenerateWithExistingPlayer(player *entities.Player) error {
 		return err
 	}
 
+	l.Number++
 	l.Player = player
 	startPos, err := l.playerSpawner.GetStartPosition(l.Rooms, l.random)
 	if err != nil {
