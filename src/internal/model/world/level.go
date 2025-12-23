@@ -314,6 +314,18 @@ func (l *Level) PlayerUseItemAtPosition(pos primitives.Point2D[int]) {
 	}
 }
 
+func (l *Level) PlayerTakeItemAtPosition(pos primitives.Point2D[int]) {
+	item := l.GetItemAtPosition(pos)
+	if item == nil {
+		return
+	}
+
+	if takeableItem, ok := item.(items.Takeable); ok {
+		l.Player.Backpack.AddItem(takeableItem)
+		l.RemoveItem(item)
+	}
+}
+
 func (l *Level) GetItemAtPosition(pos primitives.Point2D[int]) primitives.Positional2D[int] {
 	for _, item := range l.Items {
 		if item.GetPosition() == pos {

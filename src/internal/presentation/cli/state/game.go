@@ -103,6 +103,8 @@ func (g *Game) handleEvent(event *tcell.EventKey) *tcell.EventKey {
 		g.level.ProcessTurns(1)
 	case action.Select:
 		g.handleSelectAction()
+	case action.Take:
+		g.handleTakeAction()
 	case action.ToggleBackpack:
 		g.view.ToggleViewMode()
 	case action.OpenWeaponsTab:
@@ -153,6 +155,23 @@ func (g *Game) handleSelectAction() {
 	}
 }
 
+func (g *Game) handleTakeAction() {
+	if g.level.Player == nil {
+		return
+	}
+
+	if g.isPlayerReadyToInteract {
+		pos := g.level.Player.GetPosition()
+
+		switch g.level.CheckEntityCollision(pos) {
+		case world.CollisionTypeItem:
+			g.level.PlayerTakeItemAtPosition(pos)
+		}
+
+		g.resetInteraction()
+	}
+}
+
 func (g *Game) eventToAction(event *tcell.EventKey) action.Type {
 	switch event.Key() {
 	case tcell.KeyUp:
@@ -177,14 +196,10 @@ func (g *Game) eventToAction(event *tcell.EventKey) action.Type {
 		return action.MoveLeft
 	case 'd', 'в':
 		return action.MoveRight
-	case 'y', 'н':
-		return action.MoveLeftUpperCorner
-	case 'u', 'г':
-		return action.MoveRightUpperCorner
+	case 'r', 'к':
+		return action.Take
 	case 'b', 'и':
 		return action.ToggleBackpack
-	case 'n', 'т':
-		return action.MoveRightLowerCorner
 	case 'e', 'у':
 		return action.Select
 	case 'z', 'я':
