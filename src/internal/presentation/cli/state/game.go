@@ -181,6 +181,7 @@ func (g *Game) handleTakeAction() {
 		case world.CollisionTypeItem:
 			if err := g.level.PlayerTakeItemAtPosition(pos); err != nil {
 				// @todo - вывод сообщения об ошибке в view
+				return
 			}
 		}
 
