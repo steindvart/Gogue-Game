@@ -106,15 +106,27 @@ func (g *Game) handleEvent(event *tcell.EventKey) *tcell.EventKey {
 	case action.Take:
 		g.handleTakeAction()
 	case action.ToggleBackpack:
-		g.view.ToggleViewMode()
+		g.view.ToggleSecondInfoViewMode()
 	case action.OpenWeaponsTab:
 		g.view.SetBackpackTab(viewcli.BackpackTabWeapons)
+		if g.view.SecondInfoViewMode == viewcli.SecondInfoViewModeEffects {
+			g.view.ToggleSecondInfoViewMode()
+		}
 	case action.OpenFoodTab:
 		g.view.SetBackpackTab(viewcli.BackpackTabFood)
+		if g.view.SecondInfoViewMode == viewcli.SecondInfoViewModeEffects {
+			g.view.ToggleSecondInfoViewMode()
+		}
 	case action.OpenElixirsTab:
 		g.view.SetBackpackTab(viewcli.BackpackTabElixirs)
+		if g.view.SecondInfoViewMode == viewcli.SecondInfoViewModeEffects {
+			g.view.ToggleSecondInfoViewMode()
+		}
 	case action.OpenScrollsTab:
 		g.view.SetBackpackTab(viewcli.BackpackTabScrolls)
+		if g.view.SecondInfoViewMode == viewcli.SecondInfoViewModeEffects {
+			g.view.ToggleSecondInfoViewMode()
+		}
 	case action.Num0, action.Num1, action.Num2, action.Num3,
 		action.Num4, action.Num5, action.Num6, action.Num7,
 		action.Num8, action.Num9:
