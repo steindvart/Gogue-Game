@@ -22,39 +22,56 @@ const (
 )
 
 const (
-	// Общие цвета
-	ColorBlack   = "#000000"
-	ColorWhite   = "#FFFFFF"
-	ColorSkyBlue = "#87CEEB"
-	ColorAqua    = "#0194A7"
+	// Базовые цвета
+	colorBlack      = "#000000"
+	colorWhite      = "#FFFFFF"
+	colorGray       = "#808080"
+	colorLightGray  = "#E0E0E0"
+	colorSilver     = "#C0C0C0"
+	colorGold       = "#FFD700"
+	colorOrange     = "#FFA500"
+	colorRed        = "#FF0000"
+	colorTomato     = "#FF6347"
+	colorGreen      = "#00FF00"
+	colorLimeGreen  = "#32CD32"
+	colorLightGreen = "#90EE90"
+	colorPurple     = "#FF00FF"
+	colorMedPurple  = "#9370DB"
+	colorRoyalBlue  = "#4169E1"
+	colorSkyBlue    = "#87CEEB"
+	colorAqua       = "#0194A7"
+	colorTurquoise  = "#00CED1"
+	colorBrown      = "#8B4513"
+)
 
+const (
 	// Цвета игрока
-	ColorPlayer = "#FFD700" // Gold
+	ColorPlayer = colorGold
 
 	// Цвета стен и структур
-	ColorWall    = "#808080" // Gray
-	ColorFloor   = "#808080" // Gray
-	ColorPassage = "#C0C0C0" // Silver
-	ColorPortal  = "#FF00FF" // Purple
+	ColorWall    = colorGray
+	ColorFloor   = colorGray
+	ColorPassage = colorSilver
+	ColorPortal  = colorPurple
 
 	// Цвета врагов
-	ColorZombie    = "#00FF00" // Green
-	ColorVampire   = "#FF0000" // Red
-	ColorGhost     = "#E0E0E0" // Light gray
-	ColorOgre      = "#8B4513" // Saddle brown
-	ColorSnakeMage = "#32CD32" // Lime green
+	ColorZombie    = colorGreen
+	ColorVampire   = colorRed
+	ColorGhost     = colorLightGray
+	ColorOgre      = colorBrown
+	ColorSnakeMage = colorLimeGreen
 
 	// Цвета предметов
-	ColorFood   = "#FFA500" // Orange
-	ColorElixir = "#9370DB" // Medium purple
-	ColorScroll = "#00CED1" // Dark turquoise
-	ColorWeapon = "#4169E1" // Royal blue
+	ColorFood   = colorOrange
+	ColorElixir = colorMedPurple
+	ColorScroll = colorTurquoise
+	ColorWeapon = colorRoyalBlue
 
 	// Цвета текста (для информационной панели)
-	ColorHP       = "#FFD700" // Gold
-	ColorStrength = "#FF6347" // Tomato
-	ColorAgility  = "#90EE90" // Light green
-	ColorEffects  = ColorSkyBlue
+	ColorHP       = colorGold
+	ColorStrength = colorTomato
+	ColorAgility  = colorLightGreen
+	ColorEffects  = colorSkyBlue
 )
 
 type SecondInfoViewMode int
@@ -182,7 +199,7 @@ func (g *Game) setupLayout() {
 func (g *Game) initializeLegend() {
 	g.legendPanel.Clear()
 
-	fmt.Fprintf(g.legendPanel, " [%s::b]CONTROLS:[-:-:-]\n", ColorSkyBlue)
+	fmt.Fprintf(g.legendPanel, " [%s::b]CONTROLS:[-:-:-]\n", colorSkyBlue)
 	fmt.Fprintln(g.legendPanel, " ↑←↓→ or 'WASD' - Move")
 	fmt.Fprintln(g.legendPanel, " E - Use item")
 	fmt.Fprintln(g.legendPanel, " R - Take item")
@@ -192,12 +209,12 @@ func (g *Game) initializeLegend() {
 	fmt.Fprintln(g.legendPanel, " ESC - Exit game")
 	fmt.Fprintln(g.legendPanel)
 
-	fmt.Fprintf(g.legendPanel, " [%s::b]SYMBOLS:[-:-:-]\n", ColorSkyBlue)
+	fmt.Fprintf(g.legendPanel, " [%s::b]SYMBOLS:[-:-:-]\n", colorSkyBlue)
 	fmt.Fprintf(g.legendPanel, " [%s]☿[-] - Player\n", ColorPlayer)
 	fmt.Fprintf(g.legendPanel, " [%s]@[-] - Portal\n", ColorPortal)
 	fmt.Fprintln(g.legendPanel)
 
-	fmt.Fprintf(g.legendPanel, " [%s::b]ENEMIES:[-:-:-]\n", ColorSkyBlue)
+	fmt.Fprintf(g.legendPanel, " [%s::b]ENEMIES:[-:-:-]\n", colorSkyBlue)
 	fmt.Fprintf(g.legendPanel, " [%s]Z[-] - Zombie\n", ColorZombie)
 	fmt.Fprintf(g.legendPanel, " [%s]V[-] - Vampire\n", ColorVampire)
 	fmt.Fprintf(g.legendPanel, " [%s]G[-] - Ghost\n", ColorGhost)
@@ -205,7 +222,7 @@ func (g *Game) initializeLegend() {
 	fmt.Fprintf(g.legendPanel, " [%s]S[-] - Snake Mage\n", ColorSnakeMage)
 	fmt.Fprintln(g.legendPanel)
 
-	fmt.Fprintf(g.legendPanel, " [%s::b]ITEMS:[-:-:-]\n", ColorSkyBlue)
+	fmt.Fprintf(g.legendPanel, " [%s::b]ITEMS:[-:-:-]\n", colorSkyBlue)
 	fmt.Fprintf(g.legendPanel, " [%s]ð[-] - Food\n", ColorFood)
 	fmt.Fprintf(g.legendPanel, " [%s]¶[-] - Elixir\n", ColorElixir)
 	fmt.Fprintf(g.legendPanel, " [%s]![-] - Scroll\n", ColorScroll)
@@ -257,10 +274,10 @@ func (g *Game) updateInteractionInfo() {
 func printInteractPortalInfo(view *tview.TextView) {
 	fmt.Fprintln(view)
 	fmt.Fprintln(view, "───────────────────────────────────")
-	fmt.Fprintf(view, " [%s::b]You are on the portal\n to the next level.\n[-:-:-]", ColorSkyBlue)
+	fmt.Fprintf(view, " [%s::b]You are on the portal\n to the next level.\n[-:-:-]", colorSkyBlue)
 	fmt.Fprintln(view)
 	printInteractionTips(view, true, false)
-	fmt.Fprintf(view, " [%s::i]You can't go back...\n[-:-:-]", ColorSkyBlue)
+	fmt.Fprintf(view, " [%s::i]You can't go back...\n[-:-:-]", colorSkyBlue)
 }
 
 func (g *Game) updateEffectsPanel(effects []dto.EffectInfo) {
@@ -288,7 +305,7 @@ func (g *Game) updateEffectsPanel(effects []dto.EffectInfo) {
 
 func printEffect(view *tview.TextView, effect *dto.EffectInfo) {
 	if effect.DurationSteps > 0 {
-		fmt.Fprintf(view, " [%s::b]Duration:[-:-:-] %d steps\n", ColorAqua, effect.DurationSteps)
+		fmt.Fprintf(view, " [%s::b]Duration:[-:-:-] %d steps\n", colorAqua, effect.DurationSteps)
 	}
 	if effect.MaxHealthModify != 0 {
 		fmt.Fprintf(view, "  Max HP:  %+.1f\n", effect.MaxHealthModify)
@@ -323,7 +340,7 @@ func (g *Game) renderItemInfo() {
 		// @todo - добавить сокровище как предмет на карте
 		// color = ColorTreasure
 	default:
-		color = ColorWhite
+		color = colorWhite
 	}
 
 	fmt.Fprintf(g.statsPanel, "[%s::b]%s %s[-:-:-]\n", color, g.currentItemInfo.Type, g.currentItemInfo.Name)
@@ -395,38 +412,38 @@ func (g *Game) resetColorWithNewLine() {
 func (g *Game) getCellAppearance(entityType common.GameEntityType) (rune, string, string) {
 	switch entityType {
 	case common.EntityTypePlayer:
-		return '☿', ColorPlayer, ColorBlack
+		return '☿', ColorPlayer, colorBlack
 	case common.WorldTypeWall:
 		return ' ', ColorWall, ColorWall
 	case common.WorldTypeRoomFloor:
-		return '.', ColorFloor, ColorBlack
+		return '.', ColorFloor, colorBlack
 	case common.WorldTypePortal:
-		return '@', ColorPortal, ColorBlack
+		return '@', ColorPortal, colorBlack
 	case common.WorldTypePassage, common.WorldTypeDoor:
 		return ' ', ColorPassage, ColorPassage
 	case common.EntityTypeZombie:
-		return 'Z', ColorZombie, ColorBlack
+		return 'Z', ColorZombie, colorBlack
 	case common.EntityTypeVampire:
-		return 'V', ColorVampire, ColorBlack
+		return 'V', ColorVampire, colorBlack
 	case common.EntityTypeGhost:
-		return 'G', ColorGhost, ColorBlack
+		return 'G', ColorGhost, colorBlack
 	case common.EntityTypeOgre:
-		return 'O', ColorOgre, ColorBlack
+		return 'O', ColorOgre, colorBlack
 	case common.EntityTypeSnakeMage:
-		return 'S', ColorSnakeMage, ColorBlack
+		return 'S', ColorSnakeMage, colorBlack
 	case common.FoodTypePotatoes, common.FoodTypeBread, common.FoodTypeMeat,
 		common.FoodTypeMistery, common.FoodTypeBeer:
-		return 'ð', ColorFood, ColorBlack
+		return 'ð', ColorFood, colorBlack
 	case common.ElixirTypeStrength, common.ElixirTypeAgility, common.ElixirTypeDwarfism,
 		common.ElixirTypeGiantism, common.ElixirTypeMystery:
-		return '¶', ColorElixir, ColorBlack
+		return '¶', ColorElixir, colorBlack
 	case common.ScrollTypeStrength, common.ScrollTypeAgility, common.ScrollTypeUltimate,
 		common.ScrollTypeMaxHealth, common.ScrollTypeMystery:
-		return '!', ColorScroll, ColorBlack
+		return '!', ColorScroll, colorBlack
 	case common.Weapon:
-		return 'ƒ', ColorWeapon, ColorBlack
+		return 'ƒ', ColorWeapon, colorBlack
 	default:
-		return ' ', ColorWhite, ColorBlack
+		return ' ', colorWhite, colorBlack
 	}
 }
 
@@ -475,7 +492,7 @@ func (g *Game) updateBackpackPanel() {
 	g.backpackPanel.Clear()
 
 	if g.playerBackpackInfo == nil {
-		fmt.Fprintf(g.backpackPanel, " [%s::b]BACKPACK IS EMPTY[-:-:-]\n", ColorSkyBlue)
+		fmt.Fprintf(g.backpackPanel, " [%s::b]BACKPACK IS EMPTY[-:-:-]\n", colorSkyBlue)
 		return
 	}
 
@@ -498,15 +515,15 @@ func (g *Game) updateBackpackPanel() {
 		items = g.playerBackpackInfo.Scrolls
 	}
 
-	fmt.Fprintf(g.backpackPanel, " [%s::b]%s:[-:-:-] (%d/%d)\n", ColorSkyBlue, tabName, g.playerBackpackInfo.ItemsNum, g.playerBackpackInfo.Capacity)
+	fmt.Fprintf(g.backpackPanel, " [%s::b]%s:[-:-:-] (%d/%d)\n", colorSkyBlue, tabName, g.playerBackpackInfo.ItemsNum, g.playerBackpackInfo.Capacity)
 	fmt.Fprintln(g.backpackPanel)
 
 	// Отображаем список предметов
 	if len(items) == 0 {
 		if g.currentTab == BackpackTabWeapons {
-			fmt.Fprintf(g.backpackPanel, " 0: [%s::i]put current weapon to backpack[-:-:-]\n\n", ColorSkyBlue)
+			fmt.Fprintf(g.backpackPanel, " 0: [%s::i]put current weapon to backpack[-:-:-]\n\n", colorSkyBlue)
 		}
-		fmt.Fprintf(g.backpackPanel, " [%s::i]No items in this category[-:-:-]\n", ColorSkyBlue)
+		fmt.Fprintf(g.backpackPanel, " [%s::i]No items in this category[-:-:-]\n", colorSkyBlue)
 	} else {
 		g.renderBackpackItems(items)
 	}
@@ -561,7 +578,7 @@ func (g *Game) getItemIconAndColor(itemType string) (rune, string) {
 	case "Scroll":
 		return '!', ColorScroll
 	default:
-		return '?', ColorWhite
+		return '?', colorWhite
 	}
 }
 
