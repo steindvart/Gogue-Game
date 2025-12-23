@@ -1,7 +1,7 @@
 package state
 
 import (
-	"gogue/internal/model/items"
+	"gogue/internal/model/entities"
 	"gogue/internal/model/primitives"
 	"gogue/internal/model/signals"
 	"gogue/internal/model/world"
@@ -269,90 +269,44 @@ func (g *Game) handleItemSelection(actionType action.Type) {
 
 	itemIndex := int(actionType - action.Num0)
 
-	var selectedItem any
+	var itemType entities.BackpackItemType
+	var actualIndex int
+
 	switch g.view.GetCurrentBackpackTab() {
 	case viewcli.BackpackTabWeapons:
-		// Для оружия индексы 0-9 и отдельно обрабатываем 0
+		itemType = entities.BackpackItemTypeWeapon
+		// Для оружия индекс 0 - снятие текущего оружия
 		if itemIndex == 0 {
-			// Если выбран 0, то убираем текущее оружие игрока в рюкзак, если он не переполнен
 			if err := g.level.Player.DropEquipWeaponToBackpack(); err != nil {
 				// @todo - вывод сообщения об ошибке в view
 			}
-			break
-		}
-
-		actualIndex := itemIndex - 1
-		if actualIndex < 0 || actualIndex >= g.level.Player.Backpack.Weapons.Len() {
+			g.updateBackpackInfo()
 			return
 		}
-
-		i := 0
-		for elem := g.level.Player.Backpack.Weapons.Front(); elem != nil; elem = elem.Next() {
-			if i == actualIndex {
-				selectedItem = elem.Value
-				break
-			}
-			i++
-		}
+		actualIndex = itemIndex - 1
 
 	case viewcli.BackpackTabFood:
-		// Для еды индекс 1-9, поэтому нужно сместить
-		actualIndex := itemIndex - 1
-		if actualIndex < 0 || actualIndex >= g.level.Player.Backpack.Foods.Len() {
-			return
-		}
-		i := 0
-		for elem := g.level.Player.Backpack.Foods.Front(); elem != nil; elem = elem.Next() {
-			if i == actualIndex {
-				selectedItem = elem.Value
-				break
-			}
-			i++
-		}
+		itemType = entities.BackpackItemTypeFood
+		actualIndex = itemIndex - 1
 
 	case viewcli.BackpackTabElixirs:
-		actualIndex := itemIndex - 1
-		if actualIndex < 0 || actualIndex >= g.level.Player.Backpack.Elixirs.Len() {
-			return
-		}
-		i := 0
-		for elem := g.level.Player.Backpack.Elixirs.Front(); elem != nil; elem = elem.Next() {
-			if i == actualIndex {
-				selectedItem = elem.Value
-				break
-			}
-			i++
-		}
+		itemType = entities.BackpackItemTypeElixir
+		actualIndex = itemIndex - 1
 
 	case viewcli.BackpackTabScrolls:
-		actualIndex := itemIndex - 1
-		if actualIndex < 0 || actualIndex >= g.level.Player.Backpack.Scrolls.Len() {
-			return
-		}
-		i := 0
-		for elem := g.level.Player.Backpack.Scrolls.Front(); elem != nil; elem = elem.Next() {
-			if i == actualIndex {
-				selectedItem = elem.Value
-				break
-			}
-			i++
-		}
+		itemType = entities.BackpackItemTypeScroll
+		actualIndex = itemIndex - 1
 	}
 
+	selectedItem := g.level.Player.GetItemFromBackpackByIndex(itemType, actualIndex)
 	if selectedItem == nil {
 		return
 	}
 
-	// @todo - кривая логика, нужно декомпозировать и перенести в Player
-	if weapon, ok := selectedItem.(*items.Weapon); ok {
-		if err := g.level.Player.EquipWeapon(weapon); err != nil {
-			// @todo - вывод сообщения об ошибке в view
-		}
-	} else if usableItem, ok := selectedItem.(items.Usable); ok {
-		g.level.Player.Character.Use(usableItem)
+	if err := g.level.Player.UseItemFromBackpack(selectedItem); err != nil {
+		// @todo - вывод сообщения об ошибке в view
 	}
 
-	_ = g.level.Player.Backpack.RemoveItem(selectedItem)
 	g.updateBackpackInfo()
 }
 
