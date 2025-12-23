@@ -37,3 +37,8 @@ func NewFoodByConfig(rnd utils.Randomizer, box primitives.Box, cfg FoodConfig) (
 func (f *Food) Use() *primitives.Effect {
 	return f.Effect
 }
+
+// Ничего не возвращаем, но добавляем фунцию, чтобы отметить Food как Takeable.
+func (f *Food) Take() int32 {
+	return 0
+}

@@ -34,6 +34,11 @@ func NewScrollByConfig(rnd utils.Randomizer, box primitives.Box, cfg ScrollConfi
 	}), nil
 }
 
-func (e *Scroll) Use() *primitives.Effect {
-	return e.Effect
+func (s *Scroll) Use() *primitives.Effect {
+	return s.Effect
+}
+
+// Ничего не возвращаем, но добавляем фунцию, чтобы отметить Scroll как Takeable.
+func (s *Scroll) Take() int32 {
+	return 0
 }
