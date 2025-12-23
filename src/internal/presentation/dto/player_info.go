@@ -8,6 +8,7 @@ type PlayerInfo struct {
 	Strength         float64
 	Agility          float64
 	TemporaryEffects []EffectInfo
+	*WeaponInfo
 }
 
 func ConvertPlayerToDto(player *entities.Player) *PlayerInfo {
@@ -21,5 +22,6 @@ func ConvertPlayerToDto(player *entities.Player) *PlayerInfo {
 		Strength:         player.Attributes.Strength,
 		Agility:          player.Attributes.Agility,
 		TemporaryEffects: ConvertEffectsToDto(player.TemporaryEffects),
+		WeaponInfo:       ConvertWeaponToDto(player.Weapon),
 	}
 }
