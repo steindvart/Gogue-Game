@@ -5,7 +5,6 @@ import (
 	"gogue/internal/model/items"
 )
 
-// BackpackInfo содержит информацию о содержимом рюкзака для отображения в UI
 type BackpackInfo struct {
 	Capacity  uint
 	ItemsNum  uint
@@ -16,7 +15,6 @@ type BackpackInfo struct {
 	Treasures int32
 }
 
-// ConvertBackpackToDto преобразует модель рюкзака в DTO для отображения
 func ConvertBackpackToDto(backpack *items.Backpack) *BackpackInfo {
 	if backpack == nil {
 		return nil
@@ -33,7 +31,8 @@ func ConvertBackpackToDto(backpack *items.Backpack) *BackpackInfo {
 	}
 }
 
-// convertElixirListToDto преобразует список эликсиров в слайс DTO
+// @todo - подумать как избежать дублирования и обобщить код
+
 func convertElixirListToDto(itemList *list.List) []*ItemInfo {
 	if itemList == nil {
 		return []*ItemInfo{}
@@ -54,7 +53,6 @@ func convertElixirListToDto(itemList *list.List) []*ItemInfo {
 	return result
 }
 
-// convertScrollListToDto преобразует список свитков в слайс DTO
 func convertScrollListToDto(itemList *list.List) []*ItemInfo {
 	if itemList == nil {
 		return []*ItemInfo{}
@@ -75,7 +73,6 @@ func convertScrollListToDto(itemList *list.List) []*ItemInfo {
 	return result
 }
 
-// convertFoodListToDto преобразует список еды в слайс DTO
 func convertFoodListToDto(itemList *list.List) []*ItemInfo {
 	if itemList == nil {
 		return []*ItemInfo{}
@@ -96,7 +93,6 @@ func convertFoodListToDto(itemList *list.List) []*ItemInfo {
 	return result
 }
 
-// convertWeaponListToDto преобразует список оружия в слайс DTO
 func convertWeaponListToDto(itemList *list.List) []*ItemInfo {
 	if itemList == nil {
 		return []*ItemInfo{}
