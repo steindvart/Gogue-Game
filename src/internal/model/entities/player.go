@@ -33,22 +33,28 @@ func NewPlayer(box primitives.Box) *Player {
 	}
 }
 
+func (p *Player) DropEquipWeaponToBackpack() error {
+	if p.Weapon == nil {
+		return nil
+	}
+
+	if err := p.Backpack.AddItem(p.Weapon); err != nil {
+		return err
+	}
+
+	_ = p.UnequipWeapon()
+
+	return nil
+}
+
 func (p *Player) EquipWeapon(w *items.Weapon) error {
 	if w == nil {
 		return nil
 	}
 
 	// Если уже есть экипированный предмет, пытаемся положить его в рюкзак.
-	if p.Weapon != nil {
-		if p.Backpack.IsFull() {
-			return items.BackpackIsFullError{}
-		}
-
-		previousWeapon := p.UnequipWeapon()
-		err := p.Backpack.AddItem(previousWeapon)
-		if err != nil {
-			return err
-		}
+	if err := p.DropEquipWeaponToBackpack(); err != nil {
+		return err
 	}
 
 	p.Weapon = w
