@@ -38,7 +38,7 @@ func (s *Scroll) Use() *primitives.Effect {
 	return s.Effect
 }
 
-// Ничего не возвращаем, но добавляем фунцию, чтобы отметить Scroll как Takeable.
+// Ничего не возвращаем, но добавляем функцию, чтобы отметить Scroll как Takeable.
 func (s *Scroll) Take() int32 {
 	return 0
 }

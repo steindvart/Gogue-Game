@@ -36,7 +36,7 @@ func (w *Weapon) Use() *primitives.Effect {
 	return w.Effect
 }
 
-// Ничего не возвращаем, но добавляем фунцию, чтобы отметить Weapon как Takeable.
+// Ничего не возвращаем, но добавляем функцию, чтобы отметить Weapon как Takeable.
 func (w *Weapon) Take() int32 {
 	return 0
 }
