@@ -308,10 +308,14 @@ func (l *Level) PlayerUseItemAtPosition(pos primitives.Point2D[int]) {
 		return
 	}
 
-	if usableItem, ok := item.(items.Usable); ok {
+	// @todo - кривая логика, нужно декомпозировать и перенести в Player
+	if weapon, ok := item.(*items.Weapon); ok {
+		_ = l.Player.EquipWeapon(weapon)
+	} else if usableItem, ok := item.(items.Usable); ok {
 		l.Player.Character.Use(usableItem)
-		l.RemoveItem(item)
 	}
+
+	l.RemoveItem(item)
 }
 
 func (l *Level) PlayerTakeItemAtPosition(pos primitives.Point2D[int]) error {

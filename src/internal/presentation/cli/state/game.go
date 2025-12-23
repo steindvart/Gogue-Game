@@ -130,7 +130,9 @@ func (g *Game) handleEvent(event *tcell.EventKey) *tcell.EventKey {
 	case action.Num0, action.Num1, action.Num2, action.Num3,
 		action.Num4, action.Num5, action.Num6, action.Num7,
 		action.Num8, action.Num9:
-		g.handleItemSelection(g.eventToAction(event))
+		if g.view.SecondInfoViewMode == viewcli.SecondInfoViewModeBackpack {
+			g.handleItemSelection(g.eventToAction(event))
+		}
 	case action.Exit:
 		g.signal = signals.Stop
 		return nil
@@ -178,7 +180,7 @@ func (g *Game) handleTakeAction() {
 		switch g.level.CheckEntityCollision(pos) {
 		case world.CollisionTypeItem:
 			if err := g.level.PlayerTakeItemAtPosition(pos); err != nil {
-
+				// @todo - вывод сообщения об ошибке в view
 			}
 		}
 
@@ -265,23 +267,28 @@ func (g *Game) handleItemSelection(actionType action.Type) {
 		return
 	}
 
-	// Определяем индекс выбранного предмета
 	itemIndex := int(actionType - action.Num0)
 
-	// Получаем сам предмет из рюкзака игрока
 	var selectedItem any
-
-	// Нужно получить сам предмет из рюкзака игрока, а не из DTO
 	switch g.view.GetCurrentBackpackTab() {
 	case viewcli.BackpackTabWeapons:
-		// Для оружия индекс 0-9
-		if itemIndex < 0 || itemIndex >= g.level.Player.Backpack.Weapons.Len() {
+		// Для оружия индексы 0-9 и отдельно обрабатываем 0
+		if itemIndex == 0 {
+			// Если выбран 0, то убираем текущее оружие игрока в рюкзак, если он не переполнен
+			if err := g.level.Player.DropEquipWeaponToBackpack(); err != nil {
+				// @todo - вывод сообщения об ошибке в view
+			}
+			break
+		}
+
+		actualIndex := itemIndex - 1
+		if actualIndex < 0 || actualIndex >= g.level.Player.Backpack.Weapons.Len() {
 			return
 		}
-		// Получаем элемент из списка
+
 		i := 0
 		for elem := g.level.Player.Backpack.Weapons.Front(); elem != nil; elem = elem.Next() {
-			if i == itemIndex {
+			if i == actualIndex {
 				selectedItem = elem.Value
 				break
 			}
@@ -336,15 +343,16 @@ func (g *Game) handleItemSelection(actionType action.Type) {
 		return
 	}
 
-	// Используем предмет из рюкзака
-	if usableItem, ok := selectedItem.(items.Usable); ok {
+	// @todo - кривая логика, нужно декомпозировать и перенести в Player
+	if weapon, ok := selectedItem.(*items.Weapon); ok {
+		if err := g.level.Player.EquipWeapon(weapon); err != nil {
+			// @todo - вывод сообщения об ошибке в view
+		}
+	} else if usableItem, ok := selectedItem.(items.Usable); ok {
 		g.level.Player.Character.Use(usableItem)
 	}
 
-	// Удаляем предмет из рюкзака
 	_ = g.level.Player.Backpack.RemoveItem(selectedItem)
-
-	// Обновляем информацию о рюкзаке
 	g.updateBackpackInfo()
 }
 

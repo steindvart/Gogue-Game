@@ -272,9 +272,17 @@ func (g *Game) UpdateItemInfo(info *dto.ItemInfo) {
 func (g *Game) updateStatsPanel(info *dto.PlayerInfo) {
 	g.statsPanel.Clear()
 	fmt.Fprintln(g.statsPanel)
-	fmt.Fprintf(g.statsPanel, " [%s::b]HP:[-:-:-]       %.f/%-.f\n", ColorHP, info.Health, info.MaxHealth)
+	fmt.Fprintf(g.statsPanel, " [%s::b]HP:[-:-:-]       %.f/%.f\n", ColorHP, info.Health, info.MaxHealth)
 	fmt.Fprintf(g.statsPanel, " [%s::b]Strength:[-:-:-] %.f\n", ColorStrength, info.Strength)
 	fmt.Fprintf(g.statsPanel, " [%s::b]Agility:[-:-:-]  %.f\n", ColorAgility, info.Agility)
+	if info.WeaponInfo == nil {
+		fmt.Fprintf(g.statsPanel, " [%s::b]Weapon [-:-:-]   None\n", ColorWeapon)
+	} else {
+		fmt.Fprintf(
+			g.statsPanel, " [%s::b]Weapon %s:[-:-:-] %s\n",
+			ColorWeapon, info.WeaponInfo.Type, strings.Join(g.getShortEffectInfoAsStrings(info.WeaponInfo.EffectInfo), ", "),
+		)
+	}
 
 	g.updateInteractionInfo()
 }
@@ -544,7 +552,7 @@ func (g *Game) updateBackpackPanel() {
 
 	// Отображаем список предметов
 	if g.currentTab == BackpackTabWeapons {
-		fmt.Fprintf(g.backpackPanel, " 0: [%s::i]put current weapon to backpack[-:-:-]\n\n", colorSkyBlue)
+		fmt.Fprintf(g.backpackPanel, " 0: [%s::i]put current weapon to backpack[-:-:-]\n", colorSkyBlue)
 	}
 
 	if len(items) == 0 {
@@ -555,19 +563,9 @@ func (g *Game) updateBackpackPanel() {
 }
 
 func (g *Game) renderBackpackItems(items []*dto.ItemInfo) {
-	startIndex := 0
-	if g.currentTab == BackpackTabWeapons {
-		startIndex = 0 // Для оружия отображаем 0-9
-	} else {
-		startIndex = 1 // Для остальных предметов 1-9
-	}
+	startIndex := 1
 
 	for i, item := range items {
-		if i == 0 && g.currentTab == BackpackTabWeapons {
-			fmt.Fprintf(g.backpackPanel, " %d: [-:-:i]put current weapon to backpack[-:-:-]\n", i)
-			continue
-		}
-
 		if i >= MaxBackpackItemsNum {
 			break
 		}
