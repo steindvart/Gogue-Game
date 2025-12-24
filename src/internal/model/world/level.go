@@ -44,11 +44,10 @@ const (
 
 func NewLevelWithDefaults(random utils.Randomizer, mapSize primitives.Size2D[uint]) *Level {
 	cfg := DefaultLevelConfig(mapSize)
-	levelNumber := 1
 	return NewLevelWithComponents(
 		random,
 		cfg,
-		uint(levelNumber),
+		1,
 		NewGridRoomGenerator(),
 		NewConnectionTreePassageGenerator(),
 		NewRoomBasedEntitySpawner(),

@@ -16,8 +16,9 @@ import (
 )
 
 const (
-	MapHeight = 30
-	MapWidth  = 90
+	MapHeight      = 30
+	MapWidth       = 90
+	maxLevelNumber = 21
 )
 
 type Game struct {
@@ -52,7 +53,7 @@ func (g *Game) updateGameView() {
 
 	player := g.level.Player
 	if player != nil {
-		g.view.UpdatePlayerInfo(dto.ConvertPlayerToDto(g.level.Player, g.level))
+		g.view.UpdatePlayerInfo(dto.ConvertPlayerToDto(g.level.Player, g.level.Number))
 	}
 }
 
@@ -128,7 +129,6 @@ func (g *Game) handleSelectAction() {
 		case world.CollisionTypeItem:
 			g.level.PlayerUseItemAtPosition(pos)
 		case world.CollisionTypeTeleport:
-			const maxLevelNumber = 21
 			if g.level.Number <= maxLevelNumber {
 				if err := g.level.GenerateWithExistingPlayer(g.level.Player); err != nil {
 					panic("an error occurred when generating next level: " + err.Error())
