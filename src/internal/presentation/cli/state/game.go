@@ -1,6 +1,7 @@
 package state
 
 import (
+	"gogue/internal/model/entities"
 	"gogue/internal/model/primitives"
 	"gogue/internal/model/signals"
 	"gogue/internal/model/world"
@@ -53,6 +54,7 @@ func (g *Game) updateGameView() {
 	player := g.level.Player
 	if player != nil {
 		g.view.UpdatePlayerInfo(dto.ConvertPlayerToDto(g.level.Player))
+		g.updateBackpackInfo()
 	}
 }
 
@@ -101,6 +103,36 @@ func (g *Game) handleEvent(event *tcell.EventKey) *tcell.EventKey {
 		g.level.ProcessTurns(1)
 	case action.Select:
 		g.handleSelectAction()
+	case action.Take:
+		g.handleTakeAction()
+	case action.ToggleBackpack:
+		g.view.ToggleSecondInfoViewMode()
+	case action.OpenWeaponsTab:
+		g.view.SetBackpackTab(viewcli.BackpackTabWeapons)
+		if g.view.SecondInfoViewMode == viewcli.SecondInfoViewModeEffects {
+			g.view.ToggleSecondInfoViewMode()
+		}
+	case action.OpenFoodTab:
+		g.view.SetBackpackTab(viewcli.BackpackTabFood)
+		if g.view.SecondInfoViewMode == viewcli.SecondInfoViewModeEffects {
+			g.view.ToggleSecondInfoViewMode()
+		}
+	case action.OpenElixirsTab:
+		g.view.SetBackpackTab(viewcli.BackpackTabElixirs)
+		if g.view.SecondInfoViewMode == viewcli.SecondInfoViewModeEffects {
+			g.view.ToggleSecondInfoViewMode()
+		}
+	case action.OpenScrollsTab:
+		g.view.SetBackpackTab(viewcli.BackpackTabScrolls)
+		if g.view.SecondInfoViewMode == viewcli.SecondInfoViewModeEffects {
+			g.view.ToggleSecondInfoViewMode()
+		}
+	case action.Num0, action.Num1, action.Num2, action.Num3,
+		action.Num4, action.Num5, action.Num6, action.Num7,
+		action.Num8, action.Num9:
+		if g.view.SecondInfoViewMode == viewcli.SecondInfoViewModeBackpack {
+			g.handleItemSelection(g.eventToAction(event))
+		}
 	case action.Exit:
 		g.signal = signals.Stop
 		return nil
@@ -137,6 +169,27 @@ func (g *Game) handleSelectAction() {
 	}
 }
 
+func (g *Game) handleTakeAction() {
+	if g.level.Player == nil {
+		return
+	}
+
+	if g.isPlayerReadyToInteract {
+		pos := g.level.Player.GetPosition()
+
+		switch g.level.CheckEntityCollision(pos) {
+		case world.CollisionTypeItem:
+			if err := g.level.PlayerTakeItemAtPosition(pos); err != nil {
+				// @todo - вывод сообщения об ошибке в view
+				_ = sendBackpackErrorToView(1, 1)
+				return
+			}
+		}
+
+		g.resetInteraction()
+	}
+}
+
 func (g *Game) eventToAction(event *tcell.EventKey) action.Type {
 	switch event.Key() {
 	case tcell.KeyUp:
@@ -161,16 +214,40 @@ func (g *Game) eventToAction(event *tcell.EventKey) action.Type {
 		return action.MoveLeft
 	case 'd', 'в':
 		return action.MoveRight
-	case 'y', 'н':
-		return action.MoveLeftUpperCorner
-	case 'u', 'г':
-		return action.MoveRightUpperCorner
+	case 'r', 'к':
+		return action.Take
 	case 'b', 'и':
-		return action.MoveLefLowerCorner
-	case 'n', 'т':
-		return action.MoveRightLowerCorner
+		return action.ToggleBackpack
 	case 'e', 'у':
 		return action.Select
+	case 'z', 'я':
+		return action.OpenWeaponsTab
+	case 'x', 'ч':
+		return action.OpenFoodTab
+	case 'c', 'с':
+		return action.OpenElixirsTab
+	case 'v', 'м':
+		return action.OpenScrollsTab
+	case '0':
+		return action.Num0
+	case '1':
+		return action.Num1
+	case '2':
+		return action.Num2
+	case '3':
+		return action.Num3
+	case '4':
+		return action.Num4
+	case '5':
+		return action.Num5
+	case '6':
+		return action.Num6
+	case '7':
+		return action.Num7
+	case '8':
+		return action.Num8
+	case '9':
+		return action.Num9
 	}
 
 	return action.NoAction
@@ -178,6 +255,63 @@ func (g *Game) eventToAction(event *tcell.EventKey) action.Type {
 
 func (g *Game) updateItemInfo(pos primitives.Point2D[int]) {
 	g.view.UpdateItemInfo(dto.ConvertPositionalItemToDto(g.level.GetItemAtPosition(pos)))
+}
+
+func (g *Game) updateBackpackInfo() {
+	if g.level.Player != nil && g.level.Player.Backpack != nil {
+		g.view.UpdateBackpackInfo(dto.ConvertBackpackToDto(g.level.Player.Backpack))
+	}
+}
+
+// handleItemSelection обрабатывает выбор предмета из рюкзака
+func (g *Game) handleItemSelection(actionType action.Type) {
+	if g.level.Player == nil || g.level.Player.Backpack == nil {
+		return
+	}
+
+	itemIndex := int(actionType - action.Num0)
+
+	var itemType entities.BackpackItemType
+	var actualIndex int
+
+	switch g.view.GetCurrentBackpackTab() {
+	case viewcli.BackpackTabWeapons:
+		itemType = entities.BackpackItemTypeWeapon
+		// Для оружия индекс 0 - снятие текущего оружия
+		if itemIndex == 0 {
+			if err := g.level.Player.DropEquipWeaponToBackpack(); err != nil {
+				// @todo - вывод сообщения об ошибке в view
+				_ = sendBackpackErrorToView(1, 1)
+			}
+			g.updateBackpackInfo()
+			return
+		}
+		actualIndex = itemIndex - 1
+
+	case viewcli.BackpackTabFood:
+		itemType = entities.BackpackItemTypeFood
+		actualIndex = itemIndex - 1
+
+	case viewcli.BackpackTabElixirs:
+		itemType = entities.BackpackItemTypeElixir
+		actualIndex = itemIndex - 1
+
+	case viewcli.BackpackTabScrolls:
+		itemType = entities.BackpackItemTypeScroll
+		actualIndex = itemIndex - 1
+	}
+
+	selectedItem := g.level.Player.GetItemFromBackpackByIndex(itemType, actualIndex)
+	if selectedItem == nil {
+		return
+	}
+
+	if err := g.level.Player.UseItemFromBackpack(selectedItem); err != nil {
+		// @todo - вывод сообщения об ошибке в view
+		_ = sendBackpackErrorToView(1, 1)
+	}
+
+	g.updateBackpackInfo()
 }
 
 func (g *Game) Update(float64) signals.Type {
@@ -190,4 +324,9 @@ func (g *Game) Update(float64) signals.Type {
 
 func (g *Game) Primitive() tview.Primitive {
 	return g.view.GetRootPrimitive()
+}
+
+// @todo - вывод сообщения об ошибке в view
+func sendBackpackErrorToView(a, b int) int {
+	return a + b
 }

@@ -14,7 +14,7 @@ type Usable interface {
 	Use() *primitives.Effect
 }
 
-type Takable interface {
+type Takeable interface {
 	Take() int32
 }
 

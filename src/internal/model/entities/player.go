@@ -1,6 +1,7 @@
 package entities
 
 import (
+	"container/list"
 	"gogue/internal/model/items"
 	"gogue/internal/model/primitives"
 )
@@ -13,6 +14,15 @@ type Player struct {
 	Level      uint
 	ViewRadius int
 }
+
+type BackpackItemType int
+
+const (
+	BackpackItemTypeWeapon BackpackItemType = iota
+	BackpackItemTypeFood
+	BackpackItemTypeElixir
+	BackpackItemTypeScroll
+)
 
 func NewPlayer(box primitives.Box) *Player {
 	return &Player{
@@ -33,22 +43,28 @@ func NewPlayer(box primitives.Box) *Player {
 	}
 }
 
+func (p *Player) DropEquipWeaponToBackpack() error {
+	if p.Weapon == nil {
+		return nil
+	}
+
+	if err := p.Backpack.AddItem(p.Weapon); err != nil {
+		return err
+	}
+
+	_ = p.UnequipWeapon()
+
+	return nil
+}
+
 func (p *Player) EquipWeapon(w *items.Weapon) error {
 	if w == nil {
 		return nil
 	}
 
 	// Если уже есть экипированный предмет, пытаемся положить его в рюкзак.
-	if p.Weapon != nil {
-		if p.Backpack.IsFull() {
-			return items.BackpackIsFullError{}
-		}
-
-		previousWeapon := p.UnequipWeapon()
-		err := p.Backpack.AddItem(previousWeapon)
-		if err != nil {
-			return err
-		}
+	if err := p.DropEquipWeaponToBackpack(); err != nil {
+		return err
 	}
 
 	p.Weapon = w
@@ -66,4 +82,53 @@ func (p *Player) UnequipWeapon() *items.Weapon {
 		p.Weapon = nil
 	}
 	return w
+}
+
+// GetItemFromBackpackByIndex возвращает предмет из рюкзака по индексу в зависимости от типа
+func (p *Player) GetItemFromBackpackByIndex(itemType BackpackItemType, index int) any {
+	var targetList *list.List
+
+	switch itemType {
+	case BackpackItemTypeWeapon:
+		targetList = p.Backpack.Weapons
+	case BackpackItemTypeFood:
+		targetList = p.Backpack.Foods
+	case BackpackItemTypeElixir:
+		targetList = p.Backpack.Elixirs
+	case BackpackItemTypeScroll:
+		targetList = p.Backpack.Scrolls
+	default:
+		return nil
+	}
+
+	if index < 0 || index >= targetList.Len() {
+		return nil
+	}
+
+	i := 0
+	for elem := targetList.Front(); elem != nil; elem = elem.Next() {
+		if i == index {
+			return elem.Value
+		}
+		i++
+	}
+
+	return nil
+}
+
+func (p *Player) UseItemFromBackpack(item any) error {
+	if item == nil {
+		return items.ItemIsNotInBackpackError{}
+	}
+
+	// Обрабатываем оружие отдельно
+	if weapon, ok := item.(*items.Weapon); ok {
+		if err := p.EquipWeapon(weapon); err != nil {
+			return err
+		}
+	} else if usableItem, ok := item.(items.Usable); ok {
+		p.Character.Use(usableItem)
+	}
+
+	return p.Backpack.RemoveItem(item)
 }
