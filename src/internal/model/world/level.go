@@ -30,7 +30,7 @@ type Level struct {
 	entitySpawner EntitySpawner
 	playerSpawner PlayerSpawner
 	fieldRenderer FieldRenderer
-	fogOfWar      *FogOfWar
+	FogOfWar      *FogOfWar
 }
 
 type CollisionType int
@@ -75,7 +75,7 @@ func NewLevelWithComponents(
 		playerSpawner: playerSpawner,
 		Number:        levelNumber,
 		fieldRenderer: fieldRenderer,
-		fogOfWar:      NewFogOfWar(int(cfg.MapSize.Width), int(cfg.MapSize.Height)),
+		FogOfWar:      NewFogOfWar(int(cfg.MapSize.Width), int(cfg.MapSize.Height)),
 		Enemies:       []entities.Enemy{},
 		Items:         []primitives.Positional2D[int]{},
 	}
@@ -121,7 +121,7 @@ func (l *Level) GenerateWithExistingPlayer(player *entities.Player) error {
 
 func (l *Level) generateEnvironment() error {
 	// Сбрасываем туман войны при генерации нового уровня
-	l.fogOfWar.Reset()
+	l.FogOfWar.Reset()
 
 	// Геометрия
 	rooms, finishPortal, err := l.roomGen.GenerateRooms(l.config, l.random)
@@ -302,7 +302,7 @@ func (l *Level) MakeCurrentField(w, h int) [][]common.GameEntityType {
 	}
 
 	// Фильтруем поле с учётом тумана войны и радиуса обзора игрока
-	return l.fogOfWar.ApplyFogOfWar(fullField, l.Player.GetPosition(), l.Player.ViewRadius)
+	return l.FogOfWar.ApplyFogOfWar(fullField, l.Player.GetPosition(), l.Player.ViewRadius)
 }
 
 func (l *Level) PlayerUseItemAtPosition(pos primitives.Point2D[int]) {
