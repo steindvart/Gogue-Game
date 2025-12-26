@@ -125,6 +125,7 @@ type Game struct {
 	SecondInfoViewMode SecondInfoViewMode
 	currentTab         BackpackTab
 	playerBackpackInfo *dto.BackpackInfo
+	backpackDropMode   bool
 }
 
 func NewGame() *Game {
@@ -520,6 +521,13 @@ func (g *Game) GetCurrentBackpackTab() BackpackTab {
 	return g.currentTab
 }
 
+func (g *Game) SetBackpackDropMode(dropMode bool) {
+	g.backpackDropMode = dropMode
+	if g.SecondInfoViewMode == SecondInfoViewModeBackpack {
+		g.updateBackpackPanel()
+	}
+}
+
 func (g *Game) updateBackpackPanel() {
 	g.backpackPanel.Clear()
 
@@ -554,11 +562,23 @@ func (g *Game) updateBackpackPanel() {
 
 	fmt.Fprintf(g.backpackPanel, "[%s::b]Common capacity: %d/%d\n", colorBrown, g.playerBackpackInfo.ItemsNum, g.playerBackpackInfo.Capacity)
 	fmt.Fprintf(g.backpackPanel, " [%s::b]%s:[-:-:-] %d\n", color, tabName, len(items))
+
+	modeStr := "USE"
+	modeColor := colorLightGreen
+	if g.backpackDropMode {
+		modeStr = "DROP"
+		modeColor = colorTomato
+	}
+	fmt.Fprintf(g.backpackPanel, " [%s::b]Mode (toggle 'n'): %s[-:-:-]\n", modeColor, modeStr)
 	fmt.Fprintln(g.backpackPanel)
 
 	// Отображаем список предметов
 	if g.currentTab == BackpackTabWeapons {
-		fmt.Fprintf(g.backpackPanel, " 0: [%s::i]put current weapon to backpack[-:-:-]\n", colorSkyBlue)
+		if g.backpackDropMode {
+			fmt.Fprintf(g.backpackPanel, " 0: [%s::i]drop current weapon[-:-:-]\n", colorSkyBlue)
+		} else {
+			fmt.Fprintf(g.backpackPanel, " 0: [%s::i]put current weapon to backpack[-:-:-]\n", colorSkyBlue)
+		}
 	}
 
 	if len(items) == 0 {
