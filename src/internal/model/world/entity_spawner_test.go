@@ -42,17 +42,17 @@ func TestRoomBasedEntitySpawner_SpawnEntities(t *testing.T) {
 	}
 
 	// Проверяем что сущности созданы
-	if foodCount != int(config.ItemsSpawnConfig.FoodsQuntity) {
-		t.Errorf("Expected %d foods, got %d", config.ItemsSpawnConfig.FoodsQuntity, foodCount)
+	if foodCount != int(config.ItemsSpawnConfig.FoodsQuantity) {
+		t.Errorf("Expected %d foods, got %d", config.ItemsSpawnConfig.FoodsQuantity, foodCount)
 	}
-	if elixirCount != int(config.ItemsSpawnConfig.ElixirsQuntity) {
-		t.Errorf("Expected %d elixirs, got %d", config.ItemsSpawnConfig.ElixirsQuntity, elixirCount)
+	if elixirCount != int(config.ItemsSpawnConfig.ElixirsQuantity) {
+		t.Errorf("Expected %d elixirs, got %d", config.ItemsSpawnConfig.ElixirsQuantity, elixirCount)
 	}
-	if scrollCount != int(config.ItemsSpawnConfig.ScrollsQuntity) {
-		t.Errorf("Expected %d scrolls, got %d", config.ItemsSpawnConfig.ScrollsQuntity, scrollCount)
+	if scrollCount != int(config.ItemsSpawnConfig.ScrollsQuantity) {
+		t.Errorf("Expected %d scrolls, got %d", config.ItemsSpawnConfig.ScrollsQuantity, scrollCount)
 	}
-	if weaponCount != int(config.ItemsSpawnConfig.WeaponsQuntity) {
-		t.Errorf("Expected %d weapons, got %d", config.ItemsSpawnConfig.WeaponsQuntity, weaponCount)
+	if weaponCount != int(config.ItemsSpawnConfig.WeaponsQuantity) {
+		t.Errorf("Expected %d weapons, got %d", config.ItemsSpawnConfig.WeaponsQuantity, weaponCount)
 	}
 
 	// Проверяем что все позиции уникальны
@@ -175,10 +175,10 @@ func TestRoomBasedEntitySpawner_SpawnEntities_ZeroCounts(t *testing.T) {
 	source := rand.New(rand.NewSource(randomSeedTest))
 	mapSize := primitives.Size2D[uint]{Height: 30, Width: 90}
 	config := DefaultLevelConfig(mapSize)
-	config.ItemsSpawnConfig.FoodsQuntity = 0
-	config.ItemsSpawnConfig.ElixirsQuntity = 0
-	config.ItemsSpawnConfig.ScrollsQuntity = 0
-	config.ItemsSpawnConfig.WeaponsQuntity = 0
+	config.ItemsSpawnConfig.FoodsQuantity = 0
+	config.ItemsSpawnConfig.ElixirsQuantity = 0
+	config.ItemsSpawnConfig.ScrollsQuantity = 0
+	config.ItemsSpawnConfig.WeaponsQuantity = 0
 
 	roomGen := NewGridRoomGenerator()
 	rooms, _, err := roomGen.GenerateRooms(config, source)
