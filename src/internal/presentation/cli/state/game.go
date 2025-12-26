@@ -290,7 +290,6 @@ func (g *Game) updateBackpackInfo() {
 	}
 }
 
-// handleItemSelection обрабатывает выбор предмета из рюкзака
 func (g *Game) handleItemSelection(actionType action.Type) {
 	if g.level.Player == nil || g.level.Player.Backpack == nil {
 		return
@@ -341,7 +340,6 @@ func (g *Game) handleItemSelection(actionType action.Type) {
 	g.updateBackpackInfo()
 }
 
-// handleItemDrop обрабатывает выбрасывание предмета из рюкзака
 func (g *Game) handleItemDrop(actionType action.Type) {
 	if g.level.Player == nil || g.level.Player.Backpack == nil {
 		return
