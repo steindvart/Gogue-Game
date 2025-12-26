@@ -12,6 +12,14 @@ const (
 	EnemyTypeSnakeMage
 )
 
+var EnemyTypes = []EnemyType{
+	EnemyTypeZombie,
+	EnemyTypeVampire,
+	EnemyTypeGhost,
+	EnemyTypeOgre,
+	EnemyTypeSnakeMage,
+}
+
 type Direction float64
 
 const (
@@ -52,31 +60,31 @@ type Enemy struct {
 }
 
 type Zombie struct {
-	Enemy Enemy
+	*Enemy
 }
 
 type Vampire struct {
-	Enemy            Enemy
+	*Enemy
 	AbsoluteEvasions float64
 }
 
 type Ghost struct {
-	Enemy     Enemy
+	*Enemy
 	IsVisible bool
 }
 
 type Ogre struct {
-	Enemy     Enemy
+	*Enemy
 	IsResting bool
 }
 
 type SnakeMage struct {
-	Enemy Enemy
+	*Enemy
 }
 
 func NewZombie(box *primitives.Box) *Zombie {
 	return &Zombie{
-		Enemy: Enemy{
+		Enemy: &Enemy{
 			Character: &Character{
 				Box: box,
 				Attributes: &primitives.Attributes{
@@ -95,7 +103,7 @@ func NewZombie(box *primitives.Box) *Zombie {
 
 func NewVampire(box *primitives.Box) *Vampire {
 	return &Vampire{
-		Enemy: Enemy{
+		Enemy: &Enemy{
 			Character: &Character{
 				Box: box,
 				Attributes: &primitives.Attributes{
@@ -115,7 +123,7 @@ func NewVampire(box *primitives.Box) *Vampire {
 
 func NewGhost(box *primitives.Box) *Ghost {
 	return &Ghost{
-		Enemy: Enemy{
+		Enemy: &Enemy{
 			Character: &Character{
 				Box: box,
 				Attributes: &primitives.Attributes{
@@ -135,7 +143,7 @@ func NewGhost(box *primitives.Box) *Ghost {
 
 func NewOgre(box *primitives.Box) *Ogre {
 	return &Ogre{
-		Enemy: Enemy{
+		Enemy: &Enemy{
 			Character: &Character{
 				Box: box,
 				Attributes: &primitives.Attributes{
@@ -155,7 +163,7 @@ func NewOgre(box *primitives.Box) *Ogre {
 
 func NewSnakeMage(box *primitives.Box) *SnakeMage {
 	return &SnakeMage{
-		Enemy: Enemy{
+		Enemy: &Enemy{
 			Character: &Character{
 				Box: box,
 				Attributes: &primitives.Attributes{

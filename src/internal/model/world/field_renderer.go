@@ -141,17 +141,16 @@ func (r *DefaultFieldRenderer) renderItems(
 		case *items.Weapon:
 			field[pt.Y][pt.X] = common.Weapon
 		case *items.Treasure:
-			// TODO: Добавить константу Treasure в common.GameEntityType
-			field[pt.Y][pt.X] = common.Weapon // Временно используем Weapon
+			// @todo: Добавить константу Treasure в common.GameEntityType
 		}
 	}
 }
 
-func (r *DefaultFieldRenderer) renderEnemies(enemies []entities.Enemy, field [][]common.GameEntityType, width, height int) {
+func (r *DefaultFieldRenderer) renderEnemies(enemies []primitives.Positional2D[int], field [][]common.GameEntityType, width, height int) {
 	for _, enemy := range enemies {
 		pt := enemy.GetPosition()
 		if r.isInBoundsWH(pt.X, pt.Y, width, height) {
-			field[pt.Y][pt.X] = convertEnemyToEntityType(enemy.Type)
+			field[pt.Y][pt.X] = convertEnemyToEntityType(enemy)
 		}
 	}
 }
@@ -233,19 +232,20 @@ func convertScrollToEntityType(scrollType items.ScrollType) common.GameEntityTyp
 	}
 }
 
-func convertEnemyToEntityType(enemyType entities.EnemyType) common.GameEntityType {
-	switch enemyType {
-	case entities.EnemyTypeZombie:
+// Пример того, как можем из интерфейса определить конкретный тип, без доп. полей
+func convertEnemyToEntityType(enemy any) common.GameEntityType {
+	switch enemy.(type) {
+	case *entities.Zombie:
 		return common.EntityTypeZombie
-	case entities.EnemyTypeVampire:
+	case *entities.Vampire:
 		return common.EntityTypeVampire
-	case entities.EnemyTypeGhost:
+	case *entities.Ghost:
 		return common.EntityTypeGhost
-	case entities.EnemyTypeOgre:
+	case *entities.Ogre:
 		return common.EntityTypeOgre
-	case entities.EnemyTypeSnakeMage:
+	case *entities.SnakeMage:
 		return common.EntityTypeSnakeMage
-	default:
-		return common.EntityTypeZombie
 	}
+
+	return common.EntityTypeNone
 }

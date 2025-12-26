@@ -16,7 +16,8 @@ type LevelConfig struct {
 	MaxExtraPassageCount int
 	NumberXYSections     int
 	RoomsCount           int
-	ItemCounts           ItemSpawnConfig
+	ItemsSpawnConfig     ItemSpawnConfig
+	EnemiesSpawnConfig   EnemySpawnConfig
 }
 
 type ItemSpawnConfig struct {
@@ -24,6 +25,10 @@ type ItemSpawnConfig struct {
 	ElixirsQuntity uint
 	ScrollsQuntity uint
 	WeaponsQuntity uint
+}
+
+type EnemySpawnConfig struct {
+	Quantity uint
 }
 
 func DefaultLevelConfig(mapSize primitives.Size2D[uint]) LevelConfig {
@@ -37,11 +42,14 @@ func DefaultLevelConfig(mapSize primitives.Size2D[uint]) LevelConfig {
 		MaxExtraPassageCount: 2,
 		NumberXYSections:     3,
 		RoomsCount:           9,
-		ItemCounts: ItemSpawnConfig{
+		ItemsSpawnConfig: ItemSpawnConfig{
 			FoodsQuntity:   7,
 			ElixirsQuntity: 5,
 			ScrollsQuntity: 3,
 			WeaponsQuntity: 1,
+		},
+		EnemiesSpawnConfig: EnemySpawnConfig{
+			Quantity: 10,
 		},
 	}
 }

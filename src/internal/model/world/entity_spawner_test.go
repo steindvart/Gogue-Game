@@ -21,7 +21,7 @@ func TestRoomBasedEntitySpawner_SpawnEntities(t *testing.T) {
 
 	// Генерируем сущности
 	spawner := NewRoomBasedEntitySpawner()
-	entities, err := spawner.SpawnEntities(rooms, config.ItemCounts, source)
+	entities, err := spawner.SpawnEntities(rooms, config.ItemsSpawnConfig, config.EnemiesSpawnConfig, source)
 	if err != nil {
 		t.Fatalf("SpawnEntities failed: %v", err)
 	}
@@ -42,17 +42,17 @@ func TestRoomBasedEntitySpawner_SpawnEntities(t *testing.T) {
 	}
 
 	// Проверяем что сущности созданы
-	if foodCount != int(config.ItemCounts.FoodsQuntity) {
-		t.Errorf("Expected %d foods, got %d", config.ItemCounts.FoodsQuntity, foodCount)
+	if foodCount != int(config.ItemsSpawnConfig.FoodsQuntity) {
+		t.Errorf("Expected %d foods, got %d", config.ItemsSpawnConfig.FoodsQuntity, foodCount)
 	}
-	if elixirCount != int(config.ItemCounts.ElixirsQuntity) {
-		t.Errorf("Expected %d elixirs, got %d", config.ItemCounts.ElixirsQuntity, elixirCount)
+	if elixirCount != int(config.ItemsSpawnConfig.ElixirsQuntity) {
+		t.Errorf("Expected %d elixirs, got %d", config.ItemsSpawnConfig.ElixirsQuntity, elixirCount)
 	}
-	if scrollCount != int(config.ItemCounts.ScrollsQuntity) {
-		t.Errorf("Expected %d scrolls, got %d", config.ItemCounts.ScrollsQuntity, scrollCount)
+	if scrollCount != int(config.ItemsSpawnConfig.ScrollsQuntity) {
+		t.Errorf("Expected %d scrolls, got %d", config.ItemsSpawnConfig.ScrollsQuntity, scrollCount)
 	}
-	if weaponCount != int(config.ItemCounts.WeaponsQuntity) {
-		t.Errorf("Expected %d weapons, got %d", config.ItemCounts.WeaponsQuntity, weaponCount)
+	if weaponCount != int(config.ItemsSpawnConfig.WeaponsQuntity) {
+		t.Errorf("Expected %d weapons, got %d", config.ItemsSpawnConfig.WeaponsQuntity, weaponCount)
 	}
 
 	// Проверяем что все позиции уникальны
@@ -79,7 +79,7 @@ func TestRoomBasedEntitySpawner_SpawnEntities_InRoomBounds(t *testing.T) {
 	}
 
 	spawner := NewRoomBasedEntitySpawner()
-	entities, err := spawner.SpawnEntities(rooms, config.ItemCounts, source)
+	entities, err := spawner.SpawnEntities(rooms, config.ItemsSpawnConfig, config.EnemiesSpawnConfig, source)
 	if err != nil {
 		t.Fatalf("SpawnEntities failed: %v", err)
 	}
@@ -133,7 +133,7 @@ func TestRoomBasedEntitySpawner_SpawnEntities_NoStartRoom(t *testing.T) {
 	}
 
 	spawner := NewRoomBasedEntitySpawner()
-	entities, err := spawner.SpawnEntities(rooms, config.ItemCounts, source)
+	entities, err := spawner.SpawnEntities(rooms, config.ItemsSpawnConfig, config.EnemiesSpawnConfig, source)
 	if err != nil {
 		t.Fatalf("SpawnEntities failed: %v", err)
 	}
@@ -163,7 +163,7 @@ func TestRoomBasedEntitySpawner_SpawnEntities_EmptyRooms(t *testing.T) {
 	config := DefaultLevelConfig(mapSize)
 
 	spawner := NewRoomBasedEntitySpawner()
-	_, err := spawner.SpawnEntities([]Room{}, config.ItemCounts, source)
+	_, err := spawner.SpawnEntities([]Room{}, config.ItemsSpawnConfig, config.EnemiesSpawnConfig, source)
 
 	if err == nil {
 		t.Error("Expected error for empty rooms, got nil")
@@ -175,10 +175,10 @@ func TestRoomBasedEntitySpawner_SpawnEntities_ZeroCounts(t *testing.T) {
 	source := rand.New(rand.NewSource(randomSeedTest))
 	mapSize := primitives.Size2D[uint]{Height: 30, Width: 90}
 	config := DefaultLevelConfig(mapSize)
-	config.ItemCounts.FoodsQuntity = 0
-	config.ItemCounts.ElixirsQuntity = 0
-	config.ItemCounts.ScrollsQuntity = 0
-	config.ItemCounts.WeaponsQuntity = 0
+	config.ItemsSpawnConfig.FoodsQuntity = 0
+	config.ItemsSpawnConfig.ElixirsQuntity = 0
+	config.ItemsSpawnConfig.ScrollsQuntity = 0
+	config.ItemsSpawnConfig.WeaponsQuntity = 0
 
 	roomGen := NewGridRoomGenerator()
 	rooms, _, err := roomGen.GenerateRooms(config, source)
@@ -187,7 +187,7 @@ func TestRoomBasedEntitySpawner_SpawnEntities_ZeroCounts(t *testing.T) {
 	}
 
 	spawner := NewRoomBasedEntitySpawner()
-	entities, err := spawner.SpawnEntities(rooms, config.ItemCounts, source)
+	entities, err := spawner.SpawnEntities(rooms, config.ItemsSpawnConfig, config.EnemiesSpawnConfig, source)
 	if err != nil {
 		t.Fatalf("SpawnEntities failed: %v", err)
 	}

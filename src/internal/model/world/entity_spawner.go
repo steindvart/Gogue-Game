@@ -52,7 +52,8 @@ func NewRoomBasedEntitySpawner() *RoomBasedEntitySpawner {
 
 func (s *RoomBasedEntitySpawner) SpawnEntities(
 	rooms []Room,
-	config ItemSpawnConfig,
+	itemsConfig ItemSpawnConfig,
+	enemiesConfig EnemySpawnConfig,
 	random utils.Randomizer,
 ) (*SpawnedEntities, error) {
 	if len(rooms) == 0 {
@@ -61,7 +62,7 @@ func (s *RoomBasedEntitySpawner) SpawnEntities(
 
 	result := &SpawnedEntities{
 		Items:   make([]primitives.Positional2D[int], 0),
-		Enemies: make([]entities.Enemy, 0),
+		Enemies: make([]primitives.Positional2D[int], 0),
 	}
 
 	// Создаем изменяемые копии комнат для отслеживания занятых позиций
@@ -72,7 +73,7 @@ func (s *RoomBasedEntitySpawner) SpawnEntities(
 
 	// Спавним предметы
 	var err error
-	foods, err := s.spawnFoods(roomsForSpawning, config.FoodsQuntity, random)
+	foods, err := s.spawnFoods(roomsForSpawning, itemsConfig.FoodsQuntity, random)
 	if err != nil {
 		return nil, fmt.Errorf("failed to spawn foods: %w", err)
 	}
@@ -80,7 +81,7 @@ func (s *RoomBasedEntitySpawner) SpawnEntities(
 		result.Items = append(result.Items, &foods[i])
 	}
 
-	elixirs, err := s.spawnElixirs(roomsForSpawning, config.ElixirsQuntity, random)
+	elixirs, err := s.spawnElixirs(roomsForSpawning, itemsConfig.ElixirsQuntity, random)
 	if err != nil {
 		return nil, fmt.Errorf("failed to spawn elixirs: %w", err)
 	}
@@ -88,7 +89,7 @@ func (s *RoomBasedEntitySpawner) SpawnEntities(
 		result.Items = append(result.Items, &elixirs[i])
 	}
 
-	scrolls, err := s.spawnScrolls(roomsForSpawning, config.ScrollsQuntity, random)
+	scrolls, err := s.spawnScrolls(roomsForSpawning, itemsConfig.ScrollsQuntity, random)
 	if err != nil {
 		return nil, fmt.Errorf("failed to spawn scrolls: %w", err)
 	}
@@ -96,12 +97,17 @@ func (s *RoomBasedEntitySpawner) SpawnEntities(
 		result.Items = append(result.Items, &scrolls[i])
 	}
 
-	weapons, err := s.spawnWeapons(roomsForSpawning, config.WeaponsQuntity, random)
+	weapons, err := s.spawnWeapons(roomsForSpawning, itemsConfig.WeaponsQuntity, random)
 	if err != nil {
 		return nil, fmt.Errorf("failed to spawn weapons: %w", err)
 	}
 	for i := range weapons {
 		result.Items = append(result.Items, &weapons[i])
+	}
+
+	result.Enemies, err = s.spawnEnemies(roomsForSpawning, enemiesConfig.Quantity, random)
+	if err != nil {
+		return nil, fmt.Errorf("failed to spawn enemies: %w", err)
 	}
 
 	return result, nil
@@ -212,6 +218,45 @@ func (s *RoomBasedEntitySpawner) spawnWeapons(
 
 		weapon := items.NewWeaponBuiltin(random, itemBox, weaponType)
 		result = append(result, *weapon)
+
+		room.MarkOccupied(*pos)
+	}
+
+	return result, nil
+}
+
+func (s *RoomBasedEntitySpawner) spawnEnemies(
+	rooms []*Room,
+	quantity uint,
+	random utils.Randomizer,
+) ([]primitives.Positional2D[int], error) {
+	result := make([]primitives.Positional2D[int], 0, quantity)
+
+	for i := uint(0); i < quantity; i++ {
+		room, pos, err := s.findAvailablePositionInSomeRoom(rooms, random)
+		if err != nil {
+			return nil, err
+		}
+
+		enemyType := utils.GetRandomElement(random, entities.EnemyTypes)
+		box := &primitives.Box{
+			Point: *pos,
+			Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
+		}
+
+		// Пример как мы можем помещать разные типы врагов в одну через общий интерфейс
+		switch enemyType {
+		case entities.EnemyTypeZombie:
+			result = append(result, entities.NewZombie(box))
+		case entities.EnemyTypeVampire:
+			result = append(result, entities.NewVampire(box))
+		case entities.EnemyTypeGhost:
+			result = append(result, entities.NewGhost(box))
+		case entities.EnemyTypeOgre:
+			result = append(result, entities.NewOgre(box))
+		case entities.EnemyTypeSnakeMage:
+			result = append(result, entities.NewSnakeMage(box))
+		}
 
 		room.MarkOccupied(*pos)
 	}

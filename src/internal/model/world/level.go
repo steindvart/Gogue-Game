@@ -16,7 +16,7 @@ type Level struct {
 
 	// Сущности, хранящиеся непосредственно в уровне
 	Player  *entities.Player
-	Enemies []entities.Enemy
+	Enemies []primitives.Positional2D[int]
 	Items   []primitives.Positional2D[int]
 
 	// Метаданные
@@ -74,7 +74,7 @@ func NewLevelWithComponents(
 		playerSpawner: playerSpawner,
 		fieldRenderer: fieldRenderer,
 		fogOfWar:      NewFogOfWar(int(cfg.MapSize.Width), int(cfg.MapSize.Height)),
-		Enemies:       []entities.Enemy{},
+		Enemies:       []primitives.Positional2D[int]{},
 		Items:         []primitives.Positional2D[int]{},
 	}
 }
@@ -135,7 +135,7 @@ func (l *Level) generateEnvironment() error {
 	l.Passages = passages
 
 	// Сущности
-	spawned, err := l.entitySpawner.SpawnEntities(l.Rooms, l.config.ItemCounts, l.random)
+	spawned, err := l.entitySpawner.SpawnEntities(l.Rooms, l.config.ItemsSpawnConfig, l.config.EnemiesSpawnConfig, l.random)
 	if err != nil {
 		return err
 	}
