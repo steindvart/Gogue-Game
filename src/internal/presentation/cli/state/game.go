@@ -2,8 +2,6 @@ package state
 
 import (
 	"encoding/json"
-	"gogue/internal/model/entities"
-	"gogue/internal/model/items"
 	"gogue/internal/model/primitives"
 	"gogue/internal/model/signals"
 	"gogue/internal/model/world"
@@ -56,7 +54,6 @@ func NewGame() (*Game, error) {
 
 func LoadGame() (*Game, error) {
 	source := rand.New(rand.NewSource(time.Now().UnixNano()))
-
 	game := Game{
 		level: world.NewLevelWithDefaults(source, primitives.Size2D[uint]{Height: MapHeight, Width: MapWidth}),
 		view:  viewcli.NewGame(),
@@ -68,59 +65,23 @@ func LoadGame() (*Game, error) {
 	}
 	defer file.Close()
 
-	var gameSave dto.GameSaveDto
+	gameSave := dto.GameSaveDto{}
 	decoder := json.NewDecoder(file)
 	if err := decoder.Decode(&gameSave); err != nil {
 		return nil, err
 	}
-
-	game.level.Player = &entities.Player{
-		Character: &entities.Character{
-			Box: &primitives.Box{
-				Point: gameSave.Player.Position,
-			},
-			Attributes: &primitives.Attributes{
-				Health:    gameSave.Player.Health,
-				MaxHealth: gameSave.Player.MaxHealth,
-				Strength:  gameSave.Player.Strength,
-				Agility:   gameSave.Player.Agility,
-			},
-		},
-		Experience: gameSave.Player.Experience,
-		Level:      gameSave.Player.Level,
-		ViewRadius: gameSave.Player.ViewRadius,
-		Backpack:   items.NewBackpack(),
-		Weapon:     nil,
-	}
+	game.level.Number = gameSave.LevelNumber
+	game.level.Rooms = gameSave.Rooms
+	game.level.Passages = gameSave.Passages
 	game.level.FinishPortal = gameSave.FinishPortal
+	game.level.Player = &gameSave.Player
 
-	gameRooms := make([]world.Room, len(gameSave.Rooms))
-	for i, roomDTO := range gameSave.Rooms {
-		gameRooms[i] = world.Room{
-			Box:   &roomDTO.Box,
-			Type:  world.RoomTypeOrdinary,
-			Doors: roomDTO.Doors,
-		}
-	}
-	game.level.Rooms = gameRooms
-
-	gamePassages := make([]world.Passage, len(gameSave.Passages))
-	for i, passagesDTO := range gameSave.Passages {
-		gamePassages[i] = world.Passage{
-			Way:     passagesDTO.Way,
-			DoorOne: passagesDTO.DoorOne,
-			DoorTwo: passagesDTO.DoorTwo,
-		}
-	}
-	game.level.Passages = gamePassages
-
-	exploredMap := make(map[primitives.Point2D[int]]bool, len(gameSave.FogOfWar.ExploredTiles))
+	fogOfWarMap := make(map[primitives.Point2D[int]]bool, len(gameSave.FogOfWar.ExploredTiles))
 	for _, point := range gameSave.FogOfWar.ExploredTiles {
-		exploredMap[point] = true
+		fogOfWarMap[point] = true
 	}
-
 	game.level.FogOfWar = &world.FogOfWar{
-		ExploredTiles: exploredMap,
+		ExploredTiles: fogOfWarMap,
 		Width:         gameSave.FogOfWar.Width,
 		Height:        gameSave.FogOfWar.Height,
 	}
@@ -284,46 +245,19 @@ func (g *Game) Primitive() tview.Primitive {
 }
 
 func (g *Game) SaveToFile(filename string) error {
-	roomsDto := make([]dto.RoomDTO, len(g.level.Rooms))
-	for i, room := range g.level.Rooms {
-		roomsDto[i] = dto.RoomDTO{
-			Box:   *room.Box,
-			Doors: append([]primitives.Point2D[int](nil), room.Doors...),
-		}
-	}
-
-	passagesDto := make([]dto.PassageDTO, len(g.level.Passages))
-	for i, passage := range g.level.Passages {
-		passagesDto[i] = dto.PassageDTO{
-			DoorOne: passage.DoorOne,
-			DoorTwo: passage.DoorTwo,
-			Way:     append([]primitives.Point2D[int](nil), passage.Way...),
-		}
-	}
-
-	exploredList := make([]primitives.Point2D[int], 0, len(g.level.FogOfWar.ExploredTiles))
+	fogOfWarList := make([]primitives.Point2D[int], 0, len(g.level.FogOfWar.ExploredTiles))
 	for point := range g.level.FogOfWar.ExploredTiles {
-		exploredList = append(exploredList, point)
+		fogOfWarList = append(fogOfWarList, point)
 	}
 
 	gameDto := dto.GameSaveDto{
-		SaveVersion: "1",
-		LevelNumber: g.level.Number,
-		Rooms:       roomsDto,
-		Passages:    passagesDto,
-		Player: dto.PlayerSaveDTO{
-			Position:   g.level.Player.GetPosition(),
-			Health:     g.level.Player.Health,
-			MaxHealth:  g.level.Player.MaxHealth,
-			Strength:   g.level.Player.Strength,
-			Agility:    g.level.Player.Agility,
-			Level:      g.level.Number,
-			Experience: g.level.Player.Experience,
-			ViewRadius: g.level.Player.ViewRadius,
-		},
+		LevelNumber:  g.level.Number,
+		Rooms:        g.level.Rooms,
+		Passages:     g.level.Passages,
+		Player:       *g.level.Player,
 		FinishPortal: g.level.FinishPortal,
 		FogOfWar: dto.FogOfWarDto{
-			ExploredTiles: exploredList,
+			ExploredTiles: fogOfWarList,
 			Width:         g.level.FogOfWar.Width,
 			Height:        g.level.FogOfWar.Height,
 		},
