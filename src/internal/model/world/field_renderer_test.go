@@ -14,7 +14,7 @@ func TestDefaultFieldRenderer_RenderMap_EmptyLevel(t *testing.T) {
 		Rooms:    []Room{},
 		Passages: []Passage{},
 		Items:    []primitives.Positional2D[int]{},
-		Enemies:  []entities.Enemy{},
+		Enemies:  []primitives.Positional2D[int]{},
 		Player:   nil,
 	}
 
@@ -52,7 +52,7 @@ func TestDefaultFieldRenderer_RenderSingleRoom(t *testing.T) {
 		Rooms:    []Room{room},
 		Passages: []Passage{},
 		Items:    []primitives.Positional2D[int]{},
-		Enemies:  []entities.Enemy{},
+		Enemies:  []primitives.Positional2D[int]{},
 		Player:   nil,
 		FinishPortal: primitives.Box{
 			Point: primitives.Point2D[int]{X: -1, Y: -1},
@@ -109,7 +109,7 @@ func TestDefaultFieldRenderer_RenderPassage(t *testing.T) {
 		Rooms:    []Room{},
 		Passages: []Passage{passage},
 		Items:    []primitives.Positional2D[int]{},
-		Enemies:  []entities.Enemy{},
+		Enemies:  []primitives.Positional2D[int]{},
 		Player:   nil,
 		FinishPortal: primitives.Box{
 			Point: primitives.Point2D[int]{X: -1, Y: -1},
@@ -150,7 +150,7 @@ func TestDefaultFieldRenderer_RenderPortal(t *testing.T) {
 		Rooms:    []Room{room},
 		Passages: []Passage{},
 		Items:    []primitives.Positional2D[int]{},
-		Enemies:  []entities.Enemy{},
+		Enemies:  []primitives.Positional2D[int]{},
 		Player:   nil,
 		FinishPortal: primitives.Box{
 			Point: primitives.Point2D[int]{X: 3, Y: 3},
@@ -213,7 +213,7 @@ func TestDefaultFieldRenderer_RenderItems(t *testing.T) {
 		Rooms:    []Room{},
 		Passages: []Passage{},
 		Items:    []primitives.Positional2D[int]{&food, &elixir, &scroll, &weapon},
-		Enemies:  []entities.Enemy{},
+		Enemies:  []primitives.Positional2D[int]{},
 		Player:   nil,
 		FinishPortal: primitives.Box{
 			Point: primitives.Point2D[int]{X: -1, Y: -1},
@@ -241,31 +241,21 @@ func TestDefaultFieldRenderer_RenderItems(t *testing.T) {
 func TestDefaultFieldRenderer_RenderEnemies(t *testing.T) {
 	renderer := NewDefaultFieldRenderer()
 
-	zombie := entities.Enemy{
-		Type: entities.EnemyTypeZombie,
-		Character: &entities.Character{
-			Box: &primitives.Box{
-				Point: primitives.Point2D[int]{X: 3, Y: 3},
-				Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
-			},
-		},
-	}
+	zombie := entities.NewZombie(&primitives.Box{
+		Point: primitives.Point2D[int]{X: 3, Y: 3},
+		Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
+	})
 
-	vampire := entities.Enemy{
-		Type: entities.EnemyTypeVampire,
-		Character: &entities.Character{
-			Box: &primitives.Box{
-				Point: primitives.Point2D[int]{X: 5, Y: 5},
-				Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
-			},
-		},
-	}
+	vampire := entities.NewVampire(&primitives.Box{
+		Point: primitives.Point2D[int]{X: 5, Y: 5},
+		Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
+	})
 
 	level := &Level{
 		Rooms:    []Room{},
 		Passages: []Passage{},
 		Items:    []primitives.Positional2D[int]{},
-		Enemies:  []entities.Enemy{zombie, vampire},
+		Enemies:  []primitives.Positional2D[int]{zombie, vampire},
 		Player:   nil,
 		FinishPortal: primitives.Box{
 			Point: primitives.Point2D[int]{X: -1, Y: -1},
@@ -296,7 +286,7 @@ func TestDefaultFieldRenderer_RenderPlayer(t *testing.T) {
 		Rooms:    []Room{},
 		Passages: []Passage{},
 		Items:    []primitives.Positional2D[int]{},
-		Enemies:  []entities.Enemy{},
+		Enemies:  []primitives.Positional2D[int]{},
 		Player:   player,
 		FinishPortal: primitives.Box{
 			Point: primitives.Point2D[int]{X: -1, Y: -1},
@@ -335,7 +325,7 @@ func TestDefaultFieldRenderer_PlayerOverlapsItem(t *testing.T) {
 		Rooms:    []Room{},
 		Passages: []Passage{},
 		Items:    []primitives.Positional2D[int]{&food},
-		Enemies:  []entities.Enemy{},
+		Enemies:  []primitives.Positional2D[int]{},
 		Player:   player,
 		FinishPortal: primitives.Box{
 			Point: primitives.Point2D[int]{X: -1, Y: -1},
@@ -369,7 +359,7 @@ func TestDefaultFieldRenderer_BoundsChecking(t *testing.T) {
 		Rooms:    []Room{},
 		Passages: []Passage{},
 		Items:    []primitives.Positional2D[int]{&food},
-		Enemies:  []entities.Enemy{},
+		Enemies:  []primitives.Positional2D[int]{},
 		Player:   nil,
 		FinishPortal: primitives.Box{
 			Point: primitives.Point2D[int]{X: -1, Y: -1},
@@ -408,7 +398,7 @@ func TestConversionFunctions(t *testing.T) {
 		},
 		{
 			name:     "EnemyTypeZombie converts correctly",
-			testFunc: func() common.GameEntityType { return convertEnemyToEntityType(entities.EnemyTypeZombie) },
+			testFunc: func() common.GameEntityType { return convertEnemyToEntityType(&entities.Zombie{}) },
 			expected: common.EntityTypeZombie,
 		},
 	}
