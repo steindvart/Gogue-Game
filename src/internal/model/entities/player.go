@@ -10,6 +10,7 @@ type Player struct {
 	*Character
 	*items.Backpack
 	*items.Weapon
+	// @todo - убрать поля уровня и опыта. Это не нужно
 	Experience uint
 	Level      uint
 	ViewRadius int
