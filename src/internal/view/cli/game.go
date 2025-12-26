@@ -219,14 +219,15 @@ func (g *Game) initializeLegend() {
 	g.legendPanel.Clear()
 
 	fmt.Fprintf(g.legendPanel, " [%s::b]CONTROLS:[-:-:-]\n", colorSkyBlue)
-	fmt.Fprintln(g.legendPanel, " ↑←↓→ or 'wasd' - Move")
+	fmt.Fprintln(g.legendPanel, " ↑←↓→ or 'wasd' - Movement")
 	fmt.Fprintln(g.legendPanel, " e - Use item")
 	fmt.Fprintln(g.legendPanel, " r - Take item")
 	fmt.Fprintln(g.legendPanel, " ESC - Exit game")
 	fmt.Fprintln(g.legendPanel)
 
 	fmt.Fprintf(g.legendPanel, " [%s::b]BACKPACK:[-:-:-]\n", colorSkyBlue)
-	fmt.Fprintln(g.legendPanel, " b - Toggle Effects/Backpack panels")
+	fmt.Fprintln(g.legendPanel, " b - Switch Effects/Backpack panels")
+	fmt.Fprintln(g.legendPanel, " n - Switch Use/Drop mode")
 	fmt.Fprintln(g.legendPanel, " 0-9 - Select item or action")
 	fmt.Fprintln(g.legendPanel, " z - Weapon tab")
 	fmt.Fprintln(g.legendPanel, " x - Food tab")
@@ -569,7 +570,7 @@ func (g *Game) updateBackpackPanel() {
 		modeStr = "DROP"
 		modeColor = colorTomato
 	}
-	fmt.Fprintf(g.backpackPanel, " [%s::b]Mode (toggle 'n'): %s[-:-:-]\n", modeColor, modeStr)
+	fmt.Fprintf(g.backpackPanel, " [%s::b]Mode: %s[-:-:-]\n", modeColor, modeStr)
 	fmt.Fprintln(g.backpackPanel)
 
 	// Отображаем список предметов
