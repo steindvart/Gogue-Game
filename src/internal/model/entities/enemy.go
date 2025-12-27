@@ -2,7 +2,7 @@ package entities
 
 import "gogue/internal/model/primitives"
 
-type EnemyType float64
+type EnemyType int
 
 const (
 	EnemyTypeZombie EnemyType = iota
@@ -12,7 +12,15 @@ const (
 	EnemyTypeSnakeMage
 )
 
-type Direction float64
+var EnemyTypes = []EnemyType{
+	EnemyTypeZombie,
+	EnemyTypeVampire,
+	EnemyTypeGhost,
+	EnemyTypeOgre,
+	EnemyTypeSnakeMage,
+}
+
+type Direction int
 
 const (
 	DirectionForward Direction = iota
@@ -26,7 +34,7 @@ const (
 	DirectionStop
 )
 
-type AttributeRate float64
+type AttributeRate int
 
 const (
 	AttributeRateLow      AttributeRate = 25
@@ -35,7 +43,7 @@ const (
 	AttributeRateVeryHigh AttributeRate = 100
 )
 
-type HostilityRadius float64
+type HostilityRadius int
 
 const (
 	HostilityRadiusLow     HostilityRadius = 2
@@ -45,38 +53,37 @@ const (
 
 type Enemy struct {
 	*Character
-	Type            EnemyType
-	HostilityRadius HostilityRadius
-	IsChasing       bool
-	Direction       Direction
+	HostilityRadius
+	Direction
+	IsChasing bool
 }
 
 type Zombie struct {
-	Enemy Enemy
+	*Enemy
 }
 
 type Vampire struct {
-	Enemy            Enemy
-	AbsoluteEvasions float64
+	*Enemy
+	AbsoluteEvasions uint
 }
 
 type Ghost struct {
-	Enemy     Enemy
+	*Enemy
 	IsVisible bool
 }
 
 type Ogre struct {
-	Enemy     Enemy
+	*Enemy
 	IsResting bool
 }
 
 type SnakeMage struct {
-	Enemy Enemy
+	*Enemy
 }
 
 func NewZombie(box *primitives.Box) *Zombie {
 	return &Zombie{
-		Enemy: Enemy{
+		Enemy: &Enemy{
 			Character: &Character{
 				Box: box,
 				Attributes: &primitives.Attributes{
@@ -86,7 +93,6 @@ func NewZombie(box *primitives.Box) *Zombie {
 					MaxHealth: float64(AttributeRateHigh),
 				},
 			},
-			Type:            EnemyTypeZombie,
 			HostilityRadius: HostilityRadiusAverage,
 			Direction:       DirectionStop,
 		},
@@ -95,7 +101,7 @@ func NewZombie(box *primitives.Box) *Zombie {
 
 func NewVampire(box *primitives.Box) *Vampire {
 	return &Vampire{
-		Enemy: Enemy{
+		Enemy: &Enemy{
 			Character: &Character{
 				Box: box,
 				Attributes: &primitives.Attributes{
@@ -105,7 +111,6 @@ func NewVampire(box *primitives.Box) *Vampire {
 					MaxHealth: float64(AttributeRateHigh),
 				},
 			},
-			Type:            EnemyTypeVampire,
 			HostilityRadius: HostilityRadiusHigh,
 			Direction:       DirectionStop,
 		},
@@ -115,7 +120,7 @@ func NewVampire(box *primitives.Box) *Vampire {
 
 func NewGhost(box *primitives.Box) *Ghost {
 	return &Ghost{
-		Enemy: Enemy{
+		Enemy: &Enemy{
 			Character: &Character{
 				Box: box,
 				Attributes: &primitives.Attributes{
@@ -125,7 +130,6 @@ func NewGhost(box *primitives.Box) *Ghost {
 					MaxHealth: float64(AttributeRateLow),
 				},
 			},
-			Type:            EnemyTypeGhost,
 			HostilityRadius: HostilityRadiusLow,
 			Direction:       DirectionStop,
 		},
@@ -135,7 +139,7 @@ func NewGhost(box *primitives.Box) *Ghost {
 
 func NewOgre(box *primitives.Box) *Ogre {
 	return &Ogre{
-		Enemy: Enemy{
+		Enemy: &Enemy{
 			Character: &Character{
 				Box: box,
 				Attributes: &primitives.Attributes{
@@ -145,7 +149,6 @@ func NewOgre(box *primitives.Box) *Ogre {
 					MaxHealth: float64(AttributeRateVeryHigh),
 				},
 			},
-			Type:            EnemyTypeOgre,
 			HostilityRadius: HostilityRadiusAverage,
 			Direction:       DirectionStop,
 		},
@@ -155,7 +158,7 @@ func NewOgre(box *primitives.Box) *Ogre {
 
 func NewSnakeMage(box *primitives.Box) *SnakeMage {
 	return &SnakeMage{
-		Enemy: Enemy{
+		Enemy: &Enemy{
 			Character: &Character{
 				Box: box,
 				Attributes: &primitives.Attributes{
@@ -164,10 +167,8 @@ func NewSnakeMage(box *primitives.Box) *SnakeMage {
 					Health:    float64(AttributeRateHigh),
 					MaxHealth: float64(AttributeRateHigh),
 				},
-			},
-			Type:            EnemyTypeSnakeMage,
-			HostilityRadius: HostilityRadiusHigh,
-			Direction:       DirectionStop,
+			}, HostilityRadius: HostilityRadiusHigh,
+			Direction: DirectionStop,
 		},
 	}
 }
