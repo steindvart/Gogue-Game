@@ -322,8 +322,8 @@ func TestWeapon_Drop(t *testing.T) {
 		t.Errorf("Expected position to be updated to %v, got %v", newPosition, weapon.Box.Point)
 	}
 
-	if resultBox.Point != newPosition {
-		t.Errorf("Expected returned box to have position %v, got %v", newPosition, resultBox.Point)
+	if resultBox.GetPosition() != newPosition {
+		t.Errorf("Expected returned box to have position %v, got %v", newPosition, resultBox.GetPosition())
 	}
 }
 

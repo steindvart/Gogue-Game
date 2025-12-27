@@ -34,4 +34,5 @@ const (
 	OpenFoodTab
 	OpenElixirsTab
 	OpenScrollsTab
+	ToggleBackpackMode
 )
