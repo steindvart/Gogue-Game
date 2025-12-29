@@ -206,7 +206,10 @@ func (g *Game) handleEvent(event *tcell.EventKey) *tcell.EventKey {
 	case action.Exit:
 		g.signal = signals.Stop
 
-		g.SaveToFile(SaveFileName)
+		err := g.SaveToFile(SaveFileName)
+		if err != nil {
+			panic("an error occurred while saving the game:" + err.Error())
+		}
 		return nil
 	default:
 		return event
