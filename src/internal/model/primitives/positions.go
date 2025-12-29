@@ -8,6 +8,7 @@ type Point2D[T utils.Number] struct {
 
 type Positional2D[T utils.Number] interface {
 	GetPosition() Point2D[T]
+	SetPosition(pos Point2D[int])
 }
 
 func (p *Point2D[T]) Move(delta Point2D[T]) {
@@ -30,4 +31,8 @@ func (b *Box) Move(delta Point2D[int]) {
 
 func (b *Box) GetPosition() Point2D[int] {
 	return b.Point
+}
+
+func (b *Box) SetPosition(pos Point2D[int]) {
+	b.Point = pos
 }

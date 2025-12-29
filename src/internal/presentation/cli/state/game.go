@@ -2,6 +2,8 @@ package state
 
 import (
 	"encoding/json"
+	"gogue/internal/common"
+	"gogue/internal/model/entities"
 	"gogue/internal/model/primitives"
 	"gogue/internal/model/signals"
 	"gogue/internal/model/world"
@@ -31,6 +33,7 @@ type Game struct {
 	signal signals.Type
 
 	isPlayerReadyToInteract bool
+	backpackDropMode        bool
 }
 
 func NewGame() (*Game, error) {
@@ -98,6 +101,7 @@ func (g *Game) updateGameView() {
 	player := g.level.Player
 	if player != nil {
 		g.view.UpdatePlayerInfo(dto.ConvertPlayerToDto(g.level.Player, g.level.Number))
+		g.updateBackpackInfo()
 	}
 }
 
@@ -146,6 +150,59 @@ func (g *Game) handleEvent(event *tcell.EventKey) *tcell.EventKey {
 		g.level.ProcessTurns(1)
 	case action.Select:
 		g.handleSelectAction()
+	case action.Take:
+		g.handleTakeAction()
+	case action.ToggleBackpack:
+		g.view.ToggleSecondInfoViewMode()
+		// При переключении в режим рюкзака сбрасываем drop mode (по умолчанию use)
+		if g.view.SecondInfoViewMode == viewcli.SecondInfoViewModeBackpack {
+			g.backpackDropMode = false
+			g.view.SetBackpackDropMode(false)
+		}
+	case action.ToggleBackpackMode:
+		if g.view.SecondInfoViewMode == viewcli.SecondInfoViewModeBackpack {
+			g.backpackDropMode = !g.backpackDropMode
+			g.view.SetBackpackDropMode(g.backpackDropMode)
+		}
+	case action.OpenWeaponsTab:
+		g.view.SetBackpackTab(viewcli.BackpackTabWeapons)
+		if g.view.SecondInfoViewMode == viewcli.SecondInfoViewModeEffects {
+			g.view.ToggleSecondInfoViewMode()
+			// @todo - подумать как лучше сделать
+			g.backpackDropMode = false
+			g.view.SetBackpackDropMode(false)
+		}
+	case action.OpenFoodTab:
+		g.view.SetBackpackTab(viewcli.BackpackTabFood)
+		if g.view.SecondInfoViewMode == viewcli.SecondInfoViewModeEffects {
+			g.view.ToggleSecondInfoViewMode()
+			g.backpackDropMode = false
+			g.view.SetBackpackDropMode(false)
+		}
+	case action.OpenElixirsTab:
+		g.view.SetBackpackTab(viewcli.BackpackTabElixirs)
+		if g.view.SecondInfoViewMode == viewcli.SecondInfoViewModeEffects {
+			g.view.ToggleSecondInfoViewMode()
+			g.backpackDropMode = false
+			g.view.SetBackpackDropMode(false)
+		}
+	case action.OpenScrollsTab:
+		g.view.SetBackpackTab(viewcli.BackpackTabScrolls)
+		if g.view.SecondInfoViewMode == viewcli.SecondInfoViewModeEffects {
+			g.view.ToggleSecondInfoViewMode()
+			g.backpackDropMode = false
+			g.view.SetBackpackDropMode(false)
+		}
+	case action.Num0, action.Num1, action.Num2, action.Num3,
+		action.Num4, action.Num5, action.Num6, action.Num7,
+		action.Num8, action.Num9:
+		if g.view.SecondInfoViewMode == viewcli.SecondInfoViewModeBackpack {
+			if g.backpackDropMode {
+				g.handleItemDrop(g.eventToAction(event))
+			} else {
+				g.handleItemSelection(g.eventToAction(event))
+			}
+		}
 	case action.Exit:
 		g.signal = signals.Stop
 
@@ -189,6 +246,27 @@ func (g *Game) handleSelectAction() {
 	}
 }
 
+func (g *Game) handleTakeAction() {
+	if g.level.Player == nil {
+		return
+	}
+
+	if g.isPlayerReadyToInteract {
+		pos := g.level.Player.GetPosition()
+
+		switch g.level.CheckEntityCollision(pos) {
+		case world.CollisionTypeItem:
+			if err := g.level.PlayerTakeItemAtPosition(pos); err != nil {
+				// @todo - вывод сообщения об ошибке в view
+				_ = sendBackpackErrorToView(1, 1)
+				return
+			}
+		}
+
+		g.resetInteraction()
+	}
+}
+
 func (g *Game) eventToAction(event *tcell.EventKey) action.Type {
 	switch event.Key() {
 	case tcell.KeyUp:
@@ -213,16 +291,42 @@ func (g *Game) eventToAction(event *tcell.EventKey) action.Type {
 		return action.MoveLeft
 	case 'd', 'в':
 		return action.MoveRight
-	case 'y', 'н':
-		return action.MoveLeftUpperCorner
-	case 'u', 'г':
-		return action.MoveRightUpperCorner
+	case 'r', 'к':
+		return action.Take
 	case 'b', 'и':
-		return action.MoveLefLowerCorner
-	case 'n', 'т':
-		return action.MoveRightLowerCorner
+		return action.ToggleBackpack
 	case 'e', 'у':
 		return action.Select
+	case 'z', 'я':
+		return action.OpenWeaponsTab
+	case 'x', 'ч':
+		return action.OpenFoodTab
+	case 'c', 'с':
+		return action.OpenElixirsTab
+	case 'v', 'м':
+		return action.OpenScrollsTab
+	case 'n', 'т':
+		return action.ToggleBackpackMode
+	case '0':
+		return action.Num0
+	case '1':
+		return action.Num1
+	case '2':
+		return action.Num2
+	case '3':
+		return action.Num3
+	case '4':
+		return action.Num4
+	case '5':
+		return action.Num5
+	case '6':
+		return action.Num6
+	case '7':
+		return action.Num7
+	case '8':
+		return action.Num8
+	case '9':
+		return action.Num9
 	}
 
 	return action.NoAction
@@ -230,6 +334,168 @@ func (g *Game) eventToAction(event *tcell.EventKey) action.Type {
 
 func (g *Game) updateItemInfo(pos primitives.Point2D[int]) {
 	g.view.UpdateItemInfo(dto.ConvertPositionalItemToDto(g.level.GetItemAtPosition(pos)))
+}
+
+func (g *Game) updateBackpackInfo() {
+	if g.level.Player != nil && g.level.Player.Backpack != nil {
+		g.view.UpdateBackpackInfo(dto.ConvertBackpackToDto(g.level.Player.Backpack))
+	}
+}
+
+func (g *Game) handleItemSelection(actionType action.Type) {
+	if g.level.Player == nil || g.level.Player.Backpack == nil {
+		return
+	}
+
+	itemIndex := int(actionType - action.Num0)
+
+	var itemType entities.BackpackItemType
+	var actualIndex int
+
+	switch g.view.GetCurrentBackpackTab() {
+	case viewcli.BackpackTabWeapons:
+		itemType = entities.BackpackItemTypeWeapon
+		// Для оружия индекс 0 - снятие текущего оружия
+		if itemIndex == 0 {
+			if err := g.level.Player.DropEquipWeaponToBackpack(); err != nil {
+				// @todo - вывод сообщения об ошибке в view
+				_ = sendBackpackErrorToView(1, 1)
+			}
+			g.updateBackpackInfo()
+			return
+		}
+		actualIndex = itemIndex - 1
+
+	case viewcli.BackpackTabFood:
+		itemType = entities.BackpackItemTypeFood
+		actualIndex = itemIndex - 1
+
+	case viewcli.BackpackTabElixirs:
+		itemType = entities.BackpackItemTypeElixir
+		actualIndex = itemIndex - 1
+
+	case viewcli.BackpackTabScrolls:
+		itemType = entities.BackpackItemTypeScroll
+		actualIndex = itemIndex - 1
+	}
+
+	selectedItem := g.level.Player.GetItemFromBackpackByIndex(itemType, actualIndex)
+	if selectedItem == nil {
+		return
+	}
+
+	if err := g.level.Player.UseItemFromBackpack(selectedItem); err != nil {
+		// @todo - вывод сообщения об ошибке в view
+		_ = sendBackpackErrorToView(1, 1)
+	}
+
+	g.updateBackpackInfo()
+}
+
+func (g *Game) handleItemDrop(actionType action.Type) {
+	if g.level.Player == nil || g.level.Player.Backpack == nil {
+		return
+	}
+
+	itemIndex := int(actionType - action.Num0)
+
+	var itemType entities.BackpackItemType
+	var actualIndex int
+
+	switch g.view.GetCurrentBackpackTab() {
+	case viewcli.BackpackTabWeapons:
+		itemType = entities.BackpackItemTypeWeapon
+		// Для оружия индекс 0 - текущее экипированное оружие
+		if itemIndex == 0 {
+			if g.level.Player.Weapon != nil {
+				g.dropItemToMap(g.level.Player.Weapon, true)
+			}
+			return
+		}
+		actualIndex = itemIndex - 1
+
+	case viewcli.BackpackTabFood:
+		itemType = entities.BackpackItemTypeFood
+		actualIndex = itemIndex - 1
+
+	case viewcli.BackpackTabElixirs:
+		itemType = entities.BackpackItemTypeElixir
+		actualIndex = itemIndex - 1
+
+	case viewcli.BackpackTabScrolls:
+		itemType = entities.BackpackItemTypeScroll
+		actualIndex = itemIndex - 1
+	}
+
+	selectedItem := g.level.Player.GetItemFromBackpackByIndex(itemType, actualIndex)
+	if selectedItem == nil {
+		return
+	}
+
+	g.dropItemToMap(selectedItem, false)
+}
+
+// dropItemToMap выбрасывает предмет на карту в соседнюю свободную клетку
+func (g *Game) dropItemToMap(item any, isEquipped bool) {
+	if g.level.Player == nil || item == nil {
+		return
+	}
+
+	positional, ok := item.(primitives.Positional2D[int])
+	if !ok {
+		return
+	}
+
+	playerPos := g.level.Player.GetPosition()
+
+	// Ищем свободную соседнюю клетку по часовой стрелке
+	// Порядок: N, NE, E, SE, S, SW, W, NW
+	adjacentOffsets := []primitives.Point2D[int]{
+		{X: 0, Y: -1},  // North
+		{X: 1, Y: -1},  // North-East
+		{X: 1, Y: 0},   // East
+		{X: 1, Y: 1},   // South-East
+		{X: 0, Y: 1},   // South
+		{X: -1, Y: 1},  // South-West
+		{X: -1, Y: 0},  // West
+		{X: -1, Y: -1}, // North-West
+	}
+
+	var dropPos *primitives.Point2D[int]
+	for _, offset := range adjacentOffsets {
+		candidatePos := primitives.Point2D[int]{
+			X: playerPos.X + offset.X,
+			Y: playerPos.Y + offset.Y,
+		}
+
+		// Определение коллизий через получение полного поля карты
+		// а не прохода по позициям логического представления сущностей.
+		// В качестве примера и для учебного разнообразия.
+		// Ну и так значительно проще код.
+		field := g.level.GetFullField(MapWidth, MapHeight)
+
+		if field[candidatePos.Y][candidatePos.X] == common.WorldTypeRoomFloor {
+			dropPos = &candidatePos
+			break
+		}
+	}
+
+	if dropPos == nil {
+		// @todo - вывод сообщения об ошибке в view
+		_ = sendBackpackErrorToView(1, 1)
+		return
+	}
+
+	positional.SetPosition(*dropPos)
+	g.level.AddItem(positional)
+
+	if isEquipped {
+		_ = g.level.Player.UnequipWeapon()
+	} else {
+		_ = g.level.Player.Backpack.RemoveItem(item)
+	}
+
+	g.updateBackpackInfo()
 }
 
 func (g *Game) Update(float64) signals.Type {
@@ -254,13 +520,13 @@ func (g *Game) SaveToFile(filename string) error {
 		LevelNumber:  g.level.Number,
 		Rooms:        g.level.Rooms,
 		Passages:     g.level.Passages,
-		Player:       *g.level.Player,
 		FinishPortal: g.level.FinishPortal,
 		FogOfWar: dto.FogOfWarDto{
 			ExploredTiles: fogOfWarList,
 			Width:         g.level.FogOfWar.Width,
 			Height:        g.level.FogOfWar.Height,
 		},
+		Player: *g.level.Player,
 	}
 
 	file, err := os.Create(filename)
@@ -272,4 +538,9 @@ func (g *Game) SaveToFile(filename string) error {
 	encoder := json.NewEncoder(file)
 	encoder.SetIndent("", "  ")
 	return encoder.Encode(gameDto)
+}
+
+// @todo - вывод сообщения об ошибке в view
+func sendBackpackErrorToView(a, b int) int {
+	return a + b
 }

@@ -44,3 +44,8 @@ func NewElixirByConfig(rnd utils.Randomizer, box primitives.Box, cfg ElixirConfi
 func (e *Elixir) Use() *primitives.Effect {
 	return e.Effect
 }
+
+// Ничего не возвращаем, но добавляем функцию, чтобы отметить Elixir как Takeable.
+func (e *Elixir) Take() int32 {
+	return 0
+}

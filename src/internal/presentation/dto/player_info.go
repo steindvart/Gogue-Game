@@ -11,6 +11,7 @@ type PlayerInfo struct {
 	Agility          float64
 	TemporaryEffects []EffectInfo
 	LevelNumber      uint
+	*WeaponInfo
 }
 
 func ConvertPlayerToDto(player *entities.Player, levelNumber uint) *PlayerInfo {
@@ -25,5 +26,6 @@ func ConvertPlayerToDto(player *entities.Player, levelNumber uint) *PlayerInfo {
 		Agility:          player.Attributes.Agility,
 		TemporaryEffects: ConvertEffectsToDto(player.TemporaryEffects),
 		LevelNumber:      levelNumber,
+		WeaponInfo:       ConvertWeaponToDto(player.Weapon),
 	}
 }

@@ -51,7 +51,7 @@ func ConvertPositionalItemToDto(item primitives.Positional2D[int]) *ItemInfo {
 	}
 
 	_, info.CanUse = item.(items.Usable)
-	_, info.CanTake = item.(items.Takable)
+	_, info.CanTake = item.(items.Takeable)
 
 	return info
 }

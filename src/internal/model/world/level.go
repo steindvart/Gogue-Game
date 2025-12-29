@@ -16,7 +16,7 @@ type Level struct {
 
 	// Сущности, хранящиеся непосредственно в уровне
 	Player  *entities.Player
-	Enemies []entities.Enemy
+	Enemies []primitives.Positional2D[int]
 	Items   []primitives.Positional2D[int]
 
 	// Метаданные
@@ -76,7 +76,7 @@ func NewLevelWithComponents(
 		Number:        levelNumber,
 		fieldRenderer: fieldRenderer,
 		FogOfWar:      NewFogOfWar(int(cfg.MapSize.Width), int(cfg.MapSize.Height)),
-		Enemies:       []entities.Enemy{},
+		Enemies:       []primitives.Positional2D[int]{},
 		Items:         []primitives.Positional2D[int]{},
 	}
 }
@@ -138,7 +138,7 @@ func (l *Level) generateEnvironment() error {
 	l.Passages = passages
 
 	// Сущности
-	spawned, err := l.entitySpawner.SpawnEntities(l.Rooms, l.config.ItemCounts, l.random)
+	spawned, err := l.entitySpawner.SpawnEntities(l.Rooms, l.config.ItemsSpawnConfig, l.config.EnemiesSpawnConfig, l.random)
 	if err != nil {
 		return err
 	}
@@ -294,7 +294,7 @@ func (l *Level) isCollisionWithItem(pos primitives.Point2D[int]) bool {
 // MakeCurrentField создаёт двумерное представление карты уровня с учётом тумана войны
 func (l *Level) MakeCurrentField(w, h int) [][]common.GameEntityType {
 	// Сначала рендерим полное поле
-	fullField := l.fieldRenderer.RenderField(w, h, l)
+	fullField := l.GetFullField(w, h)
 
 	// Если игрока нет, возвращаем пустое поле (всё скрыто туманом войны)
 	if l.Player == nil {
@@ -305,16 +305,41 @@ func (l *Level) MakeCurrentField(w, h int) [][]common.GameEntityType {
 	return l.FogOfWar.ApplyFogOfWar(fullField, l.Player.GetPosition(), l.Player.ViewRadius)
 }
 
+// GetFullField возвращает двумерное представление карты уровня бещ учёта тумана войны
+func (l *Level) GetFullField(w, h int) [][]common.GameEntityType {
+	return l.fieldRenderer.RenderField(w, h, l)
+}
+
 func (l *Level) PlayerUseItemAtPosition(pos primitives.Point2D[int]) {
 	item := l.GetItemAtPosition(pos)
 	if item == nil {
 		return
 	}
 
-	if usableItem, ok := item.(items.Usable); ok {
+	// @todo - кривая логика, нужно декомпозировать и перенести в Player
+	if weapon, ok := item.(*items.Weapon); ok {
+		_ = l.Player.EquipWeapon(weapon)
+	} else if usableItem, ok := item.(items.Usable); ok {
 		l.Player.Character.Use(usableItem)
+	}
+
+	l.RemoveItem(item)
+}
+
+func (l *Level) PlayerTakeItemAtPosition(pos primitives.Point2D[int]) error {
+	item := l.GetItemAtPosition(pos)
+	if item == nil {
+		return nil
+	}
+
+	if takeableItem, ok := item.(items.Takeable); ok {
+		if err := l.Player.Backpack.AddItem(takeableItem); err != nil {
+			return err
+		}
 		l.RemoveItem(item)
 	}
+
+	return nil
 }
 
 func (l *Level) GetItemAtPosition(pos primitives.Point2D[int]) primitives.Positional2D[int] {

@@ -17,14 +17,15 @@ type PassageGenerator interface {
 type EntitySpawner interface {
 	SpawnEntities(
 		rooms []Room,
-		config ItemSpawnConfig,
+		itemsConfig ItemSpawnConfig,
+		enemiesConfig EnemySpawnConfig,
 		random utils.Randomizer,
 	) (*SpawnedEntities, error)
 }
 
 type SpawnedEntities struct {
 	Items   []primitives.Positional2D[int]
-	Enemies []entities.Enemy
+	Enemies []primitives.Positional2D[int]
 }
 
 type PlayerSpawner interface {

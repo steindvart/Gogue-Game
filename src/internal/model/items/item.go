@@ -14,12 +14,12 @@ type Usable interface {
 	Use() *primitives.Effect
 }
 
-type Takable interface {
+type Takeable interface {
 	Take() int32
 }
 
 type Dropable interface {
-	Drop(position primitives.Point2D[int]) primitives.Box
+	Drop(position primitives.Point2D[int]) primitives.Positional2D[int]
 }
 
 type Item struct {
@@ -27,7 +27,7 @@ type Item struct {
 	Name string
 }
 
-func (i *Item) Drop(position primitives.Point2D[int]) *primitives.Box {
+func (i *Item) Drop(position primitives.Point2D[int]) primitives.Positional2D[int] {
 	i.Box.Point = position
-	return i.Box
+	return i
 }
