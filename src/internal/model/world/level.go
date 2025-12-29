@@ -271,10 +271,7 @@ func (l *Level) GetEnemyAtPosition(pos primitives.Point2D[int]) primitives.Posit
 }
 
 func (l *Level) isCollisionWithEnemy(pos primitives.Point2D[int]) bool {
-	if l.GetEnemyAtPosition(pos) != nil {
-		return true
-	}
-	return false
+	return l.GetEnemyAtPosition(pos) != nil
 }
 
 func (l *Level) isCollisionWithItem(pos primitives.Point2D[int]) bool {
