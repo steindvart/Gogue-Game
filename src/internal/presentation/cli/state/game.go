@@ -65,17 +65,6 @@ func (g *Game) initInput() {
 }
 
 func (g *Game) handleEvent(event *tcell.EventKey) *tcell.EventKey {
-	movementRegistry := map[action.Type]primitives.Point2D[int]{
-		action.MoveUp:               {X: 0, Y: -1},
-		action.MoveDown:             {X: 0, Y: 1},
-		action.MoveLeft:             {X: -1, Y: 0},
-		action.MoveRight:            {X: 1, Y: 0},
-		action.MoveLeftUpperCorner:  {X: -1, Y: -1},
-		action.MoveRightUpperCorner: {X: 1, Y: -1},
-		action.MoveLefLowerCorner:   {X: -1, Y: 1},
-		action.MoveRightLowerCorner: {X: 1, Y: 1},
-	}
-
 	switch g.eventToAction(event) {
 	case action.MoveUp,
 		action.MoveDown,
@@ -85,12 +74,8 @@ func (g *Game) handleEvent(event *tcell.EventKey) *tcell.EventKey {
 		action.MoveRightUpperCorner,
 		action.MoveLefLowerCorner,
 		action.MoveRightLowerCorner:
-		g.level.MovePlayerWithBorderControl(movementRegistry[g.eventToAction(event)])
-
+		g.handleMoveAction(g.eventToAction(event))
 		switch g.level.CheckEntityCollision(g.level.Player.GetPosition()) {
-		case world.CollisionTypeEnemy:
-			// @todo - обработка столкновения с врагом (атака на врага)
-			g.isPlayerReadyToInteract = false
 		case world.CollisionTypeItem:
 			g.isPlayerReadyToInteract = true
 			g.updateItemInfo(g.level.Player.GetPosition())
@@ -166,6 +151,41 @@ func (g *Game) handleEvent(event *tcell.EventKey) *tcell.EventKey {
 	}
 	return nil
 
+}
+
+func (g *Game) handleMoveAction(a action.Type) {
+	movementRegistry := map[action.Type]primitives.Point2D[int]{
+		action.MoveUp:               {X: 0, Y: -1},
+		action.MoveDown:             {X: 0, Y: 1},
+		action.MoveLeft:             {X: -1, Y: 0},
+		action.MoveRight:            {X: 1, Y: 0},
+		action.MoveLeftUpperCorner:  {X: -1, Y: -1},
+		action.MoveRightUpperCorner: {X: 1, Y: -1},
+		action.MoveLefLowerCorner:   {X: -1, Y: 1},
+		action.MoveRightLowerCorner: {X: 1, Y: 1},
+	}
+
+	oldPos := g.level.Player.GetPosition()
+	g.level.Player.Move(movementRegistry[a])
+
+	if g.level.IsCollisionWithBorders(g.level.Player.GetPosition()) {
+		g.level.Player.SetPosition(oldPos)
+		return
+	}
+
+	if enemy := g.level.GetEnemyAtPosition(g.level.Player.GetPosition()); enemy != nil {
+		g.level.Attack(g.level.Player, enemy)
+
+		if provider, ok := enemy.(entities.CharacterProvider); ok {
+			character := provider.GetCharacter()
+			if !character.IsAlive() {
+				// @todo - доработать логику смерти врага (выпадение лута, опыта и т.д.)
+				g.level.RemoveEnemy(enemy)
+			}
+			g.level.Player.SetPosition(oldPos)
+		}
+		return
+	}
 }
 
 func (g *Game) resetInteraction() {

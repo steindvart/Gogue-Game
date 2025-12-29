@@ -128,7 +128,7 @@ func TestCharacter_AttackEqualsStrength(t *testing.T) {
 		primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
 		primitives.Attributes{MaxHealth: 100, Health: 100, Strength: 17.5},
 	)
-	if got := c.Attack(); got != 17.5 {
+	if got := c.MakeDamage(); got != 17.5 {
 		t.Errorf("Attack() = %v, want 17.5", got)
 	}
 }

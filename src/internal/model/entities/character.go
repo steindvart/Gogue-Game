@@ -6,6 +6,10 @@ import (
 	"gogue/internal/utils"
 )
 
+type CharacterProvider interface {
+	GetCharacter() *Character
+}
+
 type Character struct {
 	*primitives.Box
 	*primitives.Attributes
@@ -20,6 +24,10 @@ func NewCharacter(box primitives.Box, attrs primitives.Attributes) *Character {
 	}
 }
 
+func (c *Character) GetCharacter() *Character {
+	return c
+}
+
 func (c *Character) IsAlive() bool {
 	return c.Attributes.Health > 0
 }
@@ -31,8 +39,16 @@ func (c *Character) TakeDamage(damage float64) {
 	}
 }
 
-func (c *Character) Attack() float64 {
+func (c *Character) MakeDamage() float64 {
 	return c.Attributes.Strength
+}
+
+func (c *Character) Attack(defender *Character, rnd utils.Randomizer) {
+	if defender.CheckEvasion(rnd) {
+		return
+	}
+
+	defender.TakeDamage(c.MakeDamage())
 }
 
 func (c *Character) Use(usable items.Usable) {
