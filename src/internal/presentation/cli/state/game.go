@@ -1,7 +1,6 @@
 package state
 
 import (
-	"encoding/json"
 	"gogue/internal/common"
 	"gogue/internal/model/entities"
 	"gogue/internal/model/primitives"
@@ -9,9 +8,9 @@ import (
 	"gogue/internal/model/world"
 	"gogue/internal/presentation/action"
 	"gogue/internal/presentation/dto"
+	"gogue/internal/presentation/save"
 	viewcli "gogue/internal/view/cli"
 	"math/rand"
-	"os"
 	"time"
 	"unicode"
 
@@ -57,42 +56,20 @@ func NewGame() (*Game, error) {
 
 func LoadGame() (*Game, error) {
 	source := rand.New(rand.NewSource(time.Now().UnixNano()))
-	game := Game{
-		level: world.NewLevelWithDefaults(source, primitives.Size2D[uint]{Height: MapHeight, Width: MapWidth}),
-		view:  viewcli.NewGame(),
-	}
 
-	file, err := os.Open(SaveFileName)
+	level, err := save.LoadGame(SaveFileName, source)
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
 
-	gameSave := dto.GameSaveDto{}
-	decoder := json.NewDecoder(file)
-	if err := decoder.Decode(&gameSave); err != nil {
-		return nil, err
-	}
-	game.level.Number = gameSave.LevelNumber
-	game.level.Rooms = gameSave.Rooms
-	game.level.Passages = gameSave.Passages
-	game.level.FinishPortal = gameSave.FinishPortal
-	game.level.Player = &gameSave.Player
-
-	fogOfWarMap := make(map[primitives.Point2D[int]]bool, len(gameSave.FogOfWar.ExploredTiles))
-	for _, point := range gameSave.FogOfWar.ExploredTiles {
-		fogOfWarMap[point] = true
-	}
-	game.level.FogOfWar = &world.FogOfWar{
-		ExploredTiles: fogOfWarMap,
-		Width:         gameSave.FogOfWar.Width,
-		Height:        gameSave.FogOfWar.Height,
+	game := &Game{
+		level: level,
+		view:  viewcli.NewGame(),
 	}
 
 	game.updateGameView()
 	game.initInput()
-
-	return &game, nil
+	return game, nil
 }
 
 func (g *Game) updateGameView() {
@@ -206,7 +183,7 @@ func (g *Game) handleEvent(event *tcell.EventKey) *tcell.EventKey {
 	case action.Exit:
 		g.signal = signals.Stop
 
-		err := g.SaveToFile(SaveFileName)
+		err := save.SaveGame(g.level, primitives.Size2D[uint]{Height: MapHeight, Width: MapWidth}, SaveFileName)
 		if err != nil {
 			panic("an error occurred while saving the game:" + err.Error())
 		}
@@ -511,36 +488,6 @@ func (g *Game) Update(float64) signals.Type {
 
 func (g *Game) Primitive() tview.Primitive {
 	return g.view.GetRootPrimitive()
-}
-
-func (g *Game) SaveToFile(filename string) error {
-	fogOfWarList := make([]primitives.Point2D[int], 0, len(g.level.FogOfWar.ExploredTiles))
-	for point := range g.level.FogOfWar.ExploredTiles {
-		fogOfWarList = append(fogOfWarList, point)
-	}
-
-	gameDto := dto.GameSaveDto{
-		LevelNumber:  g.level.Number,
-		Rooms:        g.level.Rooms,
-		Passages:     g.level.Passages,
-		FinishPortal: g.level.FinishPortal,
-		FogOfWar: dto.FogOfWarDto{
-			ExploredTiles: fogOfWarList,
-			Width:         g.level.FogOfWar.Width,
-			Height:        g.level.FogOfWar.Height,
-		},
-		Player: *g.level.Player,
-	}
-
-	file, err := os.Create(filename)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	encoder := json.NewEncoder(file)
-	encoder.SetIndent("", "  ")
-	return encoder.Encode(gameDto)
 }
 
 // @todo - вывод сообщения об ошибке в view
