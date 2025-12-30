@@ -51,6 +51,10 @@ const (
 	HostilityRadiusHigh    HostilityRadius = 6
 )
 
+type EnemyProvider interface {
+	GetEnemy() *Enemy
+}
+
 type Enemy struct {
 	*Character
 	HostilityRadius
@@ -171,4 +175,8 @@ func NewSnakeMage(box *primitives.Box) *SnakeMage {
 			Direction: DirectionStop,
 		},
 	}
+}
+
+func (e *Enemy) GetEnemy() *Enemy {
+	return e
 }
