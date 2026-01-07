@@ -24,7 +24,7 @@ const (
 	maxLevelNumber = 21
 )
 
-const SaveFileName = "save.json"
+const SaveFileName = "bin/save.json"
 
 type Game struct {
 	level  *world.Level
