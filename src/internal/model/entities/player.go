@@ -10,9 +10,6 @@ type Player struct {
 	*Character
 	*items.Backpack
 	*items.Weapon
-	// @todo - убрать поля уровня и опыта. Это не нужно
-	Experience uint
-	Level      uint
 	ViewRadius int
 }
 
@@ -36,8 +33,6 @@ func NewPlayer(box primitives.Box) *Player {
 				Agility:   5,
 			},
 		},
-		Experience: 0,
-		Level:      1,
 		ViewRadius: 3,
 		Backpack:   items.NewBackpack(),
 		Weapon:     nil,
