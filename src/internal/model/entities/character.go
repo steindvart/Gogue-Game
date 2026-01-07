@@ -99,6 +99,13 @@ func (c *Character) ApplyEffect(effect *primitives.Effect) {
 	} else if c.Attributes.Health <= 0 {
 		c.Attributes.Health = 1
 	}
+
+	// Если какой-то из атрибутов стал отрицательным, устанавливаем его в 0.
+	if c.Attributes.Strength < 0 {
+		c.Attributes.Strength = 0
+	} else if c.Attributes.Agility < 0 {
+		c.Attributes.Agility = 0
+	}
 }
 
 func (c *Character) RemoveTemporaryEffect(effect *primitives.Effect) {

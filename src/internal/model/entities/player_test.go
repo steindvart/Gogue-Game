@@ -154,7 +154,7 @@ func TestPlayer_EquipWeapon_MovePreviousWeaponToBackpack(t *testing.T) {
 	}
 
 	rnd2 := utils.NewRandomWithSeed(200)
-	w2 := items.NewWeaponBuiltin(rnd2, primitives.Box{}, items.WeaponTypeAxe)
+	w2 := items.NewWeaponBuiltin(rnd2, primitives.Box{}, items.WeaponTypeDagger)
 	delta = w2.Effect.Attributes
 	err = p.EquipWeapon(w2)
 	if err != nil {
