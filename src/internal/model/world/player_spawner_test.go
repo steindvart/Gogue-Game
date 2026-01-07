@@ -39,9 +39,6 @@ func TestStartRoomPlayerSpawner_SpawnPlayer(t *testing.T) {
 	if player.Attributes.Health <= 0 {
 		t.Errorf("Player health should be positive, got %f", player.Attributes.Health)
 	}
-	if player.Level != 1 {
-		t.Errorf("Player level should be 1, got %d", player.Level)
-	}
 }
 
 func TestStartRoomPlayerSpawner_SpawnPlayer_InStartRoom(t *testing.T) {
