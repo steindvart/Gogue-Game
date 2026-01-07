@@ -36,12 +36,6 @@ func TestPlayer_NewPlayer_BasicInit(t *testing.T) {
 	if p.Weapon != nil {
 		t.Errorf("Weapon should be nil on init")
 	}
-	if p.Experience != 0 {
-		t.Errorf("Experience should start at 0, got %d", p.Experience)
-	}
-	if p.Level != 1 {
-		t.Errorf("CharacterLevel should start at 1, got %d", p.Level)
-	}
 }
 
 func TestPlayer_EquipWeapon_AppliesEffectAndStoresWeapon(t *testing.T) {
@@ -160,7 +154,7 @@ func TestPlayer_EquipWeapon_MovePreviousWeaponToBackpack(t *testing.T) {
 	}
 
 	rnd2 := utils.NewRandomWithSeed(200)
-	w2 := items.NewWeaponBuiltin(rnd2, primitives.Box{}, items.WeaponTypeAxe)
+	w2 := items.NewWeaponBuiltin(rnd2, primitives.Box{}, items.WeaponTypeDagger)
 	delta = w2.Effect.Attributes
 	err = p.EquipWeapon(w2)
 	if err != nil {

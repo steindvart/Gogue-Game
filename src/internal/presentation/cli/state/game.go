@@ -87,17 +87,6 @@ func (g *Game) initInput() {
 }
 
 func (g *Game) handleEvent(event *tcell.EventKey) *tcell.EventKey {
-	movementRegistry := map[action.Type]primitives.Point2D[int]{
-		action.MoveUp:               {X: 0, Y: -1},
-		action.MoveDown:             {X: 0, Y: 1},
-		action.MoveLeft:             {X: -1, Y: 0},
-		action.MoveRight:            {X: 1, Y: 0},
-		action.MoveLeftUpperCorner:  {X: -1, Y: -1},
-		action.MoveRightUpperCorner: {X: 1, Y: -1},
-		action.MoveLefLowerCorner:   {X: -1, Y: 1},
-		action.MoveRightLowerCorner: {X: 1, Y: 1},
-	}
-
 	switch g.eventToAction(event) {
 	case action.MoveUp,
 		action.MoveDown,
@@ -107,12 +96,8 @@ func (g *Game) handleEvent(event *tcell.EventKey) *tcell.EventKey {
 		action.MoveRightUpperCorner,
 		action.MoveLefLowerCorner,
 		action.MoveRightLowerCorner:
-		g.level.MovePlayerWithBorderControl(movementRegistry[g.eventToAction(event)])
-
+		g.handleMoveAction(g.eventToAction(event))
 		switch g.level.CheckEntityCollision(g.level.Player.GetPosition()) {
-		case world.CollisionTypeEnemy:
-			// @todo - обработка столкновения с врагом (атака на врага)
-			g.isPlayerReadyToInteract = false
 		case world.CollisionTypeItem:
 			g.isPlayerReadyToInteract = true
 			g.updateItemInfo(g.level.Player.GetPosition())
@@ -195,6 +180,42 @@ func (g *Game) handleEvent(event *tcell.EventKey) *tcell.EventKey {
 
 }
 
+func (g *Game) handleMoveAction(a action.Type) {
+	movementRegistry := map[action.Type]primitives.Point2D[int]{
+		action.MoveUp:               {X: 0, Y: -1},
+		action.MoveDown:             {X: 0, Y: 1},
+		action.MoveLeft:             {X: -1, Y: 0},
+		action.MoveRight:            {X: 1, Y: 0},
+		action.MoveLeftUpperCorner:  {X: -1, Y: -1},
+		action.MoveRightUpperCorner: {X: 1, Y: -1},
+		action.MoveLefLowerCorner:   {X: -1, Y: 1},
+		action.MoveRightLowerCorner: {X: 1, Y: 1},
+	}
+
+	oldPos := g.level.Player.GetPosition()
+	g.level.Player.Move(movementRegistry[a])
+
+	if g.level.IsCollisionWithBorders(g.level.Player.GetPosition()) {
+		g.level.Player.SetPosition(oldPos)
+		return
+	}
+
+	if enemy := g.level.GetEnemyAtPosition(g.level.Player.GetPosition()); enemy != nil {
+		// @todo - возвращать информацию о совершенной атаке - кто был атакован, какой был нанесён урон, сколько здоровья осталось и т.д.
+		g.level.Attack(g.level.Player, enemy)
+
+		if provider, ok := enemy.(entities.CharacterProvider); ok {
+			character := provider.GetCharacter()
+			if !character.IsAlive() {
+				// @todo - доработать логику смерти врага (выпадение лута, опыта и т.д.)
+				g.level.RemoveEnemy(enemy)
+			}
+			g.level.Player.SetPosition(oldPos)
+		}
+		return
+	}
+}
+
 func (g *Game) resetInteraction() {
 	g.isPlayerReadyToInteract = false
 	g.view.ResetInteraction()
@@ -237,8 +258,7 @@ func (g *Game) handleTakeAction() {
 		switch g.level.CheckEntityCollision(pos) {
 		case world.CollisionTypeItem:
 			if err := g.level.PlayerTakeItemAtPosition(pos); err != nil {
-				// @todo - вывод сообщения об ошибке в view
-				_ = sendBackpackErrorToView(1, 1)
+				g.view.SetInfoErrorMessage(err.Error())
 				return
 			}
 		}
@@ -338,8 +358,7 @@ func (g *Game) handleItemSelection(actionType action.Type) {
 		// Для оружия индекс 0 - снятие текущего оружия
 		if itemIndex == 0 {
 			if err := g.level.Player.DropEquipWeaponToBackpack(); err != nil {
-				// @todo - вывод сообщения об ошибке в view
-				_ = sendBackpackErrorToView(1, 1)
+				g.view.SetInfoErrorMessage(err.Error())
 			}
 			g.updateBackpackInfo()
 			return
@@ -365,8 +384,7 @@ func (g *Game) handleItemSelection(actionType action.Type) {
 	}
 
 	if err := g.level.Player.UseItemFromBackpack(selectedItem); err != nil {
-		// @todo - вывод сообщения об ошибке в view
-		_ = sendBackpackErrorToView(1, 1)
+		g.view.SetInfoErrorMessage(err.Error())
 	}
 
 	g.updateBackpackInfo()
@@ -461,8 +479,7 @@ func (g *Game) dropItemToMap(item any, isEquipped bool) {
 	}
 
 	if dropPos == nil {
-		// @todo - вывод сообщения об ошибке в view
-		_ = sendBackpackErrorToView(1, 1)
+		g.view.SetInfoErrorMessage("No free adjacent cells to drop item")
 		return
 	}
 
@@ -488,9 +505,4 @@ func (g *Game) Update(float64) signals.Type {
 
 func (g *Game) Primitive() tview.Primitive {
 	return g.view.GetRootPrimitive()
-}
-
-// @todo - вывод сообщения об ошибке в view
-func sendBackpackErrorToView(a, b int) int {
-	return a + b
 }

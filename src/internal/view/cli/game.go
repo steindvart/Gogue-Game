@@ -127,6 +127,8 @@ type Game struct {
 	currentTab         BackpackTab
 	playerBackpackInfo *dto.BackpackInfo
 	backpackDropMode   bool
+
+	infoErrorMessage string
 }
 
 func NewGame() *Game {
@@ -268,6 +270,7 @@ func (g *Game) UpdatePlayerInfo(info *dto.PlayerInfo) {
 func (g *Game) ResetInteraction() {
 	g.UpdateItemInfo(nil)
 	g.SetPlayerIsOnPortal(false)
+	g.ClearInfoMessages()
 }
 
 func (g *Game) SetPlayerIsOnPortal(val bool) {
@@ -305,6 +308,29 @@ func (g *Game) updateInteractionInfo() {
 	if g.playerIsOnPortal {
 		printInteractPortalInfo(g.statsPanel)
 	}
+
+	// @todo - небольшой баг с отрисовкой: если уже есть сообщение об ошибке,
+	// то мелькнёт ещё одно аналогичное сообщение.
+	// Не хочется делать "костыль" для решения проблемы, нужно подумать над этим отдельно.
+	if g.infoErrorMessage != "" {
+		printErrorInfoMessage(g.statsPanel, g.infoErrorMessage)
+	}
+}
+
+func printErrorInfoMessage(view *tview.TextView, msg string) {
+	fmt.Fprintln(view)
+	fmt.Fprintln(view, "───────────────────────────────────")
+	fmt.Fprintf(view, "[%s::b]Error:[-:-:-]\n %s\n", colorTomato, msg)
+	fmt.Fprintln(view)
+}
+
+func (g *Game) SetInfoErrorMessage(msg string) {
+	g.infoErrorMessage = msg
+	g.updateInteractionInfo()
+}
+
+func (g *Game) ClearInfoMessages() {
+	g.infoErrorMessage = ""
 }
 
 func printInteractPortalInfo(view *tview.TextView) {

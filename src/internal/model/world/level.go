@@ -149,15 +149,6 @@ func (l *Level) generateEnvironment() error {
 	return nil
 }
 
-func (l *Level) MovePlayerWithBorderControl(delta primitives.Point2D[int]) {
-	oldPlayerPos := l.Player.GetPosition()
-	l.Player.Move(delta)
-
-	if l.isCollisionWithBorders(l.Player.GetPosition()) {
-		l.Player.SetPosition(oldPlayerPos)
-	}
-}
-
 func (l *Level) CheckEntityCollision(pos primitives.Point2D[int]) CollisionType {
 	if l.isCollisionWithEnemy(pos) {
 		return CollisionTypeEnemy
@@ -172,7 +163,7 @@ func (l *Level) CheckEntityCollision(pos primitives.Point2D[int]) CollisionType 
 	return CollisionTypeNone
 }
 
-func (l *Level) isCollisionWithBorders(pos primitives.Point2D[int]) bool {
+func (l *Level) IsCollisionWithBorders(pos primitives.Point2D[int]) bool {
 	if l.isCollisionWithMapBorders(pos) {
 		return true
 	}
@@ -273,13 +264,17 @@ func (l *Level) isCollisionWithTeleport(delta primitives.Point2D[int]) bool {
 	return delta == l.FinishPortal.Point
 }
 
-func (l *Level) isCollisionWithEnemy(pos primitives.Point2D[int]) bool {
+func (l *Level) GetEnemyAtPosition(pos primitives.Point2D[int]) primitives.Positional2D[int] {
 	for _, enemy := range l.Enemies {
 		if pos == enemy.GetPosition() {
-			return true
+			return enemy
 		}
 	}
-	return false
+	return nil
+}
+
+func (l *Level) isCollisionWithEnemy(pos primitives.Point2D[int]) bool {
+	return l.GetEnemyAtPosition(pos) != nil
 }
 
 func (l *Level) isCollisionWithItem(pos primitives.Point2D[int]) bool {
@@ -362,4 +357,29 @@ func (l *Level) RemoveItem(item primitives.Positional2D[int]) {
 
 func (l *Level) AddItem(item primitives.Positional2D[int]) {
 	l.Items = append(l.Items, item)
+}
+
+func (l *Level) RemoveEnemy(enemy primitives.Positional2D[int]) {
+	for i, it := range l.Enemies {
+		if it == enemy {
+			l.Enemies = append(l.Enemies[:i], l.Enemies[i+1:]...)
+			return
+		}
+	}
+}
+
+type Attacker interface {
+	Attack(defender *entities.Character, rnd utils.Randomizer)
+}
+
+// @todo - возвращать информацию о совершенной атаке - кто был атакован, какой был нанесён урон, сколько здоровья осталось и т.д.
+func (l *Level) Attack(attacker Attacker, defender primitives.Positional2D[int]) {
+	if attacker == nil || defender == nil {
+		return
+	}
+
+	if enemy, ok := defender.(entities.CharacterProvider); ok {
+		attacker.Attack(enemy.GetCharacter(), l.random)
+		return
+	}
 }
