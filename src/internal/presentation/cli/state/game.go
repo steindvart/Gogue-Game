@@ -174,6 +174,7 @@ func (g *Game) handleMoveAction(a action.Type) {
 	}
 
 	if enemy := g.level.GetEnemyAtPosition(g.level.Player.GetPosition()); enemy != nil {
+		// @todo - возвращать информацию о совершенной атаке - кто был атакован, какой был нанесён урон, сколько здоровья осталось и т.д.
 		g.level.Attack(g.level.Player, enemy)
 
 		if provider, ok := enemy.(entities.CharacterProvider); ok {
