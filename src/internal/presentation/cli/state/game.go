@@ -225,8 +225,7 @@ func (g *Game) handleTakeAction() {
 		switch g.level.CheckEntityCollision(pos) {
 		case world.CollisionTypeItem:
 			if err := g.level.PlayerTakeItemAtPosition(pos); err != nil {
-				// @todo - вывод сообщения об ошибке в view
-				_ = sendBackpackErrorToView(1, 1)
+				g.view.SetInfoErrorMessage(err.Error())
 				return
 			}
 		}
@@ -326,8 +325,7 @@ func (g *Game) handleItemSelection(actionType action.Type) {
 		// Для оружия индекс 0 - снятие текущего оружия
 		if itemIndex == 0 {
 			if err := g.level.Player.DropEquipWeaponToBackpack(); err != nil {
-				// @todo - вывод сообщения об ошибке в view
-				_ = sendBackpackErrorToView(1, 1)
+				g.view.SetInfoErrorMessage(err.Error())
 			}
 			g.updateBackpackInfo()
 			return
@@ -353,8 +351,7 @@ func (g *Game) handleItemSelection(actionType action.Type) {
 	}
 
 	if err := g.level.Player.UseItemFromBackpack(selectedItem); err != nil {
-		// @todo - вывод сообщения об ошибке в view
-		_ = sendBackpackErrorToView(1, 1)
+		g.view.SetInfoErrorMessage(err.Error())
 	}
 
 	g.updateBackpackInfo()
@@ -449,8 +446,7 @@ func (g *Game) dropItemToMap(item any, isEquipped bool) {
 	}
 
 	if dropPos == nil {
-		// @todo - вывод сообщения об ошибке в view
-		_ = sendBackpackErrorToView(1, 1)
+		g.view.SetInfoErrorMessage("No free adjacent cells to drop item")
 		return
 	}
 
@@ -476,9 +472,4 @@ func (g *Game) Update(float64) signals.Type {
 
 func (g *Game) Primitive() tview.Primitive {
 	return g.view.GetRootPrimitive()
-}
-
-// @todo - вывод сообщения об ошибке в view
-func sendBackpackErrorToView(a, b int) int {
-	return a + b
 }
