@@ -369,6 +369,7 @@ type Attacker interface {
 	Attack(defender *entities.Character, rnd utils.Randomizer)
 }
 
+// @todo - возвращать информацию о совершенной атаке - кто был атакован, какой был нанесён урон, сколько здоровья осталось и т.д.
 func (l *Level) Attack(attacker Attacker, defender primitives.Positional2D[int]) {
 	if attacker == nil || defender == nil {
 		return
