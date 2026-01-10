@@ -44,7 +44,7 @@ const (
 
 func NewLevelWithDefaults(random utils.Randomizer, mapSize primitives.Size2D[uint]) *Level {
 	cfg := DefaultLevelConfig(mapSize)
-	return NewLevelWithComponents(
+	return newLevelWithComponents(
 		random,
 		cfg,
 		1,
@@ -56,7 +56,7 @@ func NewLevelWithDefaults(random utils.Randomizer, mapSize primitives.Size2D[uin
 	)
 }
 
-func NewLevelWithComponents(
+func newLevelWithComponents(
 	random utils.Randomizer,
 	cfg LevelConfig,
 	levelNumber uint,

@@ -5,7 +5,6 @@ import (
 	"gogue/internal/model/primitives"
 	"gogue/internal/model/world"
 	"gogue/internal/presentation/dto"
-	"gogue/internal/utils"
 	"os"
 )
 
@@ -23,7 +22,7 @@ func SaveGame(level *world.Level, size primitives.Size2D[uint], filename string)
 	return encoder.Encode(dto)
 }
 
-func LoadGame(filename string, random utils.Randomizer) (*world.Level, error) {
+func LoadGame(filename string) (*world.Level, error) {
 	file, err := os.Open(filename)
 	if err != nil {
 		return nil, err
@@ -35,5 +34,5 @@ func LoadGame(filename string, random utils.Randomizer) (*world.Level, error) {
 		return nil, err
 	}
 
-	return RestoreLevelFromDto(dto, random)
+	return RestoreLevelFromDto(dto)
 }

@@ -7,7 +7,8 @@ import (
 	"gogue/internal/model/primitives"
 	"gogue/internal/model/world"
 	"gogue/internal/presentation/dto"
-	"gogue/internal/utils"
+	"math/rand"
+	"time"
 )
 
 func ConvertLevelToDto(level *world.Level, size primitives.Size2D[uint]) dto.GameSaveDto {
@@ -62,8 +63,9 @@ func ConvertLevelToDto(level *world.Level, size primitives.Size2D[uint]) dto.Gam
 	}
 }
 
-func RestoreLevelFromDto(dto dto.GameSaveDto, random utils.Randomizer) (*world.Level, error) {
-	level := world.NewLevelWithDefaults(random, primitives.Size2D[uint]{
+func RestoreLevelFromDto(dto dto.GameSaveDto) (*world.Level, error) {
+	source := rand.New(rand.NewSource(time.Now().UnixNano()))
+	level := world.NewLevelWithDefaults(source, primitives.Size2D[uint]{
 		Width:  uint(dto.FogOfWar.Width),
 		Height: uint(dto.FogOfWar.Height),
 	})

@@ -24,7 +24,7 @@ const (
 	maxLevelNumber = 21
 )
 
-const SaveFileName = "bin/save.json"
+const SaveFileName = "save.json"
 
 type Game struct {
 	level  *world.Level
@@ -55,9 +55,7 @@ func NewGame() (*Game, error) {
 }
 
 func LoadGame() (*Game, error) {
-	source := rand.New(rand.NewSource(time.Now().UnixNano()))
-
-	level, err := save.LoadGame(SaveFileName, source)
+	level, err := save.LoadGame(SaveFileName)
 	if err != nil {
 		return nil, err
 	}
