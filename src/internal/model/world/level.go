@@ -30,14 +30,13 @@ type Level struct {
 	entitySpawner EntitySpawner
 	playerSpawner PlayerSpawner
 	fieldRenderer FieldRenderer
-	fogOfWar      *FogOfWar
+	FogOfWar      *FogOfWar
 }
 
 type CollisionType int
 
 const (
 	CollisionTypeNone CollisionType = iota
-	CollisionTypeBorder
 	CollisionTypeEnemy
 	CollisionTypeItem
 	CollisionTypeTeleport
@@ -45,9 +44,10 @@ const (
 
 func NewLevelWithDefaults(random utils.Randomizer, mapSize primitives.Size2D[uint]) *Level {
 	cfg := DefaultLevelConfig(mapSize)
-	return NewLevelWithComponents(
+	return newLevelWithComponents(
 		random,
 		cfg,
+		1,
 		NewGridRoomGenerator(),
 		NewConnectionTreePassageGenerator(),
 		NewRoomBasedEntitySpawner(),
@@ -56,9 +56,10 @@ func NewLevelWithDefaults(random utils.Randomizer, mapSize primitives.Size2D[uin
 	)
 }
 
-func NewLevelWithComponents(
+func newLevelWithComponents(
 	random utils.Randomizer,
 	cfg LevelConfig,
+	levelNumber uint,
 	roomGen RoomGenerator,
 	passageGen PassageGenerator,
 	entitySpawner EntitySpawner,
@@ -72,8 +73,9 @@ func NewLevelWithComponents(
 		passageGen:    passageGen,
 		entitySpawner: entitySpawner,
 		playerSpawner: playerSpawner,
+		Number:        levelNumber,
 		fieldRenderer: fieldRenderer,
-		fogOfWar:      NewFogOfWar(int(cfg.MapSize.Width), int(cfg.MapSize.Height)),
+		FogOfWar:      NewFogOfWar(int(cfg.MapSize.Width), int(cfg.MapSize.Height)),
 		Enemies:       []primitives.Positional2D[int]{},
 		Items:         []primitives.Positional2D[int]{},
 	}
@@ -107,6 +109,7 @@ func (l *Level) GenerateWithExistingPlayer(player *entities.Player) error {
 		return err
 	}
 
+	l.Number++
 	l.Player = player
 	startPos, err := l.playerSpawner.GetStartPosition(l.Rooms, l.random)
 	if err != nil {
@@ -118,7 +121,7 @@ func (l *Level) GenerateWithExistingPlayer(player *entities.Player) error {
 
 func (l *Level) generateEnvironment() error {
 	// Сбрасываем туман войны при генерации нового уровня
-	l.fogOfWar.Reset()
+	l.FogOfWar.Reset()
 
 	// Геометрия
 	rooms, finishPortal, err := l.roomGen.GenerateRooms(l.config, l.random)
@@ -294,7 +297,7 @@ func (l *Level) MakeCurrentField(w, h int) [][]common.GameEntityType {
 	}
 
 	// Фильтруем поле с учётом тумана войны и радиуса обзора игрока
-	return l.fogOfWar.ApplyFogOfWar(fullField, l.Player.GetPosition(), l.Player.ViewRadius)
+	return l.FogOfWar.ApplyFogOfWar(fullField, l.Player.GetPosition(), l.Player.ViewRadius)
 }
 
 // GetFullField возвращает двумерное представление карты уровня бещ учёта тумана войны

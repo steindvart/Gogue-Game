@@ -8,20 +8,20 @@ import (
 
 // FogOfWar управляет видимостью игрока и запоминает ранее посещённые области
 type FogOfWar struct {
-	// exploredTiles хранит координаты клеток, которые были исследованы (стены, проходы, двери)
+	// ExploredTiles хранит координаты клеток, которые были исследованы (стены, проходы, двери)
 	// Эти клетки остаются видимыми даже когда игрок уходит
-	exploredTiles map[primitives.Point2D[int]]bool
+	ExploredTiles map[primitives.Point2D[int]]bool
 
 	// Размеры поля для проверки границ
-	width  int
-	height int
+	Width  int
+	Height int
 }
 
 func NewFogOfWar(width, height int) *FogOfWar {
 	return &FogOfWar{
-		exploredTiles: make(map[primitives.Point2D[int]]bool),
-		width:         width,
-		height:        height,
+		ExploredTiles: make(map[primitives.Point2D[int]]bool),
+		Width:         width,
+		Height:        height,
 	}
 }
 
@@ -53,9 +53,9 @@ func (f *FogOfWar) ApplyFogOfWar(
 				filteredField[y][x] = entityType
 
 				if f.isStaticTile(entityType) {
-					f.exploredTiles[pos] = true
+					f.ExploredTiles[pos] = true
 				}
-			} else if f.exploredTiles[pos] {
+			} else if f.ExploredTiles[pos] {
 				filteredField[y][x] = entityType
 			}
 		}
@@ -77,9 +77,9 @@ func (f *FogOfWar) computeVisibleTiles(
 
 	// Определяем границы области видимости (квадрат вокруг смотрящего)
 	minX := utils.Max(0, origin.X-radius)
-	maxX := utils.Min(f.width-1, origin.X+radius)
+	maxX := utils.Min(f.Width-1, origin.X+radius)
 	minY := utils.Max(0, origin.Y-radius)
-	maxY := utils.Min(f.height-1, origin.Y+radius)
+	maxY := utils.Min(f.Height-1, origin.Y+radius)
 
 	// Проверяем каждую клетку в области видимости
 	for y := minY; y <= maxY; y++ {
@@ -212,7 +212,7 @@ func (f *FogOfWar) isStaticTile(entityType common.GameEntityType) bool {
 
 // isInBounds проверяет, находится ли точка в границах текущего поля
 func (f *FogOfWar) isInBounds(pos primitives.Point2D[int]) bool {
-	return pos.X >= 0 && pos.X < f.width && pos.Y >= 0 && pos.Y < f.height
+	return pos.X >= 0 && pos.X < f.Width && pos.Y >= 0 && pos.Y < f.Height
 }
 
 // @todo - ввести в реализацию или удалить (пока больше склоняюсь ко второму варианту)
@@ -245,5 +245,5 @@ func (f *FogOfWar) isInBounds(pos primitives.Point2D[int]) bool {
 
 // Reset сбрасывает память о посещённых областях (например, при переходе на новый уровень)
 func (f *FogOfWar) Reset() {
-	f.exploredTiles = make(map[primitives.Point2D[int]]bool)
+	f.ExploredTiles = make(map[primitives.Point2D[int]]bool)
 }

@@ -101,7 +101,11 @@ func (g *StateMachine) handleSignal(s signals.Type) {
 		}
 		g.PushState(game)
 	case signals.LoadGame:
-		// @todo push load game state
+		game, err := state.LoadGame()
+		if err != nil {
+			panic(err)
+		}
+		g.PushState(game)
 	case signals.ShowScoreboard:
 		// @todo push scoreboard state
 	}

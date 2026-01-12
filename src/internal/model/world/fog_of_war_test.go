@@ -326,19 +326,19 @@ func TestReset(t *testing.T) {
 	fog := NewFogOfWar(5, 5)
 
 	// Добавляем несколько исследованных точек
-	fog.exploredTiles[primitives.Point2D[int]{X: 0, Y: 0}] = true
-	fog.exploredTiles[primitives.Point2D[int]{X: 1, Y: 1}] = true
-	fog.exploredTiles[primitives.Point2D[int]{X: 2, Y: 2}] = true
+	fog.ExploredTiles[primitives.Point2D[int]{X: 0, Y: 0}] = true
+	fog.ExploredTiles[primitives.Point2D[int]{X: 1, Y: 1}] = true
+	fog.ExploredTiles[primitives.Point2D[int]{X: 2, Y: 2}] = true
 
-	if len(fog.exploredTiles) != 3 {
-		t.Errorf("Expected 3 explored tiles before reset, got %d", len(fog.exploredTiles))
+	if len(fog.ExploredTiles) != 3 {
+		t.Errorf("Expected 3 explored tiles before reset, got %d", len(fog.ExploredTiles))
 	}
 
 	// Сбрасываем
 	fog.Reset()
 
-	if len(fog.exploredTiles) != 0 {
-		t.Errorf("Expected 0 explored tiles after reset, got %d", len(fog.exploredTiles))
+	if len(fog.ExploredTiles) != 0 {
+		t.Errorf("Expected 0 explored tiles after reset, got %d", len(fog.ExploredTiles))
 	}
 }
 

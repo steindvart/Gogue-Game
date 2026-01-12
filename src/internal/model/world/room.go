@@ -16,9 +16,10 @@ const (
 
 type Room struct {
 	*primitives.Box
-	Type  RoomType
 	Doors []primitives.Point2D[int]
 
+	// Type используется только во время генерации для указания комнаты старта для Player и конечной комнаты для Portal
+	Type RoomType
 	// occupiedPositions используется только во время генерации для отслеживания занятых позиций
 	occupiedPositions map[primitives.Point2D[int]]bool
 }

@@ -1,6 +1,8 @@
 package dto
 
-import "gogue/internal/model/entities"
+import (
+	"gogue/internal/model/entities"
+)
 
 type PlayerInfo struct {
 	Health           float64
@@ -8,10 +10,11 @@ type PlayerInfo struct {
 	Strength         float64
 	Agility          float64
 	TemporaryEffects []EffectInfo
+	LevelNumber      uint
 	*WeaponInfo
 }
 
-func ConvertPlayerToDto(player *entities.Player) *PlayerInfo {
+func ConvertPlayerToDto(player *entities.Player, levelNumber uint) *PlayerInfo {
 	if player == nil {
 		return nil
 	}
@@ -22,6 +25,7 @@ func ConvertPlayerToDto(player *entities.Player) *PlayerInfo {
 		Strength:         player.Attributes.Strength,
 		Agility:          player.Attributes.Agility,
 		TemporaryEffects: ConvertEffectsToDto(player.TemporaryEffects),
+		LevelNumber:      levelNumber,
 		WeaponInfo:       ConvertWeaponToDto(player.Weapon),
 	}
 }

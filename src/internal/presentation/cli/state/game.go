@@ -8,6 +8,7 @@ import (
 	"gogue/internal/model/world"
 	"gogue/internal/presentation/action"
 	"gogue/internal/presentation/dto"
+	"gogue/internal/presentation/save"
 	viewcli "gogue/internal/view/cli"
 	"math/rand"
 	"time"
@@ -18,9 +19,12 @@ import (
 )
 
 const (
-	MapHeight = 30
-	MapWidth  = 90
+	MapHeight      = 30
+	MapWidth       = 90
+	maxLevelNumber = 21
 )
+
+const SaveFileName = "save.json"
 
 type Game struct {
 	level  *world.Level
@@ -50,12 +54,28 @@ func NewGame() (*Game, error) {
 	return &game, nil
 }
 
+func LoadGame() (*Game, error) {
+	level, err := save.LoadGame(SaveFileName)
+	if err != nil {
+		return nil, err
+	}
+
+	game := &Game{
+		level: level,
+		view:  viewcli.NewGame(),
+	}
+
+	game.updateGameView()
+	game.initInput()
+	return game, nil
+}
+
 func (g *Game) updateGameView() {
 	g.view.UpdateGameField(g.level.MakeCurrentField(MapWidth, MapHeight))
 
 	player := g.level.Player
 	if player != nil {
-		g.view.UpdatePlayerInfo(dto.ConvertPlayerToDto(g.level.Player))
+		g.view.UpdatePlayerInfo(dto.ConvertPlayerToDto(g.level.Player, g.level.Number))
 		g.updateBackpackInfo()
 	}
 }
@@ -145,6 +165,11 @@ func (g *Game) handleEvent(event *tcell.EventKey) *tcell.EventKey {
 		}
 	case action.Exit:
 		g.signal = signals.Stop
+
+		err := save.SaveGame(g.level, primitives.Size2D[uint]{Height: MapHeight, Width: MapWidth}, SaveFileName)
+		if err != nil {
+			panic("an error occurred while saving the game:" + err.Error())
+		}
 		return nil
 	default:
 		return event
@@ -206,8 +231,13 @@ func (g *Game) handleSelectAction() {
 		case world.CollisionTypeItem:
 			g.level.PlayerUseItemAtPosition(pos)
 		case world.CollisionTypeTeleport:
-			if err := g.level.GenerateWithExistingPlayer(g.level.Player); err != nil {
-				panic("an error occurred when generating next level: " + err.Error())
+			if g.level.Number <= maxLevelNumber {
+				if err := g.level.GenerateWithExistingPlayer(g.level.Player); err != nil {
+					panic("an error occurred when generating next level: " + err.Error())
+				}
+			} else {
+				// @todo сделать победное окошко. Пока что будет как будто esc
+				g.signal = signals.Stop
 			}
 		}
 
