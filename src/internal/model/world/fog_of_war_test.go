@@ -161,7 +161,7 @@ func TestApplyFogOfWar(t *testing.T) {
 		// Создаём простое поле 5x5
 		fullField := [][]common.GameEntityType{
 			{common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
-			{common.WorldTypeRoomFloor, common.FoodTypeBread, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
+			{common.WorldTypeRoomFloor, common.Food, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
 			{common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.EntityTypePlayer, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
 			{common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.EntityTypeZombie, common.WorldTypeRoomFloor},
 			{common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
@@ -179,7 +179,7 @@ func TestApplyFogOfWar(t *testing.T) {
 		}
 
 		// Еда в радиусе видимости должна быть видна
-		if result[1][1] != common.FoodTypeBread {
+		if result[1][1] != common.Food {
 			t.Errorf("Food within view radius not visible")
 		}
 
@@ -307,7 +307,7 @@ func TestIsStaticTile(t *testing.T) {
 		{"portal is static", common.WorldTypePortal, true},
 		{"player is not static", common.EntityTypePlayer, false},
 		{"enemy is not static", common.EntityTypeZombie, false},
-		{"food is not static", common.FoodTypeBread, false},
+		{"food is not static", common.Food, false},
 		{"weapon is not static", common.Weapon, false},
 	}
 

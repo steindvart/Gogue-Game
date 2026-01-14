@@ -224,13 +224,13 @@ func TestDefaultFieldRenderer_RenderItems(t *testing.T) {
 	field := renderer.RenderField(10, 10, level)
 
 	// Проверяем предметы
-	if field[2][2] != common.FoodTypeBread {
+	if field[2][2] != common.Food {
 		t.Errorf("Expected bread at (2, 2), got %v", field[2][2])
 	}
-	if field[3][3] != common.ElixirTypeStrength {
+	if field[3][3] != common.Elixir {
 		t.Errorf("Expected strength elixir at (3, 3), got %v", field[3][3])
 	}
-	if field[4][4] != common.ScrollTypeAgility {
+	if field[4][4] != common.Scroll {
 		t.Errorf("Expected agility scroll at (4, 4), got %v", field[4][4])
 	}
 	if field[5][5] != common.Weapon {
@@ -381,21 +381,6 @@ func TestConversionFunctions(t *testing.T) {
 		testFunc func() common.GameEntityType
 		expected common.GameEntityType
 	}{
-		{
-			name:     "FoodTypeBread converts correctly",
-			testFunc: func() common.GameEntityType { return convertFoodToEntityType(items.FoodTypeBread) },
-			expected: common.FoodTypeBread,
-		},
-		{
-			name:     "ElixirTypeStrength converts correctly",
-			testFunc: func() common.GameEntityType { return convertElixirToEntityType(items.ElixirTypeStrength) },
-			expected: common.ElixirTypeStrength,
-		},
-		{
-			name:     "ScrollTypeAgility converts correctly",
-			testFunc: func() common.GameEntityType { return convertScrollToEntityType(items.ScrollTypeAgility) },
-			expected: common.ScrollTypeAgility,
-		},
 		{
 			name:     "EnemyTypeZombie converts correctly",
 			testFunc: func() common.GameEntityType { return convertEnemyToEntityType(&entities.Zombie{}) },
