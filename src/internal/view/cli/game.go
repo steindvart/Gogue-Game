@@ -493,14 +493,11 @@ func (g *Game) getCellAppearance(entityType common.GameEntityType) (rune, string
 		return SymbolOgre, ColorOgre, colorBlack
 	case common.EntityTypeSnakeMage:
 		return SymbolSnakeMage, ColorSnakeMage, colorBlack
-	case common.FoodTypePotatoes, common.FoodTypeBread, common.FoodTypeMeat,
-		common.FoodTypeMistery, common.FoodTypeBeer:
+	case common.Food:
 		return SymbolFood, ColorFood, colorBlack
-	case common.ElixirTypeStrength, common.ElixirTypeAgility, common.ElixirTypeDwarfism,
-		common.ElixirTypeGiantism, common.ElixirTypeMystery:
+	case common.Elixir:
 		return SymbolElixir, ColorElixir, colorBlack
-	case common.ScrollTypeStrength, common.ScrollTypeAgility, common.ScrollTypeUltimate,
-		common.ScrollTypeMaxHealth, common.ScrollTypeMystery:
+	case common.Scroll:
 		return SymbolScroll, ColorScroll, colorBlack
 	case common.Weapon:
 		return SymbolWeapon, ColorWeapon, colorBlack

@@ -15,20 +15,9 @@ const (
 	EntityTypeGhost
 	EntityTypeOgre
 	EntityTypeSnakeMage
-	FoodTypePotatoes
-	FoodTypeBread
-	FoodTypeMeat
-	FoodTypeMistery
-	FoodTypeBeer
-	ElixirTypeStrength
-	ElixirTypeAgility
-	ElixirTypeDwarfism
-	ElixirTypeGiantism
-	ElixirTypeMystery
-	ScrollTypeStrength
-	ScrollTypeAgility
-	ScrollTypeUltimate
-	ScrollTypeMaxHealth
-	ScrollTypeMystery
+	Food
+	Elixir
+	Scroll
 	Weapon
+	Treasure
 )

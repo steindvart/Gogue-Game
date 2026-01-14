@@ -131,13 +131,13 @@ func (r *DefaultFieldRenderer) renderItems(
 		}
 
 		// Type switch для определения типа предмета
-		switch v := item.(type) {
+		switch item.(type) {
 		case *items.Food:
-			field[pt.Y][pt.X] = convertFoodToEntityType(v.Type)
+			field[pt.Y][pt.X] = common.Food
 		case *items.Elixir:
-			field[pt.Y][pt.X] = convertElixirToEntityType(v.Type)
+			field[pt.Y][pt.X] = common.Elixir
 		case *items.Scroll:
-			field[pt.Y][pt.X] = convertScrollToEntityType(v.Type)
+			field[pt.Y][pt.X] = common.Scroll
 		case *items.Weapon:
 			field[pt.Y][pt.X] = common.Weapon
 		case *items.Treasure:
@@ -177,59 +177,6 @@ func (r *DefaultFieldRenderer) isInBounds(x, y int, field [][]common.GameEntityT
 
 func (r *DefaultFieldRenderer) isInBoundsWH(x, y, width, height int) bool {
 	return x >= 0 && x < width && y >= 0 && y < height
-}
-
-// Вспомогательные функции для конвертации типов
-
-func convertFoodToEntityType(foodType items.FoodType) common.GameEntityType {
-	switch foodType {
-	case items.FoodTypePotatoes:
-		return common.FoodTypePotatoes
-	case items.FoodTypeBread:
-		return common.FoodTypeBread
-	case items.FoodTypeMeat:
-		return common.FoodTypeMeat
-	case items.FoodTypeMistery:
-		return common.FoodTypeMistery
-	case items.FoodTypeBeer:
-		return common.FoodTypeBeer
-	default:
-		return common.FoodTypeMistery
-	}
-}
-
-func convertElixirToEntityType(elixirType items.ElixirType) common.GameEntityType {
-	switch elixirType {
-	case items.ElixirTypeStrength:
-		return common.ElixirTypeStrength
-	case items.ElixirTypeAgility:
-		return common.ElixirTypeAgility
-	case items.ElixirTypeDwarfism:
-		return common.ElixirTypeDwarfism
-	case items.ElixirTypeGiantism:
-		return common.ElixirTypeGiantism
-	case items.ElixirTypeMystery:
-		return common.ElixirTypeMystery
-	default:
-		return common.ElixirTypeMystery
-	}
-}
-
-func convertScrollToEntityType(scrollType items.ScrollType) common.GameEntityType {
-	switch scrollType {
-	case items.ScrollTypeStrength:
-		return common.ScrollTypeStrength
-	case items.ScrollTypeAgility:
-		return common.ScrollTypeAgility
-	case items.ScrollTypeUltimate:
-		return common.ScrollTypeUltimate
-	case items.ScrollTypeMaxHealth:
-		return common.ScrollTypeMaxHealth
-	case items.ScrollTypeMystery:
-		return common.ScrollTypeMystery
-	default:
-		return common.ScrollTypeMystery
-	}
 }
 
 // Пример того, как можем из интерфейса определить конкретный тип, без доп. полей
