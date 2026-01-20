@@ -42,6 +42,7 @@ func DefaultLevelConfig(mapSize primitives.Size2D[uint]) LevelConfig {
 		MaxExtraPassageCount: 2,
 		NumberXYSections:     3,
 		RoomsCount:           9,
+		//todo по росту уровня эти значения должны меняться, как усложнение
 		ItemsSpawnConfig: ItemSpawnConfig{
 			FoodsQuantity:   7,
 			ElixirsQuantity: 5,

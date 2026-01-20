@@ -30,11 +30,12 @@ type Backpack struct {
 
 func NewBackpack() *Backpack {
 	return &Backpack{
-		Capacity: DefaultBackpackCapacity,
-		Elixirs:  list.New(),
-		Scrolls:  list.New(),
-		Foods:    list.New(),
-		Weapons:  list.New(),
+		Capacity:  DefaultBackpackCapacity,
+		Elixirs:   list.New(),
+		Scrolls:   list.New(),
+		Foods:     list.New(),
+		Weapons:   list.New(),
+		Treasures: 0,
 	}
 }
 

@@ -55,7 +55,7 @@ func GetTreasureConfig(t TreasureType) TreasureConfig {
 	return TreasureRegistry[TreasureTypeMystery]
 }
 
-func (cfg *TreasureConfig) GenerateValue(rng *utils.Random) int32 {
+func (cfg *TreasureConfig) GenerateValue(rng utils.Randomizer) int32 {
 	return int32(utils.RandomIntInRange(rng, int(cfg.ValueRange.Min), int(cfg.ValueRange.Max)))
 }
 
@@ -64,4 +64,17 @@ func (cfg *TreasureConfig) Validate() error {
 		return fmt.Errorf("invalid value range: min=%d > max=%d", cfg.ValueRange.Min, cfg.ValueRange.Max)
 	}
 	return nil
+}
+
+func getRandomTreasureType(rnd utils.Randomizer) TreasureType {
+	percent := rnd.Intn(100)
+	switch {
+	case percent < 65:
+		return TreasureTypeGold
+	case percent < 85:
+		return TreasureTypeGem
+	case percent < 90:
+		return TreasureTypeArtifact
+	}
+	return TreasureTypeMystery
 }

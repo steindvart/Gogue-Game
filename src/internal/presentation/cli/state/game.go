@@ -205,7 +205,7 @@ func (g *Game) handleMoveAction(a action.Type) {
 		if provider, ok := enemy.(entities.CharacterProvider); ok {
 			character := provider.GetCharacter()
 			if !character.IsAlive() {
-				// @todo - доработать логику смерти врага (выпадение лута, опыта и т.д.)
+				g.level.PlayerTopUpTreasures()
 				g.level.RemoveEnemy(enemy)
 			}
 			g.level.Player.SetPosition(oldPos)
