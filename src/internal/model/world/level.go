@@ -385,12 +385,13 @@ func (l *Level) Attack(attacker Attacker, defender primitives.Positional2D[int])
 }
 
 // @todo - с повышением lvl повысится кол-во созданных сокровищ
-func (l *Level) PlayerTopUpTreasures() {
-	mockBox := primitives.Box{
-		Point: primitives.Point2D[int]{X: 0, Y: 0},
-		Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
-	}
-	treasureType := items.GenerateTreasureType(l.random)
-	treasure := items.NewTreasureBuiltin(l.random, mockBox, treasureType)
-	l.Player.AddTreasure(treasure)
+func (l *Level) GenerateTreasure() *items.Treasure {
+	// @todo сделать задаваемое процентное соотношение вот тут
+	return items.NewTreasureBuiltin(
+		l.random,
+		primitives.Box{
+			Point: primitives.Point2D[int]{X: 0, Y: 0},
+			Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
+		},
+		items.GetTreasureType(l.random))
 }

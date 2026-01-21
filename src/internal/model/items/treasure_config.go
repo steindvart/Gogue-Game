@@ -66,6 +66,7 @@ func (cfg *TreasureConfig) Validate() error {
 	return nil
 }
 
+// @todo - сделать функцией в аргументе выше
 func getRandomTreasureType(rnd utils.Randomizer) TreasureType {
 	percent := rnd.Intn(100)
 	switch {

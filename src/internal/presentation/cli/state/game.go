@@ -205,7 +205,7 @@ func (g *Game) handleMoveAction(a action.Type) {
 		if provider, ok := enemy.(entities.CharacterProvider); ok {
 			character := provider.GetCharacter()
 			if !character.IsAlive() {
-				g.level.PlayerTopUpTreasures()
+				g.level.Player.AddTreasure(g.level.GenerateTreasure())
 				g.level.RemoveEnemy(enemy)
 			}
 			g.level.Player.SetPosition(oldPos)
