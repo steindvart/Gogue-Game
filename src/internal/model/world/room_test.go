@@ -122,6 +122,9 @@ func TestRoom_GetRandomFreePosition(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			room, err := NewRoom(tt.roomType, tt.roomSize)
+			if err != nil {
+				t.Errorf("NewRoom() no expected error, but got '%v'", err)
+			}
 			for ocPos := range tt.OccupiedPositions {
 				room.occupiedPositions[ocPos] = true
 			}
