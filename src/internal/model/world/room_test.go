@@ -14,6 +14,7 @@ func TestRoom_NewRoom(t *testing.T) {
 		roomType RoomType
 		mapSize  primitives.Box
 		want     Room
+		wantErr  error
 	}{
 		{
 			name:     "New finish room",
@@ -23,6 +24,7 @@ func TestRoom_NewRoom(t *testing.T) {
 				Box:  &primitives.Box{Point: primitives.Point2D[int]{X: 6, Y: 3}, Size: primitives.Size2D[uint]{Height: 10, Width: 10}},
 				Type: RoomTypeFinish,
 			},
+			wantErr: nil,
 		},
 		{
 			name:     "New ordinary room",
@@ -32,6 +34,7 @@ func TestRoom_NewRoom(t *testing.T) {
 				Box:  &primitives.Box{Point: primitives.Point2D[int]{X: 6, Y: 3}, Size: primitives.Size2D[uint]{Height: 10, Width: 10}},
 				Type: RoomTypeOrdinary,
 			},
+			wantErr: nil,
 		},
 		{
 			name:     "New start room",
@@ -41,12 +44,34 @@ func TestRoom_NewRoom(t *testing.T) {
 				Box:  &primitives.Box{Point: primitives.Point2D[int]{X: 6, Y: 3}, Size: primitives.Size2D[uint]{Height: 10, Width: 10}},
 				Type: RoomTypeStart,
 			},
+			wantErr: nil,
+		},
+		{
+			name:     "Little_room_size:",
+			roomType: RoomTypeStart,
+			mapSize:  primitives.Box{Point: primitives.Point2D[int]{X: 6, Y: 3}, Size: primitives.Size2D[uint]{Height: 2, Width: 2}},
+			wantErr:  errors.New("room size Width and Height should be more 3"),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			room := NewRoom(tt.roomType, tt.mapSize)
-			reflect.DeepEqual(room, tt.want)
+			room, err := NewRoom(tt.roomType, tt.mapSize)
+
+			if tt.wantErr != nil {
+				if err == nil {
+					t.Errorf("NewRoom() expected error '%v', but got nil", tt.wantErr)
+					return
+				}
+				if err.Error() != tt.wantErr.Error() {
+					t.Errorf("NewRoom() expected error '%v', but got '%v'", tt.wantErr, err)
+					return
+				}
+			} else {
+				if err != nil {
+					t.Errorf("NewRoom() no expected error, but got '%v'", err)
+				}
+				reflect.DeepEqual(room, tt.want)
+			}
 		})
 	}
 }
@@ -96,7 +121,7 @@ func TestRoom_GetRandomFreePosition(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			room := NewRoom(tt.roomType, tt.roomSize)
+			room, err := NewRoom(tt.roomType, tt.roomSize)
 			for ocPos := range tt.OccupiedPositions {
 				room.occupiedPositions[ocPos] = true
 			}

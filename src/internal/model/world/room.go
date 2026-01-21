@@ -24,20 +24,19 @@ type Room struct {
 	occupiedPositions map[primitives.Point2D[int]]bool
 }
 
-func NewRoom(roomType RoomType, box primitives.Box) *Room {
+func NewRoom(roomType RoomType, box primitives.Box) (*Room, error) {
 	const roomMinWidth = 3
 	const roomMinHeight = 3
 
 	if box.Size.Width < roomMinWidth || box.Size.Height < roomMinHeight {
-		box.Size.Width = roomMinWidth
-		box.Size.Height = roomMinHeight
+		return nil, errors.New("room size Width and Height should be more 3")
 	}
 	return &Room{
 		Box:               &box,
 		Type:              roomType,
 		Doors:             []primitives.Point2D[int]{},
 		occupiedPositions: make(map[primitives.Point2D[int]]bool),
-	}
+	}, nil
 }
 
 func (r *Room) GetRandomFreePosition(rand utils.Randomizer) (*primitives.Point2D[int], error) {
