@@ -23,10 +23,10 @@ const (
 	MapWidth       = 90
 	maxLevelNumber = 21
 
-	goldPercent     = 65
-	gemPercent      = 20
-	artifactPercent = 5
-	mysteryPercent  = 10
+	goldPercentChance     = 65
+	gemPercentChance      = 20
+	artifactPercentChance = 5
+	mysteryPercentChance  = 10
 )
 
 const SaveFileName = "save.json"
@@ -210,7 +210,7 @@ func (g *Game) handleMoveAction(a action.Type) {
 		if provider, ok := enemy.(entities.CharacterProvider); ok {
 			character := provider.GetCharacter()
 			if !character.IsAlive() {
-				item, err := g.level.GenerateTreasure(goldPercent, gemPercent, artifactPercent, mysteryPercent)
+				item, err := g.level.GenerateTreasure(goldPercentChance, gemPercentChance, artifactPercentChance, mysteryPercentChance)
 				if err != nil {
 					panic(err)
 				}
