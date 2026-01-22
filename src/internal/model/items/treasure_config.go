@@ -1,6 +1,7 @@
 package items
 
 import (
+	"errors"
 	"fmt"
 	"gogue/internal/model/primitives"
 	"gogue/internal/utils"
@@ -55,7 +56,7 @@ func GetTreasureConfig(t TreasureType) TreasureConfig {
 	return TreasureRegistry[TreasureTypeMystery]
 }
 
-func (cfg *TreasureConfig) GenerateValue(rng *utils.Random) int32 {
+func (cfg *TreasureConfig) GenerateValue(rng utils.Randomizer) int32 {
 	return int32(utils.RandomIntInRange(rng, int(cfg.ValueRange.Min), int(cfg.ValueRange.Max)))
 }
 
@@ -64,4 +65,22 @@ func (cfg *TreasureConfig) Validate() error {
 		return fmt.Errorf("invalid value range: min=%d > max=%d", cfg.ValueRange.Min, cfg.ValueRange.Max)
 	}
 	return nil
+}
+
+// @todo - сделать функцией в аргументе выше
+func getRandomTreasureType(rnd utils.Randomizer, goldPercent, gemPercent, artifactPercent, mysteryPercent uint) (TreasureType, error) {
+	if goldPercent+gemPercent+artifactPercent+mysteryPercent != 100 {
+		return TreasureTypeGold, errors.New("percentage is incorrect")
+	}
+
+	percent := rnd.Intn(100)
+	switch {
+	case percent < int(goldPercent):
+		return TreasureTypeGold, nil
+	case percent < int(goldPercent)+int(gemPercent):
+		return TreasureTypeGem, nil
+	case percent < int(goldPercent)+int(gemPercent)+int(artifactPercent):
+		return TreasureTypeArtifact, nil
+	}
+	return TreasureTypeMystery, nil
 }

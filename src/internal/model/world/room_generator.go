@@ -108,6 +108,9 @@ func (g *GridRoomGenerator) generateSingleRoom(
 		Point: primitives.Point2D[int]{X: xCell, Y: yCell},
 		Size:  primitives.Size2D[uint]{Width: uint(width), Height: uint(height)},
 	}
-
-	return *NewRoom(roomType, roomBox), nil
+	room, err := NewRoom(roomType, roomBox)
+	if err != nil {
+		return Room{}, err
+	}
+	return *room, nil
 }

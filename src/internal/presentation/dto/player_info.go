@@ -5,6 +5,7 @@ import (
 )
 
 type PlayerInfo struct {
+	Treasures        int32
 	Health           float64
 	MaxHealth        float64
 	Strength         float64
@@ -20,6 +21,7 @@ func ConvertPlayerToDto(player *entities.Player, levelNumber uint) *PlayerInfo {
 	}
 
 	return &PlayerInfo{
+		Treasures:        player.Backpack.Treasures,
 		Health:           player.Attributes.Health,
 		MaxHealth:        player.Attributes.MaxHealth,
 		Strength:         player.Attributes.Strength,

@@ -813,7 +813,7 @@ func TestBackpack_AddTreasure(t *testing.T) {
 					ValueRange:  TreasureValueRange{Min: value, Max: value},
 					Description: "Test treasure",
 				}
-				treasure, err := NewTreasureByConfig(rng, box, config)
+				treasure, err := newTreasureByConfig(rng, box, config)
 				if err != nil {
 					t.Fatalf("Failed to create treasure: %v", err)
 				}

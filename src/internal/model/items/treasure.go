@@ -11,7 +11,7 @@ type Treasure struct {
 	Value int32
 }
 
-func NewTreasure(box primitives.Box, t TreasureType, value int32) *Treasure {
+func newTreasure(box primitives.Box, t TreasureType, value int32) *Treasure {
 	return &Treasure{
 		Item:  &Item{Box: &box, Name: string(t)},
 		Type:  t,
@@ -19,17 +19,21 @@ func NewTreasure(box primitives.Box, t TreasureType, value int32) *Treasure {
 	}
 }
 
-func NewTreasureBuiltin(rnd *utils.Random, box primitives.Box, t TreasureType) *Treasure {
-	treasure, _ := NewTreasureByConfig(rnd, box, GetTreasureConfig(t))
+func NewTreasureBuiltin(rnd utils.Randomizer, box primitives.Box, t TreasureType) *Treasure {
+	treasure, _ := newTreasureByConfig(rnd, box, GetTreasureConfig(t))
 	return treasure
 }
 
-func NewTreasureByConfig(rnd *utils.Random, box primitives.Box, cfg TreasureConfig) (*Treasure, error) {
+func newTreasureByConfig(rnd utils.Randomizer, box primitives.Box, cfg TreasureConfig) (*Treasure, error) {
 	if err := cfg.Validate(); err != nil {
 		return nil, err
 	}
 
-	return NewTreasure(box, cfg.Type, cfg.GenerateValue(rnd)), nil
+	return newTreasure(box, cfg.Type, cfg.GenerateValue(rnd)), nil
+}
+
+func GetTreasureType(rnd utils.Randomizer, goldPercent, gemPercent, artifactPercent, mysteryPercent uint) (TreasureType, error) {
+	return getRandomTreasureType(rnd, goldPercent, gemPercent, artifactPercent, mysteryPercent)
 }
 
 func (tr *Treasure) Take() int32 {

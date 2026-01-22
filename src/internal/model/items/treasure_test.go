@@ -136,7 +136,7 @@ func TestTreasure_NewTreasureByConfig(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			rng := utils.NewRandomWithSeed(tt.seed)
-			treasure, err := NewTreasureByConfig(rng, tt.box, tt.config)
+			treasure, err := newTreasureByConfig(rng, tt.box, tt.config)
 
 			if tt.wantError {
 				if err == nil {
@@ -191,7 +191,7 @@ func TestTreasure_NewTreasureByConfig_FixedValue(t *testing.T) {
 
 	for i := 0; i < iterations; i++ {
 		rng := utils.NewRandomWithSeed(int64(i))
-		treasure, err := NewTreasureByConfig(rng, box, config)
+		treasure, err := newTreasureByConfig(rng, box, config)
 
 		if err != nil {
 			t.Fatalf("Unexpected error: %v", err)
@@ -496,7 +496,7 @@ func BenchmarkTreasure_NewTreasureByConfig(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		rng := utils.NewRandomWithSeed(int64(i))
-		_, _ = NewTreasureByConfig(rng, box, config)
+		_, _ = newTreasureByConfig(rng, box, config)
 	}
 }
 

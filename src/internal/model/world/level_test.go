@@ -1,6 +1,7 @@
 package world
 
 import (
+	"gogue/internal/model/items"
 	"gogue/internal/model/primitives"
 	"math/rand"
 	"strings"
@@ -311,6 +312,120 @@ func TestLevel_GeneratePassages_Deterministic(t *testing.T) {
 						}
 					}
 				}
+			}
+		})
+	}
+}
+
+func TestLevel_GenerateTreasure(t *testing.T) {
+	source := rand.New(rand.NewSource(randomSeedTest))
+	level := NewLevelWithDefaults(source, primitives.Size2D[uint]{Height: 30, Width: 90})
+	err := level.Generate()
+	if err != nil {
+		t.Fatalf("Generate returned an error: %v", err)
+	}
+
+	tests := []struct {
+		name         string
+		wantTreasure items.Treasure
+	}{
+		{
+			name: "FirstTreasure_Mystery",
+			wantTreasure: items.Treasure{
+				Item: &items.Item{
+					Box: &primitives.Box{
+						Point: primitives.Point2D[int]{X: 0, Y: 0},
+						Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
+					},
+					Name: "Treasure",
+				},
+				Type:  items.TreasureTypeMystery,
+				Value: 80,
+			},
+		},
+		{
+			name: "SecondTreasure_Gold",
+			wantTreasure: items.Treasure{
+				Item: &items.Item{
+					Box: &primitives.Box{
+						Point: primitives.Point2D[int]{X: 0, Y: 0},
+						Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
+					},
+					Name: "Treasure",
+				},
+				Type:  items.TreasureTypeGold,
+				Value: 7,
+			},
+		},
+		{
+			name: "ThirdTreasure_Gold",
+			wantTreasure: items.Treasure{
+				Item: &items.Item{
+					Box: &primitives.Box{
+						Point: primitives.Point2D[int]{X: 0, Y: 0},
+						Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
+					},
+					Name: "Treasure",
+				},
+				Type:  items.TreasureTypeGold,
+				Value: 19,
+			},
+		},
+		{
+			name: "FourthTreasure_Gold",
+			wantTreasure: items.Treasure{
+				Item: &items.Item{
+					Box: &primitives.Box{
+						Point: primitives.Point2D[int]{X: 0, Y: 0},
+						Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
+					},
+					Name: "Treasure",
+				},
+				Type:  items.TreasureTypeGold,
+				Value: 17,
+			},
+		},
+		{
+			name: "FifthTreasure_Gold",
+			wantTreasure: items.Treasure{
+				Item: &items.Item{
+					Box: &primitives.Box{
+						Point: primitives.Point2D[int]{X: 0, Y: 0},
+						Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
+					},
+					Name: "Treasure",
+				},
+				Type:  items.TreasureTypeGold,
+				Value: 16,
+			},
+		},
+		{
+			name: "SixthTreasure_Artifact",
+			wantTreasure: items.Treasure{
+				Item: &items.Item{
+					Box: &primitives.Box{
+						Point: primitives.Point2D[int]{X: 0, Y: 0},
+						Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
+					},
+					Name: "Treasure",
+				},
+				Type:  items.TreasureTypeArtifact,
+				Value: 428,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			treasure, _ := level.GenerateTreasure(65, 20, 5, 10)
+			if *tt.wantTreasure.Box != *treasure.Box {
+				t.Errorf("GenerateTreasure want Box '%+v', but got '%+v'", *tt.wantTreasure.Box, *treasure.Box)
+			}
+			if tt.wantTreasure.Type != treasure.Type {
+				t.Errorf("GenerateTreasure want Type '%+v', but got '%+v'", tt.wantTreasure.Type, treasure.Type)
+			}
+			if tt.wantTreasure.Value != treasure.Value {
+				t.Errorf("GenerateTreasure want Value '%+v', but got '%+v'", tt.wantTreasure.Value, treasure.Value)
 			}
 		})
 	}
