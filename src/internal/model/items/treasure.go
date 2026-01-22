@@ -32,8 +32,8 @@ func newTreasureByConfig(rnd utils.Randomizer, box primitives.Box, cfg TreasureC
 	return newTreasure(box, cfg.Type, cfg.GenerateValue(rnd)), nil
 }
 
-func GetTreasureType(rnd utils.Randomizer) TreasureType {
-	return getRandomTreasureType(rnd)
+func GetTreasureType(rnd utils.Randomizer, goldPercent, gemPercent, artifactPercent, mysteryPercent uint) (TreasureType, error) {
+	return getRandomTreasureType(rnd, goldPercent, gemPercent, artifactPercent, mysteryPercent)
 }
 
 func (tr *Treasure) Take() int32 {

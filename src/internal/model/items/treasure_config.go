@@ -1,6 +1,7 @@
 package items
 
 import (
+	"errors"
 	"fmt"
 	"gogue/internal/model/primitives"
 	"gogue/internal/utils"
@@ -67,15 +68,19 @@ func (cfg *TreasureConfig) Validate() error {
 }
 
 // @todo - сделать функцией в аргументе выше
-func getRandomTreasureType(rnd utils.Randomizer) TreasureType {
+func getRandomTreasureType(rnd utils.Randomizer, goldPercent, gemPercent, artifactPercent, mysteryPercent uint) (TreasureType, error) {
+	if goldPercent+gemPercent+artifactPercent+mysteryPercent != 100 {
+		return TreasureTypeGold, errors.New("percentage is incorrect")
+	}
+
 	percent := rnd.Intn(100)
 	switch {
-	case percent < 65:
-		return TreasureTypeGold
-	case percent < 85:
-		return TreasureTypeGem
-	case percent < 90:
-		return TreasureTypeArtifact
+	case percent < int(goldPercent):
+		return TreasureTypeGold, nil
+	case percent < int(goldPercent)+int(gemPercent):
+		return TreasureTypeGem, nil
+	case percent < int(goldPercent)+int(gemPercent)+int(artifactPercent):
+		return TreasureTypeArtifact, nil
 	}
-	return TreasureTypeMystery
+	return TreasureTypeMystery, nil
 }

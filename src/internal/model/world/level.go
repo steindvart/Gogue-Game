@@ -385,13 +385,17 @@ func (l *Level) Attack(attacker Attacker, defender primitives.Positional2D[int])
 }
 
 // @todo - с повышением lvl повысится кол-во созданных сокровищ
-func (l *Level) GenerateTreasure() *items.Treasure {
-	// @todo сделать задаваемое процентное соотношение вот тут
+func (l *Level) GenerateTreasure(goldPercent, gemPercent, artifactPercent, mysteryPercent uint) (*items.Treasure, error) {
+	item, err := items.GetTreasureType(l.random, goldPercent, gemPercent, artifactPercent, mysteryPercent)
+	if err != nil {
+		return nil, err
+	}
+
 	return items.NewTreasureBuiltin(
 		l.random,
 		primitives.Box{
 			Point: primitives.Point2D[int]{X: 0, Y: 0},
 			Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
 		},
-		items.GetTreasureType(l.random))
+		item), nil
 }
