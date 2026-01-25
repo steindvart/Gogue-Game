@@ -3,6 +3,7 @@
 .idea/
 .memorybank/
 coverage.*
+save.json
 
 # Prerequisites
 *.d
