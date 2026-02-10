@@ -107,6 +107,7 @@ func (g *StateMachine) handleSignal(s signals.Type) {
 		}
 		g.PushState(game)
 	case signals.ShowScoreboard:
-		// @todo push scoreboard state
+		leaderboard := state.GetScoreboard()
+		g.PushState(leaderboard)
 	}
 }
