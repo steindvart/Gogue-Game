@@ -77,7 +77,7 @@ func SaveScore(treasures int32, filename string) error {
 func LoadScore(filename string) (*dto.ScoreDto, error) {
 	file, err := os.ReadFile(filename)
 	if err != nil {
-		return nil, err
+		return &dto.ScoreDto{Scores: []int32{}}, nil
 	}
 	var scoreDto dto.ScoreDto
 	if err := json.Unmarshal(file, &scoreDto); err != nil {
