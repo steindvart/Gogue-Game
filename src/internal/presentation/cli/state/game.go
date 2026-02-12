@@ -251,7 +251,9 @@ func (g *Game) handleSelectAction() {
 				}
 			} else {
 				// @todo сделать победное окошко. Пока что будет как будто esc
-				save.SaveScore(g.level.Player.Backpack.Treasures, ScoreFileName)
+				if err := save.SaveScore(g.level.Player.Backpack.Treasures, ScoreFileName); err != nil {
+					panic("an error occurred when save score: " + err.Error())
+				}
 				g.signal = signals.Stop
 			}
 		}
