@@ -16,24 +16,29 @@ func NewScoreboard(options []string) *Scoreboard {
 		list: tview.NewList(),
 	}
 
-	// @todo - может ли тут быть список не int?
 	for _, opt := range options {
 		sb.list.AddItem(opt, "", 0, nil)
 	}
 
+	// Внешний вид списка
+	sb.list.SetBorder(true).
+		SetTitle("🌟RECORDS🌟").
+		SetBorderColor(tcell.ColorWhite).
+		SetTitleColor(tcell.ColorGold)
+
 	// Создаём пустой primitives.Box с тёмным фоном для выравнивания элементов
 	gapBox := tview.NewBox().SetBackgroundColor(tcell.ColorBlack)
+
 	// Центрируем список по горизонтали с помощью Flex
 	listFlex := tview.NewFlex().SetDirection(tview.FlexColumn).
-		AddItem(gapBox, 0, 1, false).
-		AddItem(gapBox, 6, 1, false).
-		AddItem(sb.list, 14, 0, true).
-		AddItem(gapBox, 0, 1, false)
+		AddItem(gapBox, 0, 1, false).  // отступ от левой стенки терминала
+		AddItem(sb.list, 22, 0, true). // ширина окошка
+		AddItem(gapBox, 0, 1, false)   // отступ от правой стенки терминала
+
 	rootFlex := tview.NewFlex().SetDirection(tview.FlexRow).
-		AddItem(gapBox, 2, 0, false). // верхний отступ
-		AddItem(listFlex, 5, 1, true).
-		AddItem(gapBox, 3, 0, false).
-		AddItem(gapBox, 0, 1, false) // всё оставшееся пространство
+		AddItem(gapBox, 2, 0, false).   // верхний отступ
+		AddItem(listFlex, 22, 0, true). // высота окошка 22
+		AddItem(gapBox, 0, 1, false)    // закраска пространства под окошком
 
 	sb.flex = rootFlex
 

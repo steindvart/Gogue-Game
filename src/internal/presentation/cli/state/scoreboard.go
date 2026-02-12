@@ -1,6 +1,7 @@
 package state
 
 import (
+	"fmt"
 	"gogue/internal/model/signals"
 	"gogue/internal/presentation/action"
 	viewcli "gogue/internal/view/cli"
@@ -15,7 +16,14 @@ type Scoreboard struct {
 }
 
 func NewScoreboard() *Scoreboard {
-	view := viewcli.NewScoreboard([]string{"1000", "2000", "3000", "4000", "5000"})
+	var scores []string
+	const width = 20
+
+	for i := 1; i < 100; i++ {
+		scores = append(scores, fmt.Sprintf("%*d", width, i))
+	}
+
+	view := viewcli.NewScoreboard(scores)
 
 	sb := &Scoreboard{
 		view:   view,

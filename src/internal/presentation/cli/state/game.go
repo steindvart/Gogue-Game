@@ -21,7 +21,7 @@ import (
 const (
 	MapHeight      = 30
 	MapWidth       = 90
-	maxLevelNumber = 21
+	maxLevelNumber = 3 //@todo 21
 
 	goldPercentChance     = 65
 	gemPercentChance      = 20
@@ -240,7 +240,8 @@ func (g *Game) handleSelectAction() {
 		case world.CollisionTypeItem:
 			g.level.PlayerUseItemAtPosition(pos)
 		case world.CollisionTypeTeleport:
-			if g.level.Number <= maxLevelNumber {
+			if g.level.Number < maxLevelNumber {
+				//@todo удалить сохранение при окончании игры
 				if err := g.level.GenerateWithExistingPlayer(g.level.Player); err != nil {
 					panic("an error occurred when generating next level: " + err.Error())
 				}
