@@ -107,7 +107,10 @@ func (g *StateMachine) handleSignal(s signals.Type) {
 		}
 		g.PushState(game)
 	case signals.ShowScoreboard:
-		leaderboard := state.GetScoreboard()
+		leaderboard, err := state.GetScoreboard()
+		if err != nil {
+			panic(err)
+		}
 		g.PushState(leaderboard)
 	}
 }

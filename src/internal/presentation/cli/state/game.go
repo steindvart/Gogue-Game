@@ -21,7 +21,7 @@ import (
 const (
 	MapHeight      = 30
 	MapWidth       = 90
-	maxLevelNumber = 3 //@todo 21
+	maxLevelNumber = 21
 
 	goldPercentChance     = 65
 	gemPercentChance      = 20
@@ -29,7 +29,10 @@ const (
 	mysteryPercentChance  = 10
 )
 
-const SaveFileName = "save.json"
+const (
+	SaveFileName  = "save.json"
+	ScoreFileName = "score.json"
+)
 
 type Game struct {
 	level  *world.Level
@@ -169,12 +172,13 @@ func (g *Game) handleEvent(event *tcell.EventKey) *tcell.EventKey {
 			}
 		}
 	case action.Exit:
-		g.signal = signals.Stop
-
 		err := save.SaveGame(g.level, primitives.Size2D[uint]{Height: MapHeight, Width: MapWidth}, SaveFileName)
 		if err != nil {
 			panic("an error occurred while saving the game:" + err.Error())
 		}
+
+		g.signal = signals.Stop
+
 		return nil
 	default:
 		return event
@@ -247,6 +251,7 @@ func (g *Game) handleSelectAction() {
 				}
 			} else {
 				// @todo сделать победное окошко. Пока что будет как будто esc
+				save.SaveScore(g.level.Player.Backpack.Treasures, ScoreFileName)
 				g.signal = signals.Stop
 			}
 		}
