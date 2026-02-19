@@ -138,11 +138,6 @@ func (f *FogOfWar) isStaticTile(entityType common.GameEntityType) bool {
 		entityType == common.WorldTypePortal
 }
 
-// isInBounds проверяет, находится ли точка в границах текущего поля
-func (f *FogOfWar) isInBounds(pos primitives.Point2D[int]) bool {
-	return pos.X >= 0 && pos.X < f.Width && pos.Y >= 0 && pos.Y < f.Height
-}
-
 // @todo - ввести в реализацию или удалить (пока больше склоняюсь ко второму варианту)
 // findPlayerPassage определяет, находится ли игрок в каком-либо проходе
 // func (f *FogOfWar) findPassage(pos primitives.Point2D[int], passages []Passage) *Passage {
