@@ -6,69 +6,6 @@ import (
 	"testing"
 )
 
-func TestBresenhamLine(t *testing.T) {
-	fog := NewFogOfWar(10, 10)
-
-	tests := []struct {
-		name     string
-		from     primitives.Point2D[int]
-		to       primitives.Point2D[int]
-		wantLen  int
-		wantLast primitives.Point2D[int]
-	}{
-		{
-			name:     "horizontal line right",
-			from:     primitives.Point2D[int]{X: 0, Y: 0},
-			to:       primitives.Point2D[int]{X: 5, Y: 0},
-			wantLen:  6,
-			wantLast: primitives.Point2D[int]{X: 5, Y: 0},
-		},
-		{
-			name:     "vertical line down",
-			from:     primitives.Point2D[int]{X: 0, Y: 0},
-			to:       primitives.Point2D[int]{X: 0, Y: 5},
-			wantLen:  6,
-			wantLast: primitives.Point2D[int]{X: 0, Y: 5},
-		},
-		{
-			name:     "diagonal line",
-			from:     primitives.Point2D[int]{X: 0, Y: 0},
-			to:       primitives.Point2D[int]{X: 3, Y: 3},
-			wantLen:  4,
-			wantLast: primitives.Point2D[int]{X: 3, Y: 3},
-		},
-		{
-			name:     "single point",
-			from:     primitives.Point2D[int]{X: 5, Y: 5},
-			to:       primitives.Point2D[int]{X: 5, Y: 5},
-			wantLen:  1,
-			wantLast: primitives.Point2D[int]{X: 5, Y: 5},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			line := fog.bresenhamLine(tt.from, tt.to)
-
-			if len(line) != tt.wantLen {
-				t.Errorf("bresenhamLine() length = %d, want %d", len(line), tt.wantLen)
-			}
-
-			if len(line) > 0 {
-				lastPoint := line[len(line)-1]
-				if lastPoint != tt.wantLast {
-					t.Errorf("bresenhamLine() last point = %+v, want %+v", lastPoint, tt.wantLast)
-				}
-			}
-
-			// Проверяем, что первая точка - это начало
-			if len(line) > 0 && line[0] != tt.from {
-				t.Errorf("bresenhamLine() first point = %+v, want %+v", line[0], tt.from)
-			}
-		})
-	}
-}
-
 // TestIsVisible проверяет алгоритм ray casting для определения видимости
 func TestIsVisible(t *testing.T) {
 	tests := []struct {

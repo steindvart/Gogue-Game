@@ -92,7 +92,8 @@ func (l *Level) ProcessTurns(turns uint32) {
 //
 // Логика для каждого врага:
 //  1. Вычисляется расстояние (Чебышёва) до игрока.
-//  2. Если расстояние <= HostilityRadius - враг переходит в режим преследования (IsChasing = true).
+//  2. Если расстояние <= HostilityRadius И враг имеет прямую видимость (LoS) до игрока —
+//     враг переходит в режим преследования (IsChasing = true).
 //  3. Если IsChasing - строится путь до игрока через FindPathBFS.
 //  4. Если первый шаг пути == позиция игрока - враг атакует, но не двигается.
 //  5. Если первый шаг пути занят другим врагом - враг пропускает ход.
@@ -106,6 +107,9 @@ func (l *Level) processEnemyTurns() {
 	playerPos := l.Player.GetPosition()
 	mapW := int(l.config.MapSize.Width)
 	mapH := int(l.config.MapSize.Height)
+
+	// Получаем полное поле один раз для всех врагов (используется для LoS-проверки).
+	fullField := l.GetFullField(mapW, mapH)
 
 	// Типы клеток, по которым враги могут перемещаться:
 	// пол, проходы, двери, предметы (еда, зелья, свитки, оружие), портал.
@@ -130,9 +134,17 @@ func (l *Level) processEnemyTurns() {
 		enemyPos := enemy.GetPosition()
 		dist := chebyshevDistance(enemyPos, playerPos)
 
-		// Переходим в режим преследования, если игрок в зоне враждебности
-		if dist <= int(enemy.HostilityRadius) {
+		// Переходим в режим преследования только если:
+		// 1) Игрок в зоне враждебности (HostilityRadius)
+		// 2) Враг имеет прямую видимость (Line of Sight) до игрока
+		if dist <= int(enemy.HostilityRadius) && HasLineOfSight(fullField, enemyPos, playerPos) {
 			enemy.IsChasing = true
+		}
+
+		// Если враг преследует, но потерял видимость — сбрасываем преследование.
+		// Это позволяет игроку "оторваться" от врага, скрывшись за стеной.
+		if enemy.IsChasing && !HasLineOfSight(fullField, enemyPos, playerPos) {
+			enemy.IsChasing = false
 		}
 
 		if !enemy.IsChasing {
