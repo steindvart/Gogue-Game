@@ -1,6 +1,8 @@
 package world
 
 import (
+	"math"
+
 	"gogue/internal/common"
 	"gogue/internal/model/entities"
 	"gogue/internal/model/items"
@@ -83,7 +85,162 @@ func newLevelWithComponents(
 
 func (l *Level) ProcessTurns(turns uint32) {
 	l.Player.ProcessTurns(turns)
-	// @todo - движение врагов и их взаимодействие с миром (хождение по миру, агрессия и нападение на игрока)
+	l.processEnemyTurns()
+}
+
+// processEnemyTurns обрабатывает ходы всех врагов за один игровой тик.
+//
+// Логика для каждого врага:
+//  1. Вычисляется расстояние (Чебышёва) до игрока.
+//  2. Если расстояние <= HostilityRadius - враг переходит в режим преследования (IsChasing = true).
+//  3. Если IsChasing - строится путь до игрока через FindPathBFS.
+//  4. Если первый шаг пути == позиция игрока - враг атакует, но не двигается.
+//  5. Если первый шаг пути занят другим врагом - враг пропускает ход.
+//  6. Иначе враг перемещается на первый шаг пути.
+//  7. Если путь не найден - IsChasing сбрасывается.
+func (l *Level) processEnemyTurns() {
+	if l.Player == nil || len(l.Enemies) == 0 {
+		return
+	}
+
+	playerPos := l.Player.GetPosition()
+	mapW := int(l.config.MapSize.Width)
+	mapH := int(l.config.MapSize.Height)
+
+	// Типы клеток, по которым враги могут перемещаться:
+	// пол, проходы, двери, предметы (еда, зелья, свитки, оружие), портал.
+	walkable := []int{
+		int(common.WorldTypeRoomFloor),
+		int(common.WorldTypePassage),
+		int(common.WorldTypeDoor),
+		int(common.WorldTypePortal),
+		int(common.Food),
+		int(common.Elixir),
+		int(common.Scroll),
+		int(common.Weapon),
+	}
+
+	for _, positionalEnemy := range l.Enemies {
+		provider, ok := positionalEnemy.(entities.EnemyProvider)
+		if !ok {
+			continue
+		}
+		enemy := provider.GetEnemy()
+
+		enemyPos := enemy.GetPosition()
+		dist := chebyshevDistance(enemyPos, playerPos)
+
+		// Переходим в режим преследования, если игрок в зоне враждебности
+		if dist <= int(enemy.HostilityRadius) {
+			enemy.IsChasing = true
+		}
+
+		if !enemy.IsChasing {
+			continue
+		}
+
+		// Строим навигационное поле: из полного поля карты,
+		// но блокируем клетки, занятые другими врагами.
+		navField := l.buildEnemyNavigationField(mapW, mapH, positionalEnemy)
+
+		path, err := FindPathBFS(enemyPos, playerPos, navField, walkable)
+		if err != nil || len(path) == 0 {
+			// Путь не найден - сбрасываем преследование
+			enemy.IsChasing = false
+			continue
+		}
+
+		nextStep := path[0]
+
+		// Если следующий шаг - позиция игрока: атакуем, но не двигаемся
+		if nextStep == playerPos {
+			enemy.Character.Attack(l.Player.Character, l.random)
+			continue
+		}
+
+		// Проверяем, что клетка не занята другим врагом
+		if l.isEnemyAtPosition(nextStep, positionalEnemy) {
+			continue
+		}
+
+		// Перемещаем врага
+		enemy.SetPosition(nextStep)
+	}
+}
+
+// buildEnemyNavigationField создаёт навигационную карту для конкретного врага.
+// Берёт полное поле уровня (со всеми сущностями) и блокирует клетки,
+// занятые другими врагами, заменяя их на EntityTypeNone (непроходимый тип).
+// Клетка текущего врага не блокируется - это стартовая позиция поиска.
+func (l *Level) buildEnemyNavigationField(w, h int, currentEnemy primitives.Positional2D[int]) [][]int {
+	fullField := l.GetFullField(w, h)
+	navField := make([][]int, h)
+
+	for y := 0; y < h; y++ {
+		navField[y] = make([]int, w)
+		for x := 0; x < w; x++ {
+			navField[y][x] = int(fullField[y][x])
+		}
+	}
+
+	// Блокируем клетки других врагов
+	for _, other := range l.Enemies {
+		if other == currentEnemy {
+			continue
+		}
+		pos := other.GetPosition()
+		if pos.X >= 0 && pos.X < w && pos.Y >= 0 && pos.Y < h {
+			navField[pos.Y][pos.X] = int(common.EntityTypeNone)
+		}
+	}
+
+	// Позицию текущего врага помечаем как проходимую.
+	// В fullField она отрендерена как EntityTypeZombie/Vampire/etc.,
+	// которые не входят в walkable - без этого BFS вернёт ErrInvalidStart.
+	curPos := currentEnemy.GetPosition()
+	if curPos.X >= 0 && curPos.X < w && curPos.Y >= 0 && curPos.Y < h {
+		navField[curPos.Y][curPos.X] = int(common.WorldTypeRoomFloor)
+	}
+
+	// Позицию игрока помечаем как проходимую (чтобы BFS нашёл путь к нему).
+	// В fullField она отрендерена как EntityTypePlayer, который тоже не в walkable.
+	// Используем тип RoomFloor, т.к. он гарантированно в walkable.
+	if l.Player != nil {
+		pp := l.Player.GetPosition()
+		if pp.X >= 0 && pp.X < w && pp.Y >= 0 && pp.Y < h {
+			navField[pp.Y][pp.X] = int(common.WorldTypeRoomFloor)
+		}
+	}
+
+	return navField
+}
+
+// isEnemyAtPosition проверяет, есть ли враг (кроме excludeEnemy) на указанной позиции.
+func (l *Level) isEnemyAtPosition(pos primitives.Point2D[int], excludeEnemy primitives.Positional2D[int]) bool {
+	for _, other := range l.Enemies {
+		if other == excludeEnemy {
+			continue
+		}
+		if other.GetPosition() == pos {
+			return true
+		}
+	}
+	return false
+}
+
+// chebyshevDistance вычисляет расстояние Чебышёва (шахматное расстояние) между двумя точками.
+// Это максимум из абсолютных разностей координат: max(|dx|, |dy|).
+// Используется для определения, попадает ли игрок в зону враждебности врага
+// при 8-направленном движении.
+func chebyshevDistance(a, b primitives.Point2D[int]) int {
+	dx := a.X - b.X
+	dy := a.Y - b.Y
+	absX := int(math.Abs(float64(dx)))
+	absY := int(math.Abs(float64(dy)))
+	if absX > absY {
+		return absX
+	}
+	return absY
 }
 
 // Generate генерирует геометрию, сущности и игрока
