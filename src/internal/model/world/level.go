@@ -155,7 +155,24 @@ func (l *Level) processEnemyTurns() {
 		// но блокируем клетки, занятые другими врагами.
 		navField := l.buildEnemyNavigationField(mapW, mapH, positionalEnemy)
 
-		path, err := FindPathBFS(enemyPos, playerPos, navField, walkable)
+		// BFS
+		// 4 направления: N, E, S, W
+		// Но можно сделать 8 направлений, включая диагонали, если нужно более "естественное" движение
+		// Однако так станет значительно сложнее играть. И для этого нужно будет вводить возможность движения по диагонали для
+		// игрока. Что в целом просто реализовать, но из-за этого усложниться управление - нужно будет биндить ещё 4 клавиши.
+		// Поэтому пока оставим только 4 направления, чтобы враги двигались по "квадратной" сетке так же как и игрок.
+		directions := []primitives.Point2D[int]{
+			{X: 0, Y: -1}, // North
+			// {X: 1, Y: -1},  // North-East
+			{X: 1, Y: 0}, // East
+			// {X: 1, Y: 1},   // South-East
+			{X: 0, Y: 1}, // South
+			// {X: -1, Y: 1},  // South-West
+			{X: -1, Y: 0}, // West
+			// {X: -1, Y: -1}, // North-West
+		}
+
+		path, err := FindPathBFS(enemyPos, playerPos, navField, walkable, directions)
 		if err != nil || len(path) == 0 {
 			// Путь не найден - сбрасываем преследование
 			enemy.IsChasing = false

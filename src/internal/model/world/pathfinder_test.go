@@ -13,6 +13,18 @@ const (
 	floor = 1
 )
 
+// 8 направлений: N, NE, E, SE, S, SW, W, NW
+var directions = []primitives.Point2D[int]{
+	{X: 0, Y: -1},  // North
+	{X: 1, Y: -1},  // North-East
+	{X: 1, Y: 0},   // East
+	{X: 1, Y: 1},   // South-East
+	{X: 0, Y: 1},   // South
+	{X: -1, Y: 1},  // South-West
+	{X: -1, Y: 0},  // West
+	{X: -1, Y: -1}, // North-West
+}
+
 func makeCharacterAt(x, y int) *entities.Character {
 	return entities.NewCharacter(
 		primitives.Box{
@@ -36,7 +48,7 @@ func TestFindPathBFS_DirectPath(t *testing.T) {
 	c := makeCharacterAt(0, 0)
 	target := primitives.Point2D[int]{X: 4, Y: 4}
 
-	path, err := FindPathBFS(c.GetPosition(), target, field, []int{floor})
+	path, err := FindPathBFS(c.GetPosition(), target, field, []int{floor}, directions)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -61,7 +73,7 @@ func TestFindPathBFS_SamePosition(t *testing.T) {
 	c := makeCharacterAt(1, 1)
 	target := primitives.Point2D[int]{X: 1, Y: 1}
 
-	path, err := FindPathBFS(c.GetPosition(), target, field, []int{floor})
+	path, err := FindPathBFS(c.GetPosition(), target, field, []int{floor}, directions)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -89,7 +101,7 @@ func TestFindPathBFS_PathAroundWall(t *testing.T) {
 	c := makeCharacterAt(0, 0)
 	target := primitives.Point2D[int]{X: 4, Y: 4}
 
-	path, err := FindPathBFS(c.GetPosition(), target, field, []int{floor})
+	path, err := FindPathBFS(c.GetPosition(), target, field, []int{floor}, directions)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -130,7 +142,7 @@ func TestFindPathBFS_NoPath(t *testing.T) {
 	c := makeCharacterAt(0, 0)
 	target := primitives.Point2D[int]{X: 3, Y: 3}
 
-	path, err := FindPathBFS(c.GetPosition(), target, field, []int{floor})
+	path, err := FindPathBFS(c.GetPosition(), target, field, []int{floor}, directions)
 	if err == nil {
 		t.Fatal("expected error, got nil")
 	}
@@ -159,7 +171,7 @@ func TestFindPathBFS_TargetOutOfBounds(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			path, err := FindPathBFS(c.GetPosition(), tt.target, field, []int{floor})
+			path, err := FindPathBFS(c.GetPosition(), tt.target, field, []int{floor}, directions)
 			if err == nil {
 				t.Error("expected error for out-of-bounds target")
 			}
@@ -179,7 +191,7 @@ func TestFindPathBFS_TargetOnWall(t *testing.T) {
 	c := makeCharacterAt(0, 0)
 	target := primitives.Point2D[int]{X: 1, Y: 0}
 
-	path, err := FindPathBFS(c.GetPosition(), target, field, []int{floor})
+	path, err := FindPathBFS(c.GetPosition(), target, field, []int{floor}, directions)
 	if err == nil {
 		t.Fatal("expected error when target is on wall")
 	}
@@ -197,7 +209,7 @@ func TestFindPathBFS_StartOnWall(t *testing.T) {
 	c := makeCharacterAt(0, 0)
 	target := primitives.Point2D[int]{X: 1, Y: 1}
 
-	path, err := FindPathBFS(c.GetPosition(), target, field, []int{floor})
+	path, err := FindPathBFS(c.GetPosition(), target, field, []int{floor}, directions)
 	if err == nil {
 		t.Fatal("expected error when start is on wall")
 	}
@@ -210,7 +222,7 @@ func TestFindPathBFS_EmptyField(t *testing.T) {
 	c := makeCharacterAt(0, 0)
 	target := primitives.Point2D[int]{X: 0, Y: 0}
 
-	path, err := FindPathBFS(c.GetPosition(), target, [][]int{}, []int{floor})
+	path, err := FindPathBFS(c.GetPosition(), target, [][]int{}, []int{floor}, directions)
 	if err == nil {
 		t.Fatal("expected error for empty field")
 	}
@@ -232,7 +244,7 @@ func TestFindPathBFS_MultipleWalkableTypes(t *testing.T) {
 	target := primitives.Point2D[int]{X: 2, Y: 0}
 
 	// Без двери - путь невозможен
-	path, err := FindPathBFS(c.GetPosition(), target, field, []int{floor})
+	path, err := FindPathBFS(c.GetPosition(), target, field, []int{floor}, directions)
 	// С 8-направленным движением путь существует через диагональ (0,0)->(1,1)->(2,0)
 	// но (1,1)=2 (door), и мы не указали door в walkable - проверим
 	if err == nil && len(path) > 0 {
@@ -246,7 +258,7 @@ func TestFindPathBFS_MultipleWalkableTypes(t *testing.T) {
 	}
 
 	// С дверью - путь через дверь (кратчайший)
-	path, err = FindPathBFS(c.GetPosition(), target, field, []int{floor, door})
+	path, err = FindPathBFS(c.GetPosition(), target, field, []int{floor, door}, directions)
 	if err != nil {
 		t.Fatalf("unexpected error with multiple walkable types: %v", err)
 	}
@@ -273,7 +285,7 @@ func TestFindPathBFS_PathConsistency(t *testing.T) {
 	c := makeCharacterAt(0, 0)
 	target := primitives.Point2D[int]{X: 6, Y: 6}
 
-	path, err := FindPathBFS(c.GetPosition(), target, field, []int{floor})
+	path, err := FindPathBFS(c.GetPosition(), target, field, []int{floor}, directions)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -305,7 +317,7 @@ func TestFindPathBFS_LinearPath(t *testing.T) {
 	c := makeCharacterAt(0, 0)
 	target := primitives.Point2D[int]{X: 4, Y: 0}
 
-	path, err := FindPathBFS(c.GetPosition(), target, field, []int{floor})
+	path, err := FindPathBFS(c.GetPosition(), target, field, []int{floor}, directions)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -338,7 +350,7 @@ func TestFindPathBFS_LargeOpenField(t *testing.T) {
 	c := makeCharacterAt(0, 0)
 	target := primitives.Point2D[int]{X: size - 1, Y: size - 1}
 
-	path, err := FindPathBFS(c.GetPosition(), target, field, []int{floor})
+	path, err := FindPathBFS(c.GetPosition(), target, field, []int{floor}, directions)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -364,7 +376,7 @@ func BenchmarkFindPath_OpenField50x50(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, _ = FindPathBFS(c.GetPosition(), target, field, []int{floor})
+		_, _ = FindPathBFS(c.GetPosition(), target, field, []int{floor}, directions)
 	}
 }
 
@@ -400,6 +412,6 @@ func BenchmarkFindPath_Maze20x20(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, _ = FindPathBFS(c.GetPosition(), target, field, []int{floor})
+		_, _ = FindPathBFS(c.GetPosition(), target, field, []int{floor}, directions)
 	}
 }

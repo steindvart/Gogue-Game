@@ -32,6 +32,7 @@ func FindPathBFS(
 	target primitives.Point2D[int],
 	field [][]int,
 	walkable []int,
+	directions []primitives.Point2D[int],
 ) ([]primitives.Point2D[int], error) {
 	// Валидация поля
 	if len(field) == 0 || len(field[0]) == 0 {
@@ -60,23 +61,6 @@ func FindPathBFS(
 	// Тривиальный случай: старт == цель
 	if start == target {
 		return []primitives.Point2D[int]{}, nil
-	}
-
-	// BFS
-	// 4 направления: N, E, S, W
-	// Но можно сделать 8 направлений, включая диагонали, если нужно более "естественное" движение
-	// Однако так станет значительно сложнее играть. И для этого нужно будет вводить возможность движения по диагонали для
-	// игрока. Что в целом просто реализовать, но из-за этого усложниться управление - нужно будет биндить ещё 4 клавиши.
-	// Поэтому пока оставим только 4 направления, чтобы враги двигались по "квадратной" сетке так же как и игрок.
-	directions := [4]primitives.Point2D[int]{
-		{X: 0, Y: -1}, // North
-		// {X: 1, Y: -1},  // North-East
-		{X: 1, Y: 0}, // East
-		// {X: 1, Y: 1},   // South-East
-		{X: 0, Y: 1}, // South
-		// {X: -1, Y: 1},  // South-West
-		{X: -1, Y: 0}, // West
-		// {X: -1, Y: -1}, // North-West
 	}
 
 	visited := make([][]bool, height)
