@@ -108,7 +108,8 @@ func isInVisibleAreaCircle(origin, target primitives.Point2D[int], viewRadius in
 	return octagonalDistance <= viewRadius
 }
 
-// isVisible проверяет, видна ли целевая точка из точки origin используя ray casting
+// isVisible проверяет, видна ли целевая точка из точки origin используя ray casting.
+// Делегирует проверку пакетной функции HasLineOfSight (line_of_sight.go).
 func (f *FogOfWar) isVisible(
 	field [][]common.GameEntityType,
 	origin, target primitives.Point2D[int],
@@ -126,80 +127,7 @@ func (f *FogOfWar) isVisible(
 	// 	}
 	// }
 
-	// Получаем все точки на луче от origin до target
-	rayPoints := f.bresenhamLine(origin, target)
-
-	// Проходим по всем точкам луча (кроме последней - самой цели)
-	for i := 0; i < len(rayPoints)-1; i++ {
-		point := rayPoints[i]
-
-		// Пропускаем стартовую точку
-		if point == origin {
-			continue
-		}
-
-		// Проверяем границы
-		if !f.isInBounds(point) {
-			return false
-		}
-
-		// Стена и пустое пространство блокирует видимость
-		entityType := field[point.Y][point.X]
-		if entityType == common.WorldTypeWall || entityType == common.EntityTypeNone {
-			return false
-		}
-	}
-
-	// Луч не встретил препятствий - цель видна
-	return true
-}
-
-// bresenhamLine реализует алгоритм Брезенхэма для построения линии между двумя точками
-// Wiki: https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
-func (f *FogOfWar) bresenhamLine(from, to primitives.Point2D[int]) []primitives.Point2D[int] {
-	var points []primitives.Point2D[int]
-
-	x0, y0 := from.X, from.Y
-	x1, y1 := to.X, to.Y
-
-	dx := utils.Abs(x1 - x0)
-	dy := utils.Abs(y1 - y0)
-
-	sx := 1
-	if x0 > x1 {
-		sx = -1
-	}
-
-	sy := 1
-	if y0 > y1 {
-		sy = -1
-	}
-
-	e1 := dx - dy
-
-	x, y := x0, y0
-
-	for {
-		points = append(points, primitives.Point2D[int]{X: x, Y: y})
-
-		if x == x1 && y == y1 {
-			break
-		}
-
-		e2 := 2 * e1
-
-		if e2 > -dy {
-			e1 -= dy
-			x += sx
-		}
-
-		if e2 < dx {
-			e1 += dx
-			y += sy
-		}
-	}
-
-	return points
+	return HasLineOfSight(field, origin, target)
 }
 
 // isStaticTile проверяет, является ли тип клетки статичным (должен запоминаться)
@@ -208,11 +136,6 @@ func (f *FogOfWar) isStaticTile(entityType common.GameEntityType) bool {
 		entityType == common.WorldTypePassage ||
 		entityType == common.WorldTypeDoor ||
 		entityType == common.WorldTypePortal
-}
-
-// isInBounds проверяет, находится ли точка в границах текущего поля
-func (f *FogOfWar) isInBounds(pos primitives.Point2D[int]) bool {
-	return pos.X >= 0 && pos.X < f.Width && pos.Y >= 0 && pos.Y < f.Height
 }
 
 // @todo - ввести в реализацию или удалить (пока больше склоняюсь ко второму варианту)
