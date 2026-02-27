@@ -8,4 +8,6 @@ const (
 	NewGame
 	LoadGame
 	ShowScoreboard
+	GameWon
+	ReturnToMenu
 )
