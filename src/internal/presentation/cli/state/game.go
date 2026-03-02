@@ -245,16 +245,17 @@ func (g *Game) handleSelectAction() {
 			g.level.PlayerUseItemAtPosition(pos)
 		case world.CollisionTypeTeleport:
 			if g.level.Number < maxLevelNumber {
-				//@todo удалить сохранение при окончании игры
 				if err := g.level.GenerateWithExistingPlayer(g.level.Player); err != nil {
-					panic("an error occurred when generating next level: " + err.Error())
+					panic(err.Error())
 				}
 			} else {
-				// @todo сделать победное окошко. Пока что будет как будто esc
-				if err := save.SaveScore(g.level.Player.Backpack.Treasures, ScoreFileName); err != nil {
-					panic("an error occurred when save score: " + err.Error())
+				if err := save.DeleteGame(SaveFileName); err != nil {
+					panic(err.Error())
 				}
-				g.signal = signals.Stop
+				if err := save.SaveScore(g.level.Player.Backpack.Treasures, ScoreFileName); err != nil {
+					panic(err.Error())
+				}
+				g.signal = signals.GameWon
 			}
 		}
 

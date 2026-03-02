@@ -3,6 +3,7 @@ package cli
 import (
 	"gogue/internal/model/signals"
 	"gogue/internal/presentation/cli/state"
+	viewcli "gogue/internal/view/cli"
 	"time"
 
 	"github.com/rivo/tview"
@@ -36,6 +37,14 @@ func (g *StateMachine) PopState() {
 	}
 
 	g.States = g.States[:len(g.States)-1]
+}
+
+func (g *StateMachine) rootState() {
+	if len(g.States) == 0 {
+		return
+	}
+
+	g.States = g.States[:1]
 }
 
 func (g *StateMachine) CurrentState() state.State {
@@ -103,7 +112,9 @@ func (g *StateMachine) handleSignal(s signals.Type) {
 	case signals.LoadGame:
 		game, err := state.LoadGame()
 		if err != nil {
-			panic(err)
+			msgState := state.NewMessage(viewcli.MsgNoSavedGame)
+			g.PushState(msgState)
+			return
 		}
 		g.PushState(game)
 	case signals.ShowScoreboard:
@@ -112,5 +123,10 @@ func (g *StateMachine) handleSignal(s signals.Type) {
 			panic(err)
 		}
 		g.PushState(leaderboard)
+	case signals.GameWon:
+		msgState := state.NewMessage(viewcli.MsgGameWon)
+		g.PushState(msgState)
+	case signals.ReturnToMenu:
+		g.rootState()
 	}
 }

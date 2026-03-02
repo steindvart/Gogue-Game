@@ -39,6 +39,17 @@ func LoadGame(filename string) (*world.Level, error) {
 	return RestoreLevelFromDto(saveDto)
 }
 
+func DeleteGame(filename string) error {
+	if _, err := os.Stat(filename); os.IsNotExist(err) {
+		return nil
+	}
+	err := os.Remove(filename)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func SaveScore(treasures int32, filename string) error {
 	var scoreDto dto.ScoreDto
 
