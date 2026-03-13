@@ -177,6 +177,10 @@ func (c *LevelConfig) ScaleForLevel(levelNumber uint) {
 // GetTreasureDropConfig возвращает конфигурацию выпадения сокровищ
 // для указанного номера уровня. С ростом уровня Gold-процент уменьшается
 // в пользу Gem и Artifact.
+//
+// Целочисленные проценты распределяются по методу наибольших остатков
+// (Largest Remainder / Hare–Niemeyer), который гарантирует сумму = 100
+// при минимальной погрешности округления.
 func (c *LevelConfig) GetTreasureDropConfig(levelNumber uint) TreasureDropConfig {
 	if levelNumber == 0 {
 		levelNumber = 1
@@ -186,33 +190,91 @@ func (c *LevelConfig) GetTreasureDropConfig(levelNumber uint) TreasureDropConfig
 	progression := float64(levelNumber - 1)
 	base := s.BaseTreasureDrop
 
-	gemGrowth := s.GemGrowthPerLevel * progression
-	artifactGrowth := s.ArtifactGrowthPerLevel * progression
+	// Вычисляем дробные проценты
+	gemF := float64(base.GemPercent) + s.GemGrowthPerLevel*progression
+	artifactF := float64(base.ArtifactPercent) + s.ArtifactGrowthPerLevel*progression
+	mysteryF := float64(base.MysteryPercent)
+	goldF := 100.0 - gemF - artifactF - mysteryF
 
-	// Gem и Artifact растут, Gold — уменьшается, Mystery — фиксирован
-	gem := float64(base.GemPercent) + gemGrowth
-	artifact := float64(base.ArtifactPercent) + artifactGrowth
-	mystery := float64(base.MysteryPercent)
-
-	// Gold забирает остаток, но не может быть отрицательным
-	gold := 100.0 - gem - artifact - mystery
-	if gold < 5 {
-		// Если Gold слишком мал, перераспределяем пропорционально Gem и Artifact
-		excess := 5 - gold
-		gold = 5
-		total := gem + artifact
-		if total > 0 {
-			gem -= excess * (gem / total)
-			artifact -= excess * (artifact / total)
+	// Ограничиваем минимальный Gold
+	const minGoldPercent = 5.0
+	if goldF < minGoldPercent {
+		excess := minGoldPercent - goldF
+		goldF = minGoldPercent
+		// Срезаем excess пропорционально из gem и artifact
+		sum := gemF + artifactF
+		if sum > 0 {
+			gemF -= excess * (gemF / sum)
+			artifactF -= excess * (artifactF / sum)
 		}
 	}
 
-	return TreasureDropConfig{
-		GoldPercent:     uint(math.Round(gold)),
-		GemPercent:      uint(math.Round(gem)),
-		ArtifactPercent: uint(math.Round(artifact)),
-		MysteryPercent:  uint(math.Round(mystery)),
+	// Защита от отрицательных дробных значений
+	if gemF < 0 {
+		gemF = 0
 	}
+	if artifactF < 0 {
+		artifactF = 0
+	}
+
+	// Распределяем 100 целых процентов методом наибольших остатков (Hare–Niemeyer).
+	// Порядок элементов: gold, gem, artifact, mystery.
+	fractions := [4]float64{goldF, gemF, artifactF, mysteryF}
+	result := distributeByLargestRemainder(fractions, 100)
+
+	return TreasureDropConfig{
+		GoldPercent:     uint(result[0]),
+		GemPercent:      uint(result[1]),
+		ArtifactPercent: uint(result[2]),
+		MysteryPercent:  uint(result[3]),
+	}
+}
+
+// distributeByLargestRemainder распределяет total целых единиц между N категориями
+// пропорционально дробным значениям fractions, используя метод наибольших остатков.
+//
+// Алгоритм:
+//  1. Каждой категории присваивается floor(fraction).
+//  2. Оставшиеся единицы (total - сумма floor) раздаются категориям
+//     с наибольшими дробными остатками (fraction - floor).
+//
+// Это стандартный метод пропорционального представительства (Hare–Niemeyer),
+// гарантирующий, что сумма результатов = total.
+func distributeByLargestRemainder(fractions [4]float64, total int) [4]int {
+	var result [4]int
+	var remainders [4]float64
+	allocated := 0
+
+	for i, f := range fractions {
+		floored := int(math.Floor(f))
+		if floored < 0 {
+			floored = 0
+		}
+		result[i] = floored
+		remainders[i] = f - float64(floored)
+		allocated += floored
+	}
+
+	// Раздаём оставшиеся единицы по убыванию дробного остатка
+	remaining := total - allocated
+	for remaining > 0 {
+		bestIdx := -1
+		bestRem := -1.0
+		for i, r := range remainders {
+			if r > bestRem {
+				bestRem = r
+				bestIdx = i
+			}
+		}
+		if bestIdx < 0 {
+			break
+		}
+		result[bestIdx]++
+		remainders[bestIdx] = -1.0 // Исключаем из дальнейшего выбора
+		remaining--
+	}
+
+	return result
 }
 
 // clampUint ограничивает значение v диапазоном [minVal, maxVal].
