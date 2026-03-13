@@ -417,7 +417,7 @@ func TestLevel_GenerateTreasure(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			treasure, _ := level.GenerateTreasure(65, 20, 5, 10)
+			treasure, _ := level.GenerateTreasure()
 			if *tt.wantTreasure.Box != *treasure.Box {
 				t.Errorf("GenerateTreasure want Box '%+v', but got '%+v'", *tt.wantTreasure.Box, *treasure.Box)
 			}

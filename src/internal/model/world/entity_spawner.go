@@ -105,7 +105,7 @@ func (s *RoomBasedEntitySpawner) SpawnEntities(
 		result.Items = append(result.Items, &weapons[i])
 	}
 
-	result.Enemies, err = s.spawnEnemies(roomsForSpawning, enemiesConfig.Quantity, random)
+	result.Enemies, err = s.spawnEnemies(roomsForSpawning, enemiesConfig.Quantity, random, enemiesConfig.AttributeMultiplier)
 	if err != nil {
 		return nil, fmt.Errorf("failed to spawn enemies: %w", err)
 	}
@@ -229,6 +229,7 @@ func (s *RoomBasedEntitySpawner) spawnEnemies(
 	rooms []*Room,
 	quantity uint,
 	random utils.Randomizer,
+	attributeMultiplier float64,
 ) ([]primitives.Positional2D[int], error) {
 	result := make([]primitives.Positional2D[int], 0, quantity)
 
@@ -244,20 +245,31 @@ func (s *RoomBasedEntitySpawner) spawnEnemies(
 			Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
 		}
 
+		var enemy primitives.Positional2D[int]
+
 		// Пример как мы можем помещать разные типы врагов в одну через общий интерфейс
 		switch enemyType {
 		case entities.EnemyTypeZombie:
-			result = append(result, entities.NewZombie(box))
+			enemy = entities.NewZombie(box)
 		case entities.EnemyTypeVampire:
-			result = append(result, entities.NewVampire(box))
+			enemy = entities.NewVampire(box)
 		case entities.EnemyTypeGhost:
-			result = append(result, entities.NewGhost(box))
+			enemy = entities.NewGhost(box)
 		case entities.EnemyTypeOgre:
-			result = append(result, entities.NewOgre(box))
+			enemy = entities.NewOgre(box)
 		case entities.EnemyTypeSnakeMage:
-			result = append(result, entities.NewSnakeMage(box))
+			enemy = entities.NewSnakeMage(box)
 		}
 
+		// Применяем множитель атрибутов для повышения сложности на поздних уровнях
+		if attributeMultiplier > 1.0 {
+			if provider, ok := enemy.(entities.EnemyProvider); ok {
+				e := provider.GetEnemy()
+				e.ScaleAttributes(attributeMultiplier)
+			}
+		}
+
+		result = append(result, enemy)
 		room.MarkOccupied(*pos)
 	}
 

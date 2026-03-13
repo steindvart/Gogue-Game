@@ -302,12 +302,16 @@ func (l *Level) Generate() error {
 
 // GenerateWithExistingPlayer генерирует мир, но использует переданного игрока
 func (l *Level) GenerateWithExistingPlayer(player *entities.Player) error {
+	l.Number++
+
+	// Пересчитываем сложность для нового уровня
+	l.config.ScaleForLevel(l.Number)
+
 	err := l.generateEnvironment()
 	if err != nil {
 		return err
 	}
 
-	l.Number++
 	l.Player = player
 	startPos, err := l.playerSpawner.GetStartPosition(l.Rooms, l.random)
 	if err != nil {
@@ -582,9 +586,12 @@ func (l *Level) Attack(attacker Attacker, defender primitives.Positional2D[int])
 	}
 }
 
-// @todo - с повышением lvl повысится кол-во созданных сокровищ
-func (l *Level) GenerateTreasure(goldPercent, gemPercent, artifactPercent, mysteryPercent uint) (*items.Treasure, error) {
-	item, err := items.GetTreasureType(l.random, goldPercent, gemPercent, artifactPercent, mysteryPercent)
+// GenerateTreasure генерирует сокровище с процентами выпадения,
+// масштабированными в соответствии с текущим уровнем подземелья.
+func (l *Level) GenerateTreasure() (*items.Treasure, error) {
+	drop := l.config.GetTreasureDropConfig(l.Number)
+
+	item, err := items.GetTreasureType(l.random, drop.GoldPercent, drop.GemPercent, drop.ArtifactPercent, drop.MysteryPercent)
 	if err != nil {
 		return nil, err
 	}
