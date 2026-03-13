@@ -58,6 +58,13 @@ func (m *EnemyIdleMover) MoveIdle(
 		return m.movePatrol(enemy.Enemy, fullField, otherEnemies, 2)
 	case *entities.SnakeMage:
 		return m.moveSnakeMage(enemy, fullField, otherEnemies)
+	case *entities.Mimic:
+		// Мимик стоит на месте, пока замаскирован - имитирует предмет.
+		// Когда маскировка снята, патрулирует как обычный враг.
+		if enemy.IsDisguised {
+			return false
+		}
+		return m.movePatrol(enemy.Enemy, fullField, otherEnemies, 1)
 	default:
 		return false
 	}

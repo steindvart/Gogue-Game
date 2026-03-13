@@ -8,14 +8,11 @@ import (
 type MessageType int
 
 const (
-	MsgGameWon MessageType = iota
-	MsgNoSavedGame
+	MsgNoSavedGame MessageType = iota
 )
 
 func (mt MessageType) String() string {
 	switch mt {
-	case MsgGameWon:
-		return "🎉 GAME OVER 🎉\n\nYou won!" // 🎉
 	case MsgNoSavedGame:
 		return "⚠  No Saved Game ⚠\n\nNo save file found"
 	default:
@@ -42,8 +39,6 @@ func NewMessage(msgType MessageType) *Message {
 
 	borderColor := tcell.ColorRed
 	switch msgType {
-	case MsgGameWon:
-		borderColor = tcell.ColorGreen
 	case MsgNoSavedGame:
 		borderColor = tcell.ColorYellow
 	}

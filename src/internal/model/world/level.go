@@ -150,6 +150,11 @@ func (l *Level) processEnemyTurns() []entities.AttackResult {
 			if ghost, ok := positionalEnemy.(*entities.Ghost); ok {
 				ghost.IsVisible = true
 			}
+
+			// Mimic сбрасывает маскировку при переходе в режим преследования
+			if mimic, ok := positionalEnemy.(*entities.Mimic); ok {
+				mimic.IsDisguised = false
+			}
 		}
 
 		// Если враг преследует, но потерял видимость - сбрасываем преследование.
@@ -360,6 +365,8 @@ func enemyTypeName(positional primitives.Positional2D[int]) string {
 		return "Ogre"
 	case *entities.SnakeMage:
 		return "Snake Mage"
+	case *entities.Mimic:
+		return "Mimic"
 	default:
 		return "Unknown"
 	}

@@ -32,6 +32,7 @@ const (
 	SymbolGhost     = 'G'
 	SymbolOgre      = 'O'
 	SymbolSnakeMage = 'S'
+	SymbolMimic     = 'm'
 	SymbolFood      = 'ð'
 	SymbolElixir    = '¶'
 	SymbolScroll    = '!'
@@ -78,6 +79,7 @@ const (
 	ColorGhost     = colorLightGray
 	ColorOgre      = colorBrown
 	ColorSnakeMage = colorLimeGreen
+	ColorMimic     = colorWhite
 
 	// Цвета предметов
 	ColorFood   = colorOrange
@@ -255,6 +257,7 @@ func (g *Game) initializeLegend() {
 	fmt.Fprintf(g.legendPanel, " [%s]%c[-] - Ghost\n", ColorGhost, SymbolGhost)
 	fmt.Fprintf(g.legendPanel, " [%s]%c[-] - Ogre\n", ColorOgre, SymbolOgre)
 	fmt.Fprintf(g.legendPanel, " [%s]%c[-] - Snake Mage\n", ColorSnakeMage, SymbolSnakeMage)
+	fmt.Fprintf(g.legendPanel, " [%s]%c[-] - Mimic\n", ColorMimic, SymbolMimic)
 	fmt.Fprintln(g.legendPanel)
 
 	fmt.Fprintf(g.legendPanel, " [%s::b]ITEMS:[-:-:-]\n", colorSkyBlue)
@@ -580,6 +583,8 @@ func (g *Game) getCellAppearance(entityType common.GameEntityType) (rune, string
 		return SymbolOgre, ColorOgre, colorBlack
 	case common.EntityTypeSnakeMage:
 		return SymbolSnakeMage, ColorSnakeMage, colorBlack
+	case common.EntityTypeMimic:
+		return SymbolMimic, ColorMimic, colorBlack
 	case common.Food:
 		return SymbolFood, ColorFood, colorBlack
 	case common.Elixir:

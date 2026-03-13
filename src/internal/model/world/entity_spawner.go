@@ -259,6 +259,8 @@ func (s *RoomBasedEntitySpawner) spawnEnemies(
 			enemy = entities.NewOgre(box)
 		case entities.EnemyTypeSnakeMage:
 			enemy = entities.NewSnakeMage(box)
+		case entities.EnemyTypeMimic:
+			enemy = entities.NewMimic(box)
 		}
 
 		// Применяем множитель атрибутов для повышения сложности на поздних уровнях

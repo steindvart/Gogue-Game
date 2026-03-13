@@ -198,6 +198,9 @@ func (si SerializableEnemies) MarshalJSON() ([]byte, error) {
 		case *entities.SnakeMage:
 			typ = "snakeMage"
 			data = v
+		case *entities.Mimic:
+			typ = "mimic"
+			data = v
 		default:
 			return nil, fmt.Errorf("unsupported enemy type at index %d %s", i, v)
 		}
@@ -262,6 +265,13 @@ func (si *SerializableEnemies) UnmarshalJSON(data []byte) error {
 				return fmt.Errorf("failed to unmarshal snakeMage at index %d: %w", i, err)
 			}
 			item = &snakeMage
+
+		case "mimic":
+			var mimic entities.Mimic
+			if err := json.Unmarshal(rawItem["data"], &mimic); err != nil {
+				return fmt.Errorf("failed to unmarshal mimic at index %d: %w", i, err)
+			}
+			item = &mimic
 
 		default:
 			return fmt.Errorf("unknown enemy type %q at index %d", itemType, i)
