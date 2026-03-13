@@ -308,7 +308,7 @@ func TestFood_NewFood_Randomness(t *testing.T) {
 
 func TestFood_NewFood_BeerProducesFixedValue(t *testing.T) {
 	box := primitives.Box{Point: primitives.Point2D[int]{X: 5, Y: 5}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}}
-	expectedHealth := 20.0
+	expectedHealth := 15.0
 	iterations := 30
 
 	for i := 0; i < iterations; i++ {

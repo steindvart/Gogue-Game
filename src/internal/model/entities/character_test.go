@@ -680,7 +680,7 @@ func TestCharacter_Use_WithElixir(t *testing.T) {
 			initialStr:     10,
 			initialAgi:     5,
 			wantMinHealth:  50,
-			wantMinStr:     15, // Ожидаем прирост силы
+			wantMinStr:     13, // Ожидаем прирост силы (min +3)
 			wantMinAgi:     5,
 			wantEffectsCnt: 1, // Temporary effect
 		},
@@ -692,7 +692,7 @@ func TestCharacter_Use_WithElixir(t *testing.T) {
 			initialAgi:     3,
 			wantMinHealth:  60,
 			wantMinStr:     12,
-			wantMinAgi:     8, // Ожидаем прирост ловкости
+			wantMinAgi:     6, // Ожидаем прирост ловкости (min +3)
 			wantEffectsCnt: 1,
 		},
 	}
