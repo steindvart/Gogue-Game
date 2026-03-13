@@ -7,14 +7,6 @@ import (
 	"gogue/internal/utils"
 )
 
-// cardinalDirections - 4 кардинальных направления: N, S, W, E.
-var cardinalDirections = []primitives.Point2D[int]{
-	{X: 0, Y: -1}, // North
-	{X: 0, Y: 1},  // South
-	{X: -1, Y: 0}, // West
-	{X: 1, Y: 0},  // East
-}
-
 // diagonalDirections - 4 диагональных направления.
 var diagonalDirections = []primitives.Point2D[int]{
 	{X: 1, Y: -1},  // NE
