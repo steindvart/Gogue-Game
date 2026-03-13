@@ -462,7 +462,7 @@ func (g *Game) renderSingleAttack(info *dto.AttackInfo) {
 	}
 }
 
-// formatDamageLabel форматирует строку урона с пометкой «guaranteed», если атака была гарантированной.
+// formatDamageLabel форматирует строку урона с пометкой "guaranteed", если атака была гарантированной.
 func (g *Game) formatDamageLabel(info *dto.AttackInfo) string {
 	if info.Guaranteed {
 		return fmt.Sprintf("[%s]%.0f dmg[-] [%s::b](guaranteed!)[-:-:-]", colorRed, info.Damage, colorOrange)

@@ -99,7 +99,7 @@ func (g *Game) handleEvent(event *tcell.EventKey) *tcell.EventKey {
 		action.MoveRightLowerCorner:
 		g.view.ClearAttackInfos()
 
-		// Если игрок оглушён — ход пропускается, но враги всё равно действуют.
+		// Если игрок оглушён - ход пропускается, но враги всё равно действуют.
 		if g.level.Player.ProcessStun() {
 			g.view.SetStunnedMessage(true)
 			enemyAttacks := g.level.ProcessTurns(1)

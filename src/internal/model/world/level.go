@@ -220,7 +220,7 @@ func (l *Level) processEnemyTurns() []entities.AttackResult {
 // с учётом уникальных модификаторов типа врага.
 //
 // Модификаторы:
-//   - Ogre: если IsResting — пропускает ход (отдыхает), снимает флаг и
+//   - Ogre: если IsResting - пропускает ход (отдыхает), снимает флаг и
 //     гарантированно наносит удар (игнорирует evasion) на следующий ход.
 //     После каждой обычной атаки устанавливает IsResting = true.
 //   - SnakeMage: при успешном попадании с вероятностью 30% усыпляет игрока на 1 ход.
@@ -235,7 +235,7 @@ func (l *Level) processEnemyAttack(
 	if ogre, ok := positionalEnemy.(*entities.Ogre); ok {
 		switch ogre.CombatPhase {
 		case entities.OgrePhaseResting:
-			// Отдых — пропуск хода. Переход в фазу ярости.
+			// Отдых - пропуск хода. Переход в фазу ярости.
 			ogre.CombatPhase = entities.OgrePhaseEnraged
 			return nil
 
@@ -257,7 +257,7 @@ func (l *Level) processEnemyAttack(
 			}
 
 		default:
-			// OgrePhaseReady — обычная атака, после которой огр уходит на отдых.
+			// OgrePhaseReady - обычная атака, после которой огр уходит на отдых.
 			result := enemy.Character.Attack(l.Player.Character, l.random)
 			result.AttackerName = name
 			result.DefenderName = "Player"
@@ -683,7 +683,7 @@ func (l *Level) Attack(attacker Attacker, defender primitives.Positional2D[int])
 		return nil
 	}
 
-	// Модификатор Вампира: абсолютное уклонение (первый удар — гарантированный промах).
+	// Модификатор Вампира: абсолютное уклонение (первый удар - гарантированный промах).
 	if vampire, ok := defender.(*entities.Vampire); ok {
 		if vampire.AbsoluteEvasions > 0 {
 			vampire.AbsoluteEvasions--
