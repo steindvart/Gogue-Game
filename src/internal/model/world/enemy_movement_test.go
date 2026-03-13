@@ -393,7 +393,8 @@ func TestEnemyIdleMover_SnakeMageKeepsDirectionUntilBlocked(t *testing.T) {
 
 func TestEnemyIdleMover_SnakeMageRandomDirectionOnBlock(t *testing.T) {
 	// Проверяем, что при блокировке SnakeMage не всегда выбирает одно и то же
-	// направление (т.е. выбор случайный, а не циклический)
+	// направление (т.е. выбор случайный, а не циклический).
+	// Позиция (3,1): NE -> (4,0) = стена. Доступны SE (4,2) и SW (2,2).
 	field := buildSimpleField()
 	rooms := []Room{makeTestRoom(0, 0, 7, 7)}
 
@@ -403,8 +404,8 @@ func TestEnemyIdleMover_SnakeMageRandomDirectionOnBlock(t *testing.T) {
 		rng := utils.NewRandomWithSeed(seed)
 		mover := NewEnemyIdleMover(rng)
 
-		snake := entities.NewSnakeMage(makeBox(5, 1))
-		snake.Direction = entities.DirectionDiagonallyForwardRight // NE: (6,0) = wall
+		snake := entities.NewSnakeMage(makeBox(3, 1))
+		snake.Direction = entities.DirectionDiagonallyForwardRight // NE: (4,0) = wall
 		enemies := []primitives.Positional2D[int]{snake}
 
 		mover.MoveIdle(snake, field, rooms, enemies)
