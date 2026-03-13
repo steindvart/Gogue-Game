@@ -11,6 +11,7 @@ type Player struct {
 	*items.Backpack
 	*items.Weapon
 	ViewRadius int
+	StunnedFor uint32 // Количество ходов, на которые игрок оглушён (не может действовать).
 }
 
 type BackpackItemType int
@@ -127,4 +128,23 @@ func (p *Player) UseItemFromBackpack(item any) error {
 	}
 
 	return p.Backpack.RemoveItem(item)
+}
+
+// IsStunned возвращает true, если игрок оглушён и не может действовать.
+func (p *Player) IsStunned() bool {
+	return p.StunnedFor > 0
+}
+
+// Stun оглушает игрока на указанное количество ходов.
+func (p *Player) Stun(turns uint32) {
+	p.StunnedFor += turns
+}
+
+// ProcessStun уменьшает счётчик оглушения. Возвращает true, если ход был потрачен на оглушение.
+func (p *Player) ProcessStun() bool {
+	if p.StunnedFor > 0 {
+		p.StunnedFor--
+		return true
+	}
+	return false
 }

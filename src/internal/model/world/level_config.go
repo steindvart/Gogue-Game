@@ -136,7 +136,7 @@ func DefaultLevelConfig(mapSize primitives.Size2D[uint]) LevelConfig {
 
 // ScaleForLevel пересчитывает конфигурацию спавна врагов и предметов
 // в соответствии с номером уровня подземелья.
-// levelNumber начинается с 1 (первый уровень — базовая сложность).
+// levelNumber начинается с 1 (первый уровень - базовая сложность).
 func (c *LevelConfig) ScaleForLevel(levelNumber uint) {
 	if levelNumber == 0 {
 		levelNumber = 1

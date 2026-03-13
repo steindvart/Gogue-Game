@@ -2,7 +2,7 @@ package dto
 
 import "gogue/internal/model/entities"
 
-// AttackInfo — DTO для передачи информации об атаке в view-слой.
+// AttackInfo - DTO для передачи информации об атаке в view-слой.
 type AttackInfo struct {
 	AttackerName        string
 	DefenderName        string
@@ -12,7 +12,12 @@ type AttackInfo struct {
 	DefenderMaxHealth   float64
 	DefenderKilled      bool
 
-	// Loot — информация о добыче при убийстве врага (опционально).
+	// Guaranteed - атака была гарантированной (без проверки evasion).
+	Guaranteed bool
+	// AppliedStun - атака наложила оглушение.
+	AppliedStun bool
+
+	// Loot - информация о добыче при убийстве врага (опционально).
 	LootName  string
 	LootValue int32
 }
@@ -30,6 +35,8 @@ func ConvertAttackResultToDto(result *entities.AttackResult) *AttackInfo {
 		DefenderHealthAfter: result.DefenderHealthAfter,
 		DefenderMaxHealth:   result.DefenderMaxHealth,
 		DefenderKilled:      result.DefenderKilled,
+		Guaranteed:          result.Guaranteed,
+		AppliedStun:         result.AppliedStun,
 	}
 }
 

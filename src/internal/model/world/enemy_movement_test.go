@@ -178,7 +178,7 @@ func TestEnemyIdleMover_PatrolStandsWhenBlocked(t *testing.T) {
 	enemies := []primitives.Positional2D[int]{zombie}
 	rooms := []Room{makeTestRoom(0, 0, 7, 7)}
 
-	// Принудительно ставим направление «на север» - (1,1) уже у стены
+	// Принудительно ставим направление "на север" - (1,1) уже у стены
 	zombie.Direction = entities.DirectionForward // North -> (1, 0) = wall
 	zombie.StepsRemaining = 3
 

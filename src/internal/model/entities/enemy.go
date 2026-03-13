@@ -77,17 +77,30 @@ type Ghost struct {
 	IsVisible bool
 }
 
+// OgreCombatPhase определяет фазу боевого цикла огра.
+type OgreCombatPhase int
+
+const (
+	// OgrePhaseReady - огр готов атаковать (обычная атака).
+	OgrePhaseReady OgreCombatPhase = iota
+	// OgrePhaseResting - огр отдыхает (пропуск хода после атаки).
+	OgrePhaseResting
+	// OgrePhaseEnraged - огр разъярён (следующая атака гарантированная, без проверки evasion).
+	OgrePhaseEnraged
+)
+
 type Ogre struct {
 	*Enemy
-	IsResting bool
+	IsResting   bool // deprecated: оставлено для обратной совместимости save; используйте CombatPhase.
+	CombatPhase OgreCombatPhase
 }
 
 type SnakeMage struct {
 	*Enemy
 }
 
-// Zombie — медленный, туповатый, но живучий. Низкий урон, много HP.
-// Роль: «мешок с хитпоинтами», тренировочный враг для начала игры.
+// Zombie - медленный, туповатый, но живучий. Низкий урон, много HP.
+// Роль: "мешок с хитпоинтами", тренировочный враг для начала игры.
 func NewZombie(box *primitives.Box) *Zombie {
 	return &Zombie{
 		Enemy: &Enemy{
@@ -106,8 +119,8 @@ func NewZombie(box *primitives.Box) *Zombie {
 	}
 }
 
-// Vampire — быстрый, ловкий, средний урон. Часто уклоняется.
-// Роль: «ловкач», сложно попасть, но и бьёт не так больно.
+// Vampire - быстрый, ловкий, средний урон. Часто уклоняется.
+// Роль: "ловкач", сложно попасть, но и бьёт не так больно.
 func NewVampire(box *primitives.Box) *Vampire {
 	return &Vampire{
 		Enemy: &Enemy{
@@ -123,12 +136,12 @@ func NewVampire(box *primitives.Box) *Vampire {
 			HostilityRadius: HostilityRadiusAverage,
 			Direction:       DirectionStop,
 		},
-		AbsoluteEvasions: 0,
+		AbsoluteEvasions: 1,
 	}
 }
 
-// Ghost — хрупкий, слабый, но невидимый до агрессии. Лёгкий враг.
-// Роль: «неожиданность», пугает, но быстро убивается.
+// Ghost - хрупкий, слабый, но невидимый до агрессии. Лёгкий враг.
+// Роль: "неожиданность", пугает, но быстро убивается.
 func NewGhost(box *primitives.Box) *Ghost {
 	return &Ghost{
 		Enemy: &Enemy{
@@ -148,8 +161,9 @@ func NewGhost(box *primitives.Box) *Ghost {
 	}
 }
 
-// Ogre — танк. Очень много HP, сильно бьёт, но медленный и неповоротливый.
-// Роль: «мини-босс», требует подготовки (оружие/эликсиры).
+// Ogre - танк. Очень много HP, сильно бьёт, но медленный и неповоротливый.
+// Роль: "мини-босс", требует подготовки (оружие/эликсиры).
+// После каждой атаки пропускает один ход (отдых), затем гарантированно контратакует.
 func NewOgre(box *primitives.Box) *Ogre {
 	return &Ogre{
 		Enemy: &Enemy{
@@ -162,15 +176,16 @@ func NewOgre(box *primitives.Box) *Ogre {
 					MaxHealth: 60,
 				},
 			},
-			HostilityRadius: HostilityRadiusLow,
+			HostilityRadius: HostilityRadiusAverage,
 			Direction:       DirectionStop,
 		},
-		IsResting: false,
+		IsResting:   false,
+		CombatPhase: OgrePhaseReady,
 	}
 }
 
-// SnakeMage — стеклянная пушка. Высокий урон, ловкий, но хрупкий.
-// Роль: «приоритетная цель», нужно убивать быстро или избегать.
+// SnakeMage - стеклянная пушка. Высокий урон, ловкий, но хрупкий.
+// Роль: "приоритетная цель", нужно убивать быстро или избегать.
 func NewSnakeMage(box *primitives.Box) *SnakeMage {
 	return &SnakeMage{
 		Enemy: &Enemy{
