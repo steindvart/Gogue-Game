@@ -80,21 +80,21 @@ type DifficultyScaling struct {
 func DefaultDifficultyScaling() DifficultyScaling {
 	return DifficultyScaling{
 		// Враги
-		BaseEnemyCount:       10,
-		EnemyCountPerLevel:   2,
-		MaxEnemyCount:        30,
-		EnemyAttributeGrowth: 0.12,
+		BaseEnemyCount:       8,
+		EnemyCountPerLevel:   1,
+		MaxEnemyCount:        20,
+		EnemyAttributeGrowth: 0.08,
 
 		// Предметы
 		BaseFoods:     7,
 		BaseElixirs:   5,
 		BaseScrolls:   3,
-		BaseWeapons:   1,
-		ItemDecayRate: 0.08,
-		MinFoods:      2,
-		MinElixirs:    1,
+		BaseWeapons:   2,
+		ItemDecayRate: 0.05,
+		MinFoods:      3,
+		MinElixirs:    2,
 		MinScrolls:    1,
-		MinWeapons:    0,
+		MinWeapons:    1,
 
 		// Сокровища
 		BaseTreasureDrop: TreasureDropConfig{

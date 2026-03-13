@@ -37,10 +37,10 @@ const (
 type AttributeRate int
 
 const (
-	AttributeRateLow      AttributeRate = 25
-	AttributeRateAverage  AttributeRate = 50
-	AttributeRateHigh     AttributeRate = 75
-	AttributeRateVeryHigh AttributeRate = 100
+	AttributeRateLow      AttributeRate = 5
+	AttributeRateAverage  AttributeRate = 10
+	AttributeRateHigh     AttributeRate = 15
+	AttributeRateVeryHigh AttributeRate = 20
 )
 
 type HostilityRadius int
@@ -86,53 +86,59 @@ type SnakeMage struct {
 	*Enemy
 }
 
+// Zombie — медленный, туповатый, но живучий. Низкий урон, много HP.
+// Роль: «мешок с хитпоинтами», тренировочный враг для начала игры.
 func NewZombie(box *primitives.Box) *Zombie {
 	return &Zombie{
 		Enemy: &Enemy{
 			Character: &Character{
 				Box: box,
 				Attributes: &primitives.Attributes{
-					Agility:   float64(AttributeRateLow),
-					Strength:  float64(AttributeRateAverage),
-					Health:    float64(AttributeRateHigh),
-					MaxHealth: float64(AttributeRateHigh),
+					Agility:   2,
+					Strength:  6,
+					Health:    30,
+					MaxHealth: 30,
 				},
 			},
-			HostilityRadius: HostilityRadiusAverage,
+			HostilityRadius: HostilityRadiusLow,
 			Direction:       DirectionStop,
 		},
 	}
 }
 
+// Vampire — быстрый, ловкий, средний урон. Часто уклоняется.
+// Роль: «ловкач», сложно попасть, но и бьёт не так больно.
 func NewVampire(box *primitives.Box) *Vampire {
 	return &Vampire{
 		Enemy: &Enemy{
 			Character: &Character{
 				Box: box,
 				Attributes: &primitives.Attributes{
-					Agility:   float64(AttributeRateHigh),
-					Strength:  float64(AttributeRateAverage),
-					Health:    float64(AttributeRateHigh),
-					MaxHealth: float64(AttributeRateHigh),
+					Agility:   12,
+					Strength:  8,
+					Health:    25,
+					MaxHealth: 25,
 				},
 			},
-			HostilityRadius: HostilityRadiusHigh,
+			HostilityRadius: HostilityRadiusAverage,
 			Direction:       DirectionStop,
 		},
 		AbsoluteEvasions: 0,
 	}
 }
 
+// Ghost — хрупкий, слабый, но невидимый до агрессии. Лёгкий враг.
+// Роль: «неожиданность», пугает, но быстро убивается.
 func NewGhost(box *primitives.Box) *Ghost {
 	return &Ghost{
 		Enemy: &Enemy{
 			Character: &Character{
 				Box: box,
 				Attributes: &primitives.Attributes{
-					Agility:   float64(AttributeRateHigh),
-					Strength:  float64(AttributeRateLow),
-					Health:    float64(AttributeRateLow),
-					MaxHealth: float64(AttributeRateLow),
+					Agility:   8,
+					Strength:  4,
+					Health:    12,
+					MaxHealth: 12,
 				},
 			},
 			HostilityRadius: HostilityRadiusLow,
@@ -142,38 +148,43 @@ func NewGhost(box *primitives.Box) *Ghost {
 	}
 }
 
+// Ogre — танк. Очень много HP, сильно бьёт, но медленный и неповоротливый.
+// Роль: «мини-босс», требует подготовки (оружие/эликсиры).
 func NewOgre(box *primitives.Box) *Ogre {
 	return &Ogre{
 		Enemy: &Enemy{
 			Character: &Character{
 				Box: box,
 				Attributes: &primitives.Attributes{
-					Agility:   float64(AttributeRateLow),
-					Strength:  float64(AttributeRateVeryHigh),
-					Health:    float64(AttributeRateVeryHigh),
-					MaxHealth: float64(AttributeRateVeryHigh),
+					Agility:   1,
+					Strength:  15,
+					Health:    50,
+					MaxHealth: 50,
 				},
 			},
-			HostilityRadius: HostilityRadiusAverage,
+			HostilityRadius: HostilityRadiusLow,
 			Direction:       DirectionStop,
 		},
 		IsResting: false,
 	}
 }
 
+// SnakeMage — стеклянная пушка. Высокий урон, ловкий, но хрупкий.
+// Роль: «приоритетная цель», нужно убивать быстро или избегать.
 func NewSnakeMage(box *primitives.Box) *SnakeMage {
 	return &SnakeMage{
 		Enemy: &Enemy{
 			Character: &Character{
 				Box: box,
 				Attributes: &primitives.Attributes{
-					Agility:   float64(AttributeRateVeryHigh),
-					Strength:  float64(AttributeRateAverage),
-					Health:    float64(AttributeRateHigh),
-					MaxHealth: float64(AttributeRateHigh),
+					Agility:   10,
+					Strength:  12,
+					Health:    18,
+					MaxHealth: 18,
 				},
-			}, HostilityRadius: HostilityRadiusHigh,
-			Direction: DirectionStop,
+			},
+			HostilityRadius: HostilityRadiusAverage,
+			Direction:       DirectionStop,
 		},
 	}
 }

@@ -22,7 +22,7 @@ func TestPlayer_NewPlayer_BasicInit(t *testing.T) {
 	}
 
 	// Default attributes
-	if p.Attributes.Health != 100 || p.Attributes.MaxHealth != 100 || p.Attributes.Strength != 10 || p.Attributes.Agility != 5 {
+	if p.Attributes.Health != 100 || p.Attributes.MaxHealth != 100 || p.Attributes.Strength != 12 || p.Attributes.Agility != 5 {
 		t.Errorf("Unexpected default attributes: got (H %.1f/MH %.1f, S %.1f, A %.1f)", p.Attributes.Health, p.Attributes.MaxHealth, p.Attributes.Strength, p.Attributes.Agility)
 	}
 

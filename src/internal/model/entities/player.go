@@ -29,7 +29,7 @@ func NewPlayer(box primitives.Box) *Player {
 			Attributes: &primitives.Attributes{
 				Health:    100,
 				MaxHealth: 100,
-				Strength:  10,
+				Strength:  12,
 				Agility:   5,
 			},
 		},

@@ -145,7 +145,7 @@ func (c *Character) CheckEvasion(rnd utils.Randomizer) bool {
 		return false
 	}
 
-	const scale = 20.0
+	const scale = 50.0
 	chance := 1.0 - 1.0/(1.0+c.Attributes.Agility/scale)
 
 	roll := rnd.Float64() // Случайное дробное число - [0,1)
