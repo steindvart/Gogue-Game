@@ -94,11 +94,13 @@ func (l *Level) ProcessTurns(turns uint32) {
 //  1. Вычисляется расстояние (Чебышёва) до игрока.
 //  2. Если расстояние <= HostilityRadius И враг имеет прямую видимость (LoS) до игрока -
 //     враг переходит в режим преследования (IsChasing = true).
-//  3. Если IsChasing - строится путь до игрока через FindPathBFS.
-//  4. Если первый шаг пути == позиция игрока - враг атакует, но не двигается.
-//  5. Если первый шаг пути занят другим врагом - враг пропускает ход.
-//  6. Иначе враг перемещается на первый шаг пути.
-//  7. Если путь не найден - IsChasing сбрасывается.
+//  3. Если враг преследует - строится путь до игрока через FindPathBFS.
+//  4. Если враг преследует, но потерял LoS - сбрасываем преследование.
+//  5. Если первый шаг пути == позиция игрока - враг атакует, но не двигается.
+//  6. Если первый шаг пути занят другим врагом - враг пропускает ход.
+//  7. Иначе враг перемещается на первый шаг пути.
+//  8. Если путь не найден - враг продолжает бродить по своему паттерну (idle move).
+//  9. Если враг не преследует - двигается по своему idle-паттерну.
 func (l *Level) processEnemyTurns() {
 	if l.Player == nil || len(l.Enemies) == 0 {
 		return
@@ -108,7 +110,7 @@ func (l *Level) processEnemyTurns() {
 	mapW := int(l.config.MapSize.Width)
 	mapH := int(l.config.MapSize.Height)
 
-	// Получаем полное поле один раз для всех врагов (используется для LoS-проверки).
+	// Получаем полное поле один раз для всех врагов (используется для LoS-проверки и idle-движения).
 	fullField := l.GetFullField(mapW, mapH)
 
 	// Типы клеток, по которым враги могут перемещаться:
@@ -123,6 +125,8 @@ func (l *Level) processEnemyTurns() {
 		int(common.Scroll),
 		int(common.Weapon),
 	}
+
+	idleMover := NewEnemyIdleMover(l.random)
 
 	for _, positionalEnemy := range l.Enemies {
 		provider, ok := positionalEnemy.(entities.EnemyProvider)
@@ -139,6 +143,11 @@ func (l *Level) processEnemyTurns() {
 		// 2) Враг имеет прямую видимость (Line of Sight) до игрока
 		if dist <= int(enemy.HostilityRadius) && HasLineOfSight(fullField, enemyPos, playerPos) {
 			enemy.IsChasing = true
+
+			// Ghost становится всегда видимым при переходе в режим преследования
+			if ghost, ok := positionalEnemy.(*entities.Ghost); ok {
+				ghost.IsVisible = true
+			}
 		}
 
 		// Если враг преследует, но потерял видимость - сбрасываем преследование.
@@ -147,9 +156,13 @@ func (l *Level) processEnemyTurns() {
 			enemy.IsChasing = false
 		}
 
+		// Если не преследуем - выполняем idle-движение по паттерну типа врага
 		if !enemy.IsChasing {
+			idleMover.MoveIdle(positionalEnemy, fullField, l.Rooms, l.Enemies)
 			continue
 		}
+
+		// --- Преследование ---
 
 		// Строим навигационное поле: из полного поля карты,
 		// но блокируем клетки, занятые другими врагами.
@@ -169,13 +182,12 @@ func (l *Level) processEnemyTurns() {
 			{X: 0, Y: 1}, // South
 			// {X: -1, Y: 1},  // South-West
 			{X: -1, Y: 0}, // West
-			// {X: -1, Y: -1}, // North-West
 		}
 
 		path, err := FindPathBFS(enemyPos, playerPos, navField, walkable, directions)
 		if err != nil || len(path) == 0 {
-			// Путь не найден - сбрасываем преследование
-			enemy.IsChasing = false
+			// Путь не найден - продолжаем бродить по idle-паттерну
+			idleMover.MoveIdle(positionalEnemy, fullField, l.Rooms, l.Enemies)
 			continue
 		}
 

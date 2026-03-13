@@ -59,7 +59,8 @@ type Enemy struct {
 	*Character
 	HostilityRadius
 	Direction
-	IsChasing bool
+	IsChasing      bool
+	StepsRemaining int // Сколько шагов осталось в текущем Direction (idle-патрулирование)
 }
 
 type Zombie struct {

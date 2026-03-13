@@ -148,6 +148,11 @@ func (r *DefaultFieldRenderer) renderItems(
 
 func (r *DefaultFieldRenderer) renderEnemies(enemies []primitives.Positional2D[int], field [][]common.GameEntityType, width, height int) {
 	for _, enemy := range enemies {
+		// Невидимый Ghost не отображается на карте
+		if ghost, ok := enemy.(*entities.Ghost); ok && !ghost.IsVisible {
+			continue
+		}
+
 		pt := enemy.GetPosition()
 		if r.isInBoundsWH(pt.X, pt.Y, width, height) {
 			field[pt.Y][pt.X] = convertEnemyToEntityType(enemy)
