@@ -153,6 +153,15 @@ func (r *DefaultFieldRenderer) renderEnemies(enemies []primitives.Positional2D[i
 			continue
 		}
 
+		// Замаскированный Mimic отображается как предмет (оружие), а не как враг
+		if mimic, ok := enemy.(*entities.Mimic); ok && mimic.IsDisguised {
+			pt := enemy.GetPosition()
+			if r.isInBoundsWH(pt.X, pt.Y, width, height) {
+				field[pt.Y][pt.X] = common.Weapon
+			}
+			continue
+		}
+
 		pt := enemy.GetPosition()
 		if r.isInBoundsWH(pt.X, pt.Y, width, height) {
 			field[pt.Y][pt.X] = convertEnemyToEntityType(enemy)
@@ -197,6 +206,8 @@ func convertEnemyToEntityType(enemy any) common.GameEntityType {
 		return common.EntityTypeOgre
 	case *entities.SnakeMage:
 		return common.EntityTypeSnakeMage
+	case *entities.Mimic:
+		return common.EntityTypeMimic
 	}
 
 	return common.EntityTypeNone

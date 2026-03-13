@@ -113,6 +113,7 @@ func (g *StateMachine) handleSignal(s signals.Type) {
 	case signals.LoadGame:
 		game, err := state.LoadGame()
 		if err != nil {
+			// @todo - архитектурная проблема: машина состояний не должна зависеть от view
 			msgState := state.NewMessage(viewcli.MsgNoSavedGame)
 			g.PushState(msgState)
 			return

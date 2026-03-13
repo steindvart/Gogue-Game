@@ -396,6 +396,8 @@ func (g *Game) getEnemyDisplayName(enemy primitives.Positional2D[int]) string {
 		return "Ogre"
 	case *entities.SnakeMage:
 		return "Snake Mage"
+	case *entities.Mimic:
+		return "Mimic"
 	default:
 		return "Unknown"
 	}

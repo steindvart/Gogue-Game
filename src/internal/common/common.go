@@ -15,6 +15,7 @@ const (
 	EntityTypeGhost
 	EntityTypeOgre
 	EntityTypeSnakeMage
+	EntityTypeMimic
 	Food
 	Elixir
 	Scroll

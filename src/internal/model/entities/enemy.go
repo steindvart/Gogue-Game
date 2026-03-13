@@ -10,6 +10,7 @@ const (
 	EnemyTypeGhost
 	EnemyTypeOgre
 	EnemyTypeSnakeMage
+	EnemyTypeMimic
 )
 
 var EnemyTypes = []EnemyType{
@@ -18,6 +19,7 @@ var EnemyTypes = []EnemyType{
 	EnemyTypeGhost,
 	EnemyTypeOgre,
 	EnemyTypeSnakeMage,
+	EnemyTypeMimic,
 }
 
 type Direction int
@@ -97,6 +99,16 @@ type Ogre struct {
 
 type SnakeMage struct {
 	*Enemy
+}
+
+// Mimic - имитатор предметов. Выглядит как предмет, пока игрок не подойдёт слишком близко.
+// Высокая ловкость, низкая сила, высокое здоровье, низкая враждебность.
+// Роль: "ловушка", наказывает невнимательных игроков, сложно попасть из-за ловкости.
+type Mimic struct {
+	*Enemy
+	// IsDisguised указывает, маскируется ли мимик под предмет.
+	// Сбрасывается при переходе в режим преследования.
+	IsDisguised bool
 }
 
 // Zombie - медленный, туповатый, но живучий. Низкий урон, много HP.
@@ -201,6 +213,29 @@ func NewSnakeMage(box *primitives.Box) *SnakeMage {
 			HostilityRadius: HostilityRadiusAverage,
 			Direction:       DirectionStop,
 		},
+	}
+}
+
+// Mimic - имитатор предметов. Притворяется предметом, пока игрок не подойдёт.
+// Высокая ловкость (часто уклоняется), низкая сила (слабо бьёт),
+// высокое здоровье (живучий), низкая враждебность (реагирует только вблизи).
+// Роль: "ловушка", неожиданность для невнимательных игроков.
+func NewMimic(box *primitives.Box) *Mimic {
+	return &Mimic{
+		Enemy: &Enemy{
+			Character: &Character{
+				Box: box,
+				Attributes: &primitives.Attributes{
+					Agility:   15,
+					Strength:  6,
+					Health:    40,
+					MaxHealth: 40,
+				},
+			},
+			HostilityRadius: HostilityRadiusLow,
+			Direction:       DirectionStop,
+		},
+		IsDisguised: true,
 	}
 }
 
