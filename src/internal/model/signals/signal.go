@@ -9,5 +9,6 @@ const (
 	LoadGame
 	ShowScoreboard
 	GameWon
+	GameOver
 	ReturnToMenu
 )

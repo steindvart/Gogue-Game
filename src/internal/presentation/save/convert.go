@@ -48,6 +48,8 @@ func ConvertLevelToDto(level *world.Level, size primitives.Size2D[uint]) dto.Gam
 			Weapons:   MapListToSlice[*items.Weapon](level.Player.Backpack.Weapons),
 			Treasures: level.Player.Backpack.Treasures,
 		},
+		EnemiesKilled:   level.Player.EnemiesKilled,
+		ConsumablesUsed: level.Player.ConsumablesUsed,
 	}
 
 	return dto.GameSaveDto{
@@ -127,8 +129,10 @@ func restorePlayer(dto dto.PlayerSaveDto) *entities.Player {
 			Weapons:   SliceToList(dto.Backpack.Weapons),
 			Treasures: dto.Backpack.Treasures,
 		},
-		Weapon:     dto.Weapon,
-		ViewRadius: dto.ViewRadius,
+		Weapon:          dto.Weapon,
+		ViewRadius:      dto.ViewRadius,
+		EnemiesKilled:   dto.EnemiesKilled,
+		ConsumablesUsed: dto.ConsumablesUsed,
 	}
 }
 
