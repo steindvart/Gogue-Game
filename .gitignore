@@ -4,6 +4,7 @@
 .memorybank/
 coverage.*
 save.json
+score.json
 
 # Prerequisites
 *.d
