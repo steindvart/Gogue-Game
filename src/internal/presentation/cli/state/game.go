@@ -591,6 +591,11 @@ func (g *Game) checkPlayerDeath() {
 		panic(err.Error())
 	}
 
+	// Сохраняем рекорд (сокровища) в таблицу рекордов и при гибели
+	if err := save.SaveScore(g.level.Player.Backpack.Treasures, ScoreFileName); err != nil {
+		panic(err.Error())
+	}
+
 	g.GameOverStats = g.buildGameOverStats()
 	g.signal = signals.GameOver
 }
