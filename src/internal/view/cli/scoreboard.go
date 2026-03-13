@@ -25,7 +25,7 @@ func NewScoreboard(options []string) *Scoreboard {
 	}
 
 	for i, opt := range options {
-		medal := " "
+		var medal string
 		switch i {
 		case 0:
 			medal = "🥇"
