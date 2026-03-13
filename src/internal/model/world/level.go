@@ -83,9 +83,9 @@ func newLevelWithComponents(
 	}
 }
 
-func (l *Level) ProcessTurns(turns uint32) {
+func (l *Level) ProcessTurns(turns uint32) []entities.AttackResult {
 	l.Player.ProcessTurns(turns)
-	l.processEnemyTurns()
+	return l.processEnemyTurns()
 }
 
 // processEnemyTurns обрабатывает ходы всех врагов за один игровой тик.
@@ -101,10 +101,12 @@ func (l *Level) ProcessTurns(turns uint32) {
 //  7. Иначе враг перемещается на первый шаг пути.
 //  8. Если путь не найден - враг продолжает бродить по своему паттерну (idle move).
 //  9. Если враг не преследует - двигается по своему idle-паттерну.
-func (l *Level) processEnemyTurns() {
+func (l *Level) processEnemyTurns() []entities.AttackResult {
 	if l.Player == nil || len(l.Enemies) == 0 {
-		return
+		return nil
 	}
+
+	var attackResults []entities.AttackResult
 
 	playerPos := l.Player.GetPosition()
 	mapW := int(l.config.MapSize.Width)
@@ -195,7 +197,10 @@ func (l *Level) processEnemyTurns() {
 
 		// Если следующий шаг - позиция игрока: атакуем, но не двигаемся
 		if nextStep == playerPos {
-			enemy.Character.Attack(l.Player.Character, l.random)
+			result := enemy.Character.Attack(l.Player.Character, l.random)
+			result.AttackerName = enemyTypeName(positionalEnemy)
+			result.DefenderName = "Player"
+			attackResults = append(attackResults, result)
 			continue
 		}
 
@@ -207,6 +212,8 @@ func (l *Level) processEnemyTurns() {
 		// Перемещаем врага
 		enemy.SetPosition(nextStep)
 	}
+
+	return attackResults
 }
 
 // buildEnemyNavigationField создаёт навигационную карту для конкретного врага.
@@ -267,6 +274,24 @@ func (l *Level) isEnemyAtPosition(pos primitives.Point2D[int], excludeEnemy prim
 		}
 	}
 	return false
+}
+
+// enemyTypeName возвращает читаемое имя типа врага для отображения в UI.
+func enemyTypeName(positional primitives.Positional2D[int]) string {
+	switch positional.(type) {
+	case *entities.Zombie:
+		return "Zombie"
+	case *entities.Vampire:
+		return "Vampire"
+	case *entities.Ghost:
+		return "Ghost"
+	case *entities.Ogre:
+		return "Ogre"
+	case *entities.SnakeMage:
+		return "Snake Mage"
+	default:
+		return "Unknown"
+	}
 }
 
 // chebyshevDistance вычисляет расстояние Чебышёва (шахматное расстояние) между двумя точками.
@@ -571,19 +596,22 @@ func (l *Level) RemoveEnemy(enemy primitives.Positional2D[int]) {
 }
 
 type Attacker interface {
-	Attack(defender *entities.Character, rnd utils.Randomizer)
+	Attack(defender *entities.Character, rnd utils.Randomizer) entities.AttackResult
 }
 
-// @todo - возвращать информацию о совершенной атаке - кто был атакован, какой был нанесён урон, сколько здоровья осталось и т.д.
-func (l *Level) Attack(attacker Attacker, defender primitives.Positional2D[int]) {
+// Attack выполняет атаку и возвращает результат.
+// Имена атакующего и защитника заполняются вызывающим кодом.
+func (l *Level) Attack(attacker Attacker, defender primitives.Positional2D[int]) *entities.AttackResult {
 	if attacker == nil || defender == nil {
-		return
+		return nil
 	}
 
-	if enemy, ok := defender.(entities.CharacterProvider); ok {
-		attacker.Attack(enemy.GetCharacter(), l.random)
-		return
+	if charProvider, ok := defender.(entities.CharacterProvider); ok {
+		result := attacker.Attack(charProvider.GetCharacter(), l.random)
+		return &result
 	}
+
+	return nil
 }
 
 // GenerateTreasure генерирует сокровище с процентами выпадения,

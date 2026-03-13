@@ -43,12 +43,25 @@ func (c *Character) MakeDamage() float64 {
 	return c.Attributes.Strength
 }
 
-func (c *Character) Attack(defender *Character, rnd utils.Randomizer) {
-	if defender.CheckEvasion(c.Attributes.Agility, rnd) {
-		return
+func (c *Character) Attack(defender *Character, rnd utils.Randomizer) AttackResult {
+	result := AttackResult{
+		DefenderMaxHealth: defender.Attributes.MaxHealth,
 	}
 
-	defender.TakeDamage(c.MakeDamage())
+	if defender.CheckEvasion(c.Attributes.Agility, rnd) {
+		result.Evaded = true
+		result.DefenderHealthAfter = defender.Attributes.Health
+		return result
+	}
+
+	damage := c.MakeDamage()
+	defender.TakeDamage(damage)
+
+	result.Damage = damage
+	result.DefenderHealthAfter = defender.Attributes.Health
+	result.DefenderKilled = !defender.IsAlive()
+
+	return result
 }
 
 func (c *Character) Use(usable items.Usable) {

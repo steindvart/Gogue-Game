@@ -97,6 +97,7 @@ func (g *Game) handleEvent(event *tcell.EventKey) *tcell.EventKey {
 		action.MoveRightUpperCorner,
 		action.MoveLefLowerCorner,
 		action.MoveRightLowerCorner:
+		g.view.ClearAttackInfos()
 		g.handleMoveAction(g.eventToAction(event))
 		switch g.level.CheckEntityCollision(g.level.Player.GetPosition()) {
 		case world.CollisionTypeItem:
@@ -110,7 +111,10 @@ func (g *Game) handleEvent(event *tcell.EventKey) *tcell.EventKey {
 			g.resetInteraction()
 		}
 
-		g.level.ProcessTurns(1)
+		enemyAttacks := g.level.ProcessTurns(1)
+		if len(enemyAttacks) > 0 {
+			g.view.SetEnemyAttackInfos(dto.ConvertAttackResultsToDto(enemyAttacks))
+		}
 	case action.Select:
 		g.handleSelectAction()
 	case action.Take:
@@ -203,8 +207,13 @@ func (g *Game) handleMoveAction(a action.Type) {
 	}
 
 	if enemy := g.level.GetEnemyAtPosition(g.level.Player.GetPosition()); enemy != nil {
-		// @todo - возвращать информацию о совершенной атаке - кто был атакован, какой был нанесён урон, сколько здоровья осталось и т.д.
-		g.level.Attack(g.level.Player, enemy)
+		attackResult := g.level.Attack(g.level.Player, enemy)
+
+		if attackResult != nil {
+			attackResult.AttackerName = "Player"
+			attackResult.DefenderName = g.getEnemyDisplayName(enemy)
+			g.view.SetPlayerAttackInfo(dto.ConvertAttackResultToDto(attackResult))
+		}
 
 		if provider, ok := enemy.(entities.CharacterProvider); ok {
 			character := provider.GetCharacter()
@@ -345,6 +354,24 @@ func (g *Game) eventToAction(event *tcell.EventKey) action.Type {
 
 func (g *Game) updateItemInfo(pos primitives.Point2D[int]) {
 	g.view.UpdateItemInfo(dto.ConvertPositionalItemToDto(g.level.GetItemAtPosition(pos)))
+}
+
+// getEnemyDisplayName возвращает читаемое имя типа врага для отображения в UI.
+func (g *Game) getEnemyDisplayName(enemy primitives.Positional2D[int]) string {
+	switch enemy.(type) {
+	case *entities.Zombie:
+		return "Zombie"
+	case *entities.Vampire:
+		return "Vampire"
+	case *entities.Ghost:
+		return "Ghost"
+	case *entities.Ogre:
+		return "Ogre"
+	case *entities.SnakeMage:
+		return "Snake Mage"
+	default:
+		return "Unknown"
+	}
 }
 
 func (g *Game) updateBackpackInfo() {
