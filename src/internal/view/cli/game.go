@@ -123,6 +123,10 @@ type Game struct {
 	currentItemInfo  *dto.ItemInfo
 	playerIsOnPortal bool
 
+	// Информация об атаках за последний ход
+	playerAttackInfo *dto.AttackInfo
+	enemyAttackInfos []*dto.AttackInfo
+
 	// Состояние рюкзака
 	SecondInfoViewMode SecondInfoViewMode
 	currentTab         BackpackTab
@@ -303,6 +307,10 @@ func (g *Game) updateStatsPanel(info *dto.PlayerInfo) {
 }
 
 func (g *Game) updateInteractionInfo() {
+	if g.playerAttackInfo != nil || len(g.enemyAttackInfos) > 0 {
+		g.renderAttackInfo()
+	}
+
 	if g.currentItemInfo != nil {
 		g.renderItemInfo()
 	}
@@ -333,6 +341,19 @@ func (g *Game) SetInfoErrorMessage(msg string) {
 
 func (g *Game) ClearInfoMessages() {
 	g.infoErrorMessage = ""
+}
+
+func (g *Game) SetPlayerAttackInfo(info *dto.AttackInfo) {
+	g.playerAttackInfo = info
+}
+
+func (g *Game) SetEnemyAttackInfos(infos []*dto.AttackInfo) {
+	g.enemyAttackInfos = infos
+}
+
+func (g *Game) ClearAttackInfos() {
+	g.playerAttackInfo = nil
+	g.enemyAttackInfos = nil
 }
 
 func printInteractPortalInfo(view *tview.TextView) {
@@ -382,6 +403,47 @@ func printEffect(view *tview.TextView, effect *dto.EffectInfo) {
 	}
 	if effect.AgilityModify != 0 {
 		fmt.Fprintf(view, "  AGI: %+8.1f\n", effect.AgilityModify)
+	}
+}
+
+func (g *Game) renderAttackInfo() {
+	fmt.Fprintln(g.statsPanel)
+	fmt.Fprintln(g.statsPanel, "───────────────────────────────────")
+	fmt.Fprintf(g.statsPanel, " [%s::b]COMBAT LOG:[-:-:-]\n", colorSkyBlue)
+
+	// Атака игрока на врага
+	if g.playerAttackInfo != nil {
+		g.renderSingleAttack(g.playerAttackInfo)
+	}
+
+	// Атаки врагов на игрока
+	for _, info := range g.enemyAttackInfos {
+		g.renderSingleAttack(info)
+	}
+}
+
+func (g *Game) renderSingleAttack(info *dto.AttackInfo) {
+	if info.Evaded {
+		fmt.Fprintf(g.statsPanel, " [%s]%s[-] → [%s]%s[-]: [%s]MISS[-]\n",
+			colorGold, info.AttackerName,
+			colorTomato, info.DefenderName,
+			colorSkyBlue)
+	} else if info.DefenderKilled {
+		fmt.Fprintf(g.statsPanel, " [%s]%s[-] → [%s]%s[-]: [%s]%.0f dmg[-] [%s]KILLED![-]\n",
+			colorGold, info.AttackerName,
+			colorTomato, info.DefenderName,
+			colorOrange, info.Damage,
+			colorRed)
+		if info.LootValue > 0 {
+			fmt.Fprintf(g.statsPanel, "   [%s]+ %s (%d)[-]\n",
+				ColorTreasures, info.LootName, info.LootValue)
+		}
+	} else {
+		fmt.Fprintf(g.statsPanel, " [%s]%s[-] → [%s]%s[-]: [%s]%.0f dmg[-] (HP: %.0f/%.0f)\n",
+			colorGold, info.AttackerName,
+			colorTomato, info.DefenderName,
+			colorOrange, info.Damage,
+			info.DefenderHealthAfter, info.DefenderMaxHealth)
 	}
 }
 
