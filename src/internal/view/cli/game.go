@@ -276,7 +276,6 @@ func (g *Game) ResetInteraction() {
 	g.UpdateItemInfo(nil)
 	g.SetPlayerIsOnPortal(false)
 	g.ClearInfoMessages()
-	g.ClearAttackInfos()
 }
 
 func (g *Game) SetPlayerIsOnPortal(val bool) {
