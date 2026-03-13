@@ -94,10 +94,10 @@ func NewZombie(box *primitives.Box) *Zombie {
 			Character: &Character{
 				Box: box,
 				Attributes: &primitives.Attributes{
-					Agility:   2,
-					Strength:  6,
-					Health:    30,
-					MaxHealth: 30,
+					Agility:   3,
+					Strength:  8,
+					Health:    35,
+					MaxHealth: 35,
 				},
 			},
 			HostilityRadius: HostilityRadiusLow,
@@ -114,10 +114,10 @@ func NewVampire(box *primitives.Box) *Vampire {
 			Character: &Character{
 				Box: box,
 				Attributes: &primitives.Attributes{
-					Agility:   12,
-					Strength:  8,
-					Health:    25,
-					MaxHealth: 25,
+					Agility:   14,
+					Strength:  10,
+					Health:    30,
+					MaxHealth: 30,
 				},
 			},
 			HostilityRadius: HostilityRadiusAverage,
@@ -135,10 +135,10 @@ func NewGhost(box *primitives.Box) *Ghost {
 			Character: &Character{
 				Box: box,
 				Attributes: &primitives.Attributes{
-					Agility:   8,
-					Strength:  4,
-					Health:    12,
-					MaxHealth: 12,
+					Agility:   10,
+					Strength:  6,
+					Health:    15,
+					MaxHealth: 15,
 				},
 			},
 			HostilityRadius: HostilityRadiusLow,
@@ -156,10 +156,10 @@ func NewOgre(box *primitives.Box) *Ogre {
 			Character: &Character{
 				Box: box,
 				Attributes: &primitives.Attributes{
-					Agility:   1,
-					Strength:  15,
-					Health:    50,
-					MaxHealth: 50,
+					Agility:   2,
+					Strength:  18,
+					Health:    60,
+					MaxHealth: 60,
 				},
 			},
 			HostilityRadius: HostilityRadiusLow,
@@ -177,10 +177,10 @@ func NewSnakeMage(box *primitives.Box) *SnakeMage {
 			Character: &Character{
 				Box: box,
 				Attributes: &primitives.Attributes{
-					Agility:   10,
-					Strength:  12,
-					Health:    18,
-					MaxHealth: 18,
+					Agility:   12,
+					Strength:  14,
+					Health:    22,
+					MaxHealth: 22,
 				},
 			},
 			HostilityRadius: HostilityRadiusAverage,
