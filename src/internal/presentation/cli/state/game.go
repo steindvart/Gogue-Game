@@ -209,10 +209,11 @@ func (g *Game) handleMoveAction(a action.Type) {
 	if enemy := g.level.GetEnemyAtPosition(g.level.Player.GetPosition()); enemy != nil {
 		attackResult := g.level.Attack(g.level.Player, enemy)
 
+		var playerAttackInfo *dto.AttackInfo
 		if attackResult != nil {
 			attackResult.AttackerName = "Player"
 			attackResult.DefenderName = g.getEnemyDisplayName(enemy)
-			g.view.SetPlayerAttackInfo(dto.ConvertAttackResultToDto(attackResult))
+			playerAttackInfo = dto.ConvertAttackResultToDto(attackResult)
 		}
 
 		if provider, ok := enemy.(entities.CharacterProvider); ok {
@@ -222,11 +223,17 @@ func (g *Game) handleMoveAction(a action.Type) {
 				if err != nil {
 					panic(err)
 				}
+				if playerAttackInfo != nil {
+					playerAttackInfo.LootName = item.Name
+					playerAttackInfo.LootValue = item.Value
+				}
 				g.level.Player.AddTreasure(item)
 				g.level.RemoveEnemy(enemy)
 			}
 			g.level.Player.SetPosition(oldPos)
 		}
+
+		g.view.SetPlayerAttackInfo(playerAttackInfo)
 		return
 	}
 }

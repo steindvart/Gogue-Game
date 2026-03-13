@@ -11,6 +11,10 @@ type AttackInfo struct {
 	DefenderHealthAfter float64
 	DefenderMaxHealth   float64
 	DefenderKilled      bool
+
+	// Loot — информация о добыче при убийстве врага (опционально).
+	LootName  string
+	LootValue int32
 }
 
 func ConvertAttackResultToDto(result *entities.AttackResult) *AttackInfo {

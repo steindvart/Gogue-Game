@@ -434,6 +434,10 @@ func (g *Game) renderSingleAttack(info *dto.AttackInfo) {
 			colorTomato, info.DefenderName,
 			colorOrange, info.Damage,
 			colorRed)
+		if info.LootValue > 0 {
+			fmt.Fprintf(g.statsPanel, "   [%s]+ %s (%d)[-]\n",
+				ColorTreasures, info.LootName, info.LootValue)
+		}
 	} else {
 		fmt.Fprintf(g.statsPanel, " [%s]%s[-] → [%s]%s[-]: [%s]%.0f dmg[-] (HP: %.0f/%.0f)\n",
 			colorGold, info.AttackerName,
