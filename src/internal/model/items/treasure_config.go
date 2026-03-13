@@ -87,8 +87,6 @@ func getRandomTreasureType(rnd utils.Randomizer, goldPercent, gemPercent, artifa
 		goldPercent = uint(gold64)
 		gemPercent = uint(gem64)
 		artifactPercent = uint(artifact64)
-		// mystery забирает остаток, чтобы сумма была ровно 100
-		mysteryPercent = 100 - goldPercent - gemPercent - artifactPercent
 	}
 
 	percent := rnd.Intn(100)
