@@ -27,11 +27,6 @@ func makeTestRoom(x, y int, w, h uint) Room {
 	return *room
 }
 
-// makeFieldFromTypes создаёт двумерное поле из заданного среза типов.
-func makeFieldFromTypes(rows [][]common.GameEntityType) [][]common.GameEntityType {
-	return rows
-}
-
 // buildSimpleField создаёт простое поле: комната 7x7 с полом и стенами.
 //
 //	#######
@@ -57,6 +52,38 @@ func buildSimpleField() [][]common.GameEntityType {
 	return field
 }
 
+// --- Тесты патрулирования (Zombie/Vampire/Ogre) ---
+
+func TestEnemyIdleMover_ZombiePatrolKeepsDirection(t *testing.T) {
+	rng := utils.NewRandomWithSeed(42)
+	mover := NewEnemyIdleMover(rng)
+
+	zombie := entities.NewZombie(makeBox(3, 3))
+	field := buildSimpleField()
+	enemies := []primitives.Positional2D[int]{zombie}
+	rooms := []Room{makeTestRoom(0, 0, 7, 7)}
+
+	// Первый MoveIdle назначает направление и StepsRemaining
+	mover.MoveIdle(zombie, field, rooms, enemies)
+	dirAfterFirst := zombie.Direction
+	stepsAfterFirst := zombie.StepsRemaining
+
+	if stepsAfterFirst < minPatrolSteps-1 || stepsAfterFirst > maxPatrolSteps-1 {
+		// Один шаг уже декрементирован, поэтому диапазон [min-1, max-1]
+		t.Errorf("StepsRemaining after first move = %d, expected in [%d, %d]",
+			stepsAfterFirst, minPatrolSteps-1, maxPatrolSteps-1)
+	}
+
+	// Ставим обратно в центр, делаем ещё один шаг - направление должно сохраниться
+	zombie.SetPosition(primitives.Point2D[int]{X: 3, Y: 3})
+	mover.MoveIdle(zombie, field, rooms, enemies)
+
+	if zombie.Direction != dirAfterFirst {
+		t.Errorf("Zombie should keep direction during patrol: first=%d, second=%d",
+			dirAfterFirst, zombie.Direction)
+	}
+}
+
 func TestEnemyIdleMover_ZombieMovesCardinal(t *testing.T) {
 	rng := utils.NewRandomWithSeed(42)
 	mover := NewEnemyIdleMover(rng)
@@ -78,7 +105,6 @@ func TestEnemyIdleMover_ZombieMovesCardinal(t *testing.T) {
 		t.Fatal("Zombie should have moved to a new position")
 	}
 
-	// Проверяем, что движение было кардинальным (N/S/W/E, не диагональ)
 	dx := newPos.X - startPos.X
 	dy := newPos.Y - startPos.Y
 
@@ -88,7 +114,7 @@ func TestEnemyIdleMover_ZombieMovesCardinal(t *testing.T) {
 	}
 }
 
-func TestEnemyIdleMover_VampireMovesCardinal(t *testing.T) {
+func TestEnemyIdleMover_VampirePatrolKeepsDirection(t *testing.T) {
 	rng := utils.NewRandomWithSeed(42)
 	mover := NewEnemyIdleMover(rng)
 
@@ -97,24 +123,83 @@ func TestEnemyIdleMover_VampireMovesCardinal(t *testing.T) {
 	enemies := []primitives.Positional2D[int]{vampire}
 	rooms := []Room{makeTestRoom(0, 0, 7, 7)}
 
-	startPos := vampire.GetPosition()
-	moved := mover.MoveIdle(vampire, field, rooms, enemies)
+	mover.MoveIdle(vampire, field, rooms, enemies)
+	dirFirst := vampire.Direction
 
-	if !moved {
-		t.Fatal("Vampire should be able to move in open room")
-	}
+	vampire.SetPosition(primitives.Point2D[int]{X: 3, Y: 3})
+	mover.MoveIdle(vampire, field, rooms, enemies)
 
-	newPos := vampire.GetPosition()
-	dx := newPos.X - startPos.X
-	dy := newPos.Y - startPos.Y
-
-	isCardinal := (dx == 0 && (dy == 1 || dy == -1)) || (dy == 0 && (dx == 1 || dx == -1))
-	if !isCardinal {
-		t.Errorf("Vampire moved non-cardinally: from %+v to %+v", startPos, newPos)
+	if vampire.Direction != dirFirst {
+		t.Errorf("Vampire should keep direction during patrol: first=%d, second=%d",
+			dirFirst, vampire.Direction)
 	}
 }
 
-func TestEnemyIdleMover_OgreMovesUpToTwoSteps(t *testing.T) {
+func TestEnemyIdleMover_PatrolChangesDirectionAfterStepsExpire(t *testing.T) {
+	rng := utils.NewRandomWithSeed(42)
+	mover := NewEnemyIdleMover(rng)
+
+	zombie := entities.NewZombie(makeBox(3, 3))
+	field := buildSimpleField()
+	enemies := []primitives.Positional2D[int]{zombie}
+	rooms := []Room{makeTestRoom(0, 0, 7, 7)}
+
+	// Первый вызов - назначает направление
+	mover.MoveIdle(zombie, field, rooms, enemies)
+	firstDir := zombie.Direction
+
+	// Искусственно обнуляем шаги - следующий вызов должен выбрать новое направление
+	zombie.StepsRemaining = 0
+	zombie.SetPosition(primitives.Point2D[int]{X: 3, Y: 3})
+
+	// Делаем достаточно попыток чтобы хотя бы раз направление сменилось
+	dirChanged := false
+	for i := 0; i < 20; i++ {
+		zombie.StepsRemaining = 0
+		zombie.SetPosition(primitives.Point2D[int]{X: 3, Y: 3})
+		mover.MoveIdle(zombie, field, rooms, enemies)
+		if zombie.Direction != firstDir {
+			dirChanged = true
+			break
+		}
+	}
+
+	if !dirChanged {
+		t.Error("Zombie should eventually change direction after steps expire")
+	}
+}
+
+func TestEnemyIdleMover_PatrolStandsWhenBlocked(t *testing.T) {
+	rng := utils.NewRandomWithSeed(0)
+	mover := NewEnemyIdleMover(rng)
+
+	zombie := entities.NewZombie(makeBox(1, 1))
+	field := buildSimpleField()
+	enemies := []primitives.Positional2D[int]{zombie}
+	rooms := []Room{makeTestRoom(0, 0, 7, 7)}
+
+	// Принудительно ставим направление «на север» - (1,1) уже у стены
+	zombie.Direction = entities.DirectionForward // North -> (1, 0) = wall
+	zombie.StepsRemaining = 3
+
+	startPos := zombie.GetPosition()
+	moved := mover.MoveIdle(zombie, field, rooms, enemies)
+
+	if moved {
+		t.Error("Zombie facing a wall should not move")
+	}
+
+	if zombie.GetPosition() != startPos {
+		t.Errorf("Zombie should stay at %+v, got %+v", startPos, zombie.GetPosition())
+	}
+
+	// StepsRemaining должен был декрементироваться, даже стоя на месте
+	if zombie.StepsRemaining != 2 {
+		t.Errorf("StepsRemaining should be 2, got %d", zombie.StepsRemaining)
+	}
+}
+
+func TestEnemyIdleMover_OgreMovesUpToTwoStepsPerMove(t *testing.T) {
 	rng := utils.NewRandomWithSeed(42)
 	mover := NewEnemyIdleMover(rng)
 
@@ -134,18 +219,39 @@ func TestEnemyIdleMover_OgreMovesUpToTwoSteps(t *testing.T) {
 	dx := newPos.X - startPos.X
 	dy := newPos.Y - startPos.Y
 
-	// Огр должен сделать ровно 2 шага (если есть место) или 1 шаг
 	manhattanDist := abs(dx) + abs(dy)
 	if manhattanDist != 2 && manhattanDist != 1 {
 		t.Errorf("Ogre moved %d steps, expected 1 or 2: from %+v to %+v", manhattanDist, startPos, newPos)
 	}
 
-	// Движение должно быть по одной оси (кардинальное)
 	isCardinal := (dx == 0 || dy == 0)
 	if !isCardinal {
 		t.Errorf("Ogre moved diagonally: from %+v to %+v", startPos, newPos)
 	}
 }
+
+func TestEnemyIdleMover_OgrePatrolKeepsDirection(t *testing.T) {
+	rng := utils.NewRandomWithSeed(42)
+	mover := NewEnemyIdleMover(rng)
+
+	ogre := entities.NewOgre(makeBox(3, 3))
+	field := buildSimpleField()
+	enemies := []primitives.Positional2D[int]{ogre}
+	rooms := []Room{makeTestRoom(0, 0, 7, 7)}
+
+	mover.MoveIdle(ogre, field, rooms, enemies)
+	dirFirst := ogre.Direction
+
+	ogre.SetPosition(primitives.Point2D[int]{X: 3, Y: 3})
+	mover.MoveIdle(ogre, field, rooms, enemies)
+
+	if ogre.Direction != dirFirst {
+		t.Errorf("Ogre should keep direction during patrol: first=%d, second=%d",
+			dirFirst, ogre.Direction)
+	}
+}
+
+// --- Тесты Ghost ---
 
 func TestEnemyIdleMover_GhostTeleportsInRoom(t *testing.T) {
 	rng := utils.NewRandomWithSeed(42)
@@ -158,7 +264,6 @@ func TestEnemyIdleMover_GhostTeleportsInRoom(t *testing.T) {
 
 	startPos := ghost.GetPosition()
 
-	// Ghost может телепортироваться куда угодно в комнате — проверяем за несколько итераций
 	movedFar := false
 	for i := 0; i < 20; i++ {
 		ghost.SetPosition(startPos)
@@ -168,7 +273,6 @@ func TestEnemyIdleMover_GhostTeleportsInRoom(t *testing.T) {
 		dx := abs(newPos.X - startPos.X)
 		dy := abs(newPos.Y - startPos.Y)
 
-		// Телепортация — может переместиться более чем на 1 клетку
 		if dx > 1 || dy > 1 {
 			movedFar = true
 			break
@@ -192,7 +296,6 @@ func TestEnemyIdleMover_GhostTogglesVisibility(t *testing.T) {
 	initialVisibility := ghost.IsVisible
 	changedVisibility := false
 
-	// За 50 итераций невидимость должна хотя бы раз переключиться (~30% шанс)
 	for i := 0; i < 50; i++ {
 		ghost.SetPosition(primitives.Point2D[int]{X: 3, Y: 3})
 		mover.MoveIdle(ghost, field, rooms, enemies)
@@ -207,6 +310,8 @@ func TestEnemyIdleMover_GhostTogglesVisibility(t *testing.T) {
 		t.Error("Ghost visibility should toggle at some point during idle movement")
 	}
 }
+
+// --- Тесты SnakeMage ---
 
 func TestEnemyIdleMover_SnakeMageMovesDiagonally(t *testing.T) {
 	rng := utils.NewRandomWithSeed(42)
@@ -228,41 +333,96 @@ func TestEnemyIdleMover_SnakeMageMovesDiagonally(t *testing.T) {
 	dx := abs(newPos.X - startPos.X)
 	dy := abs(newPos.Y - startPos.Y)
 
-	// Движение по диагонали: |dx| == 1 && |dy| == 1
 	if dx != 1 || dy != 1 {
 		t.Errorf("SnakeMage should move diagonally: dx=%d, dy=%d (from %+v to %+v)", dx, dy, startPos, newPos)
 	}
 }
 
-func TestEnemyIdleMover_SnakeMageChangesDirection(t *testing.T) {
+func TestEnemyIdleMover_SnakeMageKeepsDirectionUntilBlocked(t *testing.T) {
 	rng := utils.NewRandomWithSeed(42)
 	mover := NewEnemyIdleMover(rng)
 
+	// Начальная позиция (3,3), комната 7x7 (пол 1..5)
 	snake := entities.NewSnakeMage(makeBox(3, 3))
+	snake.Direction = entities.DirectionDiagonallyForwardRight // NE: dx=+1, dy=-1
 	field := buildSimpleField()
 	enemies := []primitives.Positional2D[int]{snake}
 	rooms := []Room{makeTestRoom(0, 0, 7, 7)}
 
-	// Первый ход
-	mover.MoveIdle(snake, field, rooms, enemies)
-	dirAfterFirst := snake.Direction
+	// Первый ход: (3,3) -> NE -> (4,2) - свободно, направление НЕ должно измениться
+	moved := mover.MoveIdle(snake, field, rooms, enemies)
+	if !moved {
+		t.Fatal("SnakeMage should move NE from (3,3)")
+	}
+	if snake.GetPosition().X != 4 || snake.GetPosition().Y != 2 {
+		t.Fatalf("Expected (4,2), got %+v", snake.GetPosition())
+	}
+	if snake.Direction != entities.DirectionDiagonallyForwardRight {
+		t.Errorf("SnakeMage should keep NE direction while path is clear, got %d", snake.Direction)
+	}
 
-	// Второй ход (возвращаем на центр)
-	snake.SetPosition(primitives.Point2D[int]{X: 3, Y: 3})
-	mover.MoveIdle(snake, field, rooms, enemies)
-	dirAfterSecond := snake.Direction
+	// Второй ход: (4,2) -> NE -> (5,1) - свободно
+	moved = mover.MoveIdle(snake, field, rooms, enemies)
+	if !moved {
+		t.Fatal("SnakeMage should move NE from (4,2)")
+	}
+	if snake.GetPosition().X != 5 || snake.GetPosition().Y != 1 {
+		t.Fatalf("Expected (5,1), got %+v", snake.GetPosition())
+	}
+	if snake.Direction != entities.DirectionDiagonallyForwardRight {
+		t.Errorf("SnakeMage should keep NE direction, got %d", snake.Direction)
+	}
 
-	// Направление должно меняться после каждого хода
-	if dirAfterFirst == dirAfterSecond {
-		t.Errorf("SnakeMage direction should change: first=%d, second=%d", dirAfterFirst, dirAfterSecond)
+	// Третий ход: (5,1) -> NE -> (6,0) = стена - должен сменить направление на случайную диагональ
+	moved = mover.MoveIdle(snake, field, rooms, enemies)
+	if !moved {
+		t.Fatal("SnakeMage should find an alternative diagonal from (5,1)")
+	}
+
+	// Направление должно измениться (теперь не NE, потому что NE заблокирован)
+	// Точное направление зависит от RNG, но оно должно быть одним из диагональных
+	newDir := snake.Direction
+	isDiagonal := newDir == entities.DirectionDiagonallyForwardRight ||
+		newDir == entities.DirectionDiagonallyBackRight ||
+		newDir == entities.DirectionDiagonallyBackLeft ||
+		newDir == entities.DirectionDiagonallyForwardLeft
+	if !isDiagonal {
+		t.Errorf("SnakeMage should have a diagonal direction after bounce, got %d", newDir)
 	}
 }
+
+func TestEnemyIdleMover_SnakeMageRandomDirectionOnBlock(t *testing.T) {
+	// Проверяем, что при блокировке SnakeMage не всегда выбирает одно и то же
+	// направление (т.е. выбор случайный, а не циклический)
+	field := buildSimpleField()
+	rooms := []Room{makeTestRoom(0, 0, 7, 7)}
+
+	directionsSeen := make(map[entities.Direction]bool)
+
+	for seed := int64(0); seed < 50; seed++ {
+		rng := utils.NewRandomWithSeed(seed)
+		mover := NewEnemyIdleMover(rng)
+
+		snake := entities.NewSnakeMage(makeBox(5, 1))
+		snake.Direction = entities.DirectionDiagonallyForwardRight // NE: (6,0) = wall
+		enemies := []primitives.Positional2D[int]{snake}
+
+		mover.MoveIdle(snake, field, rooms, enemies)
+		directionsSeen[snake.Direction] = true
+	}
+
+	// Должно быть несколько различных направлений (не один фиксированный цикл)
+	if len(directionsSeen) < 2 {
+		t.Errorf("SnakeMage should choose random directions on block, saw only %d unique", len(directionsSeen))
+	}
+}
+
+// --- Общие тесты ---
 
 func TestEnemyIdleMover_EnemyDoesNotMoveIntoWall(t *testing.T) {
 	rng := utils.NewRandomWithSeed(42)
 	mover := NewEnemyIdleMover(rng)
 
-	// Зомби зажат в углу — может двигаться только вправо или вниз
 	zombie := entities.NewZombie(makeBox(1, 1))
 	field := buildSimpleField()
 	enemies := []primitives.Positional2D[int]{zombie}
@@ -270,10 +430,10 @@ func TestEnemyIdleMover_EnemyDoesNotMoveIntoWall(t *testing.T) {
 
 	for i := 0; i < 50; i++ {
 		zombie.SetPosition(primitives.Point2D[int]{X: 1, Y: 1})
+		zombie.StepsRemaining = 0 // сбрасываем, чтобы каждый раз перевыбирало
 		mover.MoveIdle(zombie, field, rooms, enemies)
 
 		pos := zombie.GetPosition()
-		// Не должен оказаться на стене
 		if field[pos.Y][pos.X] == common.WorldTypeWall {
 			t.Fatalf("Zombie moved into a wall at %+v", pos)
 		}
@@ -287,7 +447,6 @@ func TestEnemyIdleMover_EnemyDoesNotMoveIntoOtherEnemy(t *testing.T) {
 	zombie1 := entities.NewZombie(makeBox(2, 3))
 	zombie2 := entities.NewZombie(makeBox(3, 3))
 
-	// Создаем маленькое поле: zombie1 зажат, zombie2 рядом
 	field := buildSimpleField()
 	enemies := []primitives.Positional2D[int]{zombie1, zombie2}
 	rooms := []Room{makeTestRoom(0, 0, 7, 7)}
@@ -295,10 +454,10 @@ func TestEnemyIdleMover_EnemyDoesNotMoveIntoOtherEnemy(t *testing.T) {
 	for i := 0; i < 50; i++ {
 		zombie1.SetPosition(primitives.Point2D[int]{X: 2, Y: 3})
 		zombie2.SetPosition(primitives.Point2D[int]{X: 3, Y: 3})
+		zombie1.StepsRemaining = 0
 
 		mover.MoveIdle(zombie1, field, rooms, enemies)
 
-		// zombie1 не должен оказаться на позиции zombie2
 		if zombie1.GetPosition() == zombie2.GetPosition() {
 			t.Fatalf("Zombie1 moved into Zombie2's position at %+v", zombie1.GetPosition())
 		}
@@ -309,7 +468,6 @@ func TestEnemyIdleMover_NoMovementWhenBlocked(t *testing.T) {
 	rng := utils.NewRandomWithSeed(42)
 	mover := NewEnemyIdleMover(rng)
 
-	// Создаём крохотную комнату 3x3 (внутри 1 клетка пола)
 	field := [][]common.GameEntityType{
 		{common.WorldTypeWall, common.WorldTypeWall, common.WorldTypeWall},
 		{common.WorldTypeWall, common.WorldTypeRoomFloor, common.WorldTypeWall},
@@ -326,21 +484,24 @@ func TestEnemyIdleMover_NoMovementWhenBlocked(t *testing.T) {
 	}
 }
 
-func TestNextSnakeMageDirection_CyclesCorrectly(t *testing.T) {
+// --- Тесты вспомогательных функций ---
+
+func TestCardinalDirectionToOffset(t *testing.T) {
 	tests := []struct {
-		input entities.Direction
-		want  entities.Direction
+		dir  entities.Direction
+		want primitives.Point2D[int]
 	}{
-		{entities.DirectionDiagonallyForwardRight, entities.DirectionDiagonallyBackRight},   // NE → SE
-		{entities.DirectionDiagonallyBackRight, entities.DirectionDiagonallyBackLeft},       // SE → SW
-		{entities.DirectionDiagonallyBackLeft, entities.DirectionDiagonallyForwardLeft},     // SW → NW
-		{entities.DirectionDiagonallyForwardLeft, entities.DirectionDiagonallyForwardRight}, // NW → NE
+		{entities.DirectionForward, primitives.Point2D[int]{X: 0, Y: -1}},
+		{entities.DirectionBack, primitives.Point2D[int]{X: 0, Y: 1}},
+		{entities.DirectionLeft, primitives.Point2D[int]{X: -1, Y: 0}},
+		{entities.DirectionRight, primitives.Point2D[int]{X: 1, Y: 0}},
+		{entities.DirectionStop, primitives.Point2D[int]{X: 0, Y: 0}},
 	}
 
 	for _, tt := range tests {
-		got := nextSnakeMageDirection(tt.input)
+		got := cardinalDirectionToOffset(tt.dir)
 		if got != tt.want {
-			t.Errorf("nextSnakeMageDirection(%d) = %d, want %d", tt.input, got, tt.want)
+			t.Errorf("cardinalDirectionToOffset(%d) = %+v, want %+v", tt.dir, got, tt.want)
 		}
 	}
 }
@@ -357,7 +518,7 @@ func TestSnakeMageDirectionToOffset_Roundtrip(t *testing.T) {
 		offset := snakeMageDirectionToOffset(dir)
 		restored := offsetToSnakeMageDirection(offset)
 		if restored != dir {
-			t.Errorf("Roundtrip failed: dir=%d → offset=%+v → dir=%d", dir, offset, restored)
+			t.Errorf("Roundtrip failed: dir=%d -> offset=%+v -> dir=%d", dir, offset, restored)
 		}
 	}
 }

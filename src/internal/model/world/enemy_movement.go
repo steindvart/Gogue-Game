@@ -23,6 +23,13 @@ var diagonalDirections = []primitives.Point2D[int]{
 	{X: -1, Y: -1}, // NW
 }
 
+const (
+	// minPatrolSteps / maxPatrolSteps - диапазон шагов патрулирования
+	// для Zombie, Vampire, Ogre.
+	minPatrolSteps = 2
+	maxPatrolSteps = 4
+)
+
 // EnemyIdleMover обрабатывает "бродячее" поведение врагов,
 // когда они не преследуют игрока. Каждый тип врага имеет свой паттерн.
 type EnemyIdleMover struct {
@@ -37,12 +44,11 @@ func NewEnemyIdleMover(random utils.Randomizer) *EnemyIdleMover {
 // Возвращает true, если враг был перемещён.
 //
 // Dispatch по конкретному типу:
-//   - Zombie: случайный шаг на 1 клетку (N/S/W/E)
-//   - Vampire: случайный шаг на 1 клетку (N/S/W/E)
-//   - Ghost: телепортация в случайную свободную клетку комнаты
-//   - переключение невидимости
-//   - Ogre: случайный шаг на 2 клетки (N/S/W/E)
-//   - SnakeMage: движение по диагонали с постоянной сменой стороны
+//   - Zombie/Vampire: патрулирование - выбирают направление на 2-4 шага,
+//     идут по нему, при преграде стоят пока шаги не закончатся
+//   - Ghost: телепортация в случайную свободную клетку комнаты + переключение невидимости
+//   - Ogre: патрулирование на 2 клетки за ход (2-4 хода в одном направлении)
+//   - SnakeMage: движение по диагонали до упора, при блокировке - случайная новая диагональ
 func (m *EnemyIdleMover) MoveIdle(
 	positionalEnemy primitives.Positional2D[int],
 	fullField [][]common.GameEntityType,
@@ -51,13 +57,13 @@ func (m *EnemyIdleMover) MoveIdle(
 ) bool {
 	switch enemy := positionalEnemy.(type) {
 	case *entities.Zombie:
-		return m.moveRandomCardinal(enemy.Enemy, fullField, otherEnemies, 1)
+		return m.movePatrol(enemy.Enemy, fullField, otherEnemies, 1)
 	case *entities.Vampire:
-		return m.moveRandomCardinal(enemy.Enemy, fullField, otherEnemies, 1)
+		return m.movePatrol(enemy.Enemy, fullField, otherEnemies, 1)
 	case *entities.Ghost:
 		return m.moveGhost(enemy, fullField, rooms, otherEnemies)
 	case *entities.Ogre:
-		return m.moveOgre(enemy, fullField, otherEnemies)
+		return m.movePatrol(enemy.Enemy, fullField, otherEnemies, 2)
 	case *entities.SnakeMage:
 		return m.moveSnakeMage(enemy, fullField, otherEnemies)
 	default:
@@ -65,25 +71,82 @@ func (m *EnemyIdleMover) MoveIdle(
 	}
 }
 
-// moveRandomCardinal перемещает врага на случайную проходимую клетку
-// из 4 кардинальных направлений. steps — количество клеток за один ход.
-func (m *EnemyIdleMover) moveRandomCardinal(
+// movePatrol реализует поведение патрулирования:
+//  1. Если StepsRemaining > 0 - пытаемся сделать шаг в текущем Direction.
+//     Если путь заблокирован - стоим, но декрементируем StepsRemaining.
+//  2. Если StepsRemaining == 0 - выбираем новое случайное кардинальное направление
+//     и назначаем StepsRemaining = [minPatrolSteps..maxPatrolSteps].
+//
+// stepsPerMove - сколько клеток враг проходит за один ход (1 для Zombie/Vampire, 2 для Ogre).
+func (m *EnemyIdleMover) movePatrol(
 	enemy *entities.Enemy,
 	field [][]common.GameEntityType,
 	otherEnemies []primitives.Positional2D[int],
-	steps int,
+	stepsPerMove int,
 ) bool {
+	// Если шаги закончились - выбираем новое направление
+	if enemy.StepsRemaining <= 0 {
+		m.assignRandomCardinalDirection(enemy)
+	}
+
+	enemy.StepsRemaining--
+
+	offset := cardinalDirectionToOffset(enemy.Direction)
+	if offset.X == 0 && offset.Y == 0 {
+		// Direction не кардинальный (DirectionStop или диагональ) - перевыбираем
+		m.assignRandomCardinalDirection(enemy)
+		offset = cardinalDirectionToOffset(enemy.Direction)
+	}
+
 	pos := enemy.GetPosition()
 
-	// Собираем все доступные конечные позиции
-	candidates := m.getWalkableCandidates(pos, cardinalDirections, steps, field, otherEnemies, enemy)
-	if len(candidates) == 0 {
+	// Пытаемся сделать stepsPerMove шагов. Если на каком-то шаге преграда -
+	// двигаемся на максимально доступное расстояние (fallback).
+	finalPos := pos
+	for s := 1; s <= stepsPerMove; s++ {
+		next := primitives.Point2D[int]{X: finalPos.X + offset.X, Y: finalPos.Y + offset.Y}
+		if !isWalkableTile(next, field) || isOccupiedByOtherEnemy(next, otherEnemies, enemy) {
+			break
+		}
+		finalPos = next
+	}
+
+	if finalPos == pos {
+		// Заблокированы - стоим на месте (шаг уже декрементирован)
 		return false
 	}
 
-	target := candidates[m.random.Intn(len(candidates))]
-	enemy.SetPosition(target)
+	enemy.SetPosition(finalPos)
 	return true
+}
+
+// assignRandomCardinalDirection выбирает случайное кардинальное направление
+// и назначает количество шагов патрулирования [minPatrolSteps..maxPatrolSteps].
+func (m *EnemyIdleMover) assignRandomCardinalDirection(enemy *entities.Enemy) {
+	dirs := []entities.Direction{
+		entities.DirectionForward, // North
+		entities.DirectionBack,    // South
+		entities.DirectionLeft,    // West
+		entities.DirectionRight,   // East
+	}
+	enemy.Direction = dirs[m.random.Intn(len(dirs))]
+	enemy.StepsRemaining = minPatrolSteps + m.random.Intn(maxPatrolSteps-minPatrolSteps+1)
+}
+
+// cardinalDirectionToOffset конвертирует кардинальный Direction в смещение по сетке.
+func cardinalDirectionToOffset(dir entities.Direction) primitives.Point2D[int] {
+	switch dir {
+	case entities.DirectionForward:
+		return primitives.Point2D[int]{X: 0, Y: -1} // North
+	case entities.DirectionBack:
+		return primitives.Point2D[int]{X: 0, Y: 1} // South
+	case entities.DirectionLeft:
+		return primitives.Point2D[int]{X: -1, Y: 0} // West
+	case entities.DirectionRight:
+		return primitives.Point2D[int]{X: 1, Y: 0} // East
+	default:
+		return primitives.Point2D[int]{X: 0, Y: 0}
+	}
 }
 
 // moveGhost телепортирует привидение в случайную свободную клетку в его комнате.
@@ -113,7 +176,7 @@ func (m *EnemyIdleMover) moveGhost(
 
 	// Если привидение не в комнате (в проходе), двигаемся как обычный враг
 	if ghostRoom == nil {
-		return m.moveRandomCardinal(ghost.Enemy, field, otherEnemies, 1)
+		return m.movePatrol(ghost.Enemy, field, otherEnemies, 1)
 	}
 
 	// Собираем все свободные клетки внутри комнаты
@@ -127,43 +190,25 @@ func (m *EnemyIdleMover) moveGhost(
 	return true
 }
 
-// moveOgre перемещает огра на 2 клетки в случайном кардинальном направлении.
-// Если 2 шага недоступны — пытается сделать 1 шаг.
-func (m *EnemyIdleMover) moveOgre(
-	ogre *entities.Ogre,
-	field [][]common.GameEntityType,
-	otherEnemies []primitives.Positional2D[int],
-) bool {
-	// Сначала пробуем 2 шага
-	if m.moveRandomCardinal(ogre.Enemy, field, otherEnemies, 2) {
-		return true
-	}
-	// Фолбэк: 1 шаг
-	return m.moveRandomCardinal(ogre.Enemy, field, otherEnemies, 1)
-}
-
 // moveSnakeMage перемещает Змея-мага по диагонали.
-// Использует Direction врага для запоминания текущего диагонального направления.
-// При каждом ходе пытается двигаться в текущем направлении;
-// если заблокирован — меняет направление на случайное доступное.
+// Двигается в текущем диагональном направлении, пока не упрётся в преграду.
+// При блокировке выбирает случайную доступную диагональ (может быть любой, включая обратную).
 func (m *EnemyIdleMover) moveSnakeMage(
 	snake *entities.SnakeMage,
 	field [][]common.GameEntityType,
 	otherEnemies []primitives.Positional2D[int],
 ) bool {
 	pos := snake.GetPosition()
-	currentDir := snakeMageDirectionToOffset(snake.Direction)
+	currentOffset := snakeMageDirectionToOffset(snake.Direction)
 
 	// Пытаемся продолжить движение в текущем направлении
-	next := primitives.Point2D[int]{X: pos.X + currentDir.X, Y: pos.Y + currentDir.Y}
+	next := primitives.Point2D[int]{X: pos.X + currentOffset.X, Y: pos.Y + currentOffset.Y}
 	if isWalkableTile(next, field) && !isOccupiedByOtherEnemy(next, otherEnemies, snake.Enemy) {
 		snake.SetPosition(next)
-		// Меняем направление для следующего хода
-		snake.Direction = nextSnakeMageDirection(snake.Direction)
 		return true
 	}
 
-	// Текущее направление заблокировано — выбираем случайное из доступных диагоналей
+	// Текущее направление заблокировано - выбираем случайную доступную диагональ
 	candidates := m.getWalkableCandidates(pos, diagonalDirections, 1, field, otherEnemies, snake.Enemy)
 	if len(candidates) == 0 {
 		return false
@@ -177,8 +222,6 @@ func (m *EnemyIdleMover) moveSnakeMage(
 		X: target.X - pos.X,
 		Y: target.Y - pos.Y,
 	})
-	// Меняем для следующего хода
-	snake.Direction = nextSnakeMageDirection(snake.Direction)
 
 	return true
 }
@@ -305,7 +348,7 @@ func isOccupiedByOtherEnemy(
 	return false
 }
 
-// --- Маппинг Direction - диагональные смещения для SnakeMage ---
+// --- Маппинг Direction -> диагональные смещения для SnakeMage ---
 
 // snakeMageDirectionToOffset конвертирует Direction врага в смещение по сетке.
 // Используем только диагональные направления для Змея-мага.
@@ -320,7 +363,7 @@ func snakeMageDirectionToOffset(dir entities.Direction) primitives.Point2D[int] 
 	case entities.DirectionDiagonallyForwardLeft:
 		return primitives.Point2D[int]{X: -1, Y: -1} // NW
 	default:
-		// По умолчанию — NE
+		// По умолчанию - NE
 		return primitives.Point2D[int]{X: 1, Y: -1}
 	}
 }
@@ -338,22 +381,5 @@ func offsetToSnakeMageDirection(offset primitives.Point2D[int]) entities.Directi
 		return entities.DirectionDiagonallyForwardLeft // NW
 	default:
 		return entities.DirectionDiagonallyForwardRight
-	}
-}
-
-// nextSnakeMageDirection меняет диагональное направление на следующее (по часовой стрелке).
-// NE -> SE -> SW -> NW -> NE ...
-func nextSnakeMageDirection(dir entities.Direction) entities.Direction {
-	switch dir {
-	case entities.DirectionDiagonallyForwardRight:
-		return entities.DirectionDiagonallyBackRight // NE -> SE
-	case entities.DirectionDiagonallyBackRight:
-		return entities.DirectionDiagonallyBackLeft // SE -> SW
-	case entities.DirectionDiagonallyBackLeft:
-		return entities.DirectionDiagonallyForwardLeft // SW -> NW
-	case entities.DirectionDiagonallyForwardLeft:
-		return entities.DirectionDiagonallyForwardRight // NW -> NE
-	default:
-		return entities.DirectionDiagonallyBackRight
 	}
 }
