@@ -22,11 +22,6 @@ const (
 	MapHeight      = 30
 	MapWidth       = 90
 	maxLevelNumber = 21
-
-	goldPercentChance     = 65
-	gemPercentChance      = 20
-	artifactPercentChance = 5
-	mysteryPercentChance  = 10
 )
 
 const (
@@ -214,7 +209,7 @@ func (g *Game) handleMoveAction(a action.Type) {
 		if provider, ok := enemy.(entities.CharacterProvider); ok {
 			character := provider.GetCharacter()
 			if !character.IsAlive() {
-				item, err := g.level.GenerateTreasure(goldPercentChance, gemPercentChance, artifactPercentChance, mysteryPercentChance)
+				item, err := g.level.GenerateTreasure()
 				if err != nil {
 					panic(err)
 				}

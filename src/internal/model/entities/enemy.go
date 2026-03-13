@@ -181,3 +181,20 @@ func NewSnakeMage(box *primitives.Box) *SnakeMage {
 func (e *Enemy) GetEnemy() *Enemy {
 	return e
 }
+
+// ScaleAttributes масштабирует атрибуты врага на указанный множитель.
+// Используется для повышения сложности на поздних уровнях подземелья.
+// multiplier = 1.0 означает базовые значения, 1.5 = +50% ко всем атрибутам.
+func (e *Enemy) ScaleAttributes(multiplier float64) {
+	if multiplier <= 0 {
+		return
+	}
+
+	attrs := e.Character.Attributes
+	attrs.Health *= multiplier
+	attrs.MaxHealth *= multiplier
+	attrs.Strength *= multiplier
+	// Agility масштабируется с половинным коэффициентом,
+	// чтобы не делать врагов неуязвимыми за счёт уклонения.
+	attrs.Agility *= 1.0 + (multiplier-1.0)*0.5
+}
