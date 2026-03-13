@@ -16,4 +16,8 @@ type AttackResult struct {
 	DefenderMaxHealth float64
 	// DefenderKilled — true, если защитник убит в результате атаки.
 	DefenderKilled bool
+	// Guaranteed — true, если атака была гарантированной (без проверки уклонения).
+	Guaranteed bool
+	// AppliedStun — true, если атака наложила оглушение на защитника.
+	AppliedStun bool
 }

@@ -98,6 +98,18 @@ func (g *Game) handleEvent(event *tcell.EventKey) *tcell.EventKey {
 		action.MoveLefLowerCorner,
 		action.MoveRightLowerCorner:
 		g.view.ClearAttackInfos()
+
+		// Если игрок оглушён — ход пропускается, но враги всё равно действуют.
+		if g.level.Player.ProcessStun() {
+			g.view.SetStunnedMessage(true)
+			enemyAttacks := g.level.ProcessTurns(1)
+			if len(enemyAttacks) > 0 {
+				g.view.SetEnemyAttackInfos(dto.ConvertAttackResultsToDto(enemyAttacks))
+			}
+			break
+		}
+		g.view.SetStunnedMessage(false)
+
 		g.handleMoveAction(g.eventToAction(event))
 		switch g.level.CheckEntityCollision(g.level.Player.GetPosition()) {
 		case world.CollisionTypeItem:

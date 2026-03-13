@@ -77,9 +77,22 @@ type Ghost struct {
 	IsVisible bool
 }
 
+// OgreCombatPhase определяет фазу боевого цикла огра.
+type OgreCombatPhase int
+
+const (
+	// OgrePhaseReady — огр готов атаковать (обычная атака).
+	OgrePhaseReady OgreCombatPhase = iota
+	// OgrePhaseResting — огр отдыхает (пропуск хода после атаки).
+	OgrePhaseResting
+	// OgrePhaseEnraged — огр разъярён (следующая атака гарантированная, без проверки evasion).
+	OgrePhaseEnraged
+)
+
 type Ogre struct {
 	*Enemy
-	IsResting bool
+	IsResting   bool // deprecated: оставлено для обратной совместимости save; используйте CombatPhase.
+	CombatPhase OgreCombatPhase
 }
 
 type SnakeMage struct {
@@ -123,7 +136,7 @@ func NewVampire(box *primitives.Box) *Vampire {
 			HostilityRadius: HostilityRadiusAverage,
 			Direction:       DirectionStop,
 		},
-		AbsoluteEvasions: 0,
+		AbsoluteEvasions: 1,
 	}
 }
 
@@ -150,6 +163,7 @@ func NewGhost(box *primitives.Box) *Ghost {
 
 // Ogre — танк. Очень много HP, сильно бьёт, но медленный и неповоротливый.
 // Роль: «мини-босс», требует подготовки (оружие/эликсиры).
+// После каждой атаки пропускает один ход (отдых), затем гарантированно контратакует.
 func NewOgre(box *primitives.Box) *Ogre {
 	return &Ogre{
 		Enemy: &Enemy{
@@ -162,10 +176,11 @@ func NewOgre(box *primitives.Box) *Ogre {
 					MaxHealth: 60,
 				},
 			},
-			HostilityRadius: HostilityRadiusLow,
+			HostilityRadius: HostilityRadiusAverage,
 			Direction:       DirectionStop,
 		},
-		IsResting: false,
+		IsResting:   false,
+		CombatPhase: OgrePhaseReady,
 	}
 }
 

@@ -197,10 +197,10 @@ func (l *Level) processEnemyTurns() []entities.AttackResult {
 
 		// Если следующий шаг - позиция игрока: атакуем, но не двигаемся
 		if nextStep == playerPos {
-			result := enemy.Character.Attack(l.Player.Character, l.random)
-			result.AttackerName = enemyTypeName(positionalEnemy)
-			result.DefenderName = "Player"
-			attackResults = append(attackResults, result)
+			attackResult := l.processEnemyAttack(positionalEnemy, enemy)
+			if attackResult != nil {
+				attackResults = append(attackResults, *attackResult)
+			}
 			continue
 		}
 
@@ -214,6 +214,77 @@ func (l *Level) processEnemyTurns() []entities.AttackResult {
 	}
 
 	return attackResults
+}
+
+// processEnemyAttack обрабатывает атаку конкретного врага на игрока
+// с учётом уникальных модификаторов типа врага.
+//
+// Модификаторы:
+//   - Ogre: если IsResting — пропускает ход (отдыхает), снимает флаг и
+//     гарантированно наносит удар (игнорирует evasion) на следующий ход.
+//     После каждой обычной атаки устанавливает IsResting = true.
+//   - SnakeMage: при успешном попадании с вероятностью 30% усыпляет игрока на 1 ход.
+//   - Прочие враги: стандартная атака через Character.Attack.
+func (l *Level) processEnemyAttack(
+	positionalEnemy primitives.Positional2D[int],
+	enemy *entities.Enemy,
+) *entities.AttackResult {
+	name := enemyTypeName(positionalEnemy)
+
+	// --- Огр: боевой цикл Ready → Resting → Enraged → Resting → ... ---
+	if ogre, ok := positionalEnemy.(*entities.Ogre); ok {
+		switch ogre.CombatPhase {
+		case entities.OgrePhaseResting:
+			// Отдых — пропуск хода. Переход в фазу ярости.
+			ogre.CombatPhase = entities.OgrePhaseEnraged
+			return nil
+
+		case entities.OgrePhaseEnraged:
+			// Гарантированная контратака (без проверки evasion).
+			damage := enemy.Character.MakeDamage()
+			l.Player.Character.TakeDamage(damage)
+
+			ogre.CombatPhase = entities.OgrePhaseResting
+
+			return &entities.AttackResult{
+				AttackerName:        name,
+				DefenderName:        "Player",
+				Damage:              damage,
+				DefenderHealthAfter: l.Player.Character.Attributes.Health,
+				DefenderMaxHealth:   l.Player.Character.Attributes.MaxHealth,
+				DefenderKilled:      !l.Player.Character.IsAlive(),
+				Guaranteed:          true,
+			}
+
+		default:
+			// OgrePhaseReady — обычная атака, после которой огр уходит на отдых.
+			result := enemy.Character.Attack(l.Player.Character, l.random)
+			result.AttackerName = name
+			result.DefenderName = "Player"
+			ogre.CombatPhase = entities.OgrePhaseResting
+			return &result
+		}
+	}
+
+	// --- Змей-маг: шанс усыпления ---
+	if _, ok := positionalEnemy.(*entities.SnakeMage); ok {
+		result := enemy.Character.Attack(l.Player.Character, l.random)
+		result.AttackerName = name
+		result.DefenderName = "Player"
+
+		const sleepChance = 0.3
+		if !result.Evaded && l.random.Float64() < sleepChance {
+			l.Player.Stun(1)
+			result.AppliedStun = true
+		}
+		return &result
+	}
+
+	// --- Стандартная атака ---
+	result := enemy.Character.Attack(l.Player.Character, l.random)
+	result.AttackerName = name
+	result.DefenderName = "Player"
+	return &result
 }
 
 // buildEnemyNavigationField создаёт навигационную карту для конкретного врага.
@@ -601,17 +672,31 @@ type Attacker interface {
 
 // Attack выполняет атаку и возвращает результат.
 // Имена атакующего и защитника заполняются вызывающим кодом.
+// Перед стандартной атакой проверяются уникальные модификаторы защитника.
 func (l *Level) Attack(attacker Attacker, defender primitives.Positional2D[int]) *entities.AttackResult {
 	if attacker == nil || defender == nil {
 		return nil
 	}
 
-	if charProvider, ok := defender.(entities.CharacterProvider); ok {
-		result := attacker.Attack(charProvider.GetCharacter(), l.random)
-		return &result
+	charProvider, ok := defender.(entities.CharacterProvider)
+	if !ok {
+		return nil
 	}
 
-	return nil
+	// Модификатор Вампира: абсолютное уклонение (первый удар — гарантированный промах).
+	if vampire, ok := defender.(*entities.Vampire); ok {
+		if vampire.AbsoluteEvasions > 0 {
+			vampire.AbsoluteEvasions--
+			return &entities.AttackResult{
+				Evaded:              true,
+				DefenderHealthAfter: vampire.Character.Attributes.Health,
+				DefenderMaxHealth:   vampire.Character.Attributes.MaxHealth,
+			}
+		}
+	}
+
+	result := attacker.Attack(charProvider.GetCharacter(), l.random)
+	return &result
 }
 
 // GenerateTreasure генерирует сокровище с процентами выпадения,

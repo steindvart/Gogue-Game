@@ -122,6 +122,7 @@ type Game struct {
 
 	currentItemInfo  *dto.ItemInfo
 	playerIsOnPortal bool
+	playerIsStunned  bool
 
 	// Информация об атаках за последний ход
 	playerAttackInfo *dto.AttackInfo
@@ -356,6 +357,10 @@ func (g *Game) ClearAttackInfos() {
 	g.enemyAttackInfos = nil
 }
 
+func (g *Game) SetStunnedMessage(stunned bool) {
+	g.playerIsStunned = stunned
+}
+
 func printInteractPortalInfo(view *tview.TextView) {
 	fmt.Fprintln(view)
 	fmt.Fprintln(view, "───────────────────────────────────")
@@ -411,6 +416,10 @@ func (g *Game) renderAttackInfo() {
 	fmt.Fprintln(g.statsPanel, "───────────────────────────────────")
 	fmt.Fprintf(g.statsPanel, " [%s::b]COMBAT LOG:[-:-:-]\n", colorSkyBlue)
 
+	if g.playerIsStunned {
+		fmt.Fprintf(g.statsPanel, " [%s::b]You are stunned! Turn skipped.[-:-:-]\n", colorMedPurple)
+	}
+
 	// Атака игрока на врага
 	if g.playerAttackInfo != nil {
 		g.renderSingleAttack(g.playerAttackInfo)
@@ -429,22 +438,36 @@ func (g *Game) renderSingleAttack(info *dto.AttackInfo) {
 			colorTomato, info.DefenderName,
 			colorSkyBlue)
 	} else if info.DefenderKilled {
-		fmt.Fprintf(g.statsPanel, " [%s]%s[-] → [%s]%s[-]: [%s]%.0f dmg[-] [%s]KILLED![-]\n",
+		dmgLabel := g.formatDamageLabel(info)
+		fmt.Fprintf(g.statsPanel, " [%s]%s[-] → [%s]%s[-]: %s [%s]KILLED![-]\n",
 			colorGold, info.AttackerName,
 			colorTomato, info.DefenderName,
-			colorOrange, info.Damage,
+			dmgLabel,
 			colorRed)
 		if info.LootValue > 0 {
 			fmt.Fprintf(g.statsPanel, "   [%s]+ %s (%d)[-]\n",
 				ColorTreasures, info.LootName, info.LootValue)
 		}
 	} else {
-		fmt.Fprintf(g.statsPanel, " [%s]%s[-] → [%s]%s[-]: [%s]%.0f dmg[-] (HP: %.0f/%.0f)\n",
+		dmgLabel := g.formatDamageLabel(info)
+		fmt.Fprintf(g.statsPanel, " [%s]%s[-] → [%s]%s[-]: %s (HP: %.0f/%.0f)\n",
 			colorGold, info.AttackerName,
 			colorTomato, info.DefenderName,
-			colorOrange, info.Damage,
+			dmgLabel,
 			info.DefenderHealthAfter, info.DefenderMaxHealth)
 	}
+
+	if info.AppliedStun {
+		fmt.Fprintf(g.statsPanel, "   [%s::b]⚡ STUNNED for 1 turn![-:-:-]\n", colorMedPurple)
+	}
+}
+
+// formatDamageLabel форматирует строку урона с пометкой «guaranteed», если атака была гарантированной.
+func (g *Game) formatDamageLabel(info *dto.AttackInfo) string {
+	if info.Guaranteed {
+		return fmt.Sprintf("[%s]%.0f dmg[-] [%s::b](guaranteed!)[-:-:-]", colorRed, info.Damage, colorOrange)
+	}
+	return fmt.Sprintf("[%s]%.0f dmg[-]", colorOrange, info.Damage)
 }
 
 func (g *Game) renderItemInfo() {
