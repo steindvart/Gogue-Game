@@ -46,7 +46,9 @@ func GetScoreboard() (*Scoreboard, error) {
 	return NewScoreboard(dto.Scores), nil
 }
 
-func (s *Scoreboard) Update(float64) signals.Type {
+func (s *Scoreboard) Update(dt float64) signals.Type {
+	s.view.Update(dt)
+
 	sig := s.signal
 	s.signal = signals.NoSignal // сброс сигнала после чтения
 	return sig

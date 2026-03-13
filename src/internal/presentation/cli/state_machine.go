@@ -3,6 +3,7 @@ package cli
 import (
 	"gogue/internal/model/signals"
 	"gogue/internal/presentation/cli/state"
+	"gogue/internal/presentation/dto"
 	viewcli "gogue/internal/view/cli"
 	"time"
 
@@ -124,9 +125,22 @@ func (g *StateMachine) handleSignal(s signals.Type) {
 		}
 		g.PushState(leaderboard)
 	case signals.GameWon:
-		msgState := state.NewMessage(viewcli.MsgGameWon)
-		g.PushState(msgState)
+		stats := g.extractGameOverStats()
+		gameOverState := state.NewGameOver(viewcli.GameOverTypeWin, stats)
+		g.PushState(gameOverState)
+	case signals.GameOver:
+		stats := g.extractGameOverStats()
+		gameOverState := state.NewGameOver(viewcli.GameOverTypeDeath, stats)
+		g.PushState(gameOverState)
 	case signals.ReturnToMenu:
 		g.rootState()
 	}
+}
+
+// extractGameOverStats извлекает статистику из текущего состояния Game (если оно активно).
+func (g *StateMachine) extractGameOverStats() *dto.GameOverStats {
+	if gameState, ok := g.CurrentState().(*state.Game); ok {
+		return gameState.GameOverStats
+	}
+	return nil
 }

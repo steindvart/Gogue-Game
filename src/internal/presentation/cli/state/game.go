@@ -3,6 +3,7 @@ package state
 import (
 	"gogue/internal/common"
 	"gogue/internal/model/entities"
+	"gogue/internal/model/items"
 	"gogue/internal/model/primitives"
 	"gogue/internal/model/signals"
 	"gogue/internal/model/world"
@@ -21,7 +22,7 @@ import (
 const (
 	MapHeight      = 30
 	MapWidth       = 90
-	maxLevelNumber = 21
+	maxLevelNumber = 2
 )
 
 const (
@@ -36,6 +37,8 @@ type Game struct {
 
 	isPlayerReadyToInteract bool
 	backpackDropMode        bool
+
+	GameOverStats *dto.GameOverStats
 }
 
 func NewGame() (*Game, error) {
@@ -106,6 +109,7 @@ func (g *Game) handleEvent(event *tcell.EventKey) *tcell.EventKey {
 			if len(enemyAttacks) > 0 {
 				g.view.SetEnemyAttackInfos(dto.ConvertAttackResultsToDto(enemyAttacks))
 			}
+			g.checkPlayerDeath()
 			break
 		}
 		g.view.SetStunnedMessage(false)
@@ -127,6 +131,7 @@ func (g *Game) handleEvent(event *tcell.EventKey) *tcell.EventKey {
 		if len(enemyAttacks) > 0 {
 			g.view.SetEnemyAttackInfos(dto.ConvertAttackResultsToDto(enemyAttacks))
 		}
+		g.checkPlayerDeath()
 	case action.Select:
 		g.handleSelectAction()
 	case action.Take:
@@ -241,6 +246,7 @@ func (g *Game) handleMoveAction(a action.Type) {
 				}
 				g.level.Player.AddTreasure(item)
 				g.level.RemoveEnemy(enemy)
+				g.level.Player.EnemiesKilled++
 			}
 			g.level.Player.SetPosition(oldPos)
 		}
@@ -265,6 +271,7 @@ func (g *Game) handleSelectAction() {
 
 		switch g.level.CheckEntityCollision(pos) {
 		case world.CollisionTypeItem:
+			g.trackConsumableUseAtPosition(pos)
 			g.level.PlayerUseItemAtPosition(pos)
 		case world.CollisionTypeTeleport:
 			if g.level.Number < maxLevelNumber {
@@ -278,6 +285,7 @@ func (g *Game) handleSelectAction() {
 				if err := save.SaveScore(g.level.Player.Backpack.Treasures, ScoreFileName); err != nil {
 					panic(err.Error())
 				}
+				g.GameOverStats = g.buildGameOverStats()
 				g.signal = signals.GameWon
 			}
 		}
@@ -440,8 +448,14 @@ func (g *Game) handleItemSelection(actionType action.Type) {
 		return
 	}
 
+	isConsumable := itemType == entities.BackpackItemTypeFood ||
+		itemType == entities.BackpackItemTypeElixir ||
+		itemType == entities.BackpackItemTypeScroll
+
 	if err := g.level.Player.UseItemFromBackpack(selectedItem); err != nil {
 		g.view.SetInfoErrorMessage(err.Error())
+	} else if isConsumable {
+		g.level.Player.ConsumablesUsed++
 	}
 
 	g.updateBackpackInfo()
@@ -550,6 +564,54 @@ func (g *Game) dropItemToMap(item any, isEquipped bool) {
 	}
 
 	g.updateBackpackInfo()
+}
+
+// trackConsumableUseAtPosition проверяет, является ли предмет на указанной позиции расходным,
+// и увеличивает счётчик использованных расходных предметов игрока.
+func (g *Game) trackConsumableUseAtPosition(pos primitives.Point2D[int]) {
+	item := g.level.GetItemAtPosition(pos)
+	if item == nil {
+		return
+	}
+
+	switch item.(type) {
+	case *items.Food, *items.Elixir, *items.Scroll:
+		g.level.Player.ConsumablesUsed++
+	}
+}
+
+// checkPlayerDeath проверяет, жив ли игрок, и если нет - сигнализирует об окончании игры.
+func (g *Game) checkPlayerDeath() {
+	if g.level.Player == nil || g.level.Player.Character.IsAlive() {
+		return
+	}
+
+	// Удаляем сохранение при гибели игрока
+	if err := save.DeleteGame(SaveFileName); err != nil {
+		panic(err.Error())
+	}
+
+	// Сохраняем рекорд (сокровища) в таблицу рекордов и при гибели
+	if err := save.SaveScore(g.level.Player.Backpack.Treasures, ScoreFileName); err != nil {
+		panic(err.Error())
+	}
+
+	g.GameOverStats = g.buildGameOverStats()
+	g.signal = signals.GameOver
+}
+
+// buildGameOverStats формирует DTO со статистикой для экрана завершения игры.
+func (g *Game) buildGameOverStats() *dto.GameOverStats {
+	if g.level.Player == nil {
+		return &dto.GameOverStats{}
+	}
+
+	return &dto.GameOverStats{
+		Treasures:       g.level.Player.Backpack.Treasures,
+		EnemiesKilled:   g.level.Player.EnemiesKilled,
+		LevelReached:    g.level.Number,
+		ConsumablesUsed: g.level.Player.ConsumablesUsed,
+	}
 }
 
 func (g *Game) Update(float64) signals.Type {
