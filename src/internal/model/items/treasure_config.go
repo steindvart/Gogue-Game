@@ -67,10 +67,26 @@ func (cfg *TreasureConfig) Validate() error {
 	return nil
 }
 
-// @todo - сделать функцией в аргументе выше
+// getRandomTreasureType выбирает случайный тип сокровища по заданным процентам.
+//
+// Если сумма процентов не равна 100, проценты нормализуются пропорционально.
+// Это гарантирует корректную работу даже при ошибках округления
+// на стороне вызывающего кода.
 func getRandomTreasureType(rnd utils.Randomizer, goldPercent, gemPercent, artifactPercent, mysteryPercent uint) (TreasureType, error) {
-	if goldPercent+gemPercent+artifactPercent+mysteryPercent != 100 {
-		return TreasureTypeGold, errors.New("percentage is incorrect")
+	sum := goldPercent + gemPercent + artifactPercent + mysteryPercent
+	if sum == 0 {
+		return TreasureTypeGold, errors.New("all treasure percentages are zero")
+	}
+
+	// Fail-safe: нормализуем к 100, если сумма отклонилась из-за округления
+	if sum != 100 {
+		gold64 := float64(goldPercent) * 100.0 / float64(sum)
+		gem64 := float64(gemPercent) * 100.0 / float64(sum)
+		artifact64 := float64(artifactPercent) * 100.0 / float64(sum)
+
+		goldPercent = uint(gold64)
+		gemPercent = uint(gem64)
+		artifactPercent = uint(artifact64)
 	}
 
 	percent := rnd.Intn(100)

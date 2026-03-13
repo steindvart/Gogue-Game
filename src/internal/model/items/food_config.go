@@ -31,29 +31,29 @@ var FoodRegistry = map[FoodType]FoodConfig{
 	// Random health food
 	FoodTypePotatoes: {
 		Type:        FoodTypePotatoes,
-		HealthRange: primitives.AttributeRange{Min: 1, Max: 10},
+		HealthRange: primitives.AttributeRange{Min: 1, Max: 8},
 		Description: "Increases health by a small amount",
 	},
 	FoodTypeBread: {
 		Type:        FoodTypeBread,
-		HealthRange: primitives.AttributeRange{Min: 10, Max: 20},
+		HealthRange: primitives.AttributeRange{Min: 8, Max: 15},
 		Description: "Increases health by a medium amount",
 	},
 	FoodTypeMeat: {
 		Type:        FoodTypeMeat,
-		HealthRange: primitives.AttributeRange{Min: 20, Max: 30},
+		HealthRange: primitives.AttributeRange{Min: 15, Max: 25},
 		Description: "Increases health by a high amount",
 	},
 	FoodTypeMistery: {
 		Type:        FoodTypeMistery,
-		HealthRange: primitives.AttributeRange{Min: -10, Max: 40},
+		HealthRange: primitives.AttributeRange{Min: -10, Max: 30},
 		Description: "Increases health by a random amount (or maybe decreases it...)",
 	},
 
 	// No random health food
 	FoodTypeBeer: {
 		Type:        FoodTypeBeer,
-		HealthRange: primitives.AttributeRange{Min: 20, Max: 20},
+		HealthRange: primitives.AttributeRange{Min: 15, Max: 15},
 		Description: "Increases health by a medium amount without random and makes you feel good",
 	},
 }

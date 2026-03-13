@@ -463,7 +463,7 @@ func TestCharacter_CheckEvasion_ZeroAgilityAlwaysFalse(t *testing.T) {
 	)
 	for i := 0; i < 100; i++ {
 		randomGenerator := utils.NewRandomWithSeed(int64(i))
-		if c.CheckEvasion(randomGenerator) {
+		if c.CheckEvasion(0, randomGenerator) {
 			t.Fatalf("CheckEvasion must be false when Agility=0 (iter %d)", i)
 		}
 	}
@@ -478,7 +478,7 @@ func TestCharacter_CheckEvasion_HighAgilityMostlyTrueWithSeed(t *testing.T) {
 	total := 200
 	for i := 0; i < total; i++ {
 		randomGenerator := utils.NewRandomWithSeed(int64(i))
-		if c.CheckEvasion(randomGenerator) {
+		if c.CheckEvasion(0, randomGenerator) {
 			evasionsCount++
 		}
 	}
@@ -497,7 +497,7 @@ func TestCharacter_CheckEvasion_NoRandom(t *testing.T) {
 	total := 200
 	randomGenerator := utils.NewRandomWithSeed(defaultCharacterTestSeed)
 	for i := 0; i < total; i++ {
-		if c.CheckEvasion(randomGenerator) {
+		if c.CheckEvasion(0, randomGenerator) {
 			evasionsCount1++
 		}
 	}
@@ -505,13 +505,59 @@ func TestCharacter_CheckEvasion_NoRandom(t *testing.T) {
 	evasionsCount2 := 0
 	for i := 0; i < total; i++ {
 		randomGenerator := utils.NewRandomWithSeed(int64(i))
-		if c.CheckEvasion(randomGenerator) {
+		if c.CheckEvasion(0, randomGenerator) {
 			evasionsCount2++
 		}
 	}
 
 	if evasionsCount1 == evasionsCount2 {
 		t.Errorf("Expected different evasion counts with different random seeds; got both %d/%d", evasionsCount1, total)
+	}
+}
+
+func TestCharacter_CheckEvasion_AttackerAgilityReducesEvasion(t *testing.T) {
+	// Защитник с Agility=20, атакующий с Agility=0 vs атакующий с Agility=30
+	c := NewCharacter(
+		primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
+		primitives.Attributes{MaxHealth: 100, Health: 100, Agility: 20, Strength: 0},
+	)
+
+	total := 500
+	evasionsNoAttackerAgi := 0
+	evasionsHighAttackerAgi := 0
+
+	for i := 0; i < total; i++ {
+		rng := utils.NewRandomWithSeed(int64(i))
+		if c.CheckEvasion(0, rng) {
+			evasionsNoAttackerAgi++
+		}
+	}
+	for i := 0; i < total; i++ {
+		rng := utils.NewRandomWithSeed(int64(i))
+		if c.CheckEvasion(30, rng) {
+			evasionsHighAttackerAgi++
+		}
+	}
+
+	if evasionsHighAttackerAgi >= evasionsNoAttackerAgi {
+		t.Errorf("High attacker agility should reduce evasions: noAttackerAgi=%d, highAttackerAgi=%d",
+			evasionsNoAttackerAgi, evasionsHighAttackerAgi)
+	}
+}
+
+func TestCharacter_CheckEvasion_AttackerOverwhelmsDefender(t *testing.T) {
+	// Если ловкость атакующего * 0.5 >= ловкости защитника, уклонений быть не должно.
+	c := NewCharacter(
+		primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
+		primitives.Attributes{MaxHealth: 100, Health: 100, Agility: 10, Strength: 0},
+	)
+
+	// attackerAgility=20 → effectiveAgility = 10 - 20*0.5 = 0 → шанс = 0
+	for i := 0; i < 100; i++ {
+		rng := utils.NewRandomWithSeed(int64(i))
+		if c.CheckEvasion(20, rng) {
+			t.Fatalf("CheckEvasion must be false when attacker agility overwhelms defender (iter %d)", i)
+		}
 	}
 }
 
@@ -680,7 +726,7 @@ func TestCharacter_Use_WithElixir(t *testing.T) {
 			initialStr:     10,
 			initialAgi:     5,
 			wantMinHealth:  50,
-			wantMinStr:     15, // Ожидаем прирост силы
+			wantMinStr:     13, // Ожидаем прирост силы (min +3)
 			wantMinAgi:     5,
 			wantEffectsCnt: 1, // Temporary effect
 		},
@@ -692,7 +738,7 @@ func TestCharacter_Use_WithElixir(t *testing.T) {
 			initialAgi:     3,
 			wantMinHealth:  60,
 			wantMinStr:     12,
-			wantMinAgi:     8, // Ожидаем прирост ловкости
+			wantMinAgi:     6, // Ожидаем прирост ловкости (min +3)
 			wantEffectsCnt: 1,
 		},
 	}

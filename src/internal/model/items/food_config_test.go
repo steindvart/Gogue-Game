@@ -19,37 +19,37 @@ func TestGetFoodConfig(t *testing.T) {
 			name:            "Get Potatoes config",
 			foodType:        FoodTypePotatoes,
 			wantType:        FoodTypePotatoes,
-			wantHealthRange: primitives.AttributeRange{Min: 1, Max: 10},
+			wantHealthRange: primitives.AttributeRange{Min: 1, Max: 8},
 		},
 		{
 			name:            "Get Bread config",
 			foodType:        FoodTypeBread,
 			wantType:        FoodTypeBread,
-			wantHealthRange: primitives.AttributeRange{Min: 10, Max: 20},
+			wantHealthRange: primitives.AttributeRange{Min: 8, Max: 15},
 		},
 		{
 			name:            "Get Meat config",
 			foodType:        FoodTypeMeat,
 			wantType:        FoodTypeMeat,
-			wantHealthRange: primitives.AttributeRange{Min: 20, Max: 30},
+			wantHealthRange: primitives.AttributeRange{Min: 15, Max: 25},
 		},
 		{
 			name:            "Get Beer config - fixed value",
 			foodType:        FoodTypeBeer,
 			wantType:        FoodTypeBeer,
-			wantHealthRange: primitives.AttributeRange{Min: 20, Max: 20},
+			wantHealthRange: primitives.AttributeRange{Min: 15, Max: 15},
 		},
 		{
 			name:            "Get Mistery config - wide range",
 			foodType:        FoodTypeMistery,
 			wantType:        FoodTypeMistery,
-			wantHealthRange: primitives.AttributeRange{Min: -10, Max: 40},
+			wantHealthRange: primitives.AttributeRange{Min: -10, Max: 30},
 		},
 		{
 			name:            "Unknown type returns Mistery",
 			foodType:        "Unknown Food",
 			wantType:        FoodTypeMistery,
-			wantHealthRange: primitives.AttributeRange{Min: -10, Max: 40},
+			wantHealthRange: primitives.AttributeRange{Min: -10, Max: 30},
 		},
 	}
 

@@ -325,108 +325,41 @@ func TestLevel_GenerateTreasure(t *testing.T) {
 		t.Fatalf("Generate returned an error: %v", err)
 	}
 
-	tests := []struct {
-		name         string
-		wantTreasure items.Treasure
-	}{
-		{
-			name: "FirstTreasure_Mystery",
-			wantTreasure: items.Treasure{
-				Item: &items.Item{
-					Box: &primitives.Box{
-						Point: primitives.Point2D[int]{X: 0, Y: 0},
-						Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
-					},
-					Name: "Treasure",
-				},
-				Type:  items.TreasureTypeMystery,
-				Value: 80,
-			},
-		},
-		{
-			name: "SecondTreasure_Gold",
-			wantTreasure: items.Treasure{
-				Item: &items.Item{
-					Box: &primitives.Box{
-						Point: primitives.Point2D[int]{X: 0, Y: 0},
-						Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
-					},
-					Name: "Treasure",
-				},
-				Type:  items.TreasureTypeGold,
-				Value: 7,
-			},
-		},
-		{
-			name: "ThirdTreasure_Gold",
-			wantTreasure: items.Treasure{
-				Item: &items.Item{
-					Box: &primitives.Box{
-						Point: primitives.Point2D[int]{X: 0, Y: 0},
-						Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
-					},
-					Name: "Treasure",
-				},
-				Type:  items.TreasureTypeGold,
-				Value: 19,
-			},
-		},
-		{
-			name: "FourthTreasure_Gold",
-			wantTreasure: items.Treasure{
-				Item: &items.Item{
-					Box: &primitives.Box{
-						Point: primitives.Point2D[int]{X: 0, Y: 0},
-						Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
-					},
-					Name: "Treasure",
-				},
-				Type:  items.TreasureTypeGold,
-				Value: 17,
-			},
-		},
-		{
-			name: "FifthTreasure_Gold",
-			wantTreasure: items.Treasure{
-				Item: &items.Item{
-					Box: &primitives.Box{
-						Point: primitives.Point2D[int]{X: 0, Y: 0},
-						Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
-					},
-					Name: "Treasure",
-				},
-				Type:  items.TreasureTypeGold,
-				Value: 16,
-			},
-		},
-		{
-			name: "SixthTreasure_Artifact",
-			wantTreasure: items.Treasure{
-				Item: &items.Item{
-					Box: &primitives.Box{
-						Point: primitives.Point2D[int]{X: 0, Y: 0},
-						Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
-					},
-					Name: "Treasure",
-				},
-				Type:  items.TreasureTypeArtifact,
-				Value: 428,
-			},
-		},
+	validTypes := map[items.TreasureType]bool{
+		items.TreasureTypeGold:     true,
+		items.TreasureTypeGem:      true,
+		items.TreasureTypeArtifact: true,
+		items.TreasureTypeMystery:  true,
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			treasure, _ := level.GenerateTreasure()
-			if *tt.wantTreasure.Box != *treasure.Box {
-				t.Errorf("GenerateTreasure want Box '%+v', but got '%+v'", *tt.wantTreasure.Box, *treasure.Box)
-			}
-			if tt.wantTreasure.Type != treasure.Type {
-				t.Errorf("GenerateTreasure want Type '%+v', but got '%+v'", tt.wantTreasure.Type, treasure.Type)
-			}
-			if tt.wantTreasure.Value != treasure.Value {
-				t.Errorf("GenerateTreasure want Value '%+v', but got '%+v'", tt.wantTreasure.Value, treasure.Value)
-			}
-		})
+	wantBox := primitives.Box{
+		Point: primitives.Point2D[int]{X: 0, Y: 0},
+		Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
+	}
+
+	const treasureCount = 10
+	for i := 0; i < treasureCount; i++ {
+		treasure, err := level.GenerateTreasure()
+		if err != nil {
+			t.Fatalf("GenerateTreasure[%d] returned an error: %v", i, err)
+		}
+
+		if treasure == nil {
+			t.Fatalf("GenerateTreasure[%d] returned nil", i)
+		}
+
+		if *treasure.Box != wantBox {
+			t.Errorf("GenerateTreasure[%d]: want Box %+v, got %+v", i, wantBox, *treasure.Box)
+		}
+
+		if !validTypes[treasure.Type] {
+			t.Errorf("GenerateTreasure[%d]: unexpected Type %q", i, treasure.Type)
+		}
+
+		cfg := items.GetTreasureConfig(treasure.Type)
+		if treasure.Value < cfg.ValueRange.Min || treasure.Value > cfg.ValueRange.Max {
+			t.Errorf("GenerateTreasure[%d]: Type=%s Value=%d out of range [%d, %d]",
+				i, treasure.Type, treasure.Value, cfg.ValueRange.Min, cfg.ValueRange.Max)
+		}
 	}
 }

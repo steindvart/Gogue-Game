@@ -44,7 +44,7 @@ func (c *Character) MakeDamage() float64 {
 }
 
 func (c *Character) Attack(defender *Character, rnd utils.Randomizer) {
-	if defender.CheckEvasion(rnd) {
+	if defender.CheckEvasion(c.Attributes.Agility, rnd) {
 		return
 	}
 
@@ -135,18 +135,34 @@ func (c *Character) removeTemporaryEffectByIndex(idx int) {
 	c.Attributes.Affect(primitives.Inverse(e.Attributes))
 }
 
-// Шанс уклонения = 1 - 1/(1 + Agility/scale).
-// Растёт с увеличением ловкости, но никогда не достигает 100%.
-// scale регулирует скорость роста. Это обеспечивает баланс между ростом шанса и невозможностью абсолютного уклонения.
-// @todo 1 - сделать настраиваемым scale? Например, для регулировки сложности игры?
-// @todo 2 - сделать сравнение с учётом ловкости атакующего?
-func (c *Character) CheckEvasion(rnd utils.Randomizer) bool {
-	if c.Attributes.Agility == 0 {
+// CheckEvasion вычисляет шанс уклонения защитника с учётом ловкости атакующего.
+//
+// Формула: chance = 1 - 1/(1 + effectiveAgility/scale),
+// где effectiveAgility = max(0, defenderAgility - attackerAgility * attackerWeight).
+//
+// attackerWeight (0.5) определяет, насколько сильно ловкость атакующего
+// снижает эффективность уклонения. Значение < 1 означает, что уклоняться
+// легче, чем попадать по ловкому противнику — это даёт преимущество защитнику.
+//
+// scale (50) регулирует скорость роста шанса уклонения.
+// Шанс растёт с увеличением ловкости, но никогда не достигает 100%.
+// @todo - сделать настраиваемым scale, чтобы ещё лучше настраивать сложность игры?
+func (c *Character) CheckEvasion(attackerAgility float64, rnd utils.Randomizer) bool {
+	if c.Attributes.Agility <= 0 {
 		return false
 	}
 
-	const scale = 20.0
-	chance := 1.0 - 1.0/(1.0+c.Attributes.Agility/scale)
+	const (
+		scale          = 50.0
+		attackerWeight = 0.5 // Ловкость атакующего влияет в 2 раза слабее
+	)
+
+	effectiveAgility := c.Attributes.Agility - attackerAgility*attackerWeight
+	if effectiveAgility <= 0 {
+		return false
+	}
+
+	chance := 1.0 - 1.0/(1.0+effectiveAgility/scale)
 
 	roll := rnd.Float64() // Случайное дробное число - [0,1)
 	return roll < chance
