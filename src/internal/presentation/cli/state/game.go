@@ -236,7 +236,7 @@ func (g *Game) handleMoveAction(a action.Type) {
 		if provider, ok := enemy.(entities.CharacterProvider); ok {
 			character := provider.GetCharacter()
 			if !character.IsAlive() {
-				item, err := g.level.GenerateTreasure()
+				item, err := g.level.GenerateTreasureForEnemy(g.getEnemyType(enemy))
 				if err != nil {
 					panic(err)
 				}
@@ -400,6 +400,25 @@ func (g *Game) getEnemyDisplayName(enemy primitives.Positional2D[int]) string {
 		return "Mimic"
 	default:
 		return "Unknown"
+	}
+}
+
+func (g *Game) getEnemyType(enemy primitives.Positional2D[int]) entities.EnemyType {
+	switch enemy.(type) {
+	case *entities.Zombie:
+		return entities.EnemyTypeZombie
+	case *entities.Vampire:
+		return entities.EnemyTypeVampire
+	case *entities.Ghost:
+		return entities.EnemyTypeGhost
+	case *entities.Ogre:
+		return entities.EnemyTypeOgre
+	case *entities.SnakeMage:
+		return entities.EnemyTypeSnakeMage
+	case *entities.Mimic:
+		return entities.EnemyTypeMimic
+	default:
+		return entities.EnemyTypeZombie
 	}
 }
 

@@ -3,6 +3,7 @@ package world
 import (
 	"math"
 
+	"gogue/internal/model/entities"
 	"gogue/internal/model/primitives"
 )
 
@@ -219,6 +220,62 @@ func (c *LevelConfig) GetTreasureDropConfig(levelNumber uint) TreasureDropConfig
 
 	// Распределяем 100 целых процентов методом наибольших остатков (Hare–Niemeyer).
 	// Порядок элементов: gold, gem, artifact, mystery.
+	fractions := [4]float64{goldF, gemF, artifactF, mysteryF}
+	result := distributeByLargestRemainder(fractions, 100)
+
+	return TreasureDropConfig{
+		GoldPercent:     uint(result[0]),
+		GemPercent:      uint(result[1]),
+		ArtifactPercent: uint(result[2]),
+		MysteryPercent:  uint(result[3]),
+	}
+}
+
+// enemyTreasureBonus задаёт бонусные проценты к Gem и Artifact
+// для конкретных типов врагов. Более сильные враги (Огр, Вампир)
+// дают повышенный шанс на ценную награду.
+var enemyTreasureBonus = map[entities.EnemyType]struct {
+	GemBonus      float64
+	ArtifactBonus float64
+}{
+	entities.EnemyTypeOgre:    {GemBonus: 10, ArtifactBonus: 15},
+	entities.EnemyTypeVampire: {GemBonus: 8, ArtifactBonus: 10},
+}
+
+// GetTreasureDropConfigForEnemy возвращает конфигурацию выпадения сокровищ,
+// скорректированную для конкретного типа врага.
+// Более сильные враги (Огр, Вампир) имеют повышенный шанс на Gem/Artifact.
+func (c *LevelConfig) GetTreasureDropConfigForEnemy(levelNumber uint, enemyType entities.EnemyType) TreasureDropConfig {
+	base := c.GetTreasureDropConfig(levelNumber)
+
+	bonus, hasBonus := enemyTreasureBonus[enemyType]
+	if !hasBonus {
+		return base
+	}
+
+	gemF := float64(base.GemPercent) + bonus.GemBonus
+	artifactF := float64(base.ArtifactPercent) + bonus.ArtifactBonus
+	mysteryF := float64(base.MysteryPercent)
+	goldF := 100.0 - gemF - artifactF - mysteryF
+
+	const minGoldPercent = 5.0
+	if goldF < minGoldPercent {
+		excess := minGoldPercent - goldF
+		goldF = minGoldPercent
+		sum := gemF + artifactF
+		if sum > 0 {
+			gemF -= excess * (gemF / sum)
+			artifactF -= excess * (artifactF / sum)
+		}
+	}
+
+	if gemF < 0 {
+		gemF = 0
+	}
+	if artifactF < 0 {
+		artifactF = 0
+	}
+
 	fractions := [4]float64{goldF, gemF, artifactF, mysteryF}
 	result := distributeByLargestRemainder(fractions, 100)
 

@@ -233,13 +233,24 @@ func (s *RoomBasedEntitySpawner) spawnEnemies(
 ) ([]primitives.Positional2D[int], error) {
 	result := make([]primitives.Positional2D[int], 0, quantity)
 
+	// Взвешенный спавн: мимик появляется значительно реже остальных.
+	// Веса задают относительную вероятность: чем выше вес, тем чаще тип появляется.
+	enemyWeights := []utils.WeightedChoice[entities.EnemyType]{
+		{Value: entities.EnemyTypeZombie, Weight: 20},
+		{Value: entities.EnemyTypeVampire, Weight: 15},
+		{Value: entities.EnemyTypeGhost, Weight: 18},
+		{Value: entities.EnemyTypeOgre, Weight: 12},
+		{Value: entities.EnemyTypeSnakeMage, Weight: 15},
+		{Value: entities.EnemyTypeMimic, Weight: 5},
+	}
+
 	for i := uint(0); i < quantity; i++ {
 		room, pos, err := s.findAvailablePositionInSomeRoom(rooms, random)
 		if err != nil {
 			return nil, err
 		}
 
-		enemyType := utils.GetRandomElement(random, entities.EnemyTypes)
+		enemyType := utils.GetWeightedRandomElement(random, enemyWeights)
 		box := &primitives.Box{
 			Point: *pos,
 			Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
