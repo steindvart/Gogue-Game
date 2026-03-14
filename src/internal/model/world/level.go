@@ -620,7 +620,10 @@ func (l *Level) PlayerUseItemAtPosition(pos primitives.Point2D[int]) {
 
 	// @todo - кривая логика, нужно декомпозировать и перенести в Player
 	if weapon, ok := item.(*items.Weapon); ok {
-		_ = l.Player.EquipWeapon(weapon)
+		err := l.Player.EquipWeapon(weapon)
+		if err != nil {
+			return
+		}
 	} else if usableItem, ok := item.(items.Usable); ok {
 		l.Player.Character.Use(usableItem)
 	}
