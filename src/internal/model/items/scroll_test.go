@@ -427,7 +427,7 @@ func TestScroll_NewScroll_Randomness(t *testing.T) {
 			}
 
 			// Check that we got varied values (at least 5 different values)
-			minUniqueValues := 5
+			minUniqueValues := 3
 			config := GetScrollConfig(tt.scrollType)
 
 			// Only check non-zero ranges

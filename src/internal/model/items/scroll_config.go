@@ -28,7 +28,7 @@ type ScrollConfig struct {
 var ScrollRegistry = map[ScrollType]ScrollConfig{
 	ScrollTypeStrength: {
 		Type:           ScrollTypeStrength,
-		StrengthRange:  primitives.AttributeRange{Min: 1, Max: 6},
+		StrengthRange:  primitives.AttributeRange{Min: 1, Max: 3},
 		AgilityRange:   primitives.AttributeRange{Min: 0, Max: 0},
 		MaxHealthRange: primitives.AttributeRange{Min: 0, Max: 0},
 		Description:    "Increases strength",
@@ -36,7 +36,7 @@ var ScrollRegistry = map[ScrollType]ScrollConfig{
 	ScrollTypeAgility: {
 		Type:           ScrollTypeAgility,
 		StrengthRange:  primitives.AttributeRange{Min: 0, Max: 0},
-		AgilityRange:   primitives.AttributeRange{Min: 1, Max: 6},
+		AgilityRange:   primitives.AttributeRange{Min: 1, Max: 3},
 		MaxHealthRange: primitives.AttributeRange{Min: 0, Max: 0},
 		Description:    "Increases agility",
 	},
@@ -44,14 +44,14 @@ var ScrollRegistry = map[ScrollType]ScrollConfig{
 		Type:           ScrollTypeMaxHealth,
 		StrengthRange:  primitives.AttributeRange{Min: 0, Max: 0},
 		AgilityRange:   primitives.AttributeRange{Min: 0, Max: 0},
-		MaxHealthRange: primitives.AttributeRange{Min: 3, Max: 12},
+		MaxHealthRange: primitives.AttributeRange{Min: 2, Max: 10},
 		Description:    "Increases maximus health",
 	},
 	ScrollTypeMystery: {
 		Type:           ScrollTypeMystery,
-		StrengthRange:  primitives.AttributeRange{Min: -3, Max: 12},
-		AgilityRange:   primitives.AttributeRange{Min: -3, Max: 12},
-		MaxHealthRange: primitives.AttributeRange{Min: -3, Max: 12},
+		StrengthRange:  primitives.AttributeRange{Min: -3, Max: 8},
+		AgilityRange:   primitives.AttributeRange{Min: -3, Max: 8},
+		MaxHealthRange: primitives.AttributeRange{Min: -3, Max: 8},
 		Description:    "Increases or decreases random attributes",
 	},
 }
