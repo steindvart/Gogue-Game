@@ -95,43 +95,56 @@ func TestIsVisible(t *testing.T) {
 // TestApplyFogOfWar проверяет применение тумана войны
 func TestApplyFogOfWar(t *testing.T) {
 	t.Run("player sees items in view radius", func(t *testing.T) {
-		// Создаём простое поле 5x5
-		fullField := [][]common.GameEntityType{
-			{common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
-			{common.WorldTypeRoomFloor, common.Food, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
-			{common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.EntityTypePlayer, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
-			{common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.EntityTypeZombie, common.WorldTypeRoomFloor},
-			{common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
+		// Создаём двухслойное поле 5x5
+		rf := common.NewRenderedField(5, 5)
+
+		// Окружение - всё пол
+		for y := 0; y < 5; y++ {
+			for x := 0; x < 5; x++ {
+				rf.EnvironmentLayer[y][x] = common.WorldTypeRoomFloor
+			}
 		}
+
+		// Объекты
+		rf.ObjectLayer[1][1] = common.Food
+		rf.ObjectLayer[2][2] = common.EntityTypePlayer
+		rf.ObjectLayer[3][3] = common.EntityTypeZombie
 
 		fog := NewFogOfWar(5, 5)
 		playerPos := primitives.Point2D[int]{X: 2, Y: 2}
 		viewRadius := 2
 
-		result := fog.ApplyFogOfWar(fullField, playerPos, viewRadius)
+		result := fog.ApplyFogOfWar(rf, playerPos, viewRadius)
 
 		// Игрок должен видеть себя
-		if result[2][2] != common.EntityTypePlayer {
+		if result.ObjectLayer[2][2] != common.EntityTypePlayer {
 			t.Errorf("Player not visible at own position")
 		}
 
 		// Еда в радиусе видимости должна быть видна
-		if result[1][1] != common.Food {
+		if result.ObjectLayer[1][1] != common.Food {
 			t.Errorf("Food within view radius not visible")
 		}
 
 		// Враг в радиусе видимости должен быть виден
-		if result[3][3] != common.EntityTypeZombie {
+		if result.ObjectLayer[3][3] != common.EntityTypeZombie {
 			t.Errorf("Enemy within view radius not visible")
 		}
 	})
 
 	t.Run("walls are remembered after viewing", func(t *testing.T) {
-		// Поле со стеной
-		fullField := [][]common.GameEntityType{
-			{common.WorldTypeWall, common.WorldTypeWall, common.WorldTypeWall, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
-			{common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
-			{common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
+		// Поле 5x3 со стенами
+		rf := common.NewRenderedField(5, 3)
+
+		// Окружение
+		rf.EnvironmentLayer[0][0] = common.WorldTypeWall
+		rf.EnvironmentLayer[0][1] = common.WorldTypeWall
+		rf.EnvironmentLayer[0][2] = common.WorldTypeWall
+		rf.EnvironmentLayer[0][3] = common.WorldTypeRoomFloor
+		rf.EnvironmentLayer[0][4] = common.WorldTypeRoomFloor
+		for x := 0; x < 5; x++ {
+			rf.EnvironmentLayer[1][x] = common.WorldTypeRoomFloor
+			rf.EnvironmentLayer[2][x] = common.WorldTypeRoomFloor
 		}
 
 		fog := NewFogOfWar(5, 3)
@@ -139,10 +152,9 @@ func TestApplyFogOfWar(t *testing.T) {
 		viewRadius := 2
 
 		// Первый просмотр - игрок видит стену
-		result1 := fog.ApplyFogOfWar(fullField, playerPos, viewRadius)
+		result1 := fog.ApplyFogOfWar(rf, playerPos, viewRadius)
 
-		// Стена должна быть видна
-		if result1[0][0] != common.WorldTypeWall {
+		if result1.EnvironmentLayer[0][0] != common.WorldTypeWall {
 			t.Errorf("Wall not visible on first view")
 		}
 
@@ -150,31 +162,37 @@ func TestApplyFogOfWar(t *testing.T) {
 		playerPos = primitives.Point2D[int]{X: 4, Y: 2}
 
 		// Второй просмотр - игрок далеко от стены
-		result2 := fog.ApplyFogOfWar(fullField, playerPos, viewRadius)
+		result2 := fog.ApplyFogOfWar(rf, playerPos, viewRadius)
 
-		// Стена всё ещё должна быть видна (запомнена)
-		if result2[0][0] != common.WorldTypeWall {
+		// Стена всё ещё должна быть видна (запомнена в EnvironmentLayer)
+		if result2.EnvironmentLayer[0][0] != common.WorldTypeWall {
 			t.Errorf("Wall not remembered after moving away")
 		}
 	})
 
 	t.Run("enemies disappear when out of view", func(t *testing.T) {
-		// Поле с врагом
-		fullField := [][]common.GameEntityType{
-			{common.EntityTypeZombie, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
-			{common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
-			{common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
+		// Поле 5x3
+		rf := common.NewRenderedField(5, 3)
+
+		// Окружение - проход (passage) в (0,0), остальное - пол
+		for y := 0; y < 3; y++ {
+			for x := 0; x < 5; x++ {
+				rf.EnvironmentLayer[y][x] = common.WorldTypeRoomFloor
+			}
 		}
+		rf.EnvironmentLayer[0][0] = common.WorldTypePassage
+
+		// Враг стоит на проходе
+		rf.ObjectLayer[0][0] = common.EntityTypeZombie
 
 		fog := NewFogOfWar(5, 3)
 		playerPos := primitives.Point2D[int]{X: 1, Y: 0}
 		viewRadius := 1
 
 		// Первый просмотр - игрок видит врага
-		result1 := fog.ApplyFogOfWar(fullField, playerPos, viewRadius)
+		result1 := fog.ApplyFogOfWar(rf, playerPos, viewRadius)
 
-		// Враг должен быть виден
-		if result1[0][0] != common.EntityTypeZombie {
+		if result1.ObjectLayer[0][0] != common.EntityTypeZombie {
 			t.Errorf("Enemy not visible when in view radius")
 		}
 
@@ -182,20 +200,31 @@ func TestApplyFogOfWar(t *testing.T) {
 		playerPos = primitives.Point2D[int]{X: 4, Y: 2}
 
 		// Второй просмотр - игрок далеко от врага
-		result2 := fog.ApplyFogOfWar(fullField, playerPos, viewRadius)
+		result2 := fog.ApplyFogOfWar(rf, playerPos, viewRadius)
 
-		// Враг не должен быть виден (динамический объект)
-		if result2[0][0] != 0 {
-			t.Errorf("Enemy should not be visible when out of view radius")
+		// Враг не должен быть виден в ObjectLayer (динамический объект)
+		if result2.ObjectLayer[0][0] != common.EntityTypeNone {
+			t.Errorf("Enemy should not be visible when out of view radius, got %v", result2.ObjectLayer[0][0])
+		}
+
+		// Проход должен быть запомнен в EnvironmentLayer (passage - статический тайл)
+		if result2.EnvironmentLayer[0][0] != common.WorldTypePassage {
+			t.Errorf("Passage should be remembered after exploration, got %v", result2.EnvironmentLayer[0][0])
 		}
 	})
 
 	t.Run("passages and doors are remembered", func(t *testing.T) {
-		// Поле с проходом и дверью
-		fullField := [][]common.GameEntityType{
-			{common.WorldTypePassage, common.WorldTypeDoor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
-			{common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
-			{common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor, common.WorldTypeRoomFloor},
+		// Поле 5x3 с проходом и дверью
+		rf := common.NewRenderedField(5, 3)
+
+		rf.EnvironmentLayer[0][0] = common.WorldTypePassage
+		rf.EnvironmentLayer[0][1] = common.WorldTypeDoor
+		rf.EnvironmentLayer[0][2] = common.WorldTypeRoomFloor
+		rf.EnvironmentLayer[0][3] = common.WorldTypeRoomFloor
+		rf.EnvironmentLayer[0][4] = common.WorldTypeRoomFloor
+		for x := 0; x < 5; x++ {
+			rf.EnvironmentLayer[1][x] = common.WorldTypeRoomFloor
+			rf.EnvironmentLayer[2][x] = common.WorldTypeRoomFloor
 		}
 
 		fog := NewFogOfWar(5, 3)
@@ -203,13 +232,12 @@ func TestApplyFogOfWar(t *testing.T) {
 		viewRadius := 1
 
 		// Первый просмотр
-		result1 := fog.ApplyFogOfWar(fullField, playerPos, viewRadius)
+		result1 := fog.ApplyFogOfWar(rf, playerPos, viewRadius)
 
-		// Проход и дверь должны быть видны
-		if result1[0][0] != common.WorldTypePassage {
+		if result1.EnvironmentLayer[0][0] != common.WorldTypePassage {
 			t.Errorf("Passage not visible")
 		}
-		if result1[0][1] != common.WorldTypeDoor {
+		if result1.EnvironmentLayer[0][1] != common.WorldTypeDoor {
 			t.Errorf("Door not visible")
 		}
 
@@ -217,13 +245,13 @@ func TestApplyFogOfWar(t *testing.T) {
 		playerPos = primitives.Point2D[int]{X: 4, Y: 2}
 
 		// Второй просмотр
-		result2 := fog.ApplyFogOfWar(fullField, playerPos, viewRadius)
+		result2 := fog.ApplyFogOfWar(rf, playerPos, viewRadius)
 
 		// Проход и дверь должны быть запомнены
-		if result2[0][0] != common.WorldTypePassage {
+		if result2.EnvironmentLayer[0][0] != common.WorldTypePassage {
 			t.Errorf("Passage not remembered")
 		}
-		if result2[0][1] != common.WorldTypeDoor {
+		if result2.EnvironmentLayer[0][1] != common.WorldTypeDoor {
 			t.Errorf("Door not remembered")
 		}
 	})
@@ -283,13 +311,13 @@ func TestReset(t *testing.T) {
 func BenchmarkApplyFogOfWar(b *testing.B) {
 	// Создаём большое поле 100x100
 	width, height := 100, 100
-	fullField := make([][]common.GameEntityType, height)
-	for y := range fullField {
-		fullField[y] = make([]common.GameEntityType, width)
-		for x := range fullField[y] {
-			// Заполняем поле случайными статичными элементами
+	rf := common.NewRenderedField(width, height)
+	for y := 0; y < height; y++ {
+		for x := 0; x < width; x++ {
 			if (x+y)%10 == 0 {
-				fullField[y][x] = common.WorldTypeWall
+				rf.EnvironmentLayer[y][x] = common.WorldTypeWall
+			} else {
+				rf.EnvironmentLayer[y][x] = common.WorldTypeRoomFloor
 			}
 		}
 	}
@@ -300,6 +328,6 @@ func BenchmarkApplyFogOfWar(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_ = fog.ApplyFogOfWar(fullField, playerPos, viewRadius)
+		_ = fog.ApplyFogOfWar(rf, playerPos, viewRadius)
 	}
 }

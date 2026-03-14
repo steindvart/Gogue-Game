@@ -113,7 +113,8 @@ func (l *Level) processEnemyTurns() []entities.AttackResult {
 	mapH := int(l.config.MapSize.Height)
 
 	// Получаем полное поле один раз для всех врагов (используется для LoS-проверки и idle-движения).
-	fullField := l.GetFullField(mapW, mapH)
+	// Для навигации и LoS используем composed-представление (однослойное).
+	fullField := l.GetFullField(mapW, mapH).Compose()
 
 	// Типы клеток, по которым враги могут перемещаться:
 	// пол, проходы, двери, предметы (еда, зелья, свитки, оружие), портал.
@@ -297,13 +298,13 @@ func (l *Level) processEnemyAttack(
 // занятые другими врагами, заменяя их на EntityTypeNone (непроходимый тип).
 // Клетка текущего врага не блокируется - это стартовая позиция поиска.
 func (l *Level) buildEnemyNavigationField(w, h int, currentEnemy primitives.Positional2D[int]) [][]int {
-	fullField := l.GetFullField(w, h)
+	composedField := l.GetFullField(w, h).Compose()
 	navField := make([][]int, h)
 
 	for y := 0; y < h; y++ {
 		navField[y] = make([]int, w)
 		for x := 0; x < w; x++ {
-			navField[y][x] = int(fullField[y][x])
+			navField[y][x] = int(composedField[y][x])
 		}
 	}
 
@@ -591,22 +592,23 @@ func (l *Level) isCollisionWithItem(pos primitives.Point2D[int]) bool {
 	return false
 }
 
-// MakeCurrentField создаёт двумерное представление карты уровня с учётом тумана войны
-func (l *Level) MakeCurrentField(w, h int) [][]common.GameEntityType {
-	// Сначала рендерим полное поле
+// MakeCurrentField создаёт двухслойное представление карты уровня с учётом тумана войны.
+// Для исследованных, но не видимых клеток показывает только окружение, скрывая динамические объекты.
+func (l *Level) MakeCurrentField(w, h int) *common.RenderedField {
+	// Сначала рендерим полное двухслойное поле
 	fullField := l.GetFullField(w, h)
 
 	// Если игрока нет, возвращаем пустое поле (всё скрыто туманом войны)
 	if l.Player == nil {
-		return utils.CreateEmpty2DSlice[common.GameEntityType](h, w)
+		return common.NewRenderedField(w, h)
 	}
 
 	// Фильтруем поле с учётом тумана войны и радиуса обзора игрока
 	return l.FogOfWar.ApplyFogOfWar(fullField, l.Player.GetPosition(), l.Player.ViewRadius)
 }
 
-// GetFullField возвращает двумерное представление карты уровня бещ учёта тумана войны
-func (l *Level) GetFullField(w, h int) [][]common.GameEntityType {
+// GetFullField возвращает двухслойное представление карты уровня без учёта тумана войны
+func (l *Level) GetFullField(w, h int) *common.RenderedField {
 	return l.fieldRenderer.RenderField(w, h, l)
 }
 

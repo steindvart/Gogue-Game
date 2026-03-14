@@ -18,20 +18,23 @@ func TestDefaultFieldRenderer_RenderMap_EmptyLevel(t *testing.T) {
 		Player:   nil,
 	}
 
-	field := renderer.RenderField(10, 10, level)
+	rf := renderer.RenderField(10, 10, level)
 
-	if len(field) != 10 {
-		t.Errorf("Expected height 10, got %d", len(field))
+	if rf.Height != 10 {
+		t.Errorf("Expected height 10, got %d", rf.Height)
 	}
-	if len(field[0]) != 10 {
-		t.Errorf("Expected width 10, got %d", len(field[0]))
+	if rf.Width != 10 {
+		t.Errorf("Expected width 10, got %d", rf.Width)
 	}
 
-	// Проверяем, что все ячейки пустые
+	// Проверяем, что оба слоя пустые
 	for y := 0; y < 10; y++ {
 		for x := 0; x < 10; x++ {
-			if field[y][x] != common.GameEntityType(0) {
-				t.Errorf("Expected empty cell at (%d, %d), got %v", x, y, field[y][x])
+			if rf.EnvironmentLayer[y][x] != common.EntityTypeNone {
+				t.Errorf("Expected empty environment at (%d, %d), got %v", x, y, rf.EnvironmentLayer[y][x])
+			}
+			if rf.ObjectLayer[y][x] != common.EntityTypeNone {
+				t.Errorf("Expected empty object at (%d, %d), got %v", x, y, rf.ObjectLayer[y][x])
 			}
 		}
 	}
@@ -60,34 +63,31 @@ func TestDefaultFieldRenderer_RenderSingleRoom(t *testing.T) {
 		},
 	}
 
-	field := renderer.RenderField(10, 10, level)
+	rf := renderer.RenderField(10, 10, level)
+	env := rf.EnvironmentLayer
 
-	// Проверяем стены комнаты
-	// Верхняя стена (y=2, x=2..6)
+	// Проверяем стены комнаты на слое окружения
 	for x := 2; x <= 6; x++ {
-		if field[2][x] != common.WorldTypeWall {
-			t.Errorf("Expected wall at (%d, 2), got %v", x, field[2][x])
+		if env[2][x] != common.WorldTypeWall {
+			t.Errorf("Expected wall at (%d, 2), got %v", x, env[2][x])
 		}
 	}
 
-	// Нижняя стена (y=5, x=2..6)
 	for x := 2; x <= 6; x++ {
-		if field[5][x] != common.WorldTypeWall {
-			t.Errorf("Expected wall at (%d, 5), got %v", x, field[5][x])
+		if env[5][x] != common.WorldTypeWall {
+			t.Errorf("Expected wall at (%d, 5), got %v", x, env[5][x])
 		}
 	}
 
-	// Левая стена (x=2, y=2..5)
 	for y := 2; y <= 5; y++ {
-		if field[y][2] != common.WorldTypeWall {
-			t.Errorf("Expected wall at (2, %d), got %v", y, field[y][2])
+		if env[y][2] != common.WorldTypeWall {
+			t.Errorf("Expected wall at (2, %d), got %v", y, env[y][2])
 		}
 	}
 
-	// Правая стена (x=6, y=2..5)
 	for y := 2; y <= 5; y++ {
-		if field[y][6] != common.WorldTypeWall {
-			t.Errorf("Expected wall at (6, %d), got %v", y, field[y][6])
+		if env[y][6] != common.WorldTypeWall {
+			t.Errorf("Expected wall at (6, %d), got %v", y, env[y][6])
 		}
 	}
 }
@@ -117,20 +117,21 @@ func TestDefaultFieldRenderer_RenderPassage(t *testing.T) {
 		},
 	}
 
-	field := renderer.RenderField(10, 10, level)
+	rf := renderer.RenderField(10, 10, level)
+	env := rf.EnvironmentLayer
 
 	// Проверяем двери
-	if field[3][3] != common.WorldTypeDoor {
-		t.Errorf("Expected door at (3, 3), got %v", field[3][3])
+	if env[3][3] != common.WorldTypeDoor {
+		t.Errorf("Expected door at (3, 3), got %v", env[3][3])
 	}
-	if field[3][7] != common.WorldTypeDoor {
-		t.Errorf("Expected door at (7, 3), got %v", field[3][7])
+	if env[3][7] != common.WorldTypeDoor {
+		t.Errorf("Expected door at (7, 3), got %v", env[3][7])
 	}
 
 	// Проверяем путь коридора
 	for _, pt := range passage.Way {
-		if field[pt.Y][pt.X] != common.WorldTypePassage {
-			t.Errorf("Expected passage at (%d, %d), got %v", pt.X, pt.Y, field[pt.Y][pt.X])
+		if env[pt.Y][pt.X] != common.WorldTypePassage {
+			t.Errorf("Expected passage at (%d, %d), got %v", pt.X, pt.Y, env[pt.Y][pt.X])
 		}
 	}
 }
@@ -158,11 +159,11 @@ func TestDefaultFieldRenderer_RenderPortal(t *testing.T) {
 		},
 	}
 
-	field := renderer.RenderField(10, 10, level)
+	rf := renderer.RenderField(10, 10, level)
 
-	// Проверяем портал
-	if field[3][3] != common.WorldTypePortal {
-		t.Errorf("Expected portal at (3, 3), got %v", field[3][3])
+	// Проверяем портал (портал - часть окружения)
+	if rf.EnvironmentLayer[3][3] != common.WorldTypePortal {
+		t.Errorf("Expected portal at (3, 3), got %v", rf.EnvironmentLayer[3][3])
 	}
 }
 
@@ -221,20 +222,21 @@ func TestDefaultFieldRenderer_RenderItems(t *testing.T) {
 		},
 	}
 
-	field := renderer.RenderField(10, 10, level)
+	rf := renderer.RenderField(10, 10, level)
+	obj := rf.ObjectLayer
 
-	// Проверяем предметы
-	if field[2][2] != common.Food {
-		t.Errorf("Expected bread at (2, 2), got %v", field[2][2])
+	// Проверяем предметы (предметы - динамический слой)
+	if obj[2][2] != common.Food {
+		t.Errorf("Expected bread at (2, 2), got %v", obj[2][2])
 	}
-	if field[3][3] != common.Elixir {
-		t.Errorf("Expected strength elixir at (3, 3), got %v", field[3][3])
+	if obj[3][3] != common.Elixir {
+		t.Errorf("Expected strength elixir at (3, 3), got %v", obj[3][3])
 	}
-	if field[4][4] != common.Scroll {
-		t.Errorf("Expected agility scroll at (4, 4), got %v", field[4][4])
+	if obj[4][4] != common.Scroll {
+		t.Errorf("Expected agility scroll at (4, 4), got %v", obj[4][4])
 	}
-	if field[5][5] != common.Weapon {
-		t.Errorf("Expected weapon at (5, 5), got %v", field[5][5])
+	if obj[5][5] != common.Weapon {
+		t.Errorf("Expected weapon at (5, 5), got %v", obj[5][5])
 	}
 }
 
@@ -263,14 +265,15 @@ func TestDefaultFieldRenderer_RenderEnemies(t *testing.T) {
 		},
 	}
 
-	field := renderer.RenderField(10, 10, level)
+	rf := renderer.RenderField(10, 10, level)
+	obj := rf.ObjectLayer
 
-	// Проверяем врагов
-	if field[3][3] != common.EntityTypeZombie {
-		t.Errorf("Expected zombie at (3, 3), got %v", field[3][3])
+	// Проверяем врагов (враги - динамический слой)
+	if obj[3][3] != common.EntityTypeZombie {
+		t.Errorf("Expected zombie at (3, 3), got %v", obj[3][3])
 	}
-	if field[5][5] != common.EntityTypeVampire {
-		t.Errorf("Expected vampire at (5, 5), got %v", field[5][5])
+	if obj[5][5] != common.EntityTypeVampire {
+		t.Errorf("Expected vampire at (5, 5), got %v", obj[5][5])
 	}
 }
 
@@ -294,11 +297,11 @@ func TestDefaultFieldRenderer_RenderPlayer(t *testing.T) {
 		},
 	}
 
-	field := renderer.RenderField(10, 10, level)
+	rf := renderer.RenderField(10, 10, level)
 
-	// Проверяем игрока
-	if field[5][5] != common.EntityTypePlayer {
-		t.Errorf("Expected player at (5, 5), got %v", field[5][5])
+	// Проверяем игрока (игрок - динамический слой)
+	if rf.ObjectLayer[5][5] != common.EntityTypePlayer {
+		t.Errorf("Expected player at (5, 5), got %v", rf.ObjectLayer[5][5])
 	}
 }
 
@@ -333,11 +336,11 @@ func TestDefaultFieldRenderer_PlayerOverlapsItem(t *testing.T) {
 		},
 	}
 
-	field := renderer.RenderField(10, 10, level)
+	rf := renderer.RenderField(10, 10, level)
 
-	// Игрок должен быть поверх еды
-	if field[5][5] != common.EntityTypePlayer {
-		t.Errorf("Expected player at (5, 5) overlapping food, got %v", field[5][5])
+	// Игрок должен быть поверх еды (оба в ObjectLayer, игрок перезаписывает)
+	if rf.ObjectLayer[5][5] != common.EntityTypePlayer {
+		t.Errorf("Expected player at (5, 5) overlapping food, got %v", rf.ObjectLayer[5][5])
 	}
 }
 
@@ -368,9 +371,9 @@ func TestDefaultFieldRenderer_BoundsChecking(t *testing.T) {
 	}
 
 	// Не должно быть паники
-	field := renderer.RenderField(10, 10, level)
+	rf := renderer.RenderField(10, 10, level)
 
-	if len(field) != 10 || len(field[0]) != 10 {
+	if rf.Height != 10 || rf.Width != 10 {
 		t.Error("Field size changed after rendering out-of-bounds object")
 	}
 }
