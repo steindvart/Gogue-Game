@@ -28,22 +28,27 @@ func NewScoreboard(entries []dto.ScoreEntry) *Scoreboard {
 	}
 
 	// Заголовки столбцов
-	headers := []string{
-		"#",
-		"Treasures",
-		"Level",
-		"Enemies",
-		"Food",
-		"Elixirs",
-		"Scrolls",
-		"Hits",
-		"Missed",
-		"Moves",
+	type columnDef struct {
+		Header string
+		Color  string
 	}
 
-	for col, header := range headers {
-		cell := tview.NewTableCell(fmt.Sprintf(" %s ", header)).
-			SetTextColor(tcell.ColorGold).
+	columns := []columnDef{
+		{"#", colorWhite},
+		{"Treasures", statColorTreasures},
+		{"Level", statColorLevel},
+		{"Enemies", statColorEnemies},
+		{"Food", statColorFood},
+		{"Elixirs", statColorElixirs},
+		{"Scrolls", statColorScrolls},
+		{"Hits", statColorHitsDealt},
+		{"Missed", statColorHitsMissed},
+		{"Moves", statColorCellsMoved},
+	}
+
+	for col, def := range columns {
+		cell := tview.NewTableCell(fmt.Sprintf(" %s ", def.Header)).
+			SetTextColor(StatTcellColor(def.Color)).
 			SetAlign(tview.AlignCenter).
 			SetSelectable(false).
 			SetAttributes(tcell.AttrBold)
@@ -64,25 +69,30 @@ func NewScoreboard(entries []dto.ScoreEntry) *Scoreboard {
 			medal = fmt.Sprintf("%d", i+1)
 		}
 
-		rowData := []string{
-			medal,
-			fmt.Sprintf("%d", entry.Treasures),
-			fmt.Sprintf("%d", entry.LevelReached),
-			fmt.Sprintf("%d", entry.EnemiesKilled),
-			fmt.Sprintf("%d", entry.FoodEaten),
-			fmt.Sprintf("%d", entry.ElixirsDrunk),
-			fmt.Sprintf("%d", entry.ScrollsRead),
-			fmt.Sprintf("%d", entry.HitsDealt),
-			fmt.Sprintf("%d", entry.HitsMissed),
-			fmt.Sprintf("%d", entry.CellsMoved),
+		type cellData struct {
+			Text  string
+			Color string
 		}
 
-		for col, text := range rowData {
-			color := tcell.ColorWhite
+		rowData := []cellData{
+			{medal, colorWhite},
+			{fmt.Sprintf("%d", entry.Treasures), statColorTreasures},
+			{fmt.Sprintf("%d", entry.LevelReached), statColorLevel},
+			{fmt.Sprintf("%d", entry.EnemiesKilled), statColorEnemies},
+			{fmt.Sprintf("%d", entry.FoodEaten), statColorFood},
+			{fmt.Sprintf("%d", entry.ElixirsDrunk), statColorElixirs},
+			{fmt.Sprintf("%d", entry.ScrollsRead), statColorScrolls},
+			{fmt.Sprintf("%d", entry.HitsDealt), statColorHitsDealt},
+			{fmt.Sprintf("%d", entry.HitsMissed), statColorHitsMissed},
+			{fmt.Sprintf("%d", entry.CellsMoved), statColorCellsMoved},
+		}
+
+		for col, data := range rowData {
+			color := StatTcellColor(data.Color)
 			if col == 0 && i < 3 {
-				color = tcell.ColorGold
+				color = StatTcellColor(colorGold)
 			}
-			cell := tview.NewTableCell(fmt.Sprintf(" %s ", text)).
+			cell := tview.NewTableCell(fmt.Sprintf(" %s ", data.Text)).
 				SetTextColor(color).
 				SetAlign(tview.AlignCenter).
 				SetSelectable(false)

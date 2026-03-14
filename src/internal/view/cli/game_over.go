@@ -76,26 +76,26 @@ func (g *GameOver) buildContent(title string, stats *dto.ScoreEntry) string {
 
 	return fmt.Sprintf(
 		"%s\n\n"+
-			"[gold]Treasures collected:[white]   %d\n"+
-			"[red]Enemies killed:[white]         %d\n"+
-			"[skyblue]Level reached:[white]      %d\n"+
-			"[green]Food eaten:[white]          %d\n"+
-			"[magenta]Elixirs drunk:[white]      %d\n"+
-			"[cyan]Scrolls read:[white]          %d\n"+
-			"[yellow]Hits dealt:[white]          %d\n"+
-			"[orange]Hits missed:[white]         %d\n"+
-			"[lime]Cells moved:[white]           %d\n\n"+
+			"[%s::b]Treasures:[-:-:-]  %d\n"+
+			"[%s::b]Level:[-:-:-]      %d\n"+
+			"[%s::b]Enemies:[-:-:-]    %d\n"+
+			"[%s::b]Food:[-:-:-]       %d\n"+
+			"[%s::b]Elixirs:[-:-:-]    %d\n"+
+			"[%s::b]Scrolls:[-:-:-]    %d\n"+
+			"[%s::b]Hits:[-:-:-]       %d\n"+
+			"[%s::b]Missed:[-:-:-]     %d\n"+
+			"[%s::b]Moves:[-:-:-]      %d\n\n"+
 			"[gray]Press Enter to return to menu",
 		title,
-		stats.Treasures,
-		stats.EnemiesKilled,
-		stats.LevelReached,
-		stats.FoodEaten,
-		stats.ElixirsDrunk,
-		stats.ScrollsRead,
-		stats.HitsDealt,
-		stats.HitsMissed,
-		stats.CellsMoved,
+		statColorTreasures, stats.Treasures,
+		statColorLevel, stats.LevelReached,
+		statColorEnemies, stats.EnemiesKilled,
+		statColorFood, stats.FoodEaten,
+		statColorElixirs, stats.ElixirsDrunk,
+		statColorScrolls, stats.ScrollsRead,
+		statColorHitsDealt, stats.HitsDealt,
+		statColorHitsMissed, stats.HitsMissed,
+		statColorCellsMoved, stats.CellsMoved,
 	)
 }
 
