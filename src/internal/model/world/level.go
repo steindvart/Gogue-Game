@@ -726,3 +726,23 @@ func (l *Level) GenerateTreasure() (*items.Treasure, error) {
 		},
 		item), nil
 }
+
+// GenerateTreasureForEnemy генерирует сокровище с процентами выпадения,
+// скорректированными для конкретного типа врага.
+// Более сильные враги (Огр, Вампир) имеют повышенный шанс на ценную награду.
+func (l *Level) GenerateTreasureForEnemy(enemyType entities.EnemyType) (*items.Treasure, error) {
+	drop := l.config.GetTreasureDropConfigForEnemy(l.Number, enemyType)
+
+	item, err := items.GetTreasureType(l.random, drop.GoldPercent, drop.GemPercent, drop.ArtifactPercent, drop.MysteryPercent)
+	if err != nil {
+		return nil, err
+	}
+
+	return items.NewTreasureBuiltin(
+		l.random,
+		primitives.Box{
+			Point: primitives.Point2D[int]{X: 0, Y: 0},
+			Size:  primitives.Size2D[uint]{Width: 1, Height: 1},
+		},
+		item), nil
+}

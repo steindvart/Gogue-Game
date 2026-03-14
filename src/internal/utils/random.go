@@ -64,3 +64,31 @@ func GetRandomElement[T any](random Randomizer, slice []T) T {
 	idx := random.Intn(len(slice))
 	return slice[idx]
 }
+
+// WeightedChoice - обобщённый элемент со значением и весом.
+type WeightedChoice[T any] struct {
+	Value  T
+	Weight int
+}
+
+// GetWeightedRandomElement выбирает случайный элемент из слайса
+// с учётом весов. Веса задают относительную вероятность выбора.
+// Паникует, если суммарный вес <= 0 или слайс пуст.
+func GetWeightedRandomElement[T any](random Randomizer, choices []WeightedChoice[T]) T {
+	totalWeight := 0
+	for _, c := range choices {
+		totalWeight += c.Weight
+	}
+
+	roll := random.Intn(totalWeight)
+	cumulative := 0
+	for _, c := range choices {
+		cumulative += c.Weight
+		if roll < cumulative {
+			return c.Value
+		}
+	}
+
+	// Не должно произойти при totalWeight > 0
+	return choices[len(choices)-1].Value
+}
