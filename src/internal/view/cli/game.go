@@ -45,6 +45,7 @@ const (
 	colorBlack      = "#000000"
 	colorWhite      = "#FFFFFF"
 	colorGray       = "#808080"
+	colorStrongGray = "#515152"
 	colorLightGray  = "#E0E0E0"
 	colorSilver     = "#C0C0C0"
 	colorGold       = "#FFD700"
@@ -70,7 +71,7 @@ const (
 	// Цвета стен и структур
 	ColorWall    = colorGray
 	ColorFloor   = colorGray
-	ColorPassage = colorSilver
+	ColorPassage = colorStrongGray
 	ColorPortal  = colorPurple
 
 	// Цвета врагов
