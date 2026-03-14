@@ -22,7 +22,7 @@ import (
 const (
 	MapHeight      = 30
 	MapWidth       = 90
-	maxLevelNumber = 2
+	maxLevelNumber = 21
 )
 
 const (
