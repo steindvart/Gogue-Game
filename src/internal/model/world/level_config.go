@@ -86,12 +86,12 @@ func DefaultDifficultyScaling() DifficultyScaling {
 		EnemyAttributeGrowth: 0.08,
 
 		// Предметы
-		BaseFoods:     7,
+		BaseFoods:     10,
 		BaseElixirs:   5,
 		BaseScrolls:   3,
 		BaseWeapons:   2,
 		ItemDecayRate: 0.05,
-		MinFoods:      3,
+		MinFoods:      5,
 		MinElixirs:    2,
 		MinScrolls:    1,
 		MinWeapons:    1,
