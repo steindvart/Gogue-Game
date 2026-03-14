@@ -126,21 +126,22 @@ func (g *StateMachine) handleSignal(s signals.Type) {
 		}
 		g.PushState(leaderboard)
 	case signals.GameWon:
-		stats := g.extractGameOverStats()
-		gameOverState := state.NewGameOver(viewcli.GameOverTypeWin, stats)
+		entry := g.extractScoreEntry()
+		gameOverState := state.NewGameOver(viewcli.GameOverTypeWin, entry)
 		g.PushState(gameOverState)
 	case signals.GameOver:
-		stats := g.extractGameOverStats()
-		gameOverState := state.NewGameOver(viewcli.GameOverTypeDeath, stats)
+		entry := g.extractScoreEntry()
+		gameOverState := state.NewGameOver(viewcli.GameOverTypeDeath, entry)
 		g.PushState(gameOverState)
 	case signals.ReturnToMenu:
 		g.rootState()
 	}
 }
 
-func (g *StateMachine) extractGameOverStats() *dto.GameOverStats {
+// extractScoreEntry извлекает статистику прохождения из текущего состояния Game.
+func (g *StateMachine) extractScoreEntry() *dto.ScoreEntry {
 	if gameState, ok := g.CurrentState().(*state.Game); ok {
-		return gameState.GameOverStats
+		return gameState.ScoreEntry
 	}
 	return nil
 }

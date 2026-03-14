@@ -38,7 +38,7 @@ type Game struct {
 	isPlayerReadyToInteract bool
 	backpackDropMode        bool
 
-	GameOverStats *dto.GameOverStats
+	ScoreEntry *dto.ScoreEntry
 }
 
 func NewGame() (*Game, error) {
@@ -293,7 +293,8 @@ func (g *Game) handleSelectAction() {
 				if err := save.SaveScore(g.buildScoreEntry(), ScoreFileName); err != nil {
 					panic(err.Error())
 				}
-				g.GameOverStats = g.buildGameOverStats()
+				entry := g.buildScoreEntry()
+				g.ScoreEntry = &entry
 				g.signal = signals.GameWon
 			}
 		}
@@ -633,14 +634,9 @@ func (g *Game) checkPlayerDeath() {
 		panic(err.Error())
 	}
 
-	g.GameOverStats = g.buildGameOverStats()
-	g.signal = signals.GameOver
-}
-
-// buildGameOverStats формирует DTO со статистикой для экрана завершения игры.
-func (g *Game) buildGameOverStats() *dto.GameOverStats {
 	entry := g.buildScoreEntry()
-	return &entry
+	g.ScoreEntry = &entry
+	g.signal = signals.GameOver
 }
 
 // buildScoreEntry формирует запись статистики для сохранения в таблицу рекордов.

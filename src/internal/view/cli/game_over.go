@@ -23,7 +23,7 @@ type GameOver struct {
 }
 
 // NewGameOver создаёт экран завершения игры с заголовком и статистикой.
-func NewGameOver(gameOverType GameOverType, stats *dto.GameOverStats) *GameOver {
+func NewGameOver(gameOverType GameOverType, stats *dto.ScoreEntry) *GameOver {
 	g := &GameOver{
 		flex: tview.NewFlex(),
 		text: tview.NewTextView(),
@@ -69,7 +69,7 @@ func (g *GameOver) buildTitle(gameOverType GameOverType) (string, tcell.Color) {
 	}
 }
 
-func (g *GameOver) buildContent(title string, stats *dto.GameOverStats) string {
+func (g *GameOver) buildContent(title string, stats *dto.ScoreEntry) string {
 	if stats == nil {
 		return title + "\n\n[gray]Press Enter to return to menu"
 	}
