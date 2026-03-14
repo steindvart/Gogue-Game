@@ -36,21 +36,13 @@ const (
 	DirectionStop
 )
 
-type AttributeRate int
-
-const (
-	AttributeRateLow      AttributeRate = 5
-	AttributeRateAverage  AttributeRate = 10
-	AttributeRateHigh     AttributeRate = 15
-	AttributeRateVeryHigh AttributeRate = 20
-)
-
 type HostilityRadius int
 
 const (
-	HostilityRadiusLow     HostilityRadius = 2
-	HostilityRadiusAverage HostilityRadius = 4
-	HostilityRadiusHigh    HostilityRadius = 6
+	HostilityRadiusExtraLow HostilityRadius = 1
+	HostilityRadiusLow      HostilityRadius = 2
+	HostilityRadiusAverage  HostilityRadius = 4
+	HostilityRadiusHigh     HostilityRadius = 6
 )
 
 type EnemyProvider interface {
@@ -79,7 +71,6 @@ type Ghost struct {
 	IsVisible bool
 }
 
-// OgreCombatPhase определяет фазу боевого цикла огра.
 type OgreCombatPhase int
 
 const (
@@ -93,7 +84,6 @@ const (
 
 type Ogre struct {
 	*Enemy
-	IsResting   bool // deprecated: оставлено для обратной совместимости save; используйте CombatPhase.
 	CombatPhase OgreCombatPhase
 }
 
@@ -121,8 +111,8 @@ func NewZombie(box *primitives.Box) *Zombie {
 				Attributes: &primitives.Attributes{
 					Agility:   3,
 					Strength:  8,
-					Health:    35,
-					MaxHealth: 35,
+					Health:    40,
+					MaxHealth: 40,
 				},
 			},
 			HostilityRadius: HostilityRadiusLow,
@@ -141,8 +131,8 @@ func NewVampire(box *primitives.Box) *Vampire {
 				Attributes: &primitives.Attributes{
 					Agility:   14,
 					Strength:  10,
-					Health:    30,
-					MaxHealth: 30,
+					Health:    35,
+					MaxHealth: 35,
 				},
 			},
 			HostilityRadius: HostilityRadiusAverage,
@@ -162,8 +152,8 @@ func NewGhost(box *primitives.Box) *Ghost {
 				Attributes: &primitives.Attributes{
 					Agility:   10,
 					Strength:  6,
-					Health:    15,
-					MaxHealth: 15,
+					Health:    18,
+					MaxHealth: 18,
 				},
 			},
 			HostilityRadius: HostilityRadiusLow,
@@ -184,14 +174,13 @@ func NewOgre(box *primitives.Box) *Ogre {
 				Attributes: &primitives.Attributes{
 					Agility:   2,
 					Strength:  18,
-					Health:    60,
-					MaxHealth: 60,
+					Health:    70,
+					MaxHealth: 70,
 				},
 			},
 			HostilityRadius: HostilityRadiusAverage,
 			Direction:       DirectionStop,
 		},
-		IsResting:   false,
 		CombatPhase: OgrePhaseReady,
 	}
 }
@@ -206,8 +195,8 @@ func NewSnakeMage(box *primitives.Box) *SnakeMage {
 				Attributes: &primitives.Attributes{
 					Agility:   12,
 					Strength:  14,
-					Health:    22,
-					MaxHealth: 22,
+					Health:    26,
+					MaxHealth: 26,
 				},
 			},
 			HostilityRadius: HostilityRadiusAverage,
@@ -232,7 +221,7 @@ func NewMimic(box *primitives.Box) *Mimic {
 					MaxHealth: 40,
 				},
 			},
-			HostilityRadius: HostilityRadiusLow,
+			HostilityRadius: HostilityRadiusExtraLow,
 			Direction:       DirectionStop,
 		},
 		IsDisguised: true,
