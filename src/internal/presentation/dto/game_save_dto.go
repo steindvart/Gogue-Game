@@ -46,8 +46,7 @@ type PlayerSaveDto struct {
 	ViewRadius       int                     `json:"view_radius"`
 	Weapon           *items.Weapon           `json:"weapon"`
 	Backpack         BackpackSaveDto         `json:"backpack"`
-	EnemiesKilled    uint                    `json:"enemies_killed"`
-	ConsumablesUsed  uint                    `json:"consumables_used"`
+	entities.GameStats
 }
 
 type EffectSaveDto struct {

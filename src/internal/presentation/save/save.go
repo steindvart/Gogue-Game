@@ -50,7 +50,7 @@ func DeleteGame(filename string) error {
 	return nil
 }
 
-func SaveScore(treasures int32, filename string) error {
+func SaveScore(entry dto.ScoreEntry, filename string) error {
 	var scoreDto dto.ScoreDto
 
 	if file, err := os.Open(filename); err == nil {
@@ -64,13 +64,13 @@ func SaveScore(treasures int32, filename string) error {
 		return err
 	}
 
-	scoreDto.Scores = append(scoreDto.Scores, treasures)
-	sort.Slice(scoreDto.Scores, func(i, j int) bool {
-		return scoreDto.Scores[i] > scoreDto.Scores[j]
+	scoreDto.Entries = append(scoreDto.Entries, entry)
+	sort.Slice(scoreDto.Entries, func(i, j int) bool {
+		return scoreDto.Entries[i].Treasures > scoreDto.Entries[j].Treasures
 	})
 
-	if len(scoreDto.Scores) > ScoresTop {
-		scoreDto.Scores = scoreDto.Scores[:ScoresTop]
+	if len(scoreDto.Entries) > ScoresTop {
+		scoreDto.Entries = scoreDto.Entries[:ScoresTop]
 	}
 
 	file, err := os.Create(filename)
@@ -88,7 +88,7 @@ func SaveScore(treasures int32, filename string) error {
 func LoadScore(filename string) (*dto.ScoreDto, error) {
 	file, err := os.ReadFile(filename)
 	if err != nil {
-		return &dto.ScoreDto{Scores: []int32{}}, nil
+		return &dto.ScoreDto{Entries: []dto.ScoreEntry{}}, nil
 	}
 	var scoreDto dto.ScoreDto
 	if err := json.Unmarshal(file, &scoreDto); err != nil {

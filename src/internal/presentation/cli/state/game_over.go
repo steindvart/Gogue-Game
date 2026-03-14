@@ -17,7 +17,7 @@ type GameOver struct {
 }
 
 // NewGameOver создаёт состояние экрана завершения игры.
-func NewGameOver(gameOverType viewcli.GameOverType, stats *dto.GameOverStats) *GameOver {
+func NewGameOver(gameOverType viewcli.GameOverType, stats *dto.ScoreEntry) *GameOver {
 	g := &GameOver{
 		view:   viewcli.NewGameOver(gameOverType, stats),
 		signal: signals.NoSignal,

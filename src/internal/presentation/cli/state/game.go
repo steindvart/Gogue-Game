@@ -38,7 +38,7 @@ type Game struct {
 	isPlayerReadyToInteract bool
 	backpackDropMode        bool
 
-	GameOverStats *dto.GameOverStats
+	ScoreEntry *dto.ScoreEntry
 }
 
 func NewGame() (*Game, error) {
@@ -231,6 +231,12 @@ func (g *Game) handleMoveAction(a action.Type) {
 			attackResult.AttackerName = "Player"
 			attackResult.DefenderName = g.getEnemyDisplayName(enemy)
 			playerAttackInfo = dto.ConvertAttackResultToDto(attackResult)
+
+			if attackResult.Evaded {
+				g.level.Player.Stats.HitsMissed++
+			} else {
+				g.level.Player.Stats.HitsDealt++
+			}
 		}
 
 		if provider, ok := enemy.(entities.CharacterProvider); ok {
@@ -246,7 +252,7 @@ func (g *Game) handleMoveAction(a action.Type) {
 				}
 				g.level.Player.AddTreasure(item)
 				g.level.RemoveEnemy(enemy)
-				g.level.Player.EnemiesKilled++
+				g.level.Player.Stats.EnemiesKilled++
 			}
 			g.level.Player.SetPosition(oldPos)
 		}
@@ -254,6 +260,8 @@ func (g *Game) handleMoveAction(a action.Type) {
 		g.view.SetPlayerAttackInfo(playerAttackInfo)
 		return
 	}
+
+	g.level.Player.Stats.CellsMoved++
 }
 
 func (g *Game) resetInteraction() {
@@ -282,10 +290,11 @@ func (g *Game) handleSelectAction() {
 				if err := save.DeleteGame(SaveFileName); err != nil {
 					panic(err.Error())
 				}
-				if err := save.SaveScore(g.level.Player.Backpack.Treasures, ScoreFileName); err != nil {
+				if err := save.SaveScore(g.buildScoreEntry(), ScoreFileName); err != nil {
 					panic(err.Error())
 				}
-				g.GameOverStats = g.buildGameOverStats()
+				entry := g.buildScoreEntry()
+				g.ScoreEntry = &entry
 				g.signal = signals.GameWon
 			}
 		}
@@ -469,14 +478,17 @@ func (g *Game) handleItemSelection(actionType action.Type) {
 		return
 	}
 
-	isConsumable := itemType == entities.BackpackItemTypeFood ||
-		itemType == entities.BackpackItemTypeElixir ||
-		itemType == entities.BackpackItemTypeScroll
-
 	if err := g.level.Player.UseItemFromBackpack(selectedItem); err != nil {
 		g.view.SetInfoErrorMessage(err.Error())
-	} else if isConsumable {
-		g.level.Player.ConsumablesUsed++
+	} else {
+		switch itemType {
+		case entities.BackpackItemTypeFood:
+			g.level.Player.Stats.FoodEaten++
+		case entities.BackpackItemTypeElixir:
+			g.level.Player.Stats.ElixirsDrunk++
+		case entities.BackpackItemTypeScroll:
+			g.level.Player.Stats.ScrollsRead++
+		}
 	}
 
 	g.updateBackpackInfo()
@@ -589,7 +601,7 @@ func (g *Game) dropItemToMap(item any, isEquipped bool) {
 }
 
 // trackConsumableUseAtPosition проверяет, является ли предмет на указанной позиции расходным,
-// и увеличивает счётчик использованных расходных предметов игрока.
+// и увеличивает соответствующий счётчик статистики игрока.
 func (g *Game) trackConsumableUseAtPosition(pos primitives.Point2D[int]) {
 	item := g.level.GetItemAtPosition(pos)
 	if item == nil {
@@ -597,8 +609,12 @@ func (g *Game) trackConsumableUseAtPosition(pos primitives.Point2D[int]) {
 	}
 
 	switch item.(type) {
-	case *items.Food, *items.Elixir, *items.Scroll:
-		g.level.Player.ConsumablesUsed++
+	case *items.Food:
+		g.level.Player.Stats.FoodEaten++
+	case *items.Elixir:
+		g.level.Player.Stats.ElixirsDrunk++
+	case *items.Scroll:
+		g.level.Player.Stats.ScrollsRead++
 	}
 }
 
@@ -614,25 +630,25 @@ func (g *Game) checkPlayerDeath() {
 	}
 
 	// Сохраняем рекорд (сокровища) в таблицу рекордов и при гибели
-	if err := save.SaveScore(g.level.Player.Backpack.Treasures, ScoreFileName); err != nil {
+	if err := save.SaveScore(g.buildScoreEntry(), ScoreFileName); err != nil {
 		panic(err.Error())
 	}
 
-	g.GameOverStats = g.buildGameOverStats()
+	entry := g.buildScoreEntry()
+	g.ScoreEntry = &entry
 	g.signal = signals.GameOver
 }
 
-// buildGameOverStats формирует DTO со статистикой для экрана завершения игры.
-func (g *Game) buildGameOverStats() *dto.GameOverStats {
+// buildScoreEntry формирует запись статистики для сохранения в таблицу рекордов.
+func (g *Game) buildScoreEntry() dto.ScoreEntry {
 	if g.level.Player == nil {
-		return &dto.GameOverStats{}
+		return dto.ScoreEntry{}
 	}
 
-	return &dto.GameOverStats{
-		Treasures:       g.level.Player.Backpack.Treasures,
-		EnemiesKilled:   g.level.Player.EnemiesKilled,
-		LevelReached:    g.level.Number,
-		ConsumablesUsed: g.level.Player.ConsumablesUsed,
+	return dto.ScoreEntry{
+		Treasures:    g.level.Player.Backpack.Treasures,
+		LevelReached: g.level.Number,
+		GameStats:    g.level.Player.Stats,
 	}
 }
 

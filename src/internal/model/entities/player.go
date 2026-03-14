@@ -13,9 +13,7 @@ type Player struct {
 	ViewRadius int
 	StunnedFor uint32 // Количество ходов, на которые игрок оглушён (не может действовать).
 
-	// Игровая статистика
-	EnemiesKilled   uint `json:"enemies_killed"`
-	ConsumablesUsed uint `json:"consumables_used"`
+	Stats GameStats `json:"stats"`
 }
 
 type BackpackItemType int

@@ -23,7 +23,7 @@ type GameOver struct {
 }
 
 // NewGameOver создаёт экран завершения игры с заголовком и статистикой.
-func NewGameOver(gameOverType GameOverType, stats *dto.GameOverStats) *GameOver {
+func NewGameOver(gameOverType GameOverType, stats *dto.ScoreEntry) *GameOver {
 	g := &GameOver{
 		flex: tview.NewFlex(),
 		text: tview.NewTextView(),
@@ -51,7 +51,7 @@ func NewGameOver(gameOverType GameOverType, stats *dto.GameOverStats) *GameOver 
 
 	rootFlex := tview.NewFlex().SetDirection(tview.FlexRow).
 		AddItem(gapBox, 0, 1, false).
-		AddItem(textFlex, 14, 0, true).
+		AddItem(textFlex, 20, 0, true).
 		AddItem(gapBox, 0, 1, false)
 
 	g.flex = rootFlex
@@ -69,23 +69,33 @@ func (g *GameOver) buildTitle(gameOverType GameOverType) (string, tcell.Color) {
 	}
 }
 
-func (g *GameOver) buildContent(title string, stats *dto.GameOverStats) string {
+func (g *GameOver) buildContent(title string, stats *dto.ScoreEntry) string {
 	if stats == nil {
 		return title + "\n\n[gray]Press Enter to return to menu"
 	}
 
 	return fmt.Sprintf(
 		"%s\n\n"+
-			"[gold]Treasures collected:[white]  %d\n"+
-			"[red]Enemies killed:[white]       %d\n"+
-			"[skyblue]Level reached:[white]        %d\n"+
-			"[orange]Consumables used:[white]     %d\n\n"+
+			"[%s::b]Treasures:[-:-:-]  %d\n"+
+			"[%s::b]Level:[-:-:-]      %d\n"+
+			"[%s::b]Enemies:[-:-:-]    %d\n"+
+			"[%s::b]Food:[-:-:-]       %d\n"+
+			"[%s::b]Elixirs:[-:-:-]    %d\n"+
+			"[%s::b]Scrolls:[-:-:-]    %d\n"+
+			"[%s::b]Hits:[-:-:-]       %d\n"+
+			"[%s::b]Missed:[-:-:-]     %d\n"+
+			"[%s::b]Moves:[-:-:-]      %d\n\n"+
 			"[gray]Press Enter to return to menu",
 		title,
-		stats.Treasures,
-		stats.EnemiesKilled,
-		stats.LevelReached,
-		stats.ConsumablesUsed,
+		statColorTreasures, stats.Treasures,
+		statColorLevel, stats.LevelReached,
+		statColorEnemies, stats.EnemiesKilled,
+		statColorFood, stats.FoodEaten,
+		statColorElixirs, stats.ElixirsDrunk,
+		statColorScrolls, stats.ScrollsRead,
+		statColorHitsDealt, stats.HitsDealt,
+		statColorHitsMissed, stats.HitsMissed,
+		statColorCellsMoved, stats.CellsMoved,
 	)
 }
 
