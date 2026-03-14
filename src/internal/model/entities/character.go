@@ -41,7 +41,7 @@ func (c *Character) TakeDamage(damage float64) {
 	}
 }
 
-// damageVariation — максимальное отклонение урона вниз (30%).
+// damageVariation - максимальное отклонение урона вниз (30%).
 // Например, при Strength = 10 урон будет в диапазоне [7, 10].
 const damageVariation = 0.3
 

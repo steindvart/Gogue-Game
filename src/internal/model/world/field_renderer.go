@@ -5,11 +5,13 @@ import (
 	"gogue/internal/model/entities"
 	"gogue/internal/model/items"
 	"gogue/internal/model/primitives"
-	"gogue/internal/utils"
 )
 
 type FieldRenderer interface {
-	RenderField(width, height int, level *Level) [][]common.GameEntityType
+	// RenderField возвращает двухслойное представление карты:
+	// EnvironmentLayer - стены, полы, проходы, порталы;
+	// ObjectLayer - враги, предметы, игрок.
+	RenderField(width, height int, level *Level) *common.RenderedField
 }
 
 type DefaultFieldRenderer struct{}
@@ -18,23 +20,25 @@ func NewDefaultFieldRenderer() *DefaultFieldRenderer {
 	return &DefaultFieldRenderer{}
 }
 
-func (r *DefaultFieldRenderer) RenderField(width, height int, level *Level) [][]common.GameEntityType {
-	field := utils.CreateEmpty2DSlice[common.GameEntityType](height, width)
+// RenderField возвращает двухслойное представление карты.
+func (r *DefaultFieldRenderer) RenderField(width, height int, level *Level) *common.RenderedField {
+	rf := common.NewRenderedField(width, height)
 
-	// Порядок рендеринга (от фона к переднему плану):
+	// Слой окружения:
 	// 1. Комнаты (стены и пол)
 	// 2. Коридоры и двери
+	r.renderRooms(level.Rooms, level.FinishPortal, rf.EnvironmentLayer)
+	r.renderPassages(level.Passages, rf.EnvironmentLayer)
+
+	// Слой объектов:
 	// 3. Предметы (еда, зелья, свитки, оружие)
 	// 4. Враги
 	// 5. Игрок (всегда поверх всех)
+	r.renderItems(level.Items, rf.ObjectLayer, width, height)
+	r.renderEnemies(level.Enemies, rf.ObjectLayer, width, height)
+	r.renderPlayer(level.Player, rf.ObjectLayer, width, height)
 
-	r.renderRooms(level.Rooms, level.FinishPortal, field)
-	r.renderPassages(level.Passages, field)
-	r.renderItems(level.Items, field, width, height)
-	r.renderEnemies(level.Enemies, field, width, height)
-	r.renderPlayer(level.Player, field, width, height)
-
-	return field
+	return rf
 }
 
 func (r *DefaultFieldRenderer) renderRooms(rooms []Room, finishPortal primitives.Box, field [][]common.GameEntityType) {

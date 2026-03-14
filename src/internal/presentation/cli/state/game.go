@@ -545,7 +545,8 @@ func (g *Game) dropItemToMap(item any, isEquipped bool) {
 		// Ну и так значительно проще код.
 		field := g.level.GetFullField(MapWidth, MapHeight)
 
-		if field[candidatePos.Y][candidatePos.X] == common.WorldTypeRoomFloor {
+		if field.EnvironmentLayer[candidatePos.Y][candidatePos.X] == common.WorldTypeRoomFloor &&
+			field.ObjectLayer[candidatePos.Y][candidatePos.X] == common.EntityTypeNone {
 			dropPos = &candidatePos
 			break
 		}

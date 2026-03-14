@@ -28,11 +28,11 @@ func NewScoreboard(options []string) *Scoreboard {
 		var medal string
 		switch i {
 		case 0:
-			medal = "🥇"
+			medal = "🥇 "
 		case 1:
-			medal = "🥈"
+			medal = "🥈 "
 		case 2:
-			medal = "🥉"
+			medal = "🥉 "
 		default:
 			medal = fmt.Sprintf("%2d.", i+1)
 		}

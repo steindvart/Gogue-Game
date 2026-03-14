@@ -45,6 +45,7 @@ const (
 	colorBlack      = "#000000"
 	colorWhite      = "#FFFFFF"
 	colorGray       = "#808080"
+	colorStrongGray = "#515152"
 	colorLightGray  = "#E0E0E0"
 	colorSilver     = "#C0C0C0"
 	colorGold       = "#FFD700"
@@ -70,7 +71,7 @@ const (
 	// Цвета стен и структур
 	ColorWall    = colorGray
 	ColorFloor   = colorGray
-	ColorPassage = colorSilver
+	ColorPassage = colorStrongGray
 	ColorPortal  = colorPurple
 
 	// Цвета врагов
@@ -519,7 +520,7 @@ func printInteractionTips(view *tview.TextView, canUse, canTake bool) {
 	}
 }
 
-func (g *Game) UpdateGameField(field [][]common.GameEntityType) {
+func (g *Game) UpdateGameField(field *common.RenderedField) {
 	g.fieldPanel.Clear()
 	g.renderField(field)
 }
@@ -530,10 +531,10 @@ func (g *Game) renderMarginsY(margin int) {
 	}
 }
 
-func (g *Game) renderField(field [][]common.GameEntityType) {
+func (g *Game) renderField(field *common.RenderedField) {
 	g.renderMarginsY(FieldMarginY)
 
-	for y := range field {
+	for y := 0; y < field.Height; y++ {
 		g.renderMarginX(FieldMarginX)
 		g.renderRow(field, y)
 		g.resetColorWithNewLine()
@@ -546,12 +547,13 @@ func (g *Game) renderMarginX(margin int) {
 	}
 }
 
-func (g *Game) renderRow(field [][]common.GameEntityType, y int) {
-	for x := range field[0] {
-		ch, colorFg, colorBg := g.getCellAppearance(field[y][x])
+func (g *Game) renderRow(field *common.RenderedField, y int) {
+	for x := 0; x < field.Width; x++ {
+		envType := field.EnvironmentLayer[y][x]
+		objType := field.ObjectLayer[y][x]
 
-		// @todo - сделать разные фоны для разных типов поверхностей
-		// @todo - сделать так, чтобы цвет фона зависел от типа поверхности под объектом (разделить поле на два слоя?)
+		ch, colorFg, colorBg := g.getCellAppearance(envType, objType)
+
 		// Полный формат: [foreground:background:modifier]char
 		fmt.Fprintf(g.fieldPanel, "[%s:%s:-]%c", colorFg, colorBg, ch)
 	}
@@ -561,10 +563,26 @@ func (g *Game) resetColorWithNewLine() {
 	fmt.Fprintf(g.fieldPanel, "[-:-:-]\n")
 }
 
-func (g *Game) getCellAppearance(entityType common.GameEntityType) (rune, string, string) {
+// getCellAppearance возвращает символ, цвет переднего плана и цвет фона для ячейки.
+// Если на ячейке есть объект - рисуем его иконку с цветом объекта, а фон берём от окружения.
+// Если объекта нет - рисуем окружение.
+func (g *Game) getCellAppearance(envType, objType common.GameEntityType) (rune, string, string) {
+	// Определяем фон от окружения
+	_, _, envBg := g.getEnvironmentAppearance(envType)
+
+	// Если есть объект - рисуем его поверх окружения
+	if objType != common.EntityTypeNone {
+		ch, colorFg := g.getObjectAppearance(objType)
+		return ch, colorFg, envBg
+	}
+
+	// Нет объекта - рисуем только окружение
+	return g.getEnvironmentAppearance(envType)
+}
+
+// getEnvironmentAppearance возвращает визуальное представление для элемента окружения.
+func (g *Game) getEnvironmentAppearance(entityType common.GameEntityType) (rune, string, string) {
 	switch entityType {
-	case common.EntityTypePlayer:
-		return SymbolPlayer, ColorPlayer, colorBlack
 	case common.WorldTypeWall:
 		return SymbolEmpty, ColorWall, ColorWall
 	case common.WorldTypeRoomFloor:
@@ -573,28 +591,38 @@ func (g *Game) getCellAppearance(entityType common.GameEntityType) (rune, string
 		return SymbolPortal, ColorPortal, colorBlack
 	case common.WorldTypePassage, common.WorldTypeDoor:
 		return SymbolEmpty, ColorPassage, ColorPassage
-	case common.EntityTypeZombie:
-		return SymbolZombie, ColorZombie, colorBlack
-	case common.EntityTypeVampire:
-		return SymbolVampire, ColorVampire, colorBlack
-	case common.EntityTypeGhost:
-		return SymbolGhost, ColorGhost, colorBlack
-	case common.EntityTypeOgre:
-		return SymbolOgre, ColorOgre, colorBlack
-	case common.EntityTypeSnakeMage:
-		return SymbolSnakeMage, ColorSnakeMage, colorBlack
-	case common.EntityTypeMimic:
-		return SymbolMimic, ColorMimic, colorBlack
-	case common.Food:
-		return SymbolFood, ColorFood, colorBlack
-	case common.Elixir:
-		return SymbolElixir, ColorElixir, colorBlack
-	case common.Scroll:
-		return SymbolScroll, ColorScroll, colorBlack
-	case common.Weapon:
-		return SymbolWeapon, ColorWeapon, colorBlack
 	default:
 		return SymbolEmpty, colorWhite, colorBlack
+	}
+}
+
+// getObjectAppearance возвращает символ и цвет переднего плана для динамического объекта.
+func (g *Game) getObjectAppearance(entityType common.GameEntityType) (rune, string) {
+	switch entityType {
+	case common.EntityTypePlayer:
+		return SymbolPlayer, ColorPlayer
+	case common.EntityTypeZombie:
+		return SymbolZombie, ColorZombie
+	case common.EntityTypeVampire:
+		return SymbolVampire, ColorVampire
+	case common.EntityTypeGhost:
+		return SymbolGhost, ColorGhost
+	case common.EntityTypeOgre:
+		return SymbolOgre, ColorOgre
+	case common.EntityTypeSnakeMage:
+		return SymbolSnakeMage, ColorSnakeMage
+	case common.EntityTypeMimic:
+		return SymbolMimic, ColorMimic
+	case common.Food:
+		return SymbolFood, ColorFood
+	case common.Elixir:
+		return SymbolElixir, ColorElixir
+	case common.Scroll:
+		return SymbolScroll, ColorScroll
+	case common.Weapon:
+		return SymbolWeapon, ColorWeapon
+	default:
+		return SymbolUnknown, colorWhite
 	}
 }
 
