@@ -9,12 +9,12 @@ import (
 type WeaponType string
 
 const (
-	WeaponTypeDagger  WeaponType = "Dagger"  // Strength: 3...10, Agility: 5...12
-	WeaponTypeSpear   WeaponType = "Spear"   // Strength: 7...18, Agility: 2...8
-	WeaponTypeSword   WeaponType = "Sword"   // Strength: 15...20, Agility: -2...5
-	WeaponTypeAxe     WeaponType = "Axe"     // Strength: 17...35, Agility: -9...-4
-	WeaponTypeMaul    WeaponType = "Maul"    // Strength: 20...45, Agility: -15...-5
-	WeaponTypeMystery WeaponType = "Mystery" // Strength: 1...50, Agility: -20...20
+	WeaponTypeDagger  WeaponType = "Dagger"  // Strength: 1...5, Agility: 3...8
+	WeaponTypeSpear   WeaponType = "Spear"   // Strength: 3...10, Agility: 1...5
+	WeaponTypeSword   WeaponType = "Sword"   // Strength: 7...13, Agility: -2...3
+	WeaponTypeAxe     WeaponType = "Axe"     // Strength: 9...19, Agility: -7...-3
+	WeaponTypeMaul    WeaponType = "Maul"    // Strength: 11...23, Agility: -12...-4
+	WeaponTypeMystery WeaponType = "Mystery" // Strength: 1...26, Agility: -15...15
 	WeaponTypeCustom  WeaponType = "Custom"  // For custom weapon - dynamicly or from external data created
 )
 
@@ -28,37 +28,37 @@ type WeaponConfig struct {
 var WeaponRegistry = map[WeaponType]WeaponConfig{
 	WeaponTypeDagger: {
 		Type:          WeaponTypeDagger,
-		StrengthRange: primitives.AttributeRange{Min: 2, Max: 7},
+		StrengthRange: primitives.AttributeRange{Min: 1, Max: 5},
 		AgilityRange:  primitives.AttributeRange{Min: 3, Max: 8},
 		Description:   "A light, quick weapon with high agility bonus but moderate damage",
 	},
 	WeaponTypeSpear: {
 		Type:          WeaponTypeSpear,
-		StrengthRange: primitives.AttributeRange{Min: 5, Max: 14},
+		StrengthRange: primitives.AttributeRange{Min: 3, Max: 10},
 		AgilityRange:  primitives.AttributeRange{Min: 1, Max: 5},
 		Description:   "A reach weapon offering good damage with some agility bonus",
 	},
 	WeaponTypeSword: {
 		Type:          WeaponTypeSword,
-		StrengthRange: primitives.AttributeRange{Min: 10, Max: 16},
+		StrengthRange: primitives.AttributeRange{Min: 7, Max: 13},
 		AgilityRange:  primitives.AttributeRange{Min: -2, Max: 3},
 		Description:   "A balanced weapon combining decent damage with slight agility adjustment",
 	},
 	WeaponTypeAxe: {
 		Type:          WeaponTypeAxe,
-		StrengthRange: primitives.AttributeRange{Min: 12, Max: 25},
+		StrengthRange: primitives.AttributeRange{Min: 9, Max: 19},
 		AgilityRange:  primitives.AttributeRange{Min: -7, Max: -3},
 		Description:   "A heavy weapon with high damage but reduced agility",
 	},
 	WeaponTypeMaul: {
 		Type:          WeaponTypeMaul,
-		StrengthRange: primitives.AttributeRange{Min: 15, Max: 30},
+		StrengthRange: primitives.AttributeRange{Min: 11, Max: 23},
 		AgilityRange:  primitives.AttributeRange{Min: -12, Max: -4},
 		Description:   "The heaviest weapon with devastating damage but significant agility penalty",
 	},
 	WeaponTypeMystery: {
 		Type:          WeaponTypeMystery,
-		StrengthRange: primitives.AttributeRange{Min: 1, Max: 35},
+		StrengthRange: primitives.AttributeRange{Min: 1, Max: 26},
 		AgilityRange:  primitives.AttributeRange{Min: -15, Max: 15},
 		Description:   "A mysterious weapon with unpredictable effects",
 	},
