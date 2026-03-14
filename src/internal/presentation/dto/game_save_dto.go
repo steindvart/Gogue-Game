@@ -47,7 +47,12 @@ type PlayerSaveDto struct {
 	Weapon           *items.Weapon           `json:"weapon"`
 	Backpack         BackpackSaveDto         `json:"backpack"`
 	EnemiesKilled    uint                    `json:"enemies_killed"`
-	ConsumablesUsed  uint                    `json:"consumables_used"`
+	FoodEaten        uint                    `json:"food_eaten"`
+	ElixirsDrunk     uint                    `json:"elixirs_drunk"`
+	ScrollsRead      uint                    `json:"scrolls_read"`
+	HitsDealt        uint                    `json:"hits_dealt"`
+	HitsMissed       uint                    `json:"hits_missed"`
+	CellsMoved       uint                    `json:"cells_moved"`
 }
 
 type EffectSaveDto struct {

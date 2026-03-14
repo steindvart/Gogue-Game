@@ -231,6 +231,12 @@ func (g *Game) handleMoveAction(a action.Type) {
 			attackResult.AttackerName = "Player"
 			attackResult.DefenderName = g.getEnemyDisplayName(enemy)
 			playerAttackInfo = dto.ConvertAttackResultToDto(attackResult)
+
+			if attackResult.Evaded {
+				g.level.Player.HitsMissed++
+			} else {
+				g.level.Player.HitsDealt++
+			}
 		}
 
 		if provider, ok := enemy.(entities.CharacterProvider); ok {
@@ -254,6 +260,8 @@ func (g *Game) handleMoveAction(a action.Type) {
 		g.view.SetPlayerAttackInfo(playerAttackInfo)
 		return
 	}
+
+	g.level.Player.CellsMoved++
 }
 
 func (g *Game) resetInteraction() {
@@ -282,7 +290,7 @@ func (g *Game) handleSelectAction() {
 				if err := save.DeleteGame(SaveFileName); err != nil {
 					panic(err.Error())
 				}
-				if err := save.SaveScore(g.level.Player.Backpack.Treasures, ScoreFileName); err != nil {
+				if err := save.SaveScore(g.buildScoreEntry(), ScoreFileName); err != nil {
 					panic(err.Error())
 				}
 				g.GameOverStats = g.buildGameOverStats()
@@ -469,14 +477,17 @@ func (g *Game) handleItemSelection(actionType action.Type) {
 		return
 	}
 
-	isConsumable := itemType == entities.BackpackItemTypeFood ||
-		itemType == entities.BackpackItemTypeElixir ||
-		itemType == entities.BackpackItemTypeScroll
-
 	if err := g.level.Player.UseItemFromBackpack(selectedItem); err != nil {
 		g.view.SetInfoErrorMessage(err.Error())
-	} else if isConsumable {
-		g.level.Player.ConsumablesUsed++
+	} else {
+		switch itemType {
+		case entities.BackpackItemTypeFood:
+			g.level.Player.FoodEaten++
+		case entities.BackpackItemTypeElixir:
+			g.level.Player.ElixirsDrunk++
+		case entities.BackpackItemTypeScroll:
+			g.level.Player.ScrollsRead++
+		}
 	}
 
 	g.updateBackpackInfo()
@@ -589,7 +600,7 @@ func (g *Game) dropItemToMap(item any, isEquipped bool) {
 }
 
 // trackConsumableUseAtPosition проверяет, является ли предмет на указанной позиции расходным,
-// и увеличивает счётчик использованных расходных предметов игрока.
+// и увеличивает соответствующий счётчик статистики игрока.
 func (g *Game) trackConsumableUseAtPosition(pos primitives.Point2D[int]) {
 	item := g.level.GetItemAtPosition(pos)
 	if item == nil {
@@ -597,8 +608,12 @@ func (g *Game) trackConsumableUseAtPosition(pos primitives.Point2D[int]) {
 	}
 
 	switch item.(type) {
-	case *items.Food, *items.Elixir, *items.Scroll:
-		g.level.Player.ConsumablesUsed++
+	case *items.Food:
+		g.level.Player.FoodEaten++
+	case *items.Elixir:
+		g.level.Player.ElixirsDrunk++
+	case *items.Scroll:
+		g.level.Player.ScrollsRead++
 	}
 }
 
@@ -614,7 +629,7 @@ func (g *Game) checkPlayerDeath() {
 	}
 
 	// Сохраняем рекорд (сокровища) в таблицу рекордов и при гибели
-	if err := save.SaveScore(g.level.Player.Backpack.Treasures, ScoreFileName); err != nil {
+	if err := save.SaveScore(g.buildScoreEntry(), ScoreFileName); err != nil {
 		panic(err.Error())
 	}
 
@@ -629,10 +644,33 @@ func (g *Game) buildGameOverStats() *dto.GameOverStats {
 	}
 
 	return &dto.GameOverStats{
-		Treasures:       g.level.Player.Backpack.Treasures,
-		EnemiesKilled:   g.level.Player.EnemiesKilled,
-		LevelReached:    g.level.Number,
-		ConsumablesUsed: g.level.Player.ConsumablesUsed,
+		Treasures:     g.level.Player.Backpack.Treasures,
+		EnemiesKilled: g.level.Player.EnemiesKilled,
+		LevelReached:  g.level.Number,
+		FoodEaten:     g.level.Player.FoodEaten,
+		ElixirsDrunk:  g.level.Player.ElixirsDrunk,
+		ScrollsRead:   g.level.Player.ScrollsRead,
+		HitsDealt:     g.level.Player.HitsDealt,
+		HitsMissed:    g.level.Player.HitsMissed,
+		CellsMoved:    g.level.Player.CellsMoved,
+	}
+}
+
+func (g *Game) buildScoreEntry() dto.ScoreEntry {
+	if g.level.Player == nil {
+		return dto.ScoreEntry{}
+	}
+
+	return dto.ScoreEntry{
+		Treasures:     g.level.Player.Backpack.Treasures,
+		LevelReached:  g.level.Number,
+		EnemiesKilled: g.level.Player.EnemiesKilled,
+		FoodEaten:     g.level.Player.FoodEaten,
+		ElixirsDrunk:  g.level.Player.ElixirsDrunk,
+		ScrollsRead:   g.level.Player.ScrollsRead,
+		HitsDealt:     g.level.Player.HitsDealt,
+		HitsMissed:    g.level.Player.HitsMissed,
+		CellsMoved:    g.level.Player.CellsMoved,
 	}
 }
 

@@ -1,9 +1,9 @@
 package state
 
 import (
-	"fmt"
 	"gogue/internal/model/signals"
 	"gogue/internal/presentation/action"
+	"gogue/internal/presentation/dto"
 	"gogue/internal/presentation/save"
 	viewcli "gogue/internal/view/cli"
 
@@ -11,21 +11,13 @@ import (
 	"github.com/rivo/tview"
 )
 
-const ScoreWidth = 20 // Отступ чтобы строка начиналась с пробелов, а score был в конце (как в exel)
-
 type Scoreboard struct {
 	view   *viewcli.Scoreboard
 	signal signals.Type
 }
 
-func NewScoreboard(scores []int32) *Scoreboard {
-	strScores := make([]string, len(scores))
-
-	for i, score := range scores {
-		strScores[i] = fmt.Sprintf("%*d", ScoreWidth, score)
-	}
-
-	view := viewcli.NewScoreboard(strScores)
+func NewScoreboard(entries []dto.ScoreEntry) *Scoreboard {
+	view := viewcli.NewScoreboard(entries)
 
 	sb := &Scoreboard{
 		view:   view,
@@ -38,12 +30,12 @@ func NewScoreboard(scores []int32) *Scoreboard {
 }
 
 func GetScoreboard() (*Scoreboard, error) {
-	dto, err := save.LoadScore(ScoreFileName)
+	scoreDto, err := save.LoadScore(ScoreFileName)
 	if err != nil {
 		return nil, err
 	}
 
-	return NewScoreboard(dto.Scores), nil
+	return NewScoreboard(scoreDto.Entries), nil
 }
 
 func (s *Scoreboard) Update(dt float64) signals.Type {

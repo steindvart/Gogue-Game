@@ -3,63 +3,117 @@ package cli
 import (
 	"fmt"
 
+	"gogue/internal/presentation/dto"
+
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 
 const (
-	scoreboardBarLength = 30
-	scoreboardBarSpeed  = 1
+	scoreboardTableLength = 90
+	scoreboardBarLength   = 60
+	scoreboardBarSpeed    = 1
 )
 
 type Scoreboard struct {
 	flex      *tview.Flex
-	list      *tview.List
+	table     *tview.Table
 	runnerBar *RunnerBar
 }
 
-func NewScoreboard(options []string) *Scoreboard {
+func NewScoreboard(entries []dto.ScoreEntry) *Scoreboard {
 	sb := &Scoreboard{
-		flex: tview.NewFlex(),
-		list: tview.NewList(),
+		flex:  tview.NewFlex(),
+		table: tview.NewTable(),
 	}
 
-	for i, opt := range options {
+	// Заголовки столбцов
+	headers := []string{
+		"#",
+		"Treasures",
+		"Level",
+		"Enemies",
+		"Food",
+		"Elixirs",
+		"Scrolls",
+		"Hits",
+		"Missed",
+		"Moves",
+	}
+
+	for col, header := range headers {
+		cell := tview.NewTableCell(fmt.Sprintf(" %s ", header)).
+			SetTextColor(tcell.ColorGold).
+			SetAlign(tview.AlignCenter).
+			SetSelectable(false).
+			SetAttributes(tcell.AttrBold)
+		sb.table.SetCell(0, col, cell)
+	}
+
+	// Данные
+	for i, entry := range entries {
 		var medal string
 		switch i {
 		case 0:
-			medal = "🥇 "
+			medal = "🥇"
 		case 1:
-			medal = "🥈 "
+			medal = "🥈"
 		case 2:
-			medal = "🥉 "
+			medal = "🥉"
 		default:
-			medal = fmt.Sprintf("%2d.", i+1)
+			medal = fmt.Sprintf("%d", i+1)
 		}
-		sb.list.AddItem(fmt.Sprintf(" %s %s", medal, opt), "", 0, nil)
+
+		rowData := []string{
+			medal,
+			fmt.Sprintf("%d", entry.Treasures),
+			fmt.Sprintf("%d", entry.LevelReached),
+			fmt.Sprintf("%d", entry.EnemiesKilled),
+			fmt.Sprintf("%d", entry.FoodEaten),
+			fmt.Sprintf("%d", entry.ElixirsDrunk),
+			fmt.Sprintf("%d", entry.ScrollsRead),
+			fmt.Sprintf("%d", entry.HitsDealt),
+			fmt.Sprintf("%d", entry.HitsMissed),
+			fmt.Sprintf("%d", entry.CellsMoved),
+		}
+
+		for col, text := range rowData {
+			color := tcell.ColorWhite
+			if col == 0 && i < 3 {
+				color = tcell.ColorGold
+			}
+			cell := tview.NewTableCell(fmt.Sprintf(" %s ", text)).
+				SetTextColor(color).
+				SetAlign(tview.AlignCenter).
+				SetSelectable(false)
+			sb.table.SetCell(i+1, col, cell)
+		}
 	}
 
-	if len(options) == 0 {
-		sb.list.AddItem("       No records yet", "", 0, nil)
+	if len(entries) == 0 {
+		cell := tview.NewTableCell("  No records yet  ").
+			SetTextColor(tcell.ColorGray).
+			SetAlign(tview.AlignCenter).
+			SetSelectable(false)
+		sb.table.SetCell(1, 0, cell)
 	}
 
-	sb.list.SetBorder(true).
-		SetTitle(" 🌟 RECORDS 🌟 ").
+	sb.table.SetBorder(true).
+		SetTitle(" 🌟 SCOREBOARD 🌟 ").
 		SetBorderColor(tcell.ColorGold).
 		SetTitleColor(tcell.ColorGold).
 		SetBackgroundColor(tcell.ColorBlack)
 
-	sb.list.SetMainTextColor(tcell.ColorWhite).
-		SetSelectedTextColor(tcell.ColorGold).
-		SetSelectedBackgroundColor(tcell.ColorBlack)
+	sb.table.SetSelectable(false, false).
+		SetBackgroundColor(tcell.ColorBlack)
 
 	sb.runnerBar = NewRunnerBar(scoreboardBarLength, " 🏆  🏆 ", scoreboardBarSpeed)
 
 	gapBox := tview.NewBox().SetBackgroundColor(tcell.ColorBlack)
 
-	listFlex := tview.NewFlex().SetDirection(tview.FlexColumn).
+	tableFlex := tview.NewFlex().SetDirection(tview.FlexColumn).
 		AddItem(gapBox, 0, 1, false).
-		AddItem(sb.list, 30, 0, true).
+		AddItem(sb.table, scoreboardTableLength, 0, true).
 		AddItem(gapBox, 0, 1, false)
 
 	runnerFlex := tview.NewFlex().SetDirection(tview.FlexColumn).
@@ -75,7 +129,7 @@ func NewScoreboard(options []string) *Scoreboard {
 
 	rootFlex := tview.NewFlex().SetDirection(tview.FlexRow).
 		AddItem(gapBox, 2, 0, false).
-		AddItem(listFlex, 22, 0, true).
+		AddItem(tableFlex, 24, 0, true).
 		AddItem(gapBox, 1, 0, false).
 		AddItem(runnerFlex, 1, 0, false).
 		AddItem(gapBox, 1, 0, false).

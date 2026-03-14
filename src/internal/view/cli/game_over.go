@@ -51,7 +51,7 @@ func NewGameOver(gameOverType GameOverType, stats *dto.GameOverStats) *GameOver 
 
 	rootFlex := tview.NewFlex().SetDirection(tview.FlexRow).
 		AddItem(gapBox, 0, 1, false).
-		AddItem(textFlex, 14, 0, true).
+		AddItem(textFlex, 20, 0, true).
 		AddItem(gapBox, 0, 1, false)
 
 	g.flex = rootFlex
@@ -76,16 +76,26 @@ func (g *GameOver) buildContent(title string, stats *dto.GameOverStats) string {
 
 	return fmt.Sprintf(
 		"%s\n\n"+
-			"[gold]Treasures collected:[white]  %d\n"+
-			"[red]Enemies killed:[white]       %d\n"+
-			"[skyblue]Level reached:[white]        %d\n"+
-			"[orange]Consumables used:[white]     %d\n\n"+
+			"[gold]Treasures collected:[white]   %d\n"+
+			"[red]Enemies killed:[white]         %d\n"+
+			"[skyblue]Level reached:[white]      %d\n"+
+			"[green]Food eaten:[white]          %d\n"+
+			"[magenta]Elixirs drunk:[white]      %d\n"+
+			"[cyan]Scrolls read:[white]          %d\n"+
+			"[yellow]Hits dealt:[white]          %d\n"+
+			"[orange]Hits missed:[white]         %d\n"+
+			"[lime]Cells moved:[white]           %d\n\n"+
 			"[gray]Press Enter to return to menu",
 		title,
 		stats.Treasures,
 		stats.EnemiesKilled,
 		stats.LevelReached,
-		stats.ConsumablesUsed,
+		stats.FoodEaten,
+		stats.ElixirsDrunk,
+		stats.ScrollsRead,
+		stats.HitsDealt,
+		stats.HitsMissed,
+		stats.CellsMoved,
 	)
 }
 

@@ -14,8 +14,13 @@ type Player struct {
 	StunnedFor uint32 // Количество ходов, на которые игрок оглушён (не может действовать).
 
 	// Игровая статистика
-	EnemiesKilled   uint `json:"enemies_killed"`
-	ConsumablesUsed uint `json:"consumables_used"`
+	EnemiesKilled uint `json:"enemies_killed"`
+	FoodEaten     uint `json:"food_eaten"`
+	ElixirsDrunk  uint `json:"elixirs_drunk"`
+	ScrollsRead   uint `json:"scrolls_read"`
+	HitsDealt     uint `json:"hits_dealt"`
+	HitsMissed    uint `json:"hits_missed"`
+	CellsMoved    uint `json:"cells_moved"`
 }
 
 type BackpackItemType int
