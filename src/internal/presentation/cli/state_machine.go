@@ -138,7 +138,6 @@ func (g *StateMachine) handleSignal(s signals.Type) {
 	}
 }
 
-// extractGameOverStats извлекает статистику из текущего состояния Game (если оно активно).
 func (g *StateMachine) extractGameOverStats() *dto.GameOverStats {
 	if gameState, ok := g.CurrentState().(*state.Game); ok {
 		return gameState.GameOverStats

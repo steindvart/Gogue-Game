@@ -233,9 +233,9 @@ func (g *Game) handleMoveAction(a action.Type) {
 			playerAttackInfo = dto.ConvertAttackResultToDto(attackResult)
 
 			if attackResult.Evaded {
-				g.level.Player.HitsMissed++
+				g.level.Player.Stats.HitsMissed++
 			} else {
-				g.level.Player.HitsDealt++
+				g.level.Player.Stats.HitsDealt++
 			}
 		}
 
@@ -252,7 +252,7 @@ func (g *Game) handleMoveAction(a action.Type) {
 				}
 				g.level.Player.AddTreasure(item)
 				g.level.RemoveEnemy(enemy)
-				g.level.Player.EnemiesKilled++
+				g.level.Player.Stats.EnemiesKilled++
 			}
 			g.level.Player.SetPosition(oldPos)
 		}
@@ -261,7 +261,7 @@ func (g *Game) handleMoveAction(a action.Type) {
 		return
 	}
 
-	g.level.Player.CellsMoved++
+	g.level.Player.Stats.CellsMoved++
 }
 
 func (g *Game) resetInteraction() {
@@ -482,11 +482,11 @@ func (g *Game) handleItemSelection(actionType action.Type) {
 	} else {
 		switch itemType {
 		case entities.BackpackItemTypeFood:
-			g.level.Player.FoodEaten++
+			g.level.Player.Stats.FoodEaten++
 		case entities.BackpackItemTypeElixir:
-			g.level.Player.ElixirsDrunk++
+			g.level.Player.Stats.ElixirsDrunk++
 		case entities.BackpackItemTypeScroll:
-			g.level.Player.ScrollsRead++
+			g.level.Player.Stats.ScrollsRead++
 		}
 	}
 
@@ -609,11 +609,11 @@ func (g *Game) trackConsumableUseAtPosition(pos primitives.Point2D[int]) {
 
 	switch item.(type) {
 	case *items.Food:
-		g.level.Player.FoodEaten++
+		g.level.Player.Stats.FoodEaten++
 	case *items.Elixir:
-		g.level.Player.ElixirsDrunk++
+		g.level.Player.Stats.ElixirsDrunk++
 	case *items.Scroll:
-		g.level.Player.ScrollsRead++
+		g.level.Player.Stats.ScrollsRead++
 	}
 }
 
@@ -639,38 +639,20 @@ func (g *Game) checkPlayerDeath() {
 
 // buildGameOverStats формирует DTO со статистикой для экрана завершения игры.
 func (g *Game) buildGameOverStats() *dto.GameOverStats {
-	if g.level.Player == nil {
-		return &dto.GameOverStats{}
-	}
-
-	return &dto.GameOverStats{
-		Treasures:     g.level.Player.Backpack.Treasures,
-		EnemiesKilled: g.level.Player.EnemiesKilled,
-		LevelReached:  g.level.Number,
-		FoodEaten:     g.level.Player.FoodEaten,
-		ElixirsDrunk:  g.level.Player.ElixirsDrunk,
-		ScrollsRead:   g.level.Player.ScrollsRead,
-		HitsDealt:     g.level.Player.HitsDealt,
-		HitsMissed:    g.level.Player.HitsMissed,
-		CellsMoved:    g.level.Player.CellsMoved,
-	}
+	entry := g.buildScoreEntry()
+	return &entry
 }
 
+// buildScoreEntry формирует запись статистики для сохранения в таблицу рекордов.
 func (g *Game) buildScoreEntry() dto.ScoreEntry {
 	if g.level.Player == nil {
 		return dto.ScoreEntry{}
 	}
 
 	return dto.ScoreEntry{
-		Treasures:     g.level.Player.Backpack.Treasures,
-		LevelReached:  g.level.Number,
-		EnemiesKilled: g.level.Player.EnemiesKilled,
-		FoodEaten:     g.level.Player.FoodEaten,
-		ElixirsDrunk:  g.level.Player.ElixirsDrunk,
-		ScrollsRead:   g.level.Player.ScrollsRead,
-		HitsDealt:     g.level.Player.HitsDealt,
-		HitsMissed:    g.level.Player.HitsMissed,
-		CellsMoved:    g.level.Player.CellsMoved,
+		Treasures:    g.level.Player.Backpack.Treasures,
+		LevelReached: g.level.Number,
+		GameStats:    g.level.Player.Stats,
 	}
 }
 
