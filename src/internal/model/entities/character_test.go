@@ -1,6 +1,7 @@
 package entities
 
 import (
+	"math"
 	"testing"
 
 	"gogue/internal/model/items"
@@ -123,13 +124,22 @@ func TestCharacter_TakeDamage(t *testing.T) {
 	}
 }
 
-func TestCharacter_AttackEqualsStrength(t *testing.T) {
+func TestCharacter_MakeDamage_WithinVariationRange(t *testing.T) {
 	c := NewCharacter(
 		primitives.Box{Point: primitives.Point2D[int]{X: 0, Y: 0}, Size: primitives.Size2D[uint]{Width: 1, Height: 1}},
 		primitives.Attributes{MaxHealth: 100, Health: 100, Strength: 17.5},
 	)
-	if got := c.MakeDamage(); got != 17.5 {
-		t.Errorf("Attack() = %v, want 17.5", got)
+
+	rnd := utils.NewRandomWithSeed(defaultCharacterTestSeed)
+
+	minExpected := 17.5 * (1.0 - damageVariation) // 14.0
+	maxExpected := 17.5                           // 17.5 (округлённые: 14..18)
+
+	for i := 0; i < 100; i++ {
+		got := c.MakeDamage(rnd)
+		if got < math.Round(minExpected) || got > math.Round(maxExpected) {
+			t.Errorf("MakeDamage() = %v, want in range [%.0f, %.0f]", got, math.Round(minExpected), math.Round(maxExpected))
+		}
 	}
 }
 

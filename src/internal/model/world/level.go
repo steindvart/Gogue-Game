@@ -246,7 +246,7 @@ func (l *Level) processEnemyAttack(
 
 		case entities.OgrePhaseEnraged:
 			// Гарантированная контратака (без проверки evasion).
-			damage := enemy.Character.MakeDamage()
+			damage := enemy.Character.MakeDamage(l.random)
 			l.Player.Character.TakeDamage(damage)
 
 			ogre.CombatPhase = entities.OgrePhaseResting

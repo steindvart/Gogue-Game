@@ -1,6 +1,8 @@
 package entities
 
 import (
+	"math"
+
 	"gogue/internal/model/items"
 	"gogue/internal/model/primitives"
 	"gogue/internal/utils"
@@ -39,8 +41,25 @@ func (c *Character) TakeDamage(damage float64) {
 	}
 }
 
-func (c *Character) MakeDamage() float64 {
-	return c.Attributes.Strength
+// damageVariation — максимальное отклонение урона вниз (30%).
+// Например, при Strength = 10 урон будет в диапазоне [7, 10].
+const damageVariation = 0.3
+
+// applyDamageVariation применяет случайное отклонение к базовому урону.
+// Урон может быть снижен до (1 - damageVariation) * baseDamage, но не увеличен.
+// Результат округляется по математическим правилам (math.Round).
+func applyDamageVariation(baseDamage float64, rnd utils.Randomizer) float64 {
+	if baseDamage <= 0 {
+		return 0
+	}
+
+	// Множитель в диапазоне [1 - damageVariation, 1.0], т.е. [0.8, 1.0]
+	multiplier := 1.0 - rnd.Float64()*damageVariation
+	return math.Round(baseDamage * multiplier)
+}
+
+func (c *Character) MakeDamage(rnd utils.Randomizer) float64 {
+	return applyDamageVariation(c.Attributes.Strength, rnd)
 }
 
 func (c *Character) Attack(defender *Character, rnd utils.Randomizer) AttackResult {
@@ -54,7 +73,7 @@ func (c *Character) Attack(defender *Character, rnd utils.Randomizer) AttackResu
 		return result
 	}
 
-	damage := c.MakeDamage()
+	damage := c.MakeDamage(rnd)
 	defender.TakeDamage(damage)
 
 	result.Damage = damage
